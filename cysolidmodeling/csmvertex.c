@@ -3,7 +3,6 @@
 #include "csmvertex.inl"
 
 #include "csmnode.inl"
-#include "csmutilptr.hxx"
 
 #include "cyassert.h"
 #include "cypeid.h"
