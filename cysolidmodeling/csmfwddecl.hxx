@@ -9,11 +9,14 @@
 #ifndef csmfwddecl_hxx
 #define csmfwddecl_hxx
 
+#include <stdlib.h>
+
 #define CYBOOL char
 #define CIERTO 1
 #define FALSO 0
 #define CONSTRUCTOR(type, name, params) type name params
 
+struct csmnode_t;
 struct csmvertex_t;
 struct csmhedge_t;
 struct csmedge_t;

@@ -7,6 +7,9 @@ CONSTRUCTOR(struct csmvertex_t *, csmvertex_crea, (double x, double y, double z,
 void csmvertex_destruye(struct csmvertex_t **vertex);
 
 
+void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge);
+
+
 // Geometría...
 
 void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, double *y, double *z);

@@ -2,6 +2,7 @@
 
 #include "csmvertex.inl"
 
+#include "csmnode.inl"
 #include "csmutilptr.hxx"
 
 #include "cyassert.h"
@@ -10,31 +11,30 @@
 
 struct csmvertex_t
 {
-    unsigned long id;
-    unsigned long num_referencias;
+    struct csmnode_t clase_base;
     
     double x, y, z;
-    
-    struct csmvertex_t *prev, *next;
+    struct csmhedge_t *hedge;
 };
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmvertex_t *, i_crea, (unsigned long id, double x, double y, double z))
+CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
+						unsigned long id,
+                        double x, double y, double z,
+                        struct csmhedge_t *hedge))
 {
     struct csmvertex_t *vertex;
     
     vertex = MALLOC(struct csmvertex_t);
     
-    vertex->id = id;
-    vertex->num_referencias = 1;
+    vertex->clase_base = csmnode_crea_node(id, vertex, csmvertex_destruye, csmvertex_t);
 
     vertex->x = x;
     vertex->y = y;
     vertex->z = z;
     
-    vertex->prev = NULL;
-    vertex->next = NULL;
+    vertex->hedge = hedge;
 
     return vertex;
 }
@@ -44,9 +44,13 @@ CONSTRUCTOR(static struct csmvertex_t *, i_crea, (unsigned long id, double x, do
 struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
+    struct csmhedge_t *hedge;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
-    return i_crea(id, x, y, z);
+    
+    hedge = NULL;
+    
+    return i_crea(id, x, y, z, hedge);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -55,14 +59,21 @@ void csmvertex_destruye(struct csmvertex_t **vertex)
 {
     assert_no_null(vertex);
     assert_no_null(*vertex);
-    assert((*vertex)->num_referencias > 0);
+
+    csmnode_unretain_ex((*vertex)->hedge, csmhedge_t);
     
-    (*vertex)->num_referencias--;
+    csmnode_unretain_ex(*vertex, csmvertex_t);
+    *vertex = NULL;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge)
+{
+    assert_no_null(vertex);
     
-    if ((*vertex)->num_referencias == 0)
-    {
-        FREE_PP(vertex, struct csmvertex_t);
-    }
+    csmnode_unretain_ex(vertex->hedge, csmhedge_t);
+    vertex->hedge = csmnode_retain_ex(vertex->hedge, csmhedge_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -92,28 +103,10 @@ void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, d
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_set_ptr_next_or_prev(struct csmvertex_t **ptr, struct csmvertex_t *next_or_prev_vertex)
-{
-    assert_no_null(ptr);
-    
-    if (*ptr != NULL)
-    {
-        assert((*ptr)->num_referencias >= 2);
-        (*ptr)->num_referencias--;
-    }
-    
-    *ptr = next_or_prev_vertex;
-    
-    if (next_or_prev_vertex != NULL)
-        next_or_prev_vertex->num_referencias++;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 struct csmvertex_t *csmvertex_next(struct csmvertex_t *vertex)
 {
     assert_no_null(vertex);
-    return vertex->next;
+    return csmnode_downcast(csmnode_next(CSMNODE(vertex)), csmvertex_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -122,8 +115,8 @@ void csmvertex_set_next(struct csmvertex_t *vertex, struct csmvertex_t *next_ver
 {
     assert_no_null(vertex);
     assert_no_null(next_vertex);
-
-    csmutilptr_set_ptr_next_or_prev(&vertex->next, next_vertex);
+    
+    csmnode_set_ptr_next(CSMNODE(vertex), CSMNODE(next_vertex));
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -131,7 +124,7 @@ void csmvertex_set_next(struct csmvertex_t *vertex, struct csmvertex_t *next_ver
 struct csmvertex_t *csmvertex_prev(struct csmvertex_t *vertex)
 {
     assert_no_null(vertex);
-    return vertex->prev;
+    return csmnode_downcast(csmnode_prev(CSMNODE(vertex)), csmvertex_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -141,5 +134,5 @@ void csmvertex_set_prev(struct csmvertex_t *vertex, struct csmvertex_t *prev_ver
     assert_no_null(vertex);
     assert_no_null(prev_vertex);
 
-    csmutilptr_set_ptr_next_or_prev(&vertex->prev, prev_vertex);
+    csmnode_set_ptr_prev(CSMNODE(vertex), CSMNODE(prev_vertex));
 }

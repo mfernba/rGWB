@@ -12,13 +12,10 @@
     assert_no_null((ptr));\
     \
     if (*(ptr) != NULL)\
-    {\
-        assert((*(ptr))->num_referencias >= 2);\
-        (*(ptr))->num_referencias--;\
-    }\
+        csmnode_unretain(CSMNODE((*(ptr))));\
     \
     *(ptr) = (next_or_prev_vertex);\
     \
     if ((next_or_prev_vertex) != NULL)\
-        (next_or_prev_vertex)->num_referencias++;\
+        csmnode_retain(CSMNODE((next_or_prev_vertex)));\
 })
