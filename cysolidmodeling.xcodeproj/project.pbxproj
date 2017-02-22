@@ -28,6 +28,10 @@
 		5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5579548B1E5E41C1000FC91E /* csmedge.inl */; };
 		557954911E5E446C000FC91E /* csmloop.c in Sources */ = {isa = PBXBuildFile; fileRef = 5579548F1E5E446C000FC91E /* csmloop.c */; };
 		557954921E5E446C000FC91E /* csmloop.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954901E5E446C000FC91E /* csmloop.inl */; };
+		557954951E5E4742000FC91E /* csmface.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954931E5E4742000FC91E /* csmface.c */; };
+		557954961E5E4742000FC91E /* csmface.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954941E5E4742000FC91E /* csmface.inl */; };
+		557954991E5E4811000FC91E /* csmbbox.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954971E5E4811000FC91E /* csmbbox.c */; };
+		5579549A1E5E4811000FC91E /* csmbbox.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954981E5E4811000FC91E /* csmbbox.inl */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +59,11 @@
 		5579548E1E5E42BB000FC91E /* csmedge.tli */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmedge.tli; sourceTree = "<group>"; };
 		5579548F1E5E446C000FC91E /* csmloop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmloop.c; sourceTree = "<group>"; };
 		557954901E5E446C000FC91E /* csmloop.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmloop.inl; sourceTree = "<group>"; };
+		557954931E5E4742000FC91E /* csmface.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmface.c; sourceTree = "<group>"; };
+		557954941E5E4742000FC91E /* csmface.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmface.inl; sourceTree = "<group>"; };
+		557954971E5E4811000FC91E /* csmbbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmbbox.c; sourceTree = "<group>"; };
+		557954981E5E4811000FC91E /* csmbbox.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmbbox.inl; sourceTree = "<group>"; };
+		5579549C1E5E4967000FC91E /* defmath.tlh */ = {isa = PBXFileReference; lastKnownFileType = text; path = defmath.tlh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +100,7 @@
 				5579545C1E5DB074000FC91E /* Info.plist */,
 				557954711E5DB275000FC91E /* csmfwddecl.hxx */,
 				5579546B1E5DB209000FC91E /* Cype Wrapper */,
+				5579549B1E5E4823000FC91E /* Utility */,
 				557954891E5E41A0000FC91E /* Half-Edge Data Structure */,
 			);
 			path = cysolidmodeling;
@@ -107,6 +117,7 @@
 				557954751E5E0694000FC91E /* cypeid.c */,
 				557954861E5E2DCB000FC91E /* cypestr.h */,
 				557954851E5E2DCB000FC91E /* cypestr.c */,
+				5579549C1E5E4967000FC91E /* defmath.tlh */,
 			);
 			name = "Cype Wrapper";
 			sourceTree = "<group>";
@@ -126,8 +137,19 @@
 				5579548E1E5E42BB000FC91E /* csmedge.tli */,
 				557954901E5E446C000FC91E /* csmloop.inl */,
 				5579548F1E5E446C000FC91E /* csmloop.c */,
+				557954941E5E4742000FC91E /* csmface.inl */,
+				557954931E5E4742000FC91E /* csmface.c */,
 			);
 			name = "Half-Edge Data Structure";
+			sourceTree = "<group>";
+		};
+		5579549B1E5E4823000FC91E /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				557954981E5E4811000FC91E /* csmbbox.inl */,
+				557954971E5E4811000FC91E /* csmbbox.c */,
+			);
+			name = Utility;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -142,9 +164,11 @@
 				557954921E5E446C000FC91E /* csmloop.inl in Headers */,
 				557954821E5E1AA9000FC91E /* csmnode.inl in Headers */,
 				557954781E5E0694000FC91E /* cypeid.h in Headers */,
+				557954961E5E4742000FC91E /* csmface.inl in Headers */,
 				557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */,
 				5579547E1E5E1403000FC91E /* csmhedge.inl in Headers */,
 				557954701E5DB24E000FC91E /* csmvertex.inl in Headers */,
+				5579549A1E5E4811000FC91E /* csmbbox.inl in Headers */,
 				557954721E5DB275000FC91E /* csmfwddecl.hxx in Headers */,
 				5579545D1E5DB074000FC91E /* cysolidmodeling.h in Headers */,
 			);
@@ -220,11 +244,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				557954951E5E4742000FC91E /* csmface.c in Sources */,
 				557954911E5E446C000FC91E /* csmloop.c in Sources */,
 				5579546A1E5DB0A8000FC91E /* cypespy.c in Sources */,
 				5579546F1E5DB24E000FC91E /* csmvertex.c in Sources */,
 				5579548C1E5E41C1000FC91E /* csmedge.c in Sources */,
 				557954681E5DB0A8000FC91E /* cyassert.c in Sources */,
+				557954991E5E4811000FC91E /* csmbbox.c in Sources */,
 				557954871E5E2DCB000FC91E /* cypestr.c in Sources */,
 				557954811E5E1AA9000FC91E /* csmnode.c in Sources */,
 				557954771E5E0694000FC91E /* cypeid.c in Sources */,

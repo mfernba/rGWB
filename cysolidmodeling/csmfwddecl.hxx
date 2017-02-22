@@ -26,4 +26,6 @@ struct csmsolid_t;
 
 enum csmedge_lado_hedge_t;
 
+struct csmbbox_t;
+
 #endif /* csmfwddecl_hxx */
