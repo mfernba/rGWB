@@ -24,5 +24,6 @@ struct csmloop_t;
 struct csmface_t;
 struct csmsolid_t;
 
+enum csmedge_lado_hedge_t;
 
 #endif /* csmfwddecl_hxx */

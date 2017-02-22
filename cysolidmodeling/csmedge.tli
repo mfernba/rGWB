@@ -1,0 +1,7 @@
+// Edge...
+
+enum csmedge_lado_hedge_t
+{
+    CSMEDGE_LADO_HEDGE_POS,
+    CSMEDGE_LADO_HEDGE_NEG
+};
