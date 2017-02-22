@@ -26,6 +26,8 @@
 		557954881E5E2DCB000FC91E /* cypestr.h in Headers */ = {isa = PBXBuildFile; fileRef = 557954861E5E2DCB000FC91E /* cypestr.h */; };
 		5579548C1E5E41C1000FC91E /* csmedge.c in Sources */ = {isa = PBXBuildFile; fileRef = 5579548A1E5E41C1000FC91E /* csmedge.c */; };
 		5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5579548B1E5E41C1000FC91E /* csmedge.inl */; };
+		557954911E5E446C000FC91E /* csmloop.c in Sources */ = {isa = PBXBuildFile; fileRef = 5579548F1E5E446C000FC91E /* csmloop.c */; };
+		557954921E5E446C000FC91E /* csmloop.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954901E5E446C000FC91E /* csmloop.inl */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +53,8 @@
 		5579548A1E5E41C1000FC91E /* csmedge.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmedge.c; sourceTree = "<group>"; };
 		5579548B1E5E41C1000FC91E /* csmedge.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmedge.inl; sourceTree = "<group>"; };
 		5579548E1E5E42BB000FC91E /* csmedge.tli */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmedge.tli; sourceTree = "<group>"; };
+		5579548F1E5E446C000FC91E /* csmloop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmloop.c; sourceTree = "<group>"; };
+		557954901E5E446C000FC91E /* csmloop.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmloop.inl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +124,8 @@
 				5579548B1E5E41C1000FC91E /* csmedge.inl */,
 				5579548A1E5E41C1000FC91E /* csmedge.c */,
 				5579548E1E5E42BB000FC91E /* csmedge.tli */,
+				557954901E5E446C000FC91E /* csmloop.inl */,
+				5579548F1E5E446C000FC91E /* csmloop.c */,
 			);
 			name = "Half-Edge Data Structure";
 			sourceTree = "<group>";
@@ -133,6 +139,7 @@
 			files = (
 				5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */,
 				557954881E5E2DCB000FC91E /* cypestr.h in Headers */,
+				557954921E5E446C000FC91E /* csmloop.inl in Headers */,
 				557954821E5E1AA9000FC91E /* csmnode.inl in Headers */,
 				557954781E5E0694000FC91E /* cypeid.h in Headers */,
 				557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */,
@@ -213,6 +220,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				557954911E5E446C000FC91E /* csmloop.c in Sources */,
 				5579546A1E5DB0A8000FC91E /* cypespy.c in Sources */,
 				5579546F1E5DB24E000FC91E /* csmvertex.c in Sources */,
 				5579548C1E5E41C1000FC91E /* csmedge.c in Sources */,
