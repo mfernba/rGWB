@@ -2,9 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento);
-
-void csmedge_destruye(struct csmedge_t **edge);
+CONSTRUCTOR(struct csmedge_t *, csmedge_crea, (unsigned long *id_nuevo_elemento));
 
 
 // Topología...

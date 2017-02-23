@@ -19,6 +19,20 @@ struct csmhedge_t
 
 // --------------------------------------------------------------------------------------------------------------
 
+static void i_csmhedge_destruye(struct csmhedge_t **hedge)
+{
+    assert_no_null(hedge);
+    assert_no_null(*hedge);
+
+    csmnode_release_ex((*hedge)->edge, csmedge_t);
+    csmnode_release_ex((*hedge)->vertex, csmvertex_t);
+    csmnode_release_ex((*hedge)->loop, csmloop_t);
+    
+    FREE_PP(hedge, struct csmhedge_t);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmhedge_t *, i_crea, (
                         unsigned long id,
                         struct csmedge_t *edge,
@@ -29,7 +43,7 @@ CONSTRUCTOR(static struct csmhedge_t *, i_crea, (
     
     hedge = MALLOC(struct csmhedge_t);
     
-    hedge->clase_base = csmnode_crea_node(id, hedge, csmhedge_destruye, csmhedge_t);
+    hedge->clase_base = csmnode_crea_node(id, hedge, i_csmhedge_destruye, csmhedge_t);
     
     hedge->edge = edge;
     hedge->vertex = vertex;
@@ -58,21 +72,6 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
 
 // --------------------------------------------------------------------------------------------------------------
 
-void csmhedge_destruye(struct csmhedge_t **hedge)
-{
-    assert_no_null(hedge);
-    assert_no_null(*hedge);
-
-    csmnode_unretain_ex((*hedge)->edge, csmedge_t);
-    csmnode_unretain_ex((*hedge)->vertex, csmvertex_t);
-    csmnode_unretain_ex((*hedge)->loop, csmloop_t);
-    
-    csmnode_unretain_ex(*hedge, csmhedge_t);
-    *hedge = NULL;
-}
-
-// --------------------------------------------------------------------------------------------------------------
-
 struct csmedge_t *csmhedge_edge(struct csmhedge_t *hedge)
 {
     assert_no_null(hedge);
@@ -85,7 +84,7 @@ void csmhedge_set_edge(struct csmhedge_t *hedge, struct csmedge_t *edge)
 {
     assert_no_null(hedge);
     
-    csmnode_unretain_ex(hedge->edge, csmedge_t);
+    csmnode_release_ex(hedge->edge, csmedge_t);
     hedge->edge = csmnode_retain_ex(edge, csmedge_t);
 }
 
@@ -103,7 +102,7 @@ void csmhedge_set_vertex(struct csmhedge_t *hedge, struct csmvertex_t *vertex)
 {
     assert_no_null(hedge);
     
-    csmnode_unretain_ex(hedge->vertex, csmvertex_t);
+    csmnode_release_ex(hedge->vertex, csmvertex_t);
     hedge->vertex = csmnode_retain_ex(vertex, csmvertex_t);
 }
 
@@ -121,7 +120,7 @@ void csmhedge_set_loop(struct csmhedge_t *hedge, struct csmloop_t *loop)
 {
     assert_no_null(hedge);
     
-    csmnode_unretain_ex(hedge->loop, csmloop_t);
+    csmnode_release_ex(hedge->loop, csmloop_t);
     hedge->loop = csmnode_retain_ex(loop, csmloop_t);
 }
 

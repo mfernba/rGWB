@@ -4,8 +4,6 @@
 
 CONSTRUCTOR(struct csmvertex_t *, csmvertex_crea, (double x, double y, double z, unsigned long *id_nuevo_elemento));
 
-void csmvertex_destruye(struct csmvertex_t **vertex);
-
 
 // Topología...
 

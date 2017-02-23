@@ -2,9 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-struct csmloop_t *csmloop_crea(unsigned long *id_nuevo_elemento);
-
-void csmloop_destruye(struct csmloop_t **loop);
+CONSTRUCTOR(struct csmloop_t *, csmloop_crea, (unsigned long *id_nuevo_elemento));
 
 
 // Topología...

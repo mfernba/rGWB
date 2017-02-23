@@ -18,6 +18,18 @@ struct csmvertex_t
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_csmvertex_destruye(struct csmvertex_t **vertex)
+{
+    assert_no_null(vertex);
+    assert_no_null(*vertex);
+
+    csmnode_release_ex((*vertex)->hedge, csmhedge_t);
+    
+    FREE_PP(vertex, struct csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
 						unsigned long id,
                         double x, double y, double z,
@@ -27,7 +39,7 @@ CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
     
     vertex = MALLOC(struct csmvertex_t);
     
-    vertex->clase_base = csmnode_crea_node(id, vertex, csmvertex_destruye, csmvertex_t);
+    vertex->clase_base = csmnode_crea_node(id, vertex, i_csmvertex_destruye, csmvertex_t);
 
     vertex->x = x;
     vertex->y = y;
@@ -54,24 +66,11 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmvertex_destruye(struct csmvertex_t **vertex)
-{
-    assert_no_null(vertex);
-    assert_no_null(*vertex);
-
-    csmnode_unretain_ex((*vertex)->hedge, csmhedge_t);
-    
-    csmnode_unretain_ex(*vertex, csmvertex_t);
-    *vertex = NULL;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge)
 {
     assert_no_null(vertex);
     
-    csmnode_unretain_ex(vertex->hedge, csmhedge_t);
+    csmnode_release_ex(vertex->hedge, csmhedge_t);
     vertex->hedge = csmnode_retain_ex(vertex->hedge, csmhedge_t);
 }
 

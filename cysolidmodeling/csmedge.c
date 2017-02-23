@@ -19,6 +19,19 @@ struct csmedge_t
 
 // --------------------------------------------------------------------------------------------------------------
 
+static void i_csmedge_destruye(struct csmedge_t **edge)
+{
+    assert_no_null(edge);
+    assert_no_null(*edge);
+
+    csmnode_release_ex((*edge)->he1, csmhedge_t);
+    csmnode_release_ex((*edge)->he2, csmhedge_t);
+    
+    FREE_PP(edge, struct csmedge_t);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmedge_t *, i_crea, (
                         unsigned long id,
                         struct csmhedge_t *he1,
@@ -28,7 +41,7 @@ CONSTRUCTOR(static struct csmedge_t *, i_crea, (
     
     edge = MALLOC(struct csmedge_t);
     
-    edge->clase_base = csmnode_crea_node(id, edge, csmedge_destruye, csmedge_t);
+    edge->clase_base = csmnode_crea_node(id, edge, i_csmedge_destruye, csmedge_t);
     
     edge->he1 = he1;
     edge->he2 = he2;
@@ -49,20 +62,6 @@ struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
     he2 = NULL;
     
     return i_crea(id, he1, he2);
-}
-
-// --------------------------------------------------------------------------------------------------------------
-
-void csmedge_destruye(struct csmedge_t **edge)
-{
-    assert_no_null(edge);
-    assert_no_null(*edge);
-
-    csmnode_unretain_ex((*edge)->he1, csmhedge_t);
-    csmnode_unretain_ex((*edge)->he2, csmhedge_t);
-    
-    csmnode_unretain_ex(*edge, csmedge_t);
-    *edge = NULL;
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -89,14 +88,14 @@ void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lad
     {
         case CSMEDGE_LADO_HEDGE_POS:
         {
-            csmnode_unretain_ex(edge->he1, csmhedge_t);
+            csmnode_release_ex(edge->he1, csmhedge_t);
             edge->he1 = csmnode_retain_ex(hedge, csmhedge_t);
             break;
         }
             
         case CSMEDGE_LADO_HEDGE_NEG:
         {
-            csmnode_unretain_ex(edge->he2, csmhedge_t);
+            csmnode_release_ex(edge->he2, csmhedge_t);
             edge->he2 = csmnode_retain_ex(hedge, csmhedge_t);
             break;
         }

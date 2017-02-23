@@ -18,6 +18,19 @@ struct csmloop_t
 
 // --------------------------------------------------------------------------------------------------------------
 
+static void i_csmloop_destruye(struct csmloop_t **loop)
+{
+    assert_no_null(loop);
+    assert_no_null(*loop);
+
+    csmnode_release_ex((*loop)->ledge, csmhedge_t);
+    csmnode_release_ex((*loop)->face, csmface_t);
+    
+    FREE_PP(loop, struct csmloop_t);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmloop_t *, i_crea, (
                         unsigned long id,
                         struct csmhedge_t *ledge,
@@ -25,7 +38,7 @@ CONSTRUCTOR(static struct csmloop_t *, i_crea, (
 {
     struct csmloop_t *loop;
     
-    loop->clase_base = csmnode_crea_node(id, loop, csmloop_destruye, csmloop_t);
+    loop->clase_base = csmnode_crea_node(id, loop, i_csmloop_destruye, csmloop_t);
     
     loop->ledge = ledge;
     loop->face = face;
@@ -51,20 +64,6 @@ struct csmloop_t *csmloop_crea(unsigned long *id_nuevo_elemento)
 
 // --------------------------------------------------------------------------------------------------------------
 
-void csmloop_destruye(struct csmloop_t **loop)
-{
-    assert_no_null(loop);
-    assert_no_null(*loop);
-
-    csmnode_unretain_ex((*loop)->ledge, csmhedge_t);
-    csmnode_unretain_ex((*loop)->face, csmface_t);
-    
-    csmnode_unretain_ex(*loop, csmloop_t);
-    *loop = NULL;
-}
-
-// --------------------------------------------------------------------------------------------------------------
-
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop)
 {
     assert_no_null(loop);
@@ -79,7 +78,7 @@ void csmloop_set_ledge(struct csmloop_t *loop, struct csmhedge_t *ledge)
 {
     assert_no_null(loop);
     
-    csmnode_unretain_ex(loop->ledge, csmhedge_t);
+    csmnode_release_ex(loop->ledge, csmhedge_t);
     loop->ledge = csmnode_retain_ex(ledge, csmhedge_t);
  }
 
@@ -99,7 +98,7 @@ void csmloop_set_face(struct csmloop_t *loop, struct csmface_t *face)
 {
     assert_no_null(loop);
     
-    csmnode_unretain_ex(loop->face, csmface_t);
+    csmnode_release_ex(loop->face, csmface_t);
     loop->face = csmnode_retain_ex(face, csmface_t);
  }
 

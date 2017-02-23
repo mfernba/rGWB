@@ -59,7 +59,7 @@ struct csmnode_derivada_t *csmnode_nousar_retain_ex(struct csmnode_t *node, cons
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_unretain(struct csmnode_t *node)
+void csmnode_release(struct csmnode_t *node)
 {
     if (node != NULL)
     {
@@ -78,12 +78,12 @@ void csmnode_unretain(struct csmnode_t *node)
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_nousar_unretain_ex(struct csmnode_t *node, const char *tipo_clase_derivada)
+void csmnode_nousar_release_ex(struct csmnode_t *node, const char *tipo_clase_derivada)
 {
     if (node != NULL)
     {
         assert(cad_cadenas_iguales(node->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
-        csmnode_unretain(node);
+        csmnode_release(node);
     }
 }
 
@@ -104,7 +104,7 @@ static void i_set_ptr_next_or_prev(struct csmnode_t **ptr, struct csmnode_t *nex
     assert_no_null((ptr));
     
     if (*ptr != NULL)
-        csmnode_unretain(*ptr);
+        csmnode_release(*ptr);
 
     *ptr = next_or_prev_vertex;
     
