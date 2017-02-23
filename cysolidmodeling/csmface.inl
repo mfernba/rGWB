@@ -2,7 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-CONSTRUCTOR(struct csmface_t *, csmface_crea, (struct csmsolid_t *fsolid, unsigned long *id_nuevo_elemento));
+CONSTRUCTOR(struct csmface_t *, csmface_crea, (struct csmsolid_t *solido, unsigned long *id_nuevo_elemento));
 
 
 // Topología...

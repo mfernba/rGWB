@@ -2,7 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-CONSTRUCTOR(struct csmloop_t *, csmloop_crea, (unsigned long *id_nuevo_elemento));
+CONSTRUCTOR(struct csmloop_t *, csmloop_crea, (struct csmface_t *face, unsigned long *id_nuevo_elemento));
 
 
 // Topología...
@@ -10,7 +10,7 @@ CONSTRUCTOR(struct csmloop_t *, csmloop_crea, (unsigned long *id_nuevo_elemento)
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop);
 void csmloop_set_ledge(struct csmloop_t *loop, struct csmhedge_t *ledge);
 
-struct csmface_t *csmloop_face(struct csmloop_t *loop);
+struct csmface_t *csmloop_lface(struct csmloop_t *loop);
 void csmloop_set_face(struct csmloop_t *loop, struct csmface_t *face);
 
 

@@ -70,10 +70,10 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
 
 // ------------------------------------------------------------------------------------------
 
-struct csmface_t *csmface_crea(struct csmsolid_t *fsolid, unsigned long *id_nuevo_elemento)
+struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
-    struct csmsolid_t *fsolid_loc;
+    struct csmsolid_t *fsolid;
     struct csmloop_t *flout;
     struct csmloop_t *floops;
     double A, B, C, D;
@@ -81,7 +81,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *fsolid, unsigned long *id_nuev
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
 
-    fsolid_loc = csmnode_retain_ex(fsolid, csmsolid_t);
+    fsolid = csmnode_retain_ex(solido, csmsolid_t);
     flout = NULL;
     floops = NULL;
     
@@ -92,7 +92,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *fsolid, unsigned long *id_nuev
     
     bbox = csmbbox_crea_vacia();
     
-    return i_crea(id, fsolid_loc, flout, floops, A, B, C, D, &bbox);
+    return i_crea(id, fsolid, flout, floops, A, B, C, D, &bbox);
 }
 
 // ------------------------------------------------------------------------------------------
