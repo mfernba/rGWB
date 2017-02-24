@@ -29,10 +29,10 @@ static void i_csmface_destruye(struct csmface_t **face)
     assert_no_null(face);
     assert_no_null(*face);
 
-    csmnode_release_ex((*face)->fsolid, csmsolid_t);
+    csmnode_release_ex(&(*face)->fsolid, csmsolid_t);
     
-    csmnode_release_ex((*face)->flout, csmloop_t);
-    csmnode_release_ex((*face)->floops, csmloop_t);
+    csmnode_release_ex(&(*face)->flout, csmloop_t);
+    csmnode_release_ex(&(*face)->floops, csmloop_t);
     
     FREE_PP(face, struct csmface_t);
 }
@@ -109,7 +109,7 @@ void csmface_set_fsolid(struct csmface_t *face, struct csmsolid_t *solid)
 {
     assert_no_null(face);
     
-    csmnode_release_ex(face->fsolid, csmsolid_t);
+    csmnode_release_ex(&face->fsolid, csmsolid_t);
     face->fsolid = csmnode_retain_ex(solid, csmsolid_t);
 }
 
@@ -127,7 +127,7 @@ void csmface_set_flout(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
     
-    csmnode_release_ex(face->flout, csmloop_t);
+    csmnode_release_ex(&face->flout, csmloop_t);
     face->flout = csmnode_retain_ex(loop, csmloop_t);
 }
 
@@ -145,7 +145,7 @@ void csmface_set_floops(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
     
-    csmnode_release_ex(face->floops, csmloop_t);
+    csmnode_release_ex(&face->floops, csmloop_t);
     face->floops = csmnode_retain_ex(loop, csmloop_t);
 }
 

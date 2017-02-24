@@ -24,8 +24,8 @@ static void i_csmedge_destruye(struct csmedge_t **edge)
     assert_no_null(edge);
     assert_no_null(*edge);
 
-    csmnode_release_ex((*edge)->he1, csmhedge_t);
-    csmnode_release_ex((*edge)->he2, csmhedge_t);
+    csmnode_release_ex(&(*edge)->he1, csmhedge_t);
+    csmnode_release_ex(&(*edge)->he2, csmhedge_t);
     
     FREE_PP(edge, struct csmedge_t);
 }
@@ -88,14 +88,14 @@ void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lad
     {
         case CSMEDGE_LADO_HEDGE_POS:
         {
-            csmnode_release_ex(edge->he1, csmhedge_t);
+            csmnode_release_ex(&edge->he1, csmhedge_t);
             edge->he1 = csmnode_retain_ex(hedge, csmhedge_t);
             break;
         }
             
         case CSMEDGE_LADO_HEDGE_NEG:
         {
-            csmnode_release_ex(edge->he2, csmhedge_t);
+            csmnode_release_ex(&edge->he2, csmhedge_t);
             edge->he2 = csmnode_retain_ex(hedge, csmhedge_t);
             break;
         }

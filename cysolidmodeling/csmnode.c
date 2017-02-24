@@ -78,12 +78,16 @@ void csmnode_release(struct csmnode_t *node)
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_nousar_release_ex(struct csmnode_t *node, const char *tipo_clase_derivada)
+void csmnode_nousar_release_ex(struct csmnode_t **node, const char *tipo_clase_derivada)
 {
-    if (node != NULL)
+    assert_no_null(node);
+    
+    if (*node != NULL)
     {
-        assert(cad_cadenas_iguales(node->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
-        csmnode_release(node);
+        assert(cad_cadenas_iguales((*node)->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+        
+        csmnode_release(*node);
+        *node = NULL;
     }
 }
 

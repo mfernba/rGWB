@@ -23,8 +23,8 @@ static void i_csmloop_destruye(struct csmloop_t **loop)
     assert_no_null(loop);
     assert_no_null(*loop);
 
-    csmnode_release_ex((*loop)->ledge, csmhedge_t);
-    csmnode_release_ex((*loop)->lface, csmface_t);
+    csmnode_release_ex(&(*loop)->ledge, csmhedge_t);
+    csmnode_release_ex(&(*loop)->lface, csmface_t);
     
     FREE_PP(loop, struct csmloop_t);
 }
@@ -78,7 +78,7 @@ void csmloop_set_ledge(struct csmloop_t *loop, struct csmhedge_t *ledge)
 {
     assert_no_null(loop);
     
-    csmnode_release_ex(loop->ledge, csmhedge_t);
+    csmnode_release_ex(&loop->ledge, csmhedge_t);
     loop->ledge = csmnode_retain_ex(ledge, csmhedge_t);
  }
 
@@ -98,7 +98,7 @@ void csmloop_set_lface(struct csmloop_t *loop, struct csmface_t *face)
 {
     assert_no_null(loop);
     
-    csmnode_release_ex(loop->lface, csmface_t);
+    csmnode_release_ex(&loop->lface, csmface_t);
     loop->lface = csmnode_retain_ex(face, csmface_t);
  }
 

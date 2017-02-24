@@ -7,6 +7,7 @@
 //
 
 #include "csmsolid.inl"
+#include "csmsolid.tli"
 
 #include "csmface.inl"
 #include "csmhedge.inl"
@@ -18,15 +19,6 @@
 #include "cypeid.h"
 #include "cypespy.h"
 
-struct csmsolid_t
-{
-    struct csmnode_t clase_base;
-    
-    struct csmface_t *sfaces;
-    struct csmedge_t *sedges;
-    struct csmvertex_t *svertexs;
-};
-
 // ----------------------------------------------------------------------------------------------------
 
 static void i_csmsolid_destruye(struct csmsolid_t **solido)
@@ -34,9 +26,9 @@ static void i_csmsolid_destruye(struct csmsolid_t **solido)
     assert_no_null(solido);
     assert_no_null(*solido);
     
-    csmnode_release_ex((*solido)->sfaces, csmface_t);
-    csmnode_release_ex((*solido)->sedges, csmedge_t);
-    csmnode_release_ex((*solido)->svertexs, csmvertex_t);
+    csmnode_release_ex(&(*solido)->sfaces, csmface_t);
+    csmnode_release_ex(&(*solido)->sedges, csmedge_t);
+    csmnode_release_ex(&(*solido)->svertexs, csmvertex_t);
     
     FREE_PP(solido, struct csmsolid_t);
 }
@@ -115,8 +107,8 @@ struct csmsolid_t *csmsolid_mvfs(double x, double y, double z, unsigned long *id
     solido->svertexs = vertex;
     solido->sfaces = face;
 
-    csmnode_release_ex(hedge, csmhedge_t);
-    csmnode_release_ex(loop, csmloop_t);
+    csmnode_release_ex(&hedge, csmhedge_t);
+    csmnode_release_ex(&loop, csmloop_t);
     
     return solido;
 }

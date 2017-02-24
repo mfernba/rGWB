@@ -1,0 +1,19 @@
+//
+//  csmsolid.tli.h
+//  cysolidmodeling
+//
+//  Created by Manuel Fernández on 24/2/17.
+//  Copyright © 2017 Manuel Fernández. All rights reserved.
+//
+
+#include "csmfwddecl.hxx"
+#include "csmnode.hxx"
+
+struct csmsolid_t
+{
+    struct csmnode_t clase_base;
+    
+    struct csmface_t *sfaces;
+    struct csmedge_t *sedges;
+    struct csmvertex_t *svertexs;
+};
