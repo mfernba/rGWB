@@ -56,7 +56,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsolid_t *, i_crea_solido_vacio, (unsigned long *id_nuevo_elemento))
+struct csmsolid_t *csmsolid_crea_vacio(unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
     struct csmface_t *sfaces;
@@ -74,43 +74,41 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea_solido_vacio, (unsigned long *id_
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsolid_mvfs(double x, double y, double z, unsigned long *id_nuevo_elemento)
+void csmsolid_crea_nueva_cara(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento, struct csmface_t **face)
 {
-    struct csmsolid_t *solido;
-    struct csmface_t *face;
-    struct csmloop_t *loop;
-    struct csmvertex_t *vertex;
-    struct csmhedge_t *hedge;
+    struct csmface_t *face_loc;
     
-    solido = i_crea_solido_vacio(id_nuevo_elemento);
     assert_no_null(solido);
-    assert(solido->svertexs == NULL);
-    assert(solido->sfaces == NULL);
-    assert(solido->sedges == NULL);
+    assert_no_null(face);
     
-    face = csmface_crea(solido, id_nuevo_elemento);
-    loop = csmloop_crea(face, id_nuevo_elemento);
-    vertex = csmvertex_crea(x, y, z, id_nuevo_elemento);
-    hedge = csmhedge_crea(id_nuevo_elemento);
+    face_loc = csmface_crea(solido, id_nuevo_elemento);
     
-    csmface_set_flout(face, loop);
-    csmface_set_floops(face, loop);
+    if (solido->sfaces == NULL)
+        solido->sfaces = face_loc;
+    else
+        csmnode_insert_node2_before_node1(solido->sfaces, face_loc, csmface_t);
     
-    csmloop_set_ledge(loop, hedge);
-    
-    csmhedge_set_vertex(hedge, vertex);
-    csmhedge_set_loop(hedge, loop);
-    csmhedge_set_next(hedge, hedge);
-    csmhedge_set_prev(hedge, hedge);
-    csmvertex_set_hedge(vertex, hedge);
-    
-    solido->svertexs = vertex;
-    solido->sfaces = face;
-
-    csmnode_release_ex(&hedge, csmhedge_t);
-    csmnode_release_ex(&loop, csmloop_t);
-    
-    return solido;
+    *face = face_loc;
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_crea_nuevo_vertice(struct csmsolid_t *solido, double x, double y, double z, unsigned long *id_nuevo_elemento, struct csmvertex_t **vertex)
+{
+    struct csmvertex_t *vertex_loc;
+    
+    assert_no_null(solido);
+    assert_no_null(vertex);
+    
+    vertex_loc = csmvertex_crea(x, y, z, id_nuevo_elemento);
+    
+    if (solido->svertexs == NULL)
+        solido->svertexs = vertex_loc;
+    else
+        csmnode_insert_node2_before_node1(solido->svertexs, vertex_loc, csmvertex_t);
+    
+    *vertex = vertex_loc;
+}
+
 
 

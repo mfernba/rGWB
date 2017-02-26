@@ -127,6 +127,9 @@ void csmface_set_flout(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
     
+    if (face->floops == NULL)
+        face->floops = csmnode_retain_ex(loop, csmloop_t);
+    
     csmnode_release_ex(&face->flout, csmloop_t);
     face->flout = csmnode_retain_ex(loop, csmloop_t);
 }

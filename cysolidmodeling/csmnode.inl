@@ -48,3 +48,11 @@ void csmnode_set_ptr_next(struct csmnode_t *node, struct csmnode_t *next_node);
 
 struct csmnode_t *csmnode_prev(struct csmnode_t *node);
 void csmnode_set_ptr_prev(struct csmnode_t *node, struct csmnode_t *prev_node);
+
+void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct csmnode_t *node2, const char *tipo_clase_derivada);
+#define csmnode_insert_node2_before_node1(node1, node2, tipo_clase_derivada)\
+(\
+    ((struct tipo_clase_derivada *)node1 == node1),\
+    ((struct tipo_clase_derivada *)node2 == node2),\
+    csmnode_nousar_insert_node2_before_node1(CSMNODE(node1), CSMNODE(node2), #tipo_clase_derivada)\
+)

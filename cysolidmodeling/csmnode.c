@@ -105,15 +105,13 @@ struct csmnode_derivada_t *csmnode_nousar_downcast(struct csmnode_t *node, const
 
 static void i_set_ptr_next_or_prev(struct csmnode_t **ptr, struct csmnode_t *next_or_prev_vertex)
 {
-    assert_no_null((ptr));
+    assert_no_null(ptr);
     
-    if (*ptr != NULL)
-        csmnode_release(*ptr);
+    csmnode_release(*ptr);
 
     *ptr = next_or_prev_vertex;
     
-    if (next_or_prev_vertex != NULL)
-        csmnode_retain(next_or_prev_vertex);
+    csmnode_retain(next_or_prev_vertex);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -151,3 +149,26 @@ void csmnode_set_ptr_prev(struct csmnode_t *node, struct csmnode_t *prev_node)
     
     i_set_ptr_next_or_prev(&node->prev, prev_node);
 }
+
+// ------------------------------------------------------------------------------------------
+
+void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct csmnode_t *node2, const char *tipo_clase_derivada)
+{
+    assert_no_null(node1);
+    assert_no_null(node2);
+    assert(cad_cadenas_iguales(node1->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+    assert(cad_cadenas_iguales(node2->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+
+    if (node1->prev != NULL)
+    {
+        assert(node1->prev->next == node1);
+
+        i_set_ptr_next_or_prev(&node2->prev, node1->prev);
+        i_set_ptr_next_or_prev(&node1->prev->next, node2);
+    }
+
+    i_set_ptr_next_or_prev(&node1->prev, node2);
+    i_set_ptr_next_or_prev(&node2->next, node1);
+}
+
+
