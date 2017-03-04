@@ -16,7 +16,7 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsolid_mvfs(double x, double y, double z, unsigned long *id_nuevo_elemento)
+struct csmsolid_t *csmeuler_mvfs(double x, double y, double z, unsigned long *id_nuevo_elemento, struct csmhedge_t **hedge_opc)
 {
     struct csmsolid_t *solido;
     struct csmvertex_t *vertex;
@@ -42,6 +42,8 @@ struct csmsolid_t *csmsolid_mvfs(double x, double y, double z, unsigned long *id
     
     csmnode_release_ex(&hedge, csmhedge_t);
     csmnode_release_ex(&loop, csmloop_t);
+    
+    ASIGNA_OPC(hedge_opc, hedge);
     
     return solido;
 }

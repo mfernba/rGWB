@@ -11,4 +11,5 @@
 void csmeuler_lmev(
                 struct csmhedge_t *he1, struct csmhedge_t *he2,
                 double x, double y, double z,
-                unsigned long *id_nuevo_elemento);
+                unsigned long *id_nuevo_elemento,
+                struct csmedge_t **edge_opc, struct csmvertex_t **vertex_opc);

@@ -1,0 +1,3 @@
+// Test básicos...
+
+void csmtest_test(void);

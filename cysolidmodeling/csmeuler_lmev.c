@@ -23,7 +23,8 @@
 void csmeuler_lmev(
                 struct csmhedge_t *he1, struct csmhedge_t *he2,
                 double x, double y, double z,
-                unsigned long *id_nuevo_elemento)
+                unsigned long *id_nuevo_elemento,
+                struct csmedge_t **edge_opc, struct csmvertex_t **vertex_opc)
 {
     struct csmsolid_t *solido_he1;
     struct csmedge_t *new_edge;
@@ -57,6 +58,9 @@ void csmeuler_lmev(
     
     assert(old_vertex == csmhedge_vertex(he2));
     csmvertex_set_hedge(old_vertex, he2);
+    
+    ASIGNA_OPC(edge_opc, new_edge);
+    ASIGNA_OPC(vertex_opc, new_vertex);
 }
 
 
