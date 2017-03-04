@@ -20,7 +20,5 @@ void csmface_set_floops(struct csmface_t *face, struct csmloop_t *loop);
 // Lista...
 
 struct csmface_t *csmface_next(struct csmface_t *face);
-void csmface_set_next(struct csmface_t *face, struct csmface_t *next_face);
 
 struct csmface_t *csmface_prev(struct csmface_t *face);
-void csmface_set_prev(struct csmface_t *face, struct csmface_t *prev_face);

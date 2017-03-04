@@ -26,10 +26,10 @@ struct csmsolid_t *csmsolid_mvfs(double x, double y, double z, unsigned long *id
     
     solido = csmsolid_crea_vacio(id_nuevo_elemento);
     
-    csmsolid_crea_nueva_cara(solido, id_nuevo_elemento, &face);
+    csmsolid_append_new_face(solido, id_nuevo_elemento, &face);
     loop = csmloop_crea(face, id_nuevo_elemento);
     hedge = csmhedge_crea(id_nuevo_elemento);
-    csmsolid_crea_nuevo_vertice(solido, x, y, z, id_nuevo_elemento, &vertex);
+    csmsolid_append_new_vertex(solido, x, y, z, id_nuevo_elemento, &vertex);
     
     csmface_set_flout(face, loop);
 

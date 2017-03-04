@@ -16,6 +16,10 @@
 #define FALSO 0
 #define CONSTRUCTOR(type, name, params) type name params
 
+#define ES_CIERTO(condicion) (condicion) ? CIERTO: FALSO
+
+#define ASIGNA_OPC(a, b) if ((a) != NULL) *(a) = (b)
+
 struct csmnode_t;
 struct csmvertex_t;
 struct csmhedge_t;

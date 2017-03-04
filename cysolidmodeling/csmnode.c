@@ -59,7 +59,7 @@ struct csmnode_derivada_t *csmnode_nousar_retain_ex(struct csmnode_t *node, cons
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_release(struct csmnode_t *node)
+static void i_release(struct csmnode_t *node, CYBOOL check_must_be_destroyed)
 {
     if (node != NULL)
     {
@@ -73,12 +73,30 @@ void csmnode_release(struct csmnode_t *node)
             cypestr_destruye(&node->tipo_clase_derivada);
             node->func_destruye_clase_derivada(&node->clase_derivada);
         }
+        else
+        {
+            assert(check_must_be_destroyed == FALSO);
+        }
+    }
+    else
+    {
+        assert(check_must_be_destroyed == FALSO);
     }
 }
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_nousar_release_ex(struct csmnode_t **node, const char *tipo_clase_derivada)
+void csmnode_release(struct csmnode_t *node)
+{
+    CYBOOL check_must_be_destroyed;
+    
+    check_must_be_destroyed = FALSO;
+    i_release(node, check_must_be_destroyed);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmnode_nousar_release_ex(struct csmnode_t **node, const char *tipo_clase_derivada, CYBOOL check_must_be_destroyed)
 {
     assert_no_null(node);
     
@@ -86,7 +104,7 @@ void csmnode_nousar_release_ex(struct csmnode_t **node, const char *tipo_clase_d
     {
         assert(cad_cadenas_iguales((*node)->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
         
-        csmnode_release(*node);
+        i_release(*node, check_must_be_destroyed);
         *node = NULL;
     }
 }

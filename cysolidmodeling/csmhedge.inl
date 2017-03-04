@@ -5,6 +5,11 @@
 CONSTRUCTOR(struct csmhedge_t *, csmhedge_crea, (unsigned long *id_nuevo_elemento));
 
 
+unsigned long csmhedge_id(const struct csmhedge_t *hedge);
+
+CYBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2);
+
+
 // Topología...
 
 struct csmedge_t *csmhedge_edge(struct csmhedge_t *hedge);

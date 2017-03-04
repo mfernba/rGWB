@@ -1,0 +1,3 @@
+//  Kills and edge and a vertex...
+
+#include "csmfwddecl.hxx"

@@ -4,6 +4,7 @@
 #include "csmedge.tli"
 
 #include "csmnode.inl"
+#include "csmhedge.inl"
 
 #include "cyassert.h"
 #include "cypeid.h"
@@ -106,6 +107,41 @@ void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lad
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmedge_remove_hedge(struct csmedge_t *edge, struct csmhedge_t *hedge)
+{
+    assert_no_null(edge);
+    
+    if (edge->he1 == hedge)
+    {
+        assert(edge->he1 == hedge);
+        csmnode_release_ex(&edge->he1, csmhedge_t);
+    }
+    else
+    {
+        assert(edge->he2 == hedge);
+        csmnode_release_ex(&edge->he2, csmhedge_t);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t *hedge)
+{
+    assert_no_null(edge);
+    
+    if (csmhedge_id_igual(edge->he1, hedge) == CIERTO)
+    {
+        return edge->he2;
+    }
+    else
+    {
+        assert(csmhedge_id_igual(edge->he2, hedge) == CIERTO);
+        return edge->he1;
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 struct csmedge_t *csmedge_next(struct csmedge_t *edge)
 {
     assert_no_null(edge);
@@ -114,28 +150,8 @@ struct csmedge_t *csmedge_next(struct csmedge_t *edge)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmedge_set_next(struct csmedge_t *edge, struct csmedge_t *next_edge)
-{
-    assert_no_null(edge);
-    assert_no_null(next_edge);
-    
-    csmnode_set_ptr_next(CSMNODE(edge), CSMNODE(next_edge));
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 struct csmedge_t *csmedge_prev(struct csmedge_t *edge)
 {
     assert_no_null(edge);
     return csmnode_downcast(csmnode_prev(CSMNODE(edge)), csmedge_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmedge_set_prev(struct csmedge_t *edge, struct csmedge_t *prev_edge)
-{
-    assert_no_null(edge);
-    assert_no_null(prev_edge);
-
-    csmnode_set_ptr_prev(CSMNODE(edge), CSMNODE(prev_edge));
 }

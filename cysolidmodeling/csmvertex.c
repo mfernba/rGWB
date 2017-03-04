@@ -66,6 +66,14 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
 
 // ----------------------------------------------------------------------------------------------------
 
+struct csmhedge_t *csmvertex_hedge(struct csmvertex_t *vertex)
+{
+    assert_no_null(vertex);
+    return vertex->hedge;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge)
 {
     assert_no_null(vertex);
@@ -109,28 +117,8 @@ struct csmvertex_t *csmvertex_next(struct csmvertex_t *vertex)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmvertex_set_next(struct csmvertex_t *vertex, struct csmvertex_t *next_vertex)
-{
-    assert_no_null(vertex);
-    assert_no_null(next_vertex);
-    
-    csmnode_set_ptr_next(CSMNODE(vertex), CSMNODE(next_vertex));
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 struct csmvertex_t *csmvertex_prev(struct csmvertex_t *vertex)
 {
     assert_no_null(vertex);
     return csmnode_downcast(csmnode_prev(CSMNODE(vertex)), csmvertex_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmvertex_set_prev(struct csmvertex_t *vertex, struct csmvertex_t *prev_vertex)
-{
-    assert_no_null(vertex);
-    assert_no_null(prev_vertex);
-
-    csmnode_set_ptr_prev(CSMNODE(vertex), CSMNODE(prev_vertex));
 }

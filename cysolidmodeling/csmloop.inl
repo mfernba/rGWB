@@ -17,8 +17,6 @@ void csmloop_set_face(struct csmloop_t *loop, struct csmface_t *face);
 // Lista...
 
 struct csmloop_t *csmloop_next(struct csmloop_t *loop);
-void csmloop_set_next(struct csmloop_t *loop, struct csmloop_t *next_loop);
 
 struct csmloop_t *csmloop_prev(struct csmloop_t *loop);
-void csmloop_set_prev(struct csmloop_t *loop, struct csmloop_t *prev_loop);
 

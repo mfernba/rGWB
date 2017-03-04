@@ -162,29 +162,8 @@ struct csmface_t *csmface_next(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmface_set_next(struct csmface_t *face, struct csmface_t *next_face)
-{
-    assert_no_null(face);
-    assert_no_null(next_face);
-    
-    csmnode_set_ptr_next(CSMNODE(face), CSMNODE(next_face));
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 struct csmface_t *csmface_prev(struct csmface_t *face)
 {
     assert_no_null(face);
     return csmnode_downcast(csmnode_prev(CSMNODE(face)), csmface_t);
 }
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmface_set_prev(struct csmface_t *face, struct csmface_t *prev_face)
-{
-    assert_no_null(face);
-    assert_no_null(prev_face);
-
-    csmnode_set_ptr_prev(CSMNODE(face), CSMNODE(prev_face));
-}
-

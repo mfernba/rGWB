@@ -72,6 +72,24 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
 
 // --------------------------------------------------------------------------------------------------------------
 
+unsigned long csmhedge_id(const struct csmhedge_t *hedge)
+{
+    assert_no_null(hedge);
+    return hedge->clase_base.id;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+CYBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2)
+{
+    assert_no_null(hedge1);
+    assert_no_null(hedge2);
+    
+    return ES_CIERTO(hedge1->clase_base.id == hedge2->clase_base.id);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 struct csmedge_t *csmhedge_edge(struct csmhedge_t *hedge)
 {
     assert_no_null(hedge);

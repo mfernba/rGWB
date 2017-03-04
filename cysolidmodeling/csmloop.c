@@ -112,28 +112,8 @@ struct csmloop_t *csmloop_next(struct csmloop_t *loop)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmloop_set_next(struct csmloop_t *loop, struct csmloop_t *next_loop)
-{
-    assert_no_null(loop);
-    assert_no_null(next_loop);
-    
-    csmnode_set_ptr_next(CSMNODE(loop), CSMNODE(next_loop));
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 struct csmloop_t *csmloop_prev(struct csmloop_t *loop)
 {
     assert_no_null(loop);
     return csmnode_downcast(csmnode_prev(CSMNODE(loop)), csmloop_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmloop_set_prev(struct csmloop_t *loop, struct csmloop_t *prev_loop)
-{
-    assert_no_null(loop);
-    assert_no_null(prev_loop);
-
-    csmnode_set_ptr_prev(CSMNODE(loop), CSMNODE(prev_loop));
 }
