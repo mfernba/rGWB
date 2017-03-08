@@ -59,6 +59,7 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     struct csmhedge_t *prev_he1, *next_he1;
     struct csmhedge_t *prev_he2, *next_he2;
     register struct csmhedge_t *he_iterator;
+    unsigned long num_iteraciones;
     
     assert_no_null(he1);
     assert_no_null(he2);
@@ -71,9 +72,13 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     
     he1_loop = csmhedge_loop(*he1);
     he_iterator = *he2;
+    num_iteraciones = 0;
     
     do
     {
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
         csmhedge_set_loop(he_iterator, he1_loop);
         he_iterator = csmhedge_next(*he2);
         
