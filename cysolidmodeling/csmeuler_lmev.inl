@@ -12,4 +12,13 @@ void csmeuler_lmev(
                 struct csmhedge_t *he1, struct csmhedge_t *he2,
                 double x, double y, double z,
                 unsigned long *id_nuevo_elemento,
-                struct csmedge_t **edge_opc, struct csmvertex_t **vertex_opc);
+                struct csmvertex_t **vertex_opc,
+                struct csmedge_t **edge_opc,
+                struct csmhedge_t **hedge_from_new_vertex_opc,
+                struct csmhedge_t **hedge_to_new_vertex_opc);
+
+void csmeuler_lmev_strut_edge(
+                struct csmhedge_t *he,
+                double x, double y, double z,
+                unsigned long *id_nuevo_elemento,
+                struct csmhedge_t **hedge_from_new_vertex_opc);

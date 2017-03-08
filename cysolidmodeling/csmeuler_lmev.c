@@ -1,9 +1,8 @@
 // cmseuler_lmev.
-/* Operator lmev "splits" the vertex pointed at by he1 and he2, and adds a new edge between the resulting
- * two vertices. (x, y, z) are the coordinates of the new vertex.
- * he1 == h2 is allowed, in this case, new_vertex and new edge are added into the face of he1.
- * The new vertex is oriented from the new vertex to the old one.
- */
+// Operator lmev "splits" the vertex pointed at by he1 and he2, and adds a new edge between the resulting
+// two vertices. (x, y, z) are the coordinates of the new vertex.
+// he1 == h2 is allowed, in this case, new_vertex and new edge are added into the face of he1.
+// The new edge is oriented from the new vertex to the old one.
 
 #include "csmeuler_lmev.inl"
 
@@ -24,7 +23,10 @@ void csmeuler_lmev(
                 struct csmhedge_t *he1, struct csmhedge_t *he2,
                 double x, double y, double z,
                 unsigned long *id_nuevo_elemento,
-                struct csmedge_t **edge_opc, struct csmvertex_t **vertex_opc)
+                struct csmvertex_t **vertex_opc,
+                struct csmedge_t **edge_opc,
+                struct csmhedge_t **hedge_from_new_vertex_opc,
+                struct csmhedge_t **hedge_to_new_vertex_opc)
 {
     struct csmsolid_t *solido_he1;
     struct csmedge_t *new_edge;
@@ -51,8 +53,8 @@ void csmeuler_lmev(
 
     old_vertex = csmhedge_vertex(he2);
     
-    csmopbas_addhe(new_edge, old_vertex, he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, NULL);
-    csmopbas_addhe(new_edge, new_vertex, he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, NULL);
+    csmopbas_addhe(new_edge, old_vertex, he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, hedge_to_new_vertex_opc);
+    csmopbas_addhe(new_edge, new_vertex, he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, hedge_from_new_vertex_opc);
 
     csmvertex_set_hedge(new_vertex, csmhedge_prev(he2));
     
@@ -63,4 +65,14 @@ void csmeuler_lmev(
     ASIGNA_OPC(vertex_opc, new_vertex);
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+void csmeuler_lmev_strut_edge(
+                struct csmhedge_t *he,
+                double x, double y, double z,
+                unsigned long *id_nuevo_elemento,
+                struct csmhedge_t **hedge_from_new_vertex_opc)
+{
+    csmeuler_lmev(he, he, x,  y,  z, id_nuevo_elemento, NULL, NULL, hedge_from_new_vertex_opc, NULL);
+}
 

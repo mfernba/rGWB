@@ -23,6 +23,7 @@
 void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
 {
     struct csmhedge_t *he1_loc, *he2_loc;
+    struct csmsolid_t *hes_solid;
     struct csmvertex_t *vertex_to_retain, *vertex_to_delete;
     struct csmhedge_t *he;
     unsigned long num_iteraciones;
@@ -32,6 +33,8 @@ void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
     he2_loc = ASIGNA_PUNTERO_PP_NO_NULL(he2, struct csmhedge_t);
     assert(csmhedge_id_igual(he1_loc, he2_loc) == FALSO);
     assert(he1_loc != he2_loc);
+    
+    hes_solid = csmopbas_solid_from_hedges(he1_loc, he2_loc);
     
     edge = csmhedge_edge(he1_loc);
     assert(edge == csmhedge_edge(he2_loc));
@@ -54,8 +57,8 @@ void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
         he = csmhedge_next(csmopbas_mate(he));
     }
     
-    csmopbas_delhe(&he1_loc, NULL);
-    csmopbas_delhe(&he2_loc, NULL);
-    csmnode_free_node_in_list(&edge, csmedge_t);
-    csmnode_free_node_in_list(&vertex_to_delete, csmvertex_t);
+    csmopbas_delhe(&he1_loc, he1);
+    csmopbas_delhe(&he2_loc, he2);
+    csmsolid_remove_edge(hes_solid, &edge);
+    csmsolid_remove_vertex(hes_solid, &vertex_to_delete);
 }

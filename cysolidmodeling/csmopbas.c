@@ -8,6 +8,7 @@
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmnode.inl"
+#include "csmsolid.inl"
 #include "csmvertex.inl"
 
 #include "cyassert.h"
@@ -41,6 +42,19 @@ struct csmsolid_t *csmopbas_solid_from_hedge(struct csmhedge_t *hedge)
     
     lface = csmopbas_face_from_hedge(hedge);
     return csmface_fsolid(lface);
+}
+
+// ------------------------------------------------------------------------------------------
+
+struct csmsolid_t *csmopbas_solid_from_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
+{
+    struct csmsolid_t *edge_solid_he1, *edge_solid_he2;
+    
+    edge_solid_he1 = csmopbas_solid_from_hedge(he1);
+    edge_solid_he2 = csmopbas_solid_from_hedge(he2);
+    assert(edge_solid_he1 == edge_solid_he2);
+    
+    return edge_solid_he1;
 }
 
 // ------------------------------------------------------------------------------------------

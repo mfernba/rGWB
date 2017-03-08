@@ -28,9 +28,11 @@
 
 // --------------------------------------------------------------------------------
 
-struct csmface_t *csmeuler_lmef(
+void csmeuler_lmef(
                 struct csmhedge_t *he1, struct csmhedge_t *he2,
-                unsigned long *id_nuevo_elemento)
+                unsigned long *id_nuevo_elemento,
+                struct csmface_t **new_face_opc,
+                struct csmhedge_t **new_he_pos_opc, struct csmhedge_t **new_he_neg_opc)
 {
     struct csmsolid_t *he1_solid;
     struct csmloop_t *loop_he1, *loop_he2;
@@ -75,7 +77,8 @@ struct csmface_t *csmeuler_lmef(
     csmloop_set_ledge(new_loop, new_he1);
     csmloop_set_ledge(csmhedge_loop(he2), new_he2);
 
-    return new_face;
+    ASIGNA_OPC(new_he_pos_opc, new_he2);
+    ASIGNA_OPC(new_he_neg_opc, new_he1);
 }
 
 

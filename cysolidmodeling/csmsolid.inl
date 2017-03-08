@@ -12,3 +12,10 @@ void csmsolid_append_new_face(struct csmsolid_t *solido, unsigned long *id_nuevo
 void csmsolid_append_new_edge(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento, struct csmedge_t **edge);
 
 void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, double z, unsigned long *id_nuevo_elemento, struct csmvertex_t **vertex);
+
+
+void csmsolid_remove_face(struct csmsolid_t *solido, struct csmface_t **face);
+
+void csmsolid_remove_edge(struct csmsolid_t *solido, struct csmedge_t **edge);
+
+void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vertex);

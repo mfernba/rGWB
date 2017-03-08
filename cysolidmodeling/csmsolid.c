@@ -66,9 +66,14 @@ void csmsolid_destruye(struct csmsolid_t **solido)
     assert_no_null(solido);
     assert_no_null(*solido);
     
-    csmnode_free_node_list(&(*solido)->sfaces, csmface_t);
-    csmnode_free_node_list(&(*solido)->sedges, csmedge_t);
-    csmnode_free_node_list(&(*solido)->svertexs, csmvertex_t);
+    if ((*solido)->sfaces != NULL)
+        csmnode_free_node_list(&(*solido)->sfaces, csmface_t);
+    
+    if ((*solido)->sedges != NULL)
+        csmnode_free_node_list(&(*solido)->sedges, csmedge_t);
+
+    if ((*solido)->svertexs != NULL)
+        csmnode_free_node_list(&(*solido)->svertexs, csmvertex_t);
     
     FREE_PP(solido, struct csmsolid_t);
 }
@@ -129,6 +134,46 @@ void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, d
     
     *vertex = vertex_loc;
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_remove_face(struct csmsolid_t *solido, struct csmface_t **face)
+{
+    assert_no_null(solido);
+    assert_no_null(face);
+    
+    if (solido->sfaces == *face)
+        solido->sfaces = csmface_next(*face);
+    
+    csmnode_free_node_in_list(face, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_remove_edge(struct csmsolid_t *solido, struct csmedge_t **edge)
+{
+    assert_no_null(solido);
+    assert_no_null(edge);
+    
+    if (solido->sedges == *edge)
+        solido->sedges = csmedge_next(*edge);
+    
+    csmnode_free_node_in_list(edge, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vertex)
+{
+    assert_no_null(solido);
+    assert_no_null(vertex);
+    
+    if (solido->svertexs == *vertex)
+        solido->svertexs = csmvertex_next(*vertex);
+    
+    csmnode_free_node_in_list(vertex, csmvertex_t);
+}
+
 
 
 

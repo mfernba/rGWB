@@ -1,14 +1,5 @@
-//
-//  csmeuler_lkef.h
-//  cysolidmodeling
-//
-//  Created by Manuel Fernández on 8/3/17.
-//  Copyright © 2017 Manuel Fernández. All rights reserved.
-//
+// low level kill edge-face...
 
-#ifndef csmeuler_lkef_h
-#define csmeuler_lkef_h
+#include "csmfwddecl.hxx"
 
-#include <stdio.h>
-
-#endif /* csmeuler_lkef_h */
+void csmeuler_lkef(struct csmhedge_t **he1, struct csmhedge_t **he2);
