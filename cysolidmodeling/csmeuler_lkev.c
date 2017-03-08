@@ -25,8 +25,8 @@ void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
     struct csmhedge_t *he1_loc, *he2_loc;
     struct csmsolid_t *hes_solid;
     struct csmvertex_t *vertex_to_retain, *vertex_to_delete;
-    struct csmhedge_t *he;
-    unsigned long num_iteraciones;
+    register struct csmhedge_t *he_iterator;
+    register unsigned long num_iteraciones;
     struct csmedge_t *edge;    
     
     he1_loc = ASIGNA_PUNTERO_PP_NO_NULL(he1, struct csmhedge_t);
@@ -45,16 +45,18 @@ void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
     vertex_to_retain = csmhedge_vertex(he2_loc);
     assert(vertex_to_delete != vertex_to_retain);
     
-    he = csmhedge_next(he2_loc);
+    he_iterator = csmhedge_next(he2_loc);
     num_iteraciones = 0;
     
-    while (he != he1_loc)
+    while (he_iterator != he1_loc)
     {
         assert(num_iteraciones < 10000);
         num_iteraciones++;
         
-        csmhedge_set_vertex(he, vertex_to_retain);
-        he = csmhedge_next(csmopbas_mate(he));
+        assert(csmhedge_vertex(he_iterator) == vertex_to_delete);
+        csmhedge_set_vertex(he_iterator, vertex_to_retain);
+        
+        he_iterator = csmhedge_next(csmopbas_mate(he_iterator));
     }
     
     csmopbas_delhe(&he1_loc, NULL, he1);

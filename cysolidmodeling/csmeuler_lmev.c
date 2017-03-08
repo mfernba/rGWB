@@ -32,24 +32,24 @@ void csmeuler_lmev(
     struct csmsolid_t *solido_he1;
     struct csmedge_t *new_edge;
     struct csmvertex_t *new_vertex;
-    struct csmhedge_t *he;
-    unsigned long num_iteraciones;
+    register struct csmhedge_t *he_iterator;
+    register unsigned long num_iteraciones;
     struct csmvertex_t *old_vertex;
     
     solido_he1 = csmopbas_solid_from_hedge(he1);
     csmsolid_append_new_edge(solido_he1, id_nuevo_elemento, &new_edge);
     csmsolid_append_new_vertex(solido_he1, x, y, z, id_nuevo_elemento, &new_vertex);
     
-    he = he1;
+    he_iterator = he1;
     num_iteraciones = 0;
     
-    while (csmhedge_id_igual(he, he2) == FALSO)
+    while (csmhedge_id_igual(he_iterator, he2) == FALSO)
     {
         assert(num_iteraciones < 10000);
         num_iteraciones++;
         
-        csmhedge_set_vertex(he, new_vertex);
-        he = csmhedge_next(csmopbas_mate(he));
+        csmhedge_set_vertex(he_iterator, new_vertex);
+        he_iterator = csmhedge_next(csmopbas_mate(he_iterator));
     }
 
     old_vertex = csmhedge_vertex(he2);
