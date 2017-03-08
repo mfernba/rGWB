@@ -104,7 +104,6 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     struct csmloop_t *loop;
     struct csmvertex_t *vertex;
     CYBOOL destroy_hedge;
-    struct csmhedge_t *hedge_for_vertex;
     
     hedge_loc = ASIGNA_PUNTERO_PP_NO_NULL(hedge, struct csmhedge_t);
     edge = csmhedge_edge(hedge_loc);
@@ -114,25 +113,19 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     if (edge == NULL)
     {
         destroy_hedge = CIERTO;
-        
         hedge_prev = NULL;
-        hedge_for_vertex = NULL;
     }
     else
     {
         if (csmhedge_next(hedge_loc) == hedge_loc)
         {
             destroy_hedge = FALSO;
-            
             hedge_prev = hedge_loc;
-            hedge_for_vertex = NULL;
         }
         else
         {
             destroy_hedge = CIERTO;
-            
             hedge_prev = csmhedge_prev(hedge_loc);
-            hedge_for_vertex = csmhedge_next(csmopbas_mate(hedge_loc));
         }
         
         csmhedge_set_edge(hedge_loc, NULL);
@@ -141,8 +134,10 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     
     if (destroy_hedge == CIERTO)
     {
+        if (csmvertex_hedge(vertex) == hedge_loc)
+            csmvertex_set_hedge(vertex, NULL);
+        
         csmloop_set_ledge(loop, hedge_prev);
-        csmvertex_set_hedge(vertex, hedge_for_vertex);
         
         csmnode_free_node_in_list(&hedge_loc, csmhedge_t);
     }

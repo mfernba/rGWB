@@ -118,7 +118,7 @@ void csmnode_nousar_remove_from_own_list(struct csmnode_t *node2, const char *ti
     if (node2->prev != NULL)
     {
         assert(node2->prev->next == node2);
-        node2->prev = node2->next;
+        node2->prev->next = node2->next;
     }
 
     if (node2->next != NULL)
