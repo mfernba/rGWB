@@ -96,9 +96,9 @@ void csmopbas_addhe(
 
 // ------------------------------------------------------------------------------------------
 
-void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_opc)
+void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_opc, struct csmhedge_t **hedge_next_opc)
 {
-    struct csmhedge_t *hedge_prev;
+    struct csmhedge_t *hedge_prev, *hedge_next;
     struct csmhedge_t *hedge_loc;
     struct csmedge_t *edge;
     struct csmloop_t *loop;
@@ -113,19 +113,30 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     if (edge == NULL)
     {
         destroy_hedge = CIERTO;
+        
         hedge_prev = NULL;
+        hedge_next = NULL;
     }
     else
     {
         if (csmhedge_next(hedge_loc) == hedge_loc)
         {
+            assert(csmhedge_prev(hedge_loc) == hedge_loc);
+            
             destroy_hedge = FALSO;
+            
             hedge_prev = hedge_loc;
+            hedge_next = hedge_loc;
         }
         else
         {
             destroy_hedge = CIERTO;
+            
             hedge_prev = csmhedge_prev(hedge_loc);
+            assert(hedge_prev != hedge_loc);
+            
+            hedge_next = csmhedge_next(hedge_loc);
+            assert(hedge_next != hedge_loc);
         }
         
         csmhedge_set_edge(hedge_loc, NULL);
@@ -143,4 +154,5 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     }
     
     ASIGNA_OPC(hedge_prev_opc, hedge_prev);
+    ASIGNA_OPC(hedge_next_opc, hedge_next);
 }

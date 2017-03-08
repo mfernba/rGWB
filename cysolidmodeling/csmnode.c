@@ -85,8 +85,6 @@ struct csmnode_t *csmnode_next(struct csmnode_t *node)
 void csmnode_set_ptr_next(struct csmnode_t *node, struct csmnode_t *next_node)
 {
     assert_no_null(node);
-    assert_no_null(next_node);
-    
     i_set_ptr_next_or_prev(&node->next, next_node);
 }
 
@@ -103,8 +101,6 @@ struct csmnode_t *csmnode_prev(struct csmnode_t *node)
 void csmnode_set_ptr_prev(struct csmnode_t *node, struct csmnode_t *prev_node)
 {
     assert_no_null(node);
-    assert_no_null(prev_node);
-    
     i_set_ptr_next_or_prev(&node->prev, prev_node);
 }
 

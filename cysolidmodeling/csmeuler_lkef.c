@@ -44,7 +44,7 @@ static void i_move_all_loops_from_he2_face1_to_he1_face(struct csmhedge_t *he1, 
         loop_to_move = loop_iterator_face2;
         loop_iterator_face2 = csmloop_next(loop_iterator_face2);
         
-        csmface_add_loop_while_removing_from_old(face_he2, loop_to_move);
+        csmface_add_loop_while_removing_from_old(face_he1, loop_to_move);
         
     } while (loop_iterator_face2 != NULL);
 }
@@ -60,6 +60,7 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     struct csmhedge_t *prev_he2, *next_he2;
     register struct csmhedge_t *he_iterator;
     unsigned long num_iteraciones;
+    struct csmface_t *he2_loop_face;
     
     assert_no_null(he1);
     assert_no_null(he2);
@@ -71,7 +72,8 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     assert(common_edge == csmhedge_edge(*he2));
     
     he1_loop = csmhedge_loop(*he1);
-    he_iterator = *he2;
+    he2_loop = csmhedge_loop(*he2);
+    he_iterator = csmloop_ledge(he2_loop);
     num_iteraciones = 0;
     
     do
@@ -80,9 +82,9 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
         num_iteraciones++;
         
         csmhedge_set_loop(he_iterator, he1_loop);
-        he_iterator = csmhedge_next(*he2);
+        he_iterator = csmhedge_next(he_iterator);
         
-    } while (he_iterator != *he2);
+    } while (he_iterator != csmloop_ledge(he2_loop));
     
     prev_he1 = csmhedge_prev(*he1);
     next_he1 = csmhedge_next(*he1);
@@ -101,13 +103,22 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     csmhedge_set_next(prev_he1, next_he2);
     csmhedge_set_prev(next_he2, prev_he1);
 
-    he2_loop = csmhedge_loop(*he2);
     csmloop_set_ledge(he2_loop, NULL);
-    csmnode_free_node_list(&he2_loop, csmloop_t);
+    he2_loop_face = csmloop_lface(he2_loop);
+    csmface_remove_loop(he2_loop_face, &he2_loop);
     
-    csmopbas_delhe(he2, he2);
-    csmopbas_delhe(he1, he1);
+    csmhedge_set_next(*he1, NULL);
+    csmhedge_set_prev(*he1, NULL);
+
+    csmhedge_set_next(*he2, NULL);
+    csmhedge_set_prev(*he2, NULL);
+    
+    csmopbas_delhe(he2, NULL, NULL);
+    csmopbas_delhe(he1, NULL, NULL);
     csmsolid_remove_edge(hes_solid, &common_edge);
+    
+    *he1 = next_he1;
+    *he2 = next_he2;
 }
 
 // --------------------------------------------------------------------------------

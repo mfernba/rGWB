@@ -17,3 +17,4 @@ FOUNDATION_EXPORT const unsigned char cysolidmodelingVersionString[];
 // In this header, you should import all the public headers of your framework using statements like #import <cysolidmodeling/PublicHeader.h>
 
 
+#import <cysolidmodeling/csmtest.h>

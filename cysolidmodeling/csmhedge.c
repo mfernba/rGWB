@@ -145,8 +145,6 @@ struct csmhedge_t *csmhedge_next(struct csmhedge_t *hedge)
 void csmhedge_set_next(struct csmhedge_t *hedge, struct csmhedge_t *next_hedge)
 {
     assert_no_null(hedge);
-    assert_no_null(next_hedge);
-    
     csmnode_set_ptr_next(CSMNODE(hedge), CSMNODE(next_hedge));
 }
 
@@ -163,8 +161,6 @@ struct csmhedge_t *csmhedge_prev(struct csmhedge_t *hedge)
 void csmhedge_set_prev(struct csmhedge_t *hedge, struct csmhedge_t *prev_hedge)
 {
     assert_no_null(hedge);
-    assert_no_null(prev_hedge);
-
     csmnode_set_ptr_prev(CSMNODE(hedge), CSMNODE(prev_hedge));
 }
 

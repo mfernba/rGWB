@@ -150,12 +150,43 @@ void csmface_set_floops(struct csmface_t *face, struct csmloop_t *loop)
 
 void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csmloop_t *loop)
 {
+    struct csmface_t *loop_old_face;
+    
     assert_no_null(face);
     assert_no_null(face->floops);
+    assert_no_null(loop);
+    
+    loop_old_face = csmloop_lface(loop);
+    assert_no_null(loop_old_face);
+    assert_no_null(loop_old_face->floops);
+    
+    if (loop_old_face->floops == loop)
+        loop_old_face->floops = csmloop_next(loop_old_face->floops);
+
+    if (loop_old_face->flout == loop)
+        loop_old_face->flout = loop_old_face->floops;
     
     csmloop_set_lface(loop, face);
+    
     csmnode_insert_node2_before_node1(face->floops, loop, csmloop_t);
     face->floops = loop;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_remove_loop(struct csmface_t *face, struct csmloop_t **loop)
+{
+    assert_no_null(face);
+    assert_no_null(loop);
+    assert(face == csmloop_lface(*loop));
+    
+    if (face->floops == *loop)
+        face->floops = csmloop_next(face->floops);
+
+    if (face->flout == *loop)
+        face->flout = face->floops;
+    
+    csmnode_free_node_in_list(loop, csmloop_t);
 }
 
 // ----------------------------------------------------------------------------------------------------

@@ -21,4 +21,4 @@ void csmopbas_addhe(
                 unsigned long *id_nuevo_elemento,
                 struct csmhedge_t **new_hedge_opc);
 
-void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_opc);
+void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_opc, struct csmhedge_t **hedge_next_opc);

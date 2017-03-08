@@ -57,8 +57,8 @@ void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
         he = csmhedge_next(csmopbas_mate(he));
     }
     
-    csmopbas_delhe(&he1_loc, he1);
-    csmopbas_delhe(&he2_loc, he2);
+    csmopbas_delhe(&he1_loc, NULL, he1);
+    csmopbas_delhe(&he2_loc, he2, NULL);
     csmsolid_remove_edge(hes_solid, &edge);
     csmsolid_remove_vertex(hes_solid, &vertex_to_delete);
 }
