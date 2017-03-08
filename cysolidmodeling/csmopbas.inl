@@ -4,6 +4,8 @@
 
 struct csmhedge_t *csmopbas_mate(struct csmhedge_t *hedge);
 
+struct csmface_t *csmopbas_face_from_hedge(struct csmhedge_t *hedge);
+
 struct csmsolid_t *csmopbas_solid_from_hedge(struct csmhedge_t *hedge);
 
 void csmopbas_addhe(

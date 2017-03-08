@@ -25,14 +25,21 @@ struct csmhedge_t *csmopbas_mate(struct csmhedge_t *hedge)
 
 // ------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmopbas_solid_from_hedge(struct csmhedge_t *hedge)
+struct csmface_t *csmopbas_face_from_hedge(struct csmhedge_t *hedge)
 {
     struct csmloop_t *loop;
-    struct csmface_t *lface;
     
     loop = csmhedge_loop(hedge);
-    lface = csmloop_lface(loop);
+    return csmloop_lface(loop);
+}
+
+// ------------------------------------------------------------------------------------------
+
+struct csmsolid_t *csmopbas_solid_from_hedge(struct csmhedge_t *hedge)
+{
+    struct csmface_t *lface;
     
+    lface = csmopbas_face_from_hedge(hedge);
     return csmface_fsolid(lface);
 }
 
@@ -123,7 +130,7 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
         csmloop_set_ledge(loop, hedge_prev);
         csmvertex_set_hedge(vertex, hedge_for_vertex);
         
-        csmnode_release_ex_checking_must_be_destroyed(&hedge_loc, csmhedge_t);
+        csmnode_free_node_in_list(&hedge_loc, csmhedge_t);
     }
     
     ASIGNA_OPC(hedge_prev_opc, hedge_prev);

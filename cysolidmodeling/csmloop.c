@@ -23,8 +23,8 @@ static void i_csmloop_destruye(struct csmloop_t **loop)
     assert_no_null(loop);
     assert_no_null(*loop);
 
-    csmnode_release_ex(&(*loop)->ledge, csmhedge_t);
-    csmnode_release_ex(&(*loop)->lface, csmface_t);
+    if ((*loop)->ledge != NULL)
+        csmnode_free_node_list(&(*loop)->ledge, csmhedge_t);
     
     FREE_PP(loop, struct csmloop_t);
 }
@@ -57,7 +57,7 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
     
     ledge = NULL;
-    lface = csmnode_retain_ex(face, csmface_t);
+    lface = face;
     
     return i_crea(id, ledge, lface);
 }
@@ -87,9 +87,7 @@ struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop)
 void csmloop_set_ledge(struct csmloop_t *loop, struct csmhedge_t *ledge)
 {
     assert_no_null(loop);
-    
-    csmnode_release_ex(&loop->ledge, csmhedge_t);
-    loop->ledge = csmnode_retain_ex(ledge, csmhedge_t);
+    loop->ledge = ledge;
  }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -107,9 +105,7 @@ struct csmface_t *csmloop_lface(struct csmloop_t *loop)
 void csmloop_set_lface(struct csmloop_t *loop, struct csmface_t *face)
 {
     assert_no_null(loop);
-    
-    csmnode_release_ex(&loop->lface, csmface_t);
-    loop->lface = csmnode_retain_ex(face, csmface_t);
+    loop->lface = face;
  }
 
 // --------------------------------------------------------------------------------------------------------------

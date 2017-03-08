@@ -9,6 +9,7 @@
 #include "csmnode.inl"
 
 #include "cyassert.h"
+#include "cypespy.h"
 #include "cypestr.h"
 
 // ------------------------------------------------------------------------------------------
@@ -22,7 +23,6 @@ struct csmnode_t csmnode_nousar_crea_node(
     struct csmnode_t node;
     
     node.id = id;
-    node.num_referencias = 1;
     
     node.clase_derivada = clase_derivada;
     node.tipo_clase_derivada = cad_copia_cadena(tipo_clase_derivada);
@@ -33,80 +33,20 @@ struct csmnode_t csmnode_nousar_crea_node(
     
     return node;
 }
-
 // ------------------------------------------------------------------------------------------
 
-void csmnode_retain(struct csmnode_t *node)
+void csmnode_destruye(struct csmnode_t **node)
 {
-    if (node != NULL)
-        node->num_referencias++;
-}
+    struct csmnode_t *node_loc;
 
-// ------------------------------------------------------------------------------------------
-
-struct csmnode_derivada_t *csmnode_nousar_retain_ex(struct csmnode_t *node, const char *tipo_clase_derivada)
-{
-    if (node != NULL)
-    {
-        assert(cad_cadenas_iguales(node->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
-        return node->clase_derivada;
-    }
-    else
-    {
-        return NULL;
-    }
-}
-
-// ------------------------------------------------------------------------------------------
-
-static void i_release(struct csmnode_t *node, CYBOOL check_must_be_destroyed)
-{
-    if (node != NULL)
-    {
-        assert_no_null(node->func_destruye_clase_derivada);
-        assert(node->num_referencias >= 2);
-        
-        node->num_referencias--;
-        
-        if (node->num_referencias == 0)
-        {
-            cypestr_destruye(&node->tipo_clase_derivada);
-            node->func_destruye_clase_derivada(&node->clase_derivada);
-        }
-        else
-        {
-            assert(check_must_be_destroyed == FALSO);
-        }
-    }
-    else
-    {
-        assert(check_must_be_destroyed == FALSO);
-    }
-}
-
-// ------------------------------------------------------------------------------------------
-
-void csmnode_release(struct csmnode_t *node)
-{
-    CYBOOL check_must_be_destroyed;
-    
-    check_must_be_destroyed = FALSO;
-    i_release(node, check_must_be_destroyed);
-}
-
-// ------------------------------------------------------------------------------------------
-
-void csmnode_nousar_release_ex(struct csmnode_t **node, const char *tipo_clase_derivada, CYBOOL check_must_be_destroyed)
-{
     assert_no_null(node);
+    assert_no_null(*node);
+    assert_no_null((*node)->func_destruye_clase_derivada);
     
-    if (*node != NULL)
-    {
-        assert(cad_cadenas_iguales((*node)->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
-        
-        i_release(*node, check_must_be_destroyed);
-        *node = NULL;
-    }
+    node_loc = ASIGNA_PUNTERO_PP_NO_NULL(node, struct csmnode_t);
+    
+    cypestr_destruye(&node_loc->tipo_clase_derivada);
+    node_loc->func_destruye_clase_derivada(&node_loc->clase_derivada);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -124,12 +64,7 @@ struct csmnode_derivada_t *csmnode_nousar_downcast(struct csmnode_t *node, const
 static void i_set_ptr_next_or_prev(struct csmnode_t **ptr, struct csmnode_t *next_or_prev_vertex)
 {
     assert_no_null(ptr);
-    
-    csmnode_release(*ptr);
-
     *ptr = next_or_prev_vertex;
-    
-    csmnode_retain(next_or_prev_vertex);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -170,6 +105,29 @@ void csmnode_set_ptr_prev(struct csmnode_t *node, struct csmnode_t *prev_node)
 
 // ------------------------------------------------------------------------------------------
 
+void csmnode_nousar_remove_from_own_list(struct csmnode_t *node2, const char *tipo_clase_derivada)
+{
+    assert_no_null(node2);
+    assert(cad_cadenas_iguales(node2->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+    
+    if (node2->prev != NULL)
+    {
+        assert(node2->prev->next == node2);
+        node2->prev = node2->next;
+    }
+
+    if (node2->next != NULL)
+    {
+        assert(node2->next->prev == node2);
+        node2->next->prev = node2->prev;
+    }
+    
+    node2->prev = NULL;
+    node2->next = NULL;
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct csmnode_t *node2, const char *tipo_clase_derivada)
 {
     assert_no_null(node1);
@@ -177,6 +135,8 @@ void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct cs
     assert(cad_cadenas_iguales(node1->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
     assert(cad_cadenas_iguales(node2->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
 
+    csmnode_nousar_remove_from_own_list(node2, tipo_clase_derivada);
+    
     if (node1->prev != NULL)
     {
         assert(node1->prev->next == node1);
@@ -188,5 +148,44 @@ void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct cs
     i_set_ptr_next_or_prev(&node1->prev, node2);
     i_set_ptr_next_or_prev(&node2->next, node1);
 }
+
+// ------------------------------------------------------------------------------------------
+
+void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived, const char *tipo_clase_derivada)
+{
+    struct csmnode_derivada_t *head_node_derived_loc;
+    struct csmnode_t *head_node;
+    
+    head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_derivada_t);
+    head_node = (struct csmnode_t *)head_node_derived_loc;
+    
+    do
+    {
+        struct csmnode_t *next_node;
+        
+        next_node = head_node->next;
+        csmnode_destruye(&head_node);
+        
+        head_node = next_node;
+        
+    } while (head_node != NULL);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmnode_nousar_free_node_in_list(struct csmnode_derivada_t **head_node_derived, const char *tipo_clase_derivada)
+{
+    struct csmnode_derivada_t *head_node_derived_loc;
+    struct csmnode_t *head_node;
+    
+    head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_derivada_t);
+    head_node = (struct csmnode_t *)head_node_derived_loc;
+    
+    csmnode_nousar_remove_from_own_list(head_node, tipo_clase_derivada);
+    csmnode_destruye(&head_node);
+}
+
+
+
 
 

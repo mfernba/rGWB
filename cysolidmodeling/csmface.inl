@@ -16,7 +16,7 @@ void csmface_set_flout(struct csmface_t *face, struct csmloop_t *loop);
 struct csmloop_t *csmface_floops(struct csmface_t *face);
 void csmface_set_floops(struct csmface_t *face, struct csmloop_t *loop);
 
-void csmface_add_loop(struct csmface_t *face, struct csmloop_t *loop);
+void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csmloop_t *loop);
 
 
 // Lista...

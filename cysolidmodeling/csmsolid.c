@@ -22,20 +22,6 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_csmsolid_destruye(struct csmsolid_t **solido)
-{
-    assert_no_null(solido);
-    assert_no_null(*solido);
-    
-    csmnode_release_ex(&(*solido)->sfaces, csmface_t);
-    csmnode_release_ex(&(*solido)->sedges, csmedge_t);
-    csmnode_release_ex(&(*solido)->svertexs, csmvertex_t);
-    
-    FREE_PP(solido, struct csmsolid_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
                         unsigned long id,
                         struct csmface_t *sfaces,
@@ -46,7 +32,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
     
     solido = MALLOC(struct csmsolid_t);
     
-    solido->clase_base = csmnode_crea_node(id, solido, i_csmsolid_destruye, csmsolid_t);
+    solido->id = id;
     
     solido->sfaces = sfaces;
     solido->sedges = sedges;
@@ -71,6 +57,20 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long *id_nuevo_elemento)
     svertexs = NULL;
     
     return i_crea(id, sfaces, sedges, svertexs);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_destruye(struct csmsolid_t **solido)
+{
+    assert_no_null(solido);
+    assert_no_null(*solido);
+    
+    csmnode_free_node_list(&(*solido)->sfaces, csmface_t);
+    csmnode_free_node_list(&(*solido)->sedges, csmedge_t);
+    csmnode_free_node_list(&(*solido)->svertexs, csmvertex_t);
+    
+    FREE_PP(solido, struct csmsolid_t);
 }
 
 // ----------------------------------------------------------------------------------------------------

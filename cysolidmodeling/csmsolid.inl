@@ -4,6 +4,9 @@
 
 CONSTRUCTOR(struct csmsolid_t *, csmsolid_crea_vacio, (unsigned long *id_nuevo_elemento));
 
+void csmsolid_destruye(struct csmsolid_t **solido);
+
+
 void csmsolid_append_new_face(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento, struct csmface_t **face);
 
 void csmsolid_append_new_edge(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento, struct csmedge_t **edge);

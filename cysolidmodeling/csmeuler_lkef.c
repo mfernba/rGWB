@@ -23,48 +23,55 @@
 
 // --------------------------------------------------------------------------------
 
-void csmeuler_lkef(struct csmhedge_t *he1, struct csmhedge_t *he2)
+static void i_move_all_loops_from_he2_face1_to_he1_face(struct csmhedge_t *he1, struct csmhedge_t *he2)
 {
-    /*
-    struct csmhedge_t *he_iterator;
+    struct csmface_t *face_he1, *face_he2;
+    register struct csmloop_t *loop_iterator_face2;
+
+    assert(he1 != he2);
+    assert(csmhedge_edge(he1) == csmhedge_edge(he2));
+    
+    face_he1 = csmopbas_face_from_hedge(he1);
+    face_he2 = csmopbas_face_from_hedge(he2);
+    assert(face_he1 != face_he2);
+    
+    loop_iterator_face2 = csmface_floops(face_he2);
+    
+    do
+    {
+        struct csmloop_t *loop_to_move;
+        
+        loop_to_move = loop_iterator_face2;
+        loop_iterator_face2 = csmloop_next(loop_iterator_face2);
+        
+        csmface_add_loop_while_removing_from_old(face_he2, loop_to_move);
+        
+    } while (loop_iterator_face2 != NULL);
+}
+
+// --------------------------------------------------------------------------------
+
+static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t *he1, struct csmhedge_t *he2)
+{
+    struct csmedge_t *common_edge;
+    struct csmloop_t *he1_loop, *he2_loop;
     struct csmhedge_t *prev_he1, *next_he1;
     struct csmhedge_t *prev_he2, *next_he2;
-    struct csmface_t *he2_face;
+    register struct csmhedge_t *he_iterator;
     
-    {
-        struct csmloop_t *he1_loop, *he2_loop;
-        struct csmface_t *face_he1, *face_he2;
-        struct csmloop_t *loop_iterator_face1;
-        
-        he1_loop = csmhedge_loop(he1);
-        face_he1 = csmloop_lface(he1_loop);
-
-        he2_loop = csmhedge_loop(he2);
-        face_he2 = csmloop_lface(he2_loop);
-        
-        loop_iterator_face1 = csmface_floops(face_he1);
-        
-        do
-        {
-            struct csmloop_t *loop_to_move;
-            
-            loop_to_move = loop_iterator_face1;
-            loop_iterator_face1 = csmloop_next(loop_iterator_face1);
-            
-            csmloop_set_face(loop_to_move, face_he2);
-            csmface_add_loop(face_he2, loop_to_move);
-            
-        } while (loop_iterator_face1 != NULL);
-    }
+    assert(he1 != he2);    
+    common_edge = csmhedge_edge(he1);
+    assert(common_edge == csmhedge_edge(he2));
     
-
+    he1_loop = csmhedge_loop(he1);
+    he_iterator = he2;
     
-    he_iterator = csmhedge_next(he2);
-    while (he_iterator != he2)
+    do
     {
         csmhedge_set_loop(he_iterator, he1_loop);
         he_iterator = csmhedge_next(he2);
-    }
+        
+    } while (he_iterator != he2);
     
     prev_he1 = csmhedge_prev(he1);
     next_he1 = csmhedge_next(he1);
@@ -72,15 +79,40 @@ void csmeuler_lkef(struct csmhedge_t *he1, struct csmhedge_t *he2)
     prev_he2 = csmhedge_prev(he2);
     next_he2 = csmhedge_next(he2);
     
+    csmloop_set_ledge(he1_loop, next_he1);
+    
+    csmvertex_set_hedge(csmhedge_vertex(he1), next_he2);
+    csmvertex_set_hedge(csmhedge_vertex(he2), next_he1);
+    
     csmhedge_set_next(prev_he2, next_he1);
     csmhedge_set_prev(next_he1, prev_he2);
     
     csmhedge_set_next(prev_he1, next_he2);
     csmhedge_set_prev(next_he2, prev_he1);
+
+    he2_loop = csmhedge_loop(he2);
+    csmloop_set_ledge(he2_loop, NULL);
+    csmnode_free_node_list(&he2_loop, csmloop_t);
     
-    he2_face = csmloop_lface(csmhedge_loop(he2));
-    csmnode_release_ex_checking_must_be_destroyed(&he2_face, csmface_t);
-    */
+    csmopbas_delhe(&he2, NULL);
+    csmopbas_delhe(&he1, NULL);
+    csmnode_free_node_list(&common_edge, csmedge_t);
+}
+
+// --------------------------------------------------------------------------------
+
+void csmeuler_lkef(struct csmhedge_t *he1, struct csmhedge_t *he2)
+{
+    struct csmface_t *old_he2_face;
+    
+    assert(he1 != he2);
+
+    old_he2_face = csmopbas_face_from_hedge(he2);
+    
+    i_move_all_loops_from_he2_face1_to_he1_face(he1, he2);
+    i_merge_halfegdes_loops_isolating_edge(he1, he2);
+    
+    csmnode_free_node_list(&old_he2_face, csmface_t);
 }
 
 

@@ -40,9 +40,6 @@ struct csmsolid_t *csmeuler_mvfs(double x, double y, double z, unsigned long *id
     csmhedge_set_next(hedge, hedge);
     csmhedge_set_prev(hedge, hedge);
     
-    csmnode_release_ex(&hedge, csmhedge_t);
-    csmnode_release_ex(&loop, csmloop_t);
-    
     ASIGNA_OPC(hedge_opc, hedge);
     
     return solido;

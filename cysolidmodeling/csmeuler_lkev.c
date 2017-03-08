@@ -25,8 +25,8 @@ void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
     struct csmhedge_t *he1_loc, *he2_loc;
     struct csmvertex_t *vertex_to_retain, *vertex_to_delete;
     struct csmhedge_t *he;
-    struct csmedge_t *edge;
-    
+    unsigned long num_iteraciones;
+    struct csmedge_t *edge;    
     
     he1_loc = ASIGNA_PUNTERO_PP_NO_NULL(he1, struct csmhedge_t);
     he2_loc = ASIGNA_PUNTERO_PP_NO_NULL(he2, struct csmhedge_t);
@@ -43,14 +43,19 @@ void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
     assert(vertex_to_delete != vertex_to_retain);
     
     he = csmhedge_next(he2_loc);
+    num_iteraciones = 0;
+    
     while (he != he1_loc)
     {
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
         csmhedge_set_vertex(he, vertex_to_retain);
         he = csmhedge_next(csmopbas_mate(he));
     }
     
     csmopbas_delhe(&he1_loc, NULL);
     csmopbas_delhe(&he2_loc, NULL);
-    csmnode_release_ex_checking_must_be_destroyed(&edge, csmedge_t);
-    csmnode_release_ex_checking_must_be_destroyed(&vertex_to_delete, csmvertex_t);
+    csmnode_free_node_in_list(&edge, csmedge_t);
+    csmnode_free_node_in_list(&vertex_to_delete, csmvertex_t);
 }

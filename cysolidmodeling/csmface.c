@@ -3,6 +3,7 @@
 #include "csmface.inl"
 
 #include "csmbbox.inl"
+#include "csmloop.inl"
 #include "csmnode.inl"
 
 #include "cyassert.h"
@@ -29,10 +30,8 @@ static void i_csmface_destruye(struct csmface_t **face)
     assert_no_null(face);
     assert_no_null(*face);
 
-    csmnode_release_ex(&(*face)->fsolid, csmsolid_t);
-    
-    csmnode_release_ex(&(*face)->flout, csmloop_t);
-    csmnode_release_ex(&(*face)->floops, csmloop_t);
+    if ((*face)->floops != NULL)
+        csmnode_free_node_list(&(*face)->floops, csmloop_t);
     
     FREE_PP(face, struct csmface_t);
 }
@@ -81,7 +80,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
 
-    fsolid = csmnode_retain_ex(solido, csmsolid_t);
+    fsolid = solido;
     flout = NULL;
     floops = NULL;
     
@@ -108,9 +107,7 @@ struct csmsolid_t *csmface_fsolid(struct csmface_t *face)
 void csmface_set_fsolid(struct csmface_t *face, struct csmsolid_t *solid)
 {
     assert_no_null(face);
-    
-    csmnode_release_ex(&face->fsolid, csmsolid_t);
-    face->fsolid = csmnode_retain_ex(solid, csmsolid_t);
+    face->fsolid = solid;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -128,10 +125,9 @@ void csmface_set_flout(struct csmface_t *face, struct csmloop_t *loop)
     assert_no_null(face);
     
     if (face->floops == NULL)
-        face->floops = csmnode_retain_ex(loop, csmloop_t);
+        face->floops = loop;
     
-    csmnode_release_ex(&face->flout, csmloop_t);
-    face->flout = csmnode_retain_ex(loop, csmloop_t);
+    face->flout = loop;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -147,18 +143,17 @@ struct csmloop_t *csmface_floops(struct csmface_t *face)
 void csmface_set_floops(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
-    
-    csmnode_release_ex(&face->floops, csmloop_t);
-    face->floops = csmnode_retain_ex(loop, csmloop_t);
+    face->floops = loop;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmface_add_loop(struct csmface_t *face, struct csmloop_t *loop)
+void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
     assert_no_null(face->floops);
     
+    csmloop_set_lface(loop, face);
     csmnode_insert_node2_before_node1(face->floops, loop, csmloop_t);
 }
 

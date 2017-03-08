@@ -23,8 +23,6 @@ static void i_csmvertex_destruye(struct csmvertex_t **vertex)
     assert_no_null(vertex);
     assert_no_null(*vertex);
 
-    csmnode_release_ex(&(*vertex)->hedge, csmhedge_t);
-    
     FREE_PP(vertex, struct csmvertex_t);
 }
 
@@ -77,9 +75,7 @@ struct csmhedge_t *csmvertex_hedge(struct csmvertex_t *vertex)
 void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge)
 {
     assert_no_null(vertex);
-    
-    csmnode_release_ex(&(vertex->hedge), csmhedge_t);
-    vertex->hedge = csmnode_retain_ex(vertex->hedge, csmhedge_t);
+    vertex->hedge = vertex->hedge;
 }
 
 // ----------------------------------------------------------------------------------------------------

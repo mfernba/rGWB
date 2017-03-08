@@ -10,7 +10,6 @@ typedef void (*csmnode_FPtr_destruye)(struct csmnode_derivada_t **clase_derivada
 struct csmnode_t
 {
     unsigned long id;
-    unsigned long num_referencias;
 
     struct csmnode_derivada_t *clase_derivada;
     char *tipo_clase_derivada;
