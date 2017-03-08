@@ -77,16 +77,16 @@ static void i_test_crea_lamina(void)
     csmeuler_lkef(&he_pos, &he_neg);
     assert(he_pos != NULL);
     assert(he_neg != NULL);
-    assert(csmopbas_mate(he_neg) == hedge_from_vertex3);
+    assert(he_pos == hedge_from_vertex3);
     
-    he1 = he_neg;
+    he1 = he_pos;
     he2 = csmopbas_mate(he1);
     csmeuler_lkev(&he1, &he2);
-    assert(csmopbas_mate(he1) == hedge_from_vertex2);
+    assert(he1 == hedge_from_vertex2);
 
     he2 = csmopbas_mate(he1);
     csmeuler_lkev(&he1, &he2);
-    assert(csmopbas_mate(he1) == hedge_from_vertex1);
+    assert(he1 == hedge_from_vertex1);
 
     he2 = csmopbas_mate(he1);
     csmeuler_lkev(&he1, &he2);
@@ -106,3 +106,8 @@ void csmtest_test(void)
     i_test_basico_solido_una_arista();
     i_test_crea_lamina();
 }
+
+
+
+
+
