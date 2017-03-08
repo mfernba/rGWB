@@ -28,6 +28,7 @@ void csmeuler_lmev(
                 struct csmhedge_t **hedge_from_new_vertex_opc,
                 struct csmhedge_t **hedge_to_new_vertex_opc)
 {
+    struct csmhedge_t *hedge_from_new_vertex_loc, *hedge_to_new_vertex_loc;
     struct csmsolid_t *solido_he1;
     struct csmedge_t *new_edge;
     struct csmvertex_t *new_vertex;
@@ -53,16 +54,18 @@ void csmeuler_lmev(
 
     old_vertex = csmhedge_vertex(he2);
     
-    csmopbas_addhe(new_edge, old_vertex, he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, hedge_to_new_vertex_opc);
-    csmopbas_addhe(new_edge, new_vertex, he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, hedge_from_new_vertex_opc);
+    csmopbas_addhe(new_edge, old_vertex, he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &hedge_to_new_vertex_loc);
+    csmopbas_addhe(new_edge, new_vertex, he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, &hedge_from_new_vertex_loc);
 
-    csmvertex_set_hedge(new_vertex, csmhedge_prev(he2));
+    csmvertex_set_hedge(new_vertex, hedge_from_new_vertex_loc);
     
     assert(old_vertex == csmhedge_vertex(he2));
     csmvertex_set_hedge(old_vertex, he2);
     
-    ASIGNA_OPC(edge_opc, new_edge);
     ASIGNA_OPC(vertex_opc, new_vertex);
+    ASIGNA_OPC(edge_opc, new_edge);
+    ASIGNA_OPC(hedge_from_new_vertex_opc, hedge_from_new_vertex_loc);
+    ASIGNA_OPC(hedge_to_new_vertex_opc, hedge_to_new_vertex_loc);
 }
 
 // ----------------------------------------------------------------------------------------------------

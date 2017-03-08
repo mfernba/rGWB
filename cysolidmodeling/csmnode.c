@@ -53,10 +53,15 @@ void csmnode_destruye(struct csmnode_t **node)
 
 struct csmnode_derivada_t *csmnode_nousar_downcast(struct csmnode_t *node, const char *tipo_clase_derivada)
 {
-    assert_no_null(node);
-    assert(cad_cadenas_iguales(node->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
-    
-    return node->clase_derivada;
+    if (node == NULL)
+    {
+        return NULL;
+    }
+    else
+    {
+        assert(cad_cadenas_iguales(node->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+        return node->clase_derivada;
+    }
 }
 
 // ------------------------------------------------------------------------------------------
@@ -163,7 +168,11 @@ void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived
     {
         struct csmnode_t *next_node;
         
-        next_node = head_node->next;
+        if (head_node->next != head_node)
+            next_node = head_node->next;
+        else
+            next_node = NULL;
+        
         csmnode_destruye(&head_node);
         
         head_node = next_node;

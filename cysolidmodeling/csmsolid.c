@@ -89,10 +89,10 @@ void csmsolid_append_new_face(struct csmsolid_t *solido, unsigned long *id_nuevo
     
     face_loc = csmface_crea(solido, id_nuevo_elemento);
     
-    if (solido->sfaces == NULL)
-        solido->sfaces = face_loc;
-    else
+    if (solido->sfaces != NULL)
         csmnode_insert_node2_before_node1(solido->sfaces, face_loc, csmface_t);
+    
+    solido->sfaces = face_loc;
     
     *face = face_loc;
 }
@@ -108,10 +108,10 @@ void csmsolid_append_new_edge(struct csmsolid_t *solido, unsigned long *id_nuevo
     
     edge_loc = csmedge_crea(id_nuevo_elemento);
 
-    if (solido->sfaces == NULL)
-        solido->sedges = edge_loc;
-    else
+    if (solido->sedges != NULL)
         csmnode_insert_node2_before_node1(solido->sedges, edge_loc, csmedge_t);
+    
+    solido->sedges = edge_loc;
     
     *edge = edge_loc;
 }
@@ -127,10 +127,10 @@ void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, d
     
     vertex_loc = csmvertex_crea(x, y, z, id_nuevo_elemento);
     
-    if (solido->svertexs == NULL)
-        solido->svertexs = vertex_loc;
-    else
+    if (solido->svertexs != NULL)
         csmnode_insert_node2_before_node1(solido->svertexs, vertex_loc, csmvertex_t);
+
+    solido->svertexs = vertex_loc;
     
     *vertex = vertex_loc;
 }

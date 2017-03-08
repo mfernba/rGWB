@@ -12,6 +12,7 @@
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmnode.inl"
+#include "csmvertex.inl"
 #include "csmsolid.inl"
 
 // ----------------------------------------------------------------------------------------------------
@@ -39,6 +40,8 @@ struct csmsolid_t *csmeuler_mvfs(double x, double y, double z, unsigned long *id
     csmhedge_set_loop(hedge, loop);
     csmhedge_set_next(hedge, hedge);
     csmhedge_set_prev(hedge, hedge);
+    
+    csmvertex_set_hedge(vertex, hedge);
     
     ASIGNA_OPC(hedge_opc, hedge);
     

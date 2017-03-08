@@ -27,6 +27,7 @@ static void i_test_crea_destruye_solido_vacio(void)
     id_nuevo_elemento = 0;
     
     solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, NULL);
+    csmeuler_kvfs(solido);
     
     csmsolid_destruye(&solido);
 }
@@ -47,8 +48,9 @@ static void i_test_basico_solido_una_arista(void)
     csmeuler_lmev(hedge, hedge, 1., 0., 0., &id_nuevo_elemento, NULL, NULL, &he1, &he2);
     
     csmeuler_lkev(&he1, &he2);
-    assert(he1 == NULL);
-    assert(he2 == NULL);
+    assert(he1 == he2);
+
+    csmeuler_kvfs(solido);
     
     csmsolid_destruye(&solido);
 }

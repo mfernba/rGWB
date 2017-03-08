@@ -75,7 +75,7 @@ struct csmhedge_t *csmvertex_hedge(struct csmvertex_t *vertex)
 void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge)
 {
     assert_no_null(vertex);
-    vertex->hedge = vertex->hedge;
+    vertex->hedge = hedge;
 }
 
 // ----------------------------------------------------------------------------------------------------

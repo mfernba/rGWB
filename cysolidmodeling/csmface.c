@@ -155,6 +155,7 @@ void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csm
     
     csmloop_set_lface(loop, face);
     csmnode_insert_node2_before_node1(face->floops, loop, csmloop_t);
+    face->floops = loop;
 }
 
 // ----------------------------------------------------------------------------------------------------

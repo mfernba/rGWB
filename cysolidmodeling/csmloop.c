@@ -38,6 +38,8 @@ CONSTRUCTOR(static struct csmloop_t *, i_crea, (
 {
     struct csmloop_t *loop;
     
+    loop = MALLOC(struct csmloop_t);
+    
     loop->clase_base = csmnode_crea_node(id, loop, i_csmloop_destruye, csmloop_t);
     
     loop->ledge = ledge;
