@@ -21,7 +21,7 @@ static void i_test_crea_destruye_solido_vacio(void)
     
     solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, NULL);
     
-    csmnode_release_ex(&solido, csmsolid_t);
+    csmnode_release_ex_checking_must_be_destroyed(&solido, csmsolid_t);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ static void i_test_basico_solido_una_arista(void)
     csmeuler_lkev(&he1, &he2);
     edge = NULL;
     
-    csmnode_release_ex(&solido, csmsolid_t);
+    csmnode_release_ex_checking_must_be_destroyed(&solido, csmsolid_t);
 }
 
 // ------------------------------------------------------------------------------------------

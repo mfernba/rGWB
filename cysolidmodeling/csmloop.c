@@ -64,6 +64,16 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
 
 // --------------------------------------------------------------------------------------------------------------
 
+CYBOOL csmloop_ids_iguales(const struct csmloop_t *loop1, const struct csmloop_t *loop2)
+{
+    assert_no_null(loop1);
+    assert_no_null(loop2);
+    
+    return ES_CIERTO(loop1->clase_base.id == loop2->clase_base.id);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop)
 {
     assert_no_null(loop);

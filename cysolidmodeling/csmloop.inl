@@ -5,6 +5,8 @@
 CONSTRUCTOR(struct csmloop_t *, csmloop_crea, (struct csmface_t *face, unsigned long *id_nuevo_elemento));
 
 
+CYBOOL csmloop_ids_iguales(const struct csmloop_t *loop1, const struct csmloop_t *loop2);
+
 // Topología...
 
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop);

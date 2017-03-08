@@ -154,6 +154,16 @@ void csmface_set_floops(struct csmface_t *face, struct csmloop_t *loop)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmface_add_loop(struct csmface_t *face, struct csmloop_t *loop)
+{
+    assert_no_null(face);
+    assert_no_null(face->floops);
+    
+    csmnode_insert_node2_before_node1(face->floops, loop, csmloop_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 struct csmface_t *csmface_next(struct csmface_t *face)
 {
     assert_no_null(face);
