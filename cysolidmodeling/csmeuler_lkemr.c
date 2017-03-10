@@ -22,9 +22,9 @@
 // --------------------------------------------------------------------------------
 
 void csmeuler_lkemr(
-                struct csmhedge_t **he1, struct csmhedge_t **he2,
+                struct csmhedge_t **he_to_ring, struct csmhedge_t **he_from_ring,
                 unsigned long *id_nuevo_elemento,
-                struct csmhedge_t **he1_next, struct csmhedge_t **he2_next)
+                struct csmhedge_t **he_to_ring_next, struct csmhedge_t **he_from_ring_next)
 {
     struct csmhedge_t *he1_loc, *he2_loc;
     struct csmedge_t *edge_to_remove;
@@ -38,11 +38,9 @@ void csmeuler_lkemr(
     struct csmvertex_t *vertex1, *vertex2;
     struct csmsolid_t *he1_and_he2_solid;
     
-    assert_no_null(he1);
-    assert_no_null(he2);
-    
-    he1_loc = ASIGNA_PUNTERO_PP_NO_NULL(he1, struct csmhedge_t);
-    he2_loc = ASIGNA_PUNTERO_PP_NO_NULL(he2, struct csmhedge_t);
+    he1_loc = ASIGNA_PUNTERO_PP_NO_NULL(he_to_ring, struct csmhedge_t);
+    he2_loc = ASIGNA_PUNTERO_PP_NO_NULL(he_from_ring, struct csmhedge_t);
+    assert(he1_loc != he2_loc);
     
     edge_to_remove = csmhedge_edge(he1_loc);
     assert(edge_to_remove == csmhedge_edge(he2_loc));
@@ -51,15 +49,10 @@ void csmeuler_lkemr(
     assert(loop_to_divide == csmhedge_loop(he2_loc));
     
     he1_old_next = csmhedge_next(he1_loc);
-    assert(he1_old_next != he2_loc);
-    assert(he1_old_next != he1_loc);
-    
     he2_old_next = csmhedge_next(he2_loc);
-    assert(he2_old_next != he2_loc);
-    assert(he2_old_next != he1_loc);
     
     vertex1 = csmhedge_vertex(he1_loc);
-    vertex2 = csmhedge_vertex(he1_loc);
+    vertex2 = csmhedge_vertex(he2_loc);
     
     csmhedge_set_next(he1_loc, he2_old_next);
     csmhedge_set_prev(he2_old_next, he1_loc);
@@ -84,10 +77,10 @@ void csmeuler_lkemr(
         
     } while (he_iterator != he2_loc);
 
-    csmopbas_delhe(&he1_loc, &he1_prev, he1_next);
+    csmopbas_delhe(&he1_loc, &he1_prev, he_to_ring_next);
     csmloop_set_ledge(loop_to_divide, he1_prev);
     
-    csmopbas_delhe(&he2_loc, &he2_prev, he2_next);
+    csmopbas_delhe(&he2_loc, &he2_prev, he_from_ring_next);
     csmloop_set_ledge(new_loop, he2_prev);
     
     csmvertex_set_hedge(vertex1, he2_old_next);

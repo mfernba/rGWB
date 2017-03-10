@@ -20,7 +20,10 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
+void csmeuler_lkev(
+                struct csmhedge_t **he1, struct csmhedge_t **he2,
+                struct csmhedge_t **he1_prev_opc, struct csmhedge_t **he1_next_opc,
+                struct csmhedge_t **he2_prev_opc, struct csmhedge_t **he2_next_opc)
 {
     struct csmhedge_t *he1_loc, *he2_loc;
     struct csmsolid_t *hes_solid;
@@ -59,8 +62,8 @@ void csmeuler_lkev(struct csmhedge_t **he1, struct csmhedge_t **he2)
         he_iterator = csmhedge_next(csmopbas_mate(he_iterator));
     }
     
-    csmopbas_delhe(&he1_loc, NULL, he1);
-    csmopbas_delhe(&he2_loc, he2, NULL);
+    csmopbas_delhe(&he1_loc, he1_prev_opc, he1_next_opc);
+    csmopbas_delhe(&he2_loc, he2_prev_opc, he2_next_opc);
     csmsolid_remove_edge(hes_solid, &edge);
     csmsolid_remove_vertex(hes_solid, &vertex_to_delete);
 }

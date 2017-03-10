@@ -11,6 +11,8 @@
 #include "csmeuler_lmev.inl"
 #include "csmeuler_lkef.inl"
 #include "csmeuler_lkev.inl"
+#include "csmeuler_lkemr.inl"
+#include "csmeuler_lmekr.inl"
 
 #include "csmnode.inl"
 #include "csmopbas.inl"
@@ -47,7 +49,7 @@ static void i_test_basico_solido_una_arista(void)
     
     csmeuler_lmev(hedge, hedge, 1., 0., 0., &id_nuevo_elemento, NULL, NULL, &he1, &he2);
     
-    csmeuler_lkev(&he1, &he2);
+    csmeuler_lkev(&he1, &he2, &he1, NULL, &he2, NULL);
     assert(he1 == he2);
 
     csmeuler_kvfs(solido);
@@ -81,15 +83,75 @@ static void i_test_crea_lamina(void)
     
     he1 = he_pos;
     he2 = csmopbas_mate(he1);
-    csmeuler_lkev(&he1, &he2);
+    csmeuler_lkev(&he1, &he2, NULL, &he1, &he2, NULL);
     assert(he1 == hedge_from_vertex2);
 
     he2 = csmopbas_mate(he1);
-    csmeuler_lkev(&he1, &he2);
+    csmeuler_lkev(&he1, &he2, NULL, &he1, &he2, NULL);
     assert(he1 == hedge_from_vertex1);
 
     he2 = csmopbas_mate(he1);
-    csmeuler_lkev(&he1, &he2);
+    csmeuler_lkev(&he1, &he2, NULL, &he1, &he2, NULL);
+    assert(he1 == he2);
+    assert(he1 == initial_hedge);
+    
+    csmeuler_kvfs(solido);
+    
+    csmsolid_destruye(&solido);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_crea_lamina_con_hueco(void)
+{
+    struct csmsolid_t *solido;
+    unsigned long id_nuevo_elemento;
+    struct csmhedge_t *initial_hedge, *hedge_from_vertex1, *hedge_from_vertex2, *hedge_from_vertex3;
+    struct csmhedge_t *he_pos, *he_neg;
+    struct csmhedge_t *he1, *he2;
+    
+    id_nuevo_elemento = 0;
+    
+    solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, &initial_hedge);
+    
+    csmeuler_lmev_strut_edge(initial_hedge, 10., 0., 0., &id_nuevo_elemento, &hedge_from_vertex1);
+    csmeuler_lmev_strut_edge(hedge_from_vertex1, 10., 1.0, 0., &id_nuevo_elemento, &hedge_from_vertex2);
+    csmeuler_lmev_strut_edge(hedge_from_vertex2, 0., 10., 0., &id_nuevo_elemento, &hedge_from_vertex3);
+    csmeuler_lmef(initial_hedge, hedge_from_vertex3, &id_nuevo_elemento, NULL, &he_pos, &he_neg);
+    
+    // Hueco de un sólo vértice...
+    {
+        struct csmhedge_t *he_from_vertex, *he_to_vertex;
+        struct csmhedge_t *he1_hole_pos_next, *he2_hole_pos_next;
+        struct csmhedge_t *hedge_lado_neg, *hedge_lado_pos;
+        
+        csmeuler_lmev(he_pos, he_pos, 1., 1., 0., &id_nuevo_elemento, NULL, NULL, &he_from_vertex, &he_to_vertex);
+        csmeuler_lkemr(&he_to_vertex, &he_from_vertex, &id_nuevo_elemento, &he1_hole_pos_next, &he2_hole_pos_next);
+        
+        csmeuler_lmekr(he1_hole_pos_next, he2_hole_pos_next, &id_nuevo_elemento, &hedge_lado_neg, &hedge_lado_pos);
+        csmeuler_lkev(&hedge_lado_neg, &hedge_lado_pos, &hedge_lado_neg, NULL, NULL, &hedge_lado_pos);
+        assert(hedge_lado_neg != NULL);
+        assert(hedge_lado_pos != NULL);
+        assert(hedge_lado_pos == he_pos);
+        assert(hedge_lado_neg == hedge_from_vertex1);
+    }
+    
+    csmeuler_lkef(&he_pos, &he_neg);
+    assert(he_pos != NULL);
+    assert(he_neg != NULL);
+    assert(he_pos == hedge_from_vertex3);
+    
+    he1 = he_pos;
+    he2 = csmopbas_mate(he1);
+    csmeuler_lkev(&he1, &he2, NULL, &he1, &he2, NULL);
+    assert(he1 == hedge_from_vertex2);
+
+    he2 = csmopbas_mate(he1);
+    csmeuler_lkev(&he1, &he2, NULL, &he1, &he2, NULL);
+    assert(he1 == hedge_from_vertex1);
+
+    he2 = csmopbas_mate(he1);
+    csmeuler_lkev(&he1, &he2, NULL, &he1, &he2, NULL);
     assert(he1 == he2);
     assert(he1 == initial_hedge);
     
@@ -105,6 +167,7 @@ void csmtest_test(void)
     i_test_crea_destruye_solido_vacio();
     i_test_basico_solido_una_arista();
     i_test_crea_lamina();
+    i_test_crea_lamina_con_hueco();
 }
 
 

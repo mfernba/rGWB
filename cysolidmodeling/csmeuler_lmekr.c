@@ -21,16 +21,18 @@
 
 // --------------------------------------------------------------------------------
 
-void csmeuler_lmekr(struct csmhedge_t *he1, struct csmhedge_t *he2, unsigned long *id_nuevo_elemento)
+void csmeuler_lmekr(
+                struct csmhedge_t *he1, struct csmhedge_t *he2,
+                unsigned long *id_nuevo_elemento,
+                struct csmhedge_t **hedge_lado_neg_opc, struct csmhedge_t **hedge_lado_pos_opc)
 {
     struct csmloop_t *he1_loop, *he2_loop;
     struct csmface_t *he1_and_he2_face;
     struct csmsolid_t *he1_and_he2_solid;
-    struct csmhedge_t *he_iterator;
-    struct csmhedge_t *he1_old_prev, *he2_old_prev;
+    register struct csmhedge_t *he_iterator;
+    register unsigned long num_iteraciones;
     struct csmedge_t *new_edge;
     struct csmhedge_t *nhe1, *nhe2;
-    unsigned long num_iteraciones;
     
     he1_loop = csmhedge_loop(he1);
     he2_loop = csmhedge_loop(he2);
@@ -53,22 +55,26 @@ void csmeuler_lmekr(struct csmhedge_t *he1, struct csmhedge_t *he2, unsigned lon
         
     } while (he_iterator != he2);
     
-    he1_old_prev = csmhedge_prev(he1);
-    he2_old_prev = csmhedge_prev(he2);
-    
     he1_and_he2_solid = csmface_fsolid(he1_and_he2_face);
     csmsolid_append_new_edge(he1_and_he2_solid, id_nuevo_elemento, &new_edge);
 
-    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he2, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &nhe2);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &nhe1);
-    
-    csmhedge_set_next(he1_old_prev, nhe2);
-    csmhedge_set_prev(nhe2, he1_old_prev);
+// Al contrario que Mäntylä, he1 lo pongo en el lado neg y he2 en el pos
+    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &nhe1);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, &nhe2);
 
-    csmhedge_set_next(he2_old_prev, nhe1);
-    csmhedge_set_prev(nhe1, he2_old_prev);
+    csmhedge_set_next(nhe1, he2);
+    csmhedge_set_next(nhe2, he1);
     
+    csmhedge_set_prev(he2, nhe1);
+    csmhedge_set_prev(he1, nhe2);
+    
+    if (csmface_flout(he1_and_he2_face) == he2_loop)
+        csmface_set_flout(he1_and_he2_face, he1_loop);
+        
     csmloop_set_ledge(he2_loop, NULL);
     csmface_remove_loop(he1_and_he2_face, &he2_loop);
+    
+    ASIGNA_OPC(hedge_lado_neg_opc, nhe1);
+    ASIGNA_OPC(hedge_lado_pos_opc, nhe2);
 }
 

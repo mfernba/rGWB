@@ -2,4 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-void csmeuler_lmekr(struct csmhedge_t *he1, struct csmhedge_t *he2, unsigned long *id_nuevo_elemento);
+void csmeuler_lmekr(
+                struct csmhedge_t *he1, struct csmhedge_t *he2,
+                unsigned long *id_nuevo_elemento,
+                struct csmhedge_t **hedge_lado_neg_opc, struct csmhedge_t **hedge_lado_pos_opc);
