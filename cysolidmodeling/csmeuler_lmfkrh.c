@@ -1,7 +1,7 @@
 // low make face kill ring hole...
 //
 // Makes the loop the outer loop of a new face...
-//
+// It's assumed that loop is an inner loop of its parent face
 
 #include "csmeuler_lmfkrh.inl"
 
