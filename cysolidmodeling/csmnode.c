@@ -51,6 +51,14 @@ void csmnode_destruye(struct csmnode_t **node)
 
 // ------------------------------------------------------------------------------------------
 
+unsigned long csmnode_id(const struct csmnode_t *node)
+{
+    assert_no_null(node);
+    return node->id;
+}
+
+// ------------------------------------------------------------------------------------------
+
 struct csmnode_derivada_t *csmnode_nousar_downcast(struct csmnode_t *node, const char *tipo_clase_derivada)
 {
     if (node == NULL)
@@ -155,21 +163,28 @@ void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct cs
 void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived, const char *tipo_clase_derivada)
 {
     struct csmnode_derivada_t *head_node_derived_loc;
-    struct csmnode_t *head_node;
+    struct csmnode_t *first_node, *head_node;
+    unsigned long no_of_deleted_nodes;
     
     head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_derivada_t);
     head_node = (struct csmnode_t *)head_node_derived_loc;
+    first_node = head_node;
+    no_of_deleted_nodes = 0;
     
     do
     {
         struct csmnode_t *next_node;
         
-        if (head_node->next != head_node)
+        // head_node->next != head_node  -> mvfs solid (one face, one loop, one hedge, no edge, code as hegde->next == hegde
+        // head_node->next != first_node -> loop edge list
+        
+        if (head_node->next != head_node && head_node->next != first_node)
             next_node = head_node->next;
         else
             next_node = NULL;
         
         csmnode_destruye(&head_node);
+        no_of_deleted_nodes++;
         
         head_node = next_node;
         

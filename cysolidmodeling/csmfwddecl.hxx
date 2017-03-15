@@ -10,6 +10,7 @@
 #define csmfwddecl_hxx
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #define CYBOOL char
 #define CIERTO 1

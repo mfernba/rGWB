@@ -27,6 +27,9 @@ struct csmnode_t csmnode_nousar_crea_node(
 
 void csmnode_destruye(struct csmnode_t **node);
 
+
+unsigned long csmnode_id(const struct csmnode_t *node);
+
 struct csmnode_derivada_t *csmnode_nousar_downcast(struct csmnode_t *node, const char *tipo_clase_derivada);
 #define csmnode_downcast(node, tipo_clase_derivada) (struct tipo_clase_derivada *)csmnode_nousar_downcast(node, #tipo_clase_derivada)
 

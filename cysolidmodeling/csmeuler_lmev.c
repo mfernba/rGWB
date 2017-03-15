@@ -43,7 +43,7 @@ void csmeuler_lmev(
     he_iterator = he1;
     num_iteraciones = 0;
     
-    while (csmhedge_id_igual(he_iterator, he2) == FALSO)
+    while (he_iterator != he2)
     {
         assert(num_iteraciones < 10000);
         num_iteraciones++;

@@ -22,5 +22,4 @@ void csmeuler_lringmv(struct csmloop_t *loop, struct csmface_t *face, CYBOOL as_
     
     if (as_outer_loop == CIERTO)
         csmface_set_flout(face, loop);
-    
 }

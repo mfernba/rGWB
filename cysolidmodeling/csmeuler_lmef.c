@@ -46,7 +46,6 @@ void csmeuler_lmef(
     
     loop_he1 = csmhedge_loop(he1);
     loop_he2 = csmhedge_loop(he2);
-    assert(csmloop_ids_iguales(loop_he1, loop_he2) == CIERTO);
     assert(loop_he1 == loop_he2);
 
     he1_solid = csmopbas_solid_from_hedge(he1);

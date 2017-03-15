@@ -19,3 +19,6 @@ void csmsolid_remove_face(struct csmsolid_t *solido, struct csmface_t **face);
 void csmsolid_remove_edge(struct csmsolid_t *solido, struct csmedge_t **edge);
 
 void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vertex);
+
+
+void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro);
