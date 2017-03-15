@@ -332,13 +332,25 @@ static void i_print_info_debug_loop(struct csmloop_t *loop, CYBOOL is_outer_loop
         
         edge = csmhedge_edge(iterator);
         
-        fprintf(
+        if (edge == NULL)
+        {
+            fprintf(
                 stdout,
-                "\t\t(He %4lu [edge %4lu], %6.3f, %6.3f, %6.3f, %d)\n",
+                "\t\t(He %4lu [edge (null)], %6.3f, %6.3f, %6.3f, %d)\n",
+                csmnode_id(CSMNODE(iterator)),
+                x, y, z,
+                ES_CIERTO(csmhedge_loop(iterator) == loop));
+        }
+        else
+        {
+            fprintf(
+                stdout,
+                "\t\t(He %4lu [edge %6lu], %6.3f, %6.3f, %6.3f, %d)\n",
                 csmnode_id(CSMNODE(iterator)),
                 csmnode_id(CSMNODE(edge)),
                 x, y, z,
                 ES_CIERTO(csmhedge_loop(iterator) == loop));
+        }
         
         if (assert_si_no_es_integro == CIERTO)
             assert(csmhedge_loop(iterator) == loop);
