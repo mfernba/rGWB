@@ -175,6 +175,7 @@ static void i_test_crea_hexaedro(void)
     id_nuevo_elemento = 0;
     
     solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, &hei);
+    csmsolid_print_debug(solido, CIERTO);
     
     // Cara inferior...
     {
