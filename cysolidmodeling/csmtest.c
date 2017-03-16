@@ -17,8 +17,10 @@
 
 #include "csmnode.inl"
 #include "csmopbas.inl"
+#include "csmhashtb.inl"
 
 #include "cyassert.h"
+#include "a_pto3d.h"
 
 // ------------------------------------------------------------------------------------------
 
@@ -226,6 +228,45 @@ static void i_test_crea_hexaedro(void)
 
 // ------------------------------------------------------------------------------------------
 
+struct i_item_tabla_t
+{
+    unsigned long id;
+    double a;
+};
+
+static void i_test_tabla_hash(void)
+{
+    struct csmhashtb(i_item_tabla_t) *tabla_hash;
+    struct i_item_tabla_t item1, item2, item3;
+    struct i_item_tabla_t *item;
+    
+    item1.id = 3;
+    item1.a = 9.;
+
+    item2.id = 5;
+    item2.a = 19.;
+
+    item3.id = 8;
+    item3.a = 25.;
+    
+    tabla_hash = csmhashtb_create_empty(i_item_tabla_t);
+    
+    csmhashtb_add_item(tabla_hash, 3, &item1, i_item_tabla_t);
+    csmhashtb_add_item(tabla_hash, 5, &item2, i_item_tabla_t);
+    csmhashtb_add_item(tabla_hash, 1000, &item3, i_item_tabla_t);
+    
+    item = csmhashtb_ptr_for_id(tabla_hash, 5, i_item_tabla_t);
+    assert_no_null(item);
+    assert(item->id == 5);
+    
+    csmhashtb_remove_item(tabla_hash, 5, i_item_tabla_t);
+    assert(csmhashtb_contains_id(tabla_hash, i_item_tabla_t, 5, NULL) == FALSO);
+    
+    csmhashtb_destruye(&tabla_hash, i_item_tabla_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     i_test_crea_destruye_solido_vacio();
@@ -233,6 +274,7 @@ void csmtest_test(void)
     i_test_crea_lamina();
     i_test_crea_lamina_con_hueco();
     i_test_crea_hexaedro();
+    i_test_tabla_hash();
 }
 
 
