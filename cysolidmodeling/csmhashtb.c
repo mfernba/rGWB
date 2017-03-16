@@ -8,7 +8,7 @@
 
 #include "csmhashtb.inl"
 
-#include "csmuthash.inl"
+#include "csmuthash.hxx"
 
 #include "cyassert.h"
 #include "cypespy.h"
