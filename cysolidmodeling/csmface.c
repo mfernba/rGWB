@@ -12,7 +12,7 @@
 
 struct csmface_t
 {
-    struct csmnode_t clase_base;
+    unsigned long id;
 
     struct csmsolid_t *fsolid;
     
@@ -25,22 +25,9 @@ struct csmface_t
 
 // ------------------------------------------------------------------------------------------
 
-static void i_csmface_destruye(struct csmface_t **face)
-{
-    assert_no_null(face);
-    assert_no_null(*face);
-
-    if ((*face)->floops != NULL)
-        csmnode_free_node_list(&(*face)->floops, csmloop_t);
-    
-    FREE_PP(face, struct csmface_t);
-}
-
-// ------------------------------------------------------------------------------------------
-
 CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         unsigned long id,
-                        struct csmsolid_t *fsolid,
+                                                struct csmsolid_t *fsolid,
                         struct csmloop_t *flout,
                         struct csmloop_t *floops,
                         double A, double B, double C, double D,
@@ -50,7 +37,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     
     face = MALLOC(struct csmface_t);
     
-    face->clase_base = csmnode_crea_node(id, face, i_csmface_destruye, csmface_t);
+    face->id = id;
     
     face->fsolid = fsolid;
     
@@ -92,6 +79,27 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     bbox = csmbbox_crea_vacia();
     
     return i_crea(id, fsolid, flout, floops, A, B, C, D, &bbox);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmface_destruye(struct csmface_t **face)
+{
+    assert_no_null(face);
+    assert_no_null(*face);
+
+    if ((*face)->floops != NULL)
+        csmnode_free_node_list(&(*face)->floops, csmloop_t);
+    
+    FREE_PP(face, struct csmface_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+unsigned long csmface_id(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->id;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -187,20 +195,4 @@ void csmface_remove_loop(struct csmface_t *face, struct csmloop_t **loop)
         face->flout = face->floops;
     
     csmnode_free_node_in_list(loop, csmloop_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-struct csmface_t *csmface_next(struct csmface_t *face)
-{
-    assert_no_null(face);
-    return csmnode_downcast(csmnode_next(CSMNODE(face)), csmface_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-struct csmface_t *csmface_prev(struct csmface_t *face)
-{
-    assert_no_null(face);
-    return csmnode_downcast(csmnode_prev(CSMNODE(face)), csmface_t);
 }

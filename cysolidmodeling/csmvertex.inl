@@ -4,6 +4,11 @@
 
 CONSTRUCTOR(struct csmvertex_t *, csmvertex_crea, (double x, double y, double z, unsigned long *id_nuevo_elemento));
 
+void csmvertex_destruye(struct csmvertex_t **vertex);
+
+
+unsigned long csmvertex_id(const struct csmvertex_t *vertex);
+
 
 // Topología...
 
@@ -18,9 +23,3 @@ void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge);
 void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, double *y, double *z);
 
 void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, double z);
-
-
-// Lista...
-
-struct csmvertex_t *csmvertex_next(struct csmvertex_t *vertex);
-struct csmvertex_t *csmvertex_prev(struct csmvertex_t *vertex);

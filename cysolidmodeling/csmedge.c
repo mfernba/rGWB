@@ -3,7 +3,6 @@
 #include "csmedge.inl"
 #include "csmedge.tli"
 
-#include "csmnode.inl"
 #include "csmhedge.inl"
 
 #include "cyassert.h"
@@ -12,21 +11,11 @@
 
 struct csmedge_t
 {
-    struct csmnode_t clase_base;
+    unsigned long id;
     
     struct csmhedge_t *he1;
     struct csmhedge_t *he2;
 };
-
-// --------------------------------------------------------------------------------------------------------------
-
-static void i_csmedge_destruye(struct csmedge_t **edge)
-{
-    assert_no_null(edge);
-    assert_no_null(*edge);
-
-    FREE_PP(edge, struct csmedge_t);
-}
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -39,7 +28,7 @@ CONSTRUCTOR(static struct csmedge_t *, i_crea, (
     
     edge = MALLOC(struct csmedge_t);
     
-    edge->clase_base = csmnode_crea_node(id, edge, i_csmedge_destruye, csmedge_t);
+    edge->id = id;
     
     edge->he1 = he1;
     edge->he2 = he2;
@@ -60,6 +49,24 @@ struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
     he2 = NULL;
     
     return i_crea(id, he1, he2);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+void csmedge_destruye(struct csmedge_t **edge)
+{
+    assert_no_null(edge);
+    assert_no_null(*edge);
+
+    FREE_PP(edge, struct csmedge_t);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+unsigned long csmedge_id(const struct csmedge_t *edge)
+{
+    assert_no_null(edge);
+    return edge->id;
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -130,20 +137,4 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
         assert(csmhedge_id_igual(edge->he2, hedge) == CIERTO);
         return edge->he1;
     }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-struct csmedge_t *csmedge_next(struct csmedge_t *edge)
-{
-    assert_no_null(edge);
-    return csmnode_downcast(csmnode_next(CSMNODE(edge)), csmedge_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-struct csmedge_t *csmedge_prev(struct csmedge_t *edge)
-{
-    assert_no_null(edge);
-    return csmnode_downcast(csmnode_prev(CSMNODE(edge)), csmedge_t);
 }

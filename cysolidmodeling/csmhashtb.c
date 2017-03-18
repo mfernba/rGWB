@@ -17,7 +17,7 @@
 struct csmhashtb_item_t
 {
     unsigned long id;
-    void *ptr;
+    struct csmhashtb_item_ptr_t *ptr;
     
     UT_hash_handle hh;
 };
@@ -48,8 +48,14 @@ CONSTRUCTOR(static struct csmhashtb_item_t *, i_crea_item, (unsigned long id, vo
 
 // ------------------------------------------------------------------------------------------
 
-static void i_destruye_item(struct csmhashtb_item_t **item)
+static void i_destruye_item(struct csmhashtb_item_t **item, csmhashtb_FPtr_free_item_ptr func_free_item_ptr)
 {
+    assert_no_null(item);
+    assert_no_null(*item);
+    
+    if (func_free_item_ptr != NULL)
+        func_free_item_ptr(&(*item)->ptr);
+    
     FREE_PP(item, struct csmhashtb_item_t);
 }
 
@@ -67,7 +73,7 @@ struct csmhashtb_t *csmhashtb_nousar_create_empty(void)
 
 // ------------------------------------------------------------------------------------------
 
-void csmhashtb_nousar_free(struct csmhashtb_t **tabla)
+void csmhashtb_nousar_free(struct csmhashtb_t **tabla, csmhashtb_FPtr_free_item_ptr func_free_item_ptr)
 {
     assert_no_null(tabla);
     assert_no_null(*tabla);
@@ -79,7 +85,7 @@ void csmhashtb_nousar_free(struct csmhashtb_t **tabla)
         HASH_ITER(hh, (*tabla)->items, current_item, tmp)
         {
             HASH_DEL((*tabla)->items, current_item);
-            i_destruye_item(&current_item);
+            i_destruye_item(&current_item, func_free_item_ptr);
         }
     }
     
@@ -120,6 +126,24 @@ void csmhashtb_nousar_remove_item(struct csmhashtb_t *tabla, unsigned long id)
     assert_no_null(item);
     
     HASH_DEL(tabla->items, item);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmhashtb_nousar_clear(struct csmhashtb_t *tabla, csmhashtb_FPtr_free_item_ptr func_free_item_ptr)
+{
+    assert_no_null(tabla);
+    
+    if (tabla->items != NULL)
+    {
+        struct csmhashtb_item_t *current_item, *tmp;
+
+        HASH_ITER(hh, tabla->items, current_item, tmp)
+        {
+            HASH_DEL(tabla->items, current_item);
+            i_destruye_item(&current_item, func_free_item_ptr);
+        }
+    }
 }
 
 // ------------------------------------------------------------------------------------------

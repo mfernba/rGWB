@@ -8,6 +8,7 @@
 
 #include "csmeuler_kvfs.inl"
 
+#include "csmhashtb.inl"
 #include "csmloop.inl"
 #include "csmnode.inl"
 #include "csmface.inl"
@@ -20,18 +21,26 @@
 
 void csmeuler_kvfs(struct csmsolid_t *solido)
 {
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    struct csmface_t *face;
     struct csmloop_t *floops;
-    
+
     assert_no_null(solido);
-    assert_no_null(solido->sfaces);
-    assert(csmface_next(solido->sfaces) == NULL);
-    assert(solido->sedges == NULL);
-    assert_no_null(solido->svertexs);
-    assert(csmvertex_next(solido->svertexs) == NULL);
+    assert(csmhashtb_count(solido->sfaces, csmface_t) == 1);
+    assert(csmhashtb_count(solido->sedges, csmedge_t) == 0);
+    assert(csmhashtb_count(solido->svertexs, csmvertex_t) == 1);
     
-    floops = csmface_floops(solido->sfaces);
+    face_iterator = csmhashtb_create_iterator(solido->sfaces, csmface_t);
+    assert(csmhashtb_has_next(face_iterator, csmface_t) == CIERTO);
+    
+    csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+    assert(csmhashtb_has_next(face_iterator, csmface_t) == FALSO);
+    
+    floops = csmface_floops(face);
     assert(csmloop_next(floops) == NULL);
     
-    csmnode_free_node_list(&solido->sfaces, csmface_t);
-    csmnode_free_node_list(&solido->svertexs, csmvertex_t);
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+    
+    csmhashtb_clear(solido->sfaces, csmface_t, csmface_destruye);
+    csmhashtb_clear(solido->svertexs, csmvertex_t, csmvertex_destruye);
 }

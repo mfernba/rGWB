@@ -2,29 +2,17 @@
 
 #include "csmvertex.inl"
 
-#include "csmnode.inl"
-
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
 
 struct csmvertex_t
 {
-    struct csmnode_t clase_base;
+    unsigned long id;
     
     double x, y, z;
     struct csmhedge_t *hedge;
 };
-
-// ----------------------------------------------------------------------------------------------------
-
-static void i_csmvertex_destruye(struct csmvertex_t **vertex)
-{
-    assert_no_null(vertex);
-    assert_no_null(*vertex);
-
-    FREE_PP(vertex, struct csmvertex_t);
-}
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -37,7 +25,7 @@ CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
     
     vertex = MALLOC(struct csmvertex_t);
     
-    vertex->clase_base = csmnode_crea_node(id, vertex, i_csmvertex_destruye, csmvertex_t);
+    vertex->id = id;
 
     vertex->x = x;
     vertex->y = y;
@@ -60,6 +48,24 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
     hedge = NULL;
     
     return i_crea(id, x, y, z, hedge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmvertex_destruye(struct csmvertex_t **vertex)
+{
+    assert_no_null(vertex);
+    assert_no_null(*vertex);
+
+    FREE_PP(vertex, struct csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+unsigned long csmvertex_id(const struct csmvertex_t *vertex)
+{
+    assert_no_null(vertex);
+    return vertex->id;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -101,20 +107,4 @@ void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, d
     vertex->x = x;
     vertex->y = y;
     vertex->z = z;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-struct csmvertex_t *csmvertex_next(struct csmvertex_t *vertex)
-{
-    assert_no_null(vertex);
-    return csmnode_downcast(csmnode_next(CSMNODE(vertex)), csmvertex_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-struct csmvertex_t *csmvertex_prev(struct csmvertex_t *vertex)
-{
-    assert_no_null(vertex);
-    return csmnode_downcast(csmnode_prev(CSMNODE(vertex)), csmvertex_t);
 }

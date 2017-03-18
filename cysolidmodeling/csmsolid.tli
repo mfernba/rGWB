@@ -7,12 +7,14 @@
 //
 
 #include "csmfwddecl.hxx"
+#include "csmhashtb.hxx"
 
 struct csmsolid_t
 {
     unsigned long id;
 
-    struct csmface_t *sfaces;
-    struct csmedge_t *sedges;
-    struct csmvertex_t *svertexs;
+    struct csmhashtb(csmface_t) *sfaces;
+    struct csmhashtb(csmedge_t) *sedges;
+    struct csmhashtb(csmvertex_t) *svertexs;
 };
+

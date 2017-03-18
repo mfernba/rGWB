@@ -281,7 +281,7 @@ static void i_test_tabla_hash(void)
         csmhashtb_free_iterator(&it, i_item_tabla_t);
     }
     
-    csmhashtb_free(&tabla_hash, i_item_tabla_t);
+    csmhashtb_free(&tabla_hash, i_item_tabla_t, NULL);
 }
 
 // ------------------------------------------------------------------------------------------
