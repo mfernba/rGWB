@@ -10,5 +10,6 @@
 #define csmhashtb_h
 
 #define csmhashtb(tipo) csmhashtb__##tipo
+#define csmhashtb_iterator(tipo) csmhashtb__iterator_##tipo
 
 #endif /* csmhashtb_h */

@@ -1,4 +1,5 @@
 //
+
 //  csmhashtb.c
 //  cysolidmodeling
 //
@@ -24,6 +25,11 @@ struct csmhashtb_item_t
 struct csmhashtb_t
 {
     struct csmhashtb_item_t *items;
+};
+
+struct csmhashtb_iterator_t
+{
+    struct csmhashtb_item_t *next_item;
 };
 
 // ------------------------------------------------------------------------------------------
@@ -61,7 +67,7 @@ struct csmhashtb_t *csmhashtb_nousar_create_empty(void)
 
 // ------------------------------------------------------------------------------------------
 
-void csmhashtb_nousar_destruye(struct csmhashtb_t **tabla)
+void csmhashtb_nousar_free(struct csmhashtb_t **tabla)
 {
     assert_no_null(tabla);
     assert_no_null(*tabla);
@@ -78,6 +84,14 @@ void csmhashtb_nousar_destruye(struct csmhashtb_t **tabla)
     }
     
     FREE_PP(tabla, struct csmhashtb_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+unsigned long csmhashtb_nousar_count(const struct csmhashtb_t *tabla)
+{
+    assert_no_null(tabla);
+    return HASH_COUNT(tabla->items);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -142,4 +156,61 @@ CYBOOL csmhashtb_nousar_contains_id(struct csmhashtb_t *tabla, unsigned long id,
         return FALSO;
     }
 }
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmhashtb_iterator_t *, i_create_iterator, (struct csmhashtb_item_t *next_item))
+{
+    struct csmhashtb_iterator_t *iterator;
+    
+    iterator = MALLOC(struct csmhashtb_iterator_t);
+    
+    iterator->next_item = next_item;
+    
+    return iterator;
+}
+
+// ------------------------------------------------------------------------------------------
+
+struct csmhashtb_iterator_t *csmhashtb_nousar_create_iterator(struct csmhashtb_t *tabla)
+{
+    assert_no_null(tabla);
+    return i_create_iterator(tabla->items);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmhashtb_nousar_free_iterator(struct csmhashtb_iterator_t **iterator)
+{
+    assert_no_null(iterator);
+    assert_no_null(*iterator);
+    
+    FREE_PP(iterator, struct csmhashtb_iterator_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+CYBOOL csmhashtb_nousar_has_next(const struct csmhashtb_iterator_t *iterator)
+{
+    assert_no_null(iterator);
+    
+    if (iterator->next_item != NULL)
+        return ES_CIERTO(iterator->next_item != NULL);
+    else
+        return FALSO;
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmhashtb_nousar_next_pair(struct csmhashtb_iterator_t *iterator, unsigned long *id_opc, void **ptr_opc)
+{
+    assert_no_null(iterator);
+    assert_no_null(iterator->next_item);
+    
+    ASIGNA_OPC(id_opc, iterator->next_item->id);
+    ASIGNA_OPC(ptr_opc, iterator->next_item->ptr);
+    
+    iterator->next_item = iterator->next_item->hh.next;
+}
+
 

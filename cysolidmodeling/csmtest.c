@@ -261,8 +261,27 @@ static void i_test_tabla_hash(void)
     
     csmhashtb_remove_item(tabla_hash, 5, i_item_tabla_t);
     assert(csmhashtb_contains_id(tabla_hash, i_item_tabla_t, 5, NULL) == FALSO);
+
+    csmhashtb_add_item(tabla_hash, 5, &item2, i_item_tabla_t);
     
-    csmhashtb_destruye(&tabla_hash, i_item_tabla_t);
+    {
+        struct csmhashtb_iterator(i_item_tabla_t) *it;
+        
+        it = csmhashtb_create_iterator(tabla_hash, i_item_tabla_t);
+        
+        while (csmhashtb_has_next(it, i_item_tabla_t) == CIERTO)
+        {
+            unsigned long id;
+            struct i_item_tabla_t *item_tabla;
+            
+            csmhashtb_next_pair(it, &id, &item_tabla, i_item_tabla_t);
+            fprintf(stdout, "%lu %lu %lf\n", id, item_tabla->id, item_tabla->a);
+        }
+        
+        csmhashtb_free_iterator(&it, i_item_tabla_t);
+    }
+    
+    csmhashtb_free(&tabla_hash, i_item_tabla_t);
 }
 
 // ------------------------------------------------------------------------------------------
