@@ -27,7 +27,7 @@ struct csmface_t
 
 CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         unsigned long id,
-                                                struct csmsolid_t *fsolid,
+                        struct csmsolid_t *fsolid,
                         struct csmloop_t *flout,
                         struct csmloop_t *floops,
                         double A, double B, double C, double D,
