@@ -23,12 +23,12 @@
 
 void csmeuler_lmekr(
                 struct csmhedge_t *he1, struct csmhedge_t *he2,
-                unsigned long *id_nuevo_elemento,
                 struct csmhedge_t **hedge_lado_neg_opc, struct csmhedge_t **hedge_lado_pos_opc)
 {
     struct csmloop_t *he1_loop, *he2_loop;
     struct csmface_t *he1_and_he2_face;
     struct csmsolid_t *he1_and_he2_solid;
+    unsigned long *id_nuevo_elemento;
     register struct csmhedge_t *he_iterator;
     register unsigned long num_iteraciones;
     struct csmedge_t *new_edge;
@@ -56,9 +56,10 @@ void csmeuler_lmekr(
     } while (he_iterator != he2);
     
     he1_and_he2_solid = csmface_fsolid(he1_and_he2_face);
-    csmsolid_append_new_edge(he1_and_he2_solid, id_nuevo_elemento, &new_edge);
+    csmsolid_append_new_edge(he1_and_he2_solid, &new_edge);
 
 // Al contrario que Mäntylä, he1 lo pongo en el lado neg y he2 en el pos
+    id_nuevo_elemento = csmsolid_id_new_element(he1_and_he2_solid);
     csmopbas_addhe(new_edge, csmhedge_vertex(he1), he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &nhe1);
     csmopbas_addhe(new_edge, csmhedge_vertex(he2), he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, &nhe2);
 

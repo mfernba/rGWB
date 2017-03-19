@@ -30,7 +30,6 @@
 
 void csmeuler_lmef(
                 struct csmhedge_t *he1, struct csmhedge_t *he2,
-                unsigned long *id_nuevo_elemento,
                 struct csmface_t **new_face_opc,
                 struct csmhedge_t **new_he_pos_opc, struct csmhedge_t **new_he_neg_opc)
 {
@@ -41,6 +40,7 @@ void csmeuler_lmef(
     struct csmloop_t *new_loop;
     register struct csmhedge_t *he_iterator;
     register unsigned long num_iteraciones;
+    unsigned long *id_nuevo_elemento;
     struct csmhedge_t *new_he1, *new_he2;
     struct csmhedge_t *prev_new_he1, *prev_new_he2;
     
@@ -49,9 +49,10 @@ void csmeuler_lmef(
     assert(loop_he1 == loop_he2);
 
     he1_solid = csmopbas_solid_from_hedge(he1);
-    csmsolid_append_new_face(he1_solid, id_nuevo_elemento, &new_face);
-    csmsolid_append_new_edge(he1_solid, id_nuevo_elemento, &new_edge);
+    csmsolid_append_new_face(he1_solid, &new_face);
+    csmsolid_append_new_edge(he1_solid, &new_edge);
     
+    id_nuevo_elemento = csmsolid_id_new_element(he1_solid);
     new_loop = csmloop_crea(new_face, id_nuevo_elemento);
     csmface_set_flout(new_face, new_loop);
     

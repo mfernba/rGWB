@@ -23,7 +23,6 @@
 
 void csmeuler_lkemr(
                 struct csmhedge_t **he_to_ring, struct csmhedge_t **he_from_ring,
-                unsigned long *id_nuevo_elemento,
                 struct csmhedge_t **he_to_ring_next, struct csmhedge_t **he_from_ring_next)
 {
     struct csmhedge_t *he1_loc, *he2_loc;
@@ -31,6 +30,7 @@ void csmeuler_lkemr(
     struct csmloop_t *loop_to_divide;
     struct csmhedge_t *he1_old_next, *he2_old_next;
     struct csmface_t *he1_and_he2_face;
+    unsigned long *id_nuevo_elemento;
     struct csmloop_t *new_loop;
     struct csmhedge_t *he_iterator;
     unsigned long num_iteraciones;
@@ -61,6 +61,7 @@ void csmeuler_lkemr(
     csmhedge_set_prev(he1_old_next, he2_loc);
 
     he1_and_he2_face = csmloop_lface(loop_to_divide);
+    id_nuevo_elemento = csmsolid_id_new_element(csmface_fsolid(he1_and_he2_face));
     new_loop = csmloop_crea(he1_and_he2_face, id_nuevo_elemento);
     csmface_add_loop_while_removing_from_old(he1_and_he2_face, new_loop);
  

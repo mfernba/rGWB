@@ -14,7 +14,7 @@
 
 // --------------------------------------------------------------------------------
 
-void csmeuler_lmfkrh(struct csmloop_t *loop, unsigned long *id_nuevo_elemento, struct csmface_t **new_face_opc)
+void csmeuler_lmfkrh(struct csmloop_t *loop, struct csmface_t **new_face_opc)
 {
     struct csmface_t *new_face_loc;
     struct csmface_t *old_face;
@@ -25,7 +25,7 @@ void csmeuler_lmfkrh(struct csmloop_t *loop, unsigned long *id_nuevo_elemento, s
     
     solid = csmface_fsolid(old_face);
     
-    csmsolid_append_new_face(solid, id_nuevo_elemento, &new_face_loc);
+    csmsolid_append_new_face(solid, &new_face_loc);
     csmface_add_loop_while_removing_from_old(new_face_loc, loop);
     
     ASIGNA_OPC(new_face_opc, new_face_loc);

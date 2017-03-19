@@ -25,7 +25,7 @@
 // ----------------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
-                        unsigned long id,
+                        unsigned long id_nuevo_elemento,
                         struct csmhashtb(csmface_t) **sfaces,
                         struct csmhashtb(csmedge_t) **sedges,
                         struct csmhashtb(csmvertex_t) **svertexs))
@@ -34,7 +34,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
     
     solido = MALLOC(struct csmsolid_t);
     
-    solido->id = id;
+    solido->id_nuevo_elemento = id_nuevo_elemento;
     
     solido->sfaces = ASIGNA_PUNTERO_PP_NO_NULL(sfaces, struct csmhashtb(csmface_t));
     solido->sedges = ASIGNA_PUNTERO_PP_NO_NULL(sedges, struct csmhashtb(csmedge_t));
@@ -45,20 +45,20 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsolid_crea_vacio(unsigned long *id_nuevo_elemento)
+struct csmsolid_t *csmsolid_crea_vacio(void)
 {
-    unsigned long id;
+    unsigned long id_nuevo_elemento;
     struct csmhashtb(csmface_t) *sfaces;
     struct csmhashtb(csmedge_t) *sedges;
     struct csmhashtb(csmvertex_t) *svertexs;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id_nuevo_elemento = 0;
     
     sfaces = csmhashtb_create_empty(csmface_t);
     sedges = csmhashtb_create_empty(csmedge_t);
     svertexs = csmhashtb_create_empty(csmvertex_t);
     
-    return i_crea(id, &sfaces, &sedges, &svertexs);
+    return i_crea(id_nuevo_elemento, &sfaces, &sedges, &svertexs);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -77,14 +77,22 @@ void csmsolid_destruye(struct csmsolid_t **solido)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_append_new_face(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento, struct csmface_t **face)
+unsigned long *csmsolid_id_new_element(struct csmsolid_t *solido)
+{
+    assert_no_null(solido);
+    return &solido->id_nuevo_elemento;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_append_new_face(struct csmsolid_t *solido, struct csmface_t **face)
 {
     struct csmface_t *face_loc;
     
     assert_no_null(solido);
     assert_no_null(face);
     
-    face_loc = csmface_crea(solido, id_nuevo_elemento);
+    face_loc = csmface_crea(solido, &solido->id_nuevo_elemento);
     csmhashtb_add_item(solido->sfaces, csmface_id(face_loc), face_loc, csmface_t);
     
     *face = face_loc;
@@ -92,14 +100,14 @@ void csmsolid_append_new_face(struct csmsolid_t *solido, unsigned long *id_nuevo
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_append_new_edge(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento, struct csmedge_t **edge)
+void csmsolid_append_new_edge(struct csmsolid_t *solido, struct csmedge_t **edge)
 {
     struct csmedge_t *edge_loc;
     
     assert_no_null(solido);
     assert_no_null(edge);
     
-    edge_loc = csmedge_crea(id_nuevo_elemento);
+    edge_loc = csmedge_crea(&solido->id_nuevo_elemento);
     csmhashtb_add_item(solido->sedges, csmedge_id(edge_loc), edge_loc, csmedge_t);
     
     *edge = edge_loc;
@@ -107,14 +115,14 @@ void csmsolid_append_new_edge(struct csmsolid_t *solido, unsigned long *id_nuevo
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, double z, unsigned long *id_nuevo_elemento, struct csmvertex_t **vertex)
+void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, double z, struct csmvertex_t **vertex)
 {
     struct csmvertex_t *vertex_loc;
     
     assert_no_null(solido);
     assert_no_null(vertex);
     
-    vertex_loc = csmvertex_crea(x, y, z, id_nuevo_elemento);
+    vertex_loc = csmvertex_crea(x, y, z, &solido->id_nuevo_elemento);
     csmhashtb_add_item(solido->svertexs, csmvertex_id(vertex_loc), vertex_loc, csmvertex_t);
     
     *vertex = vertex_loc;

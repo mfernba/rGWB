@@ -27,11 +27,8 @@
 static void i_test_crea_destruye_solido_vacio(void)
 {
     struct csmsolid_t *solido;
-    unsigned long id_nuevo_elemento;
     
-    id_nuevo_elemento = 0;
-    
-    solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, NULL);
+    solido = csmeuler_mvfs(0., 0., 0., NULL);
     
     csmeuler_kvfs(solido);
     
@@ -43,15 +40,12 @@ static void i_test_crea_destruye_solido_vacio(void)
 static void i_test_basico_solido_una_arista(void)
 {
     struct csmsolid_t *solido;
-    unsigned long id_nuevo_elemento;
     struct csmhedge_t *hedge;
     struct csmhedge_t *he1, *he2;
     
-    id_nuevo_elemento = 0;
+    solido = csmeuler_mvfs(0., 0., 0., &hedge);
     
-    solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, &hedge);
-    
-    csmeuler_lmev(hedge, hedge, 1., 0., 0., &id_nuevo_elemento, NULL, NULL, &he1, &he2);
+    csmeuler_lmev(hedge, hedge, 1., 0., 0., NULL, NULL, &he1, &he2);
     
     csmeuler_lkev(&he1, &he2, &he1, NULL, &he2, NULL);
     assert(he1 == he2);
@@ -66,19 +60,16 @@ static void i_test_basico_solido_una_arista(void)
 static void i_test_crea_lamina(void)
 {
     struct csmsolid_t *solido;
-    unsigned long id_nuevo_elemento;
     struct csmhedge_t *initial_hedge, *hedge_from_vertex1, *hedge_from_vertex2, *hedge_from_vertex3;
     struct csmhedge_t *he_pos, *he_neg;
     struct csmhedge_t *he1, *he2;
     
-    id_nuevo_elemento = 0;
+    solido = csmeuler_mvfs(0., 0., 0., &initial_hedge);
     
-    solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, &initial_hedge);
-    
-    csmeuler_lmev_strut_edge(initial_hedge, 1., 0., 0., &id_nuevo_elemento, &hedge_from_vertex1);
-    csmeuler_lmev_strut_edge(hedge_from_vertex1, 1., 1., 0., &id_nuevo_elemento, &hedge_from_vertex2);
-    csmeuler_lmev_strut_edge(hedge_from_vertex2, 0., 1., 0., &id_nuevo_elemento, &hedge_from_vertex3);
-    csmeuler_lmef(initial_hedge, hedge_from_vertex3, &id_nuevo_elemento, NULL, &he_pos, &he_neg);
+    csmeuler_lmev_strut_edge(initial_hedge, 1., 0., 0., &hedge_from_vertex1);
+    csmeuler_lmev_strut_edge(hedge_from_vertex1, 1., 1., 0., &hedge_from_vertex2);
+    csmeuler_lmev_strut_edge(hedge_from_vertex2, 0., 1., 0., &hedge_from_vertex3);
+    csmeuler_lmef(initial_hedge, hedge_from_vertex3, NULL, &he_pos, &he_neg);
     
     csmeuler_lkef(&he_pos, &he_neg);
     assert(he_pos != NULL);
@@ -109,19 +100,16 @@ static void i_test_crea_lamina(void)
 static void i_test_crea_lamina_con_hueco(void)
 {
     struct csmsolid_t *solido;
-    unsigned long id_nuevo_elemento;
     struct csmhedge_t *initial_hedge, *hedge_from_vertex1, *hedge_from_vertex2, *hedge_from_vertex3;
     struct csmhedge_t *he_pos, *he_neg;
     struct csmhedge_t *he1, *he2;
     
-    id_nuevo_elemento = 0;
+    solido = csmeuler_mvfs(0., 0., 0., &initial_hedge);
     
-    solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, &initial_hedge);
-    
-    csmeuler_lmev_strut_edge(initial_hedge, 10., 0., 0., &id_nuevo_elemento, &hedge_from_vertex1);
-    csmeuler_lmev_strut_edge(hedge_from_vertex1, 10., 1.0, 0., &id_nuevo_elemento, &hedge_from_vertex2);
-    csmeuler_lmev_strut_edge(hedge_from_vertex2, 0., 10., 0., &id_nuevo_elemento, &hedge_from_vertex3);
-    csmeuler_lmef(initial_hedge, hedge_from_vertex3, &id_nuevo_elemento, NULL, &he_pos, &he_neg);
+    csmeuler_lmev_strut_edge(initial_hedge, 10., 0., 0., &hedge_from_vertex1);
+    csmeuler_lmev_strut_edge(hedge_from_vertex1, 10., 1.0, 0., &hedge_from_vertex2);
+    csmeuler_lmev_strut_edge(hedge_from_vertex2, 0., 10., 0., &hedge_from_vertex3);
+    csmeuler_lmef(initial_hedge, hedge_from_vertex3, NULL, &he_pos, &he_neg);
     
     // Hueco de un sólo vértice...
     {
@@ -129,10 +117,10 @@ static void i_test_crea_lamina_con_hueco(void)
         struct csmhedge_t *he1_hole_pos_next, *he2_hole_pos_next;
         struct csmhedge_t *hedge_lado_neg, *hedge_lado_pos;
         
-        csmeuler_lmev(he_pos, he_pos, 1., 1., 0., &id_nuevo_elemento, NULL, NULL, &he_from_vertex, &he_to_vertex);
-        csmeuler_lkemr(&he_to_vertex, &he_from_vertex, &id_nuevo_elemento, &he1_hole_pos_next, &he2_hole_pos_next);
+        csmeuler_lmev(he_pos, he_pos, 1., 1., 0., NULL, NULL, &he_from_vertex, &he_to_vertex);
+        csmeuler_lkemr(&he_to_vertex, &he_from_vertex, &he1_hole_pos_next, &he2_hole_pos_next);
         
-        csmeuler_lmekr(he1_hole_pos_next, he2_hole_pos_next, &id_nuevo_elemento, &hedge_lado_neg, &hedge_lado_pos);
+        csmeuler_lmekr(he1_hole_pos_next, he2_hole_pos_next, &hedge_lado_neg, &hedge_lado_pos);
         csmeuler_lkev(&hedge_lado_neg, &hedge_lado_pos, &hedge_lado_neg, NULL, NULL, &hedge_lado_pos);
         assert(hedge_lado_neg != NULL);
         assert(hedge_lado_pos != NULL);
@@ -176,15 +164,15 @@ static void i_test_crea_hexaedro(void)
     
     id_nuevo_elemento = 0;
     
-    solido = csmeuler_mvfs(0., 0., 0., &id_nuevo_elemento, &hei);
+    solido = csmeuler_mvfs(0., 0., 0., &hei);
     csmsolid_print_debug(solido, CIERTO);
     
     // Cara inferior...
     {
-        csmeuler_lmev_strut_edge(hei, 10.,  0., 0., &id_nuevo_elemento, &he1);
-        csmeuler_lmev_strut_edge(he1, 10., 10., 0., &id_nuevo_elemento, &he2);
-        csmeuler_lmev_strut_edge(he2,  0., 10., 0., &id_nuevo_elemento, &he3);
-        csmeuler_lmef(hei, he3, &id_nuevo_elemento, NULL, &he4, NULL);
+        csmeuler_lmev_strut_edge(hei, 10.,  0., 0., &he1);
+        csmeuler_lmev_strut_edge(he1, 10., 10., 0., &he2);
+        csmeuler_lmev_strut_edge(he2,  0., 10., 0., &he3);
+        csmeuler_lmef(hei, he3, NULL, &he4, NULL);
         assert(csmopbas_mate(he1) == hei);
     }
 
@@ -192,10 +180,10 @@ static void i_test_crea_hexaedro(void)
     
     // Aristas verticales...
     {
-        csmeuler_lmev_strut_edge(he1, 10.,  0., 10., &id_nuevo_elemento, &he1_top);
-        csmeuler_lmev_strut_edge(he2, 10., 10., 10., &id_nuevo_elemento, &he2_top);
-        csmeuler_lmev_strut_edge(he3,  0., 10., 10., &id_nuevo_elemento, &he3_top);
-        csmeuler_lmev_strut_edge(he4,  0.,  0., 10., &id_nuevo_elemento, &he4_top);
+        csmeuler_lmev_strut_edge(he1, 10.,  0., 10., &he1_top);
+        csmeuler_lmev_strut_edge(he2, 10., 10., 10., &he2_top);
+        csmeuler_lmev_strut_edge(he3,  0., 10., 10., &he3_top);
+        csmeuler_lmev_strut_edge(he4,  0.,  0., 10., &he4_top);
         
         assert(csmhedge_loop(he1_top) == csmhedge_loop(he2_top));
         assert(csmhedge_loop(he1_top) == csmhedge_loop(he3_top));
@@ -204,9 +192,9 @@ static void i_test_crea_hexaedro(void)
 
     csmsolid_print_debug(solido, CIERTO);
     
-    csmeuler_lmef(he4_top, he3_top, &id_nuevo_elemento, NULL, NULL, NULL);
-    csmeuler_lmef(he3_top, he2_top, &id_nuevo_elemento, NULL, NULL, NULL);
-    csmeuler_lmef(he2_top, he1_top, &id_nuevo_elemento, NULL, NULL, NULL);
+    csmeuler_lmef(he4_top, he3_top, NULL, NULL, NULL);
+    csmeuler_lmef(he3_top, he2_top, NULL, NULL, NULL);
+    csmeuler_lmef(he2_top, he1_top, NULL, NULL, NULL);
 
     //csmeuler_lmef(he1_top, he4_top, &id_nuevo_elemento, NULL, NULL, NULL);
     
@@ -219,7 +207,7 @@ static void i_test_crea_hexaedro(void)
 
     csmsolid_print_debug(solido, CIERTO);
     
-    csmeuler_lmef(he1_top, he1_top_next_next_next, &id_nuevo_elemento, NULL, NULL, NULL);
+    csmeuler_lmef(he1_top, he1_top_next_next_next, NULL, NULL, NULL);
     
     csmsolid_print_debug(solido, CIERTO);
     
