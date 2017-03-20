@@ -38,6 +38,6 @@ struct csmbbox_t;
 struct csmhashtb(csmface_t);
 struct csmhashtb(csmedge_t);
 struct csmhashtb(csmvertex_t);
-
+struct csmhashtb(csmhedge_t);
 
 #endif /* csmfwddecl_hxx */

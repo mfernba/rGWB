@@ -4,6 +4,13 @@
 
 CONSTRUCTOR(struct csmhedge_t *, csmhedge_crea, (unsigned long *id_nuevo_elemento));
 
+CONSTRUCTOR(struct csmhedge_t *, csmhedge_duplicate, (
+                        const struct csmhedge_t *hedge,
+                        struct csmloop_t *loop,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
+
 
 unsigned long csmhedge_id(const struct csmhedge_t *hedge);
 

@@ -2,6 +2,8 @@
 
 #include "csmvertex.inl"
 
+#include "csmhashtb.inl"
+
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
@@ -48,6 +50,40 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
     hedge = NULL;
     
     return i_crea(id, x, y, z, hedge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y, double z, unsigned long *id_nuevo_elemento))
+{
+    unsigned long id;
+    struct csmhedge_t *hedge;
+    
+    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    
+    hedge = NULL;
+    
+    return i_crea(id, x, y, z, hedge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmvertex_t *csmvertex_duplicate(
+                        const struct csmvertex_t *vertex,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new)
+{
+    struct csmvertex_t *new_vertex;
+    
+    assert_no_null(vertex);
+    
+    new_vertex = i_duplicate_vertex(vertex->x, vertex->y, vertex->z, id_nuevo_elemento);
+    assert_no_null(new_vertex);
+    assert(new_vertex->hedge == NULL);
+    
+    csmhashtb_add_item(relation_svertexs_old_to_new, vertex->id, new_vertex, csmvertex_t);
+    
+    return new_vertex;
 }
 
 // ----------------------------------------------------------------------------------------------------

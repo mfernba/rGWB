@@ -54,6 +54,14 @@ void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct cs
     csmnode_nousar_insert_node2_before_node1(CSMNODE(node1), CSMNODE(node2), #tipo_clase_derivada)\
 )
 
+void csmnode_nousar_insert_node2_after_node1(struct csmnode_t *node1, struct csmnode_t *node2, const char *tipo_clase_derivada);
+#define csmnode_insert_node2_after_node1(node1, node2, tipo_clase_derivada)\
+(\
+    ((struct tipo_clase_derivada *)node1 == node1),\
+    ((struct tipo_clase_derivada *)node2 == node2),\
+    csmnode_nousar_insert_node2_after_node1(CSMNODE(node1), CSMNODE(node2), #tipo_clase_derivada)\
+)
+
 void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived, const char *tipo_clase_derivada);
 #define csmnode_free_node_list(head_node_derived, tipo_clase_derivada)\
 (\

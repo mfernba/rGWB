@@ -2,7 +2,9 @@
 
 #include "csmhedge.inl"
 
+#include "csmhashtb.inl"
 #include "csmnode.inl"
+#include "csmvertex.inl"
 
 #include "cyassert.h"
 #include "cypeid.h"
@@ -64,6 +66,52 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
     loop = NULL;
     
     return i_crea(id, edge, vertex, loop);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmhedge_t *, i_duplicate_hedge, (struct csmloop_t *loop, unsigned long *id_nuevo_elemento))
+{
+    unsigned long id;
+    struct csmedge_t *edge;
+    struct csmvertex_t *vertex;
+    
+    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+
+    edge = NULL;
+    vertex = NULL;
+    
+    return i_crea(id, edge, vertex, loop);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+struct csmhedge_t *csmhedge_duplicate(
+                        const struct csmhedge_t *hedge,
+                        struct csmloop_t *loop,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
+{
+    struct csmhedge_t *new_hedge;
+    unsigned long id_old_vertex;
+    
+    assert_no_null(hedge);
+    
+    new_hedge = i_duplicate_hedge(loop, id_nuevo_elemento);
+    assert_no_null(new_hedge);
+    assert(new_hedge->edge == NULL);
+    assert(new_hedge->vertex == NULL);
+    
+    id_old_vertex = csmvertex_id(hedge->vertex);
+    new_hedge->vertex = csmhashtb_ptr_for_id(relation_svertexs_old_to_new, id_old_vertex, csmvertex_t);
+    
+    if (csmvertex_hedge(hedge->vertex) == hedge)
+        csmvertex_set_hedge(new_hedge->vertex, new_hedge);
+    
+    csmhashtb_add_item(relation_shedges_old_to_new, hedge->clase_base.id, new_hedge, csmhedge_t);
+    
+    return new_hedge;
 }
 
 // --------------------------------------------------------------------------------------------------------------

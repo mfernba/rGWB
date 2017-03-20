@@ -83,6 +83,74 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
 
 // ------------------------------------------------------------------------------------------
 
+CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
+                        struct csmsolid_t *fsolid,
+                        double A, double B, double C, double D,
+                        unsigned long *id_nuevo_elemento))
+{
+    unsigned long id;
+    struct csmloop_t *flout, *floops;
+    struct csmbbox_t *bbox;
+    
+    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    flout = NULL;
+    floops = NULL;
+    bbox = csmbbox_crea_vacia();
+    
+    return i_crea(id, fsolid, flout, floops, A, B, C, D, &bbox);
+}
+
+// ------------------------------------------------------------------------------------------
+
+struct csmface_t *csmface_duplicate(
+                        struct csmface_t *face,
+                        struct csmsolid_t *fsolid,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
+{
+    struct csmface_t *new_face;
+    struct csmloop_t *iterator, *last_loop;
+    
+    assert_no_null(face);
+
+    new_face = i_duplicate_face(fsolid, face->A, face->B, face->C, face->D, id_nuevo_elemento);
+    assert_no_null(new_face);
+    
+    iterator = face->floops;
+    last_loop = NULL;
+    
+    while (iterator != NULL)
+    {
+        struct csmloop_t *iterator_copy;
+        
+        iterator_copy = csmloop_duplicate(
+                        iterator,
+                        new_face,
+                        id_nuevo_elemento,
+                        relation_svertexs_old_to_new,
+                        relation_shedges_old_to_new);
+        
+        if (new_face->floops == NULL)
+            new_face->floops = iterator_copy;
+        else
+            csmnode_insert_node2_after_node1(last_loop, iterator_copy, csmloop_t);
+        
+        if (iterator == face->flout)
+            new_face->flout = iterator_copy;
+        
+        last_loop = iterator_copy;
+        iterator = csmloop_next(iterator);
+    }
+    
+    assert_no_null(new_face->flout);
+    assert_no_null(new_face->floops);
+    
+    return new_face;
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmface_destruye(struct csmface_t **face)
 {
     assert_no_null(face);

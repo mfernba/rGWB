@@ -4,6 +4,11 @@
 
 CONSTRUCTOR(struct csmvertex_t *, csmvertex_crea, (double x, double y, double z, unsigned long *id_nuevo_elemento));
 
+CONSTRUCTOR(struct csmvertex_t *, csmvertex_duplicate, (
+                        const struct csmvertex_t *vertex,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new));
+
 void csmvertex_destruye(struct csmvertex_t **vertex);
 
 

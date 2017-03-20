@@ -3,6 +3,7 @@
 #include "csmedge.inl"
 #include "csmedge.tli"
 
+#include "csmhashtb.inl"
 #include "csmhedge.inl"
 
 #include "cyassert.h"
@@ -49,6 +50,44 @@ struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
     he2 = NULL;
     
     return i_crea(id, he1, he2);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(struct csmedge_t *, i_duplicate_edge, (unsigned long *id_nuevo_elemento))
+{
+    unsigned long id;
+    struct csmhedge_t *he1, *he2;
+    
+    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+
+    he1 = NULL;
+    he2 = NULL;
+    
+    return i_crea(id, he1, he2);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+struct csmedge_t *csmedge_duplicate(
+                        const struct csmedge_t *edge,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
+{
+    struct csmedge_t *new_edge;
+    
+    new_edge = i_duplicate_edge(id_nuevo_elemento);
+    assert_no_null(new_edge);
+    assert(new_edge->he1 == NULL);
+    assert(new_edge->he2 == NULL);
+    
+    new_edge->he1 = csmhashtb_ptr_for_id(relation_shedges_old_to_new, csmhedge_id(edge->he1), csmhedge_t);
+    csmhedge_set_edge(new_edge->he1, new_edge);
+    
+    new_edge->he2 = csmhashtb_ptr_for_id(relation_shedges_old_to_new, csmhedge_id(edge->he2), csmhedge_t);
+    csmhedge_set_edge(new_edge->he2, new_edge);
+    
+    return new_edge;
 }
 
 // --------------------------------------------------------------------------------------------------------------

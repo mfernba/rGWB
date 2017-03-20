@@ -158,7 +158,7 @@ static void i_test_crea_hexaedro(void)
 {
     struct csmsolid_t *solido;
     unsigned long id_nuevo_elemento;
-    struct csmhedge_t *hei, *he1, *he2, *he3, *he4_pos, *he4;
+    struct csmhedge_t *hei, *he1, *he2, *he3, *he4;
     struct csmhedge_t *he1_top, *he2_top, *he3_top, *he4_top;
     struct csmhedge_t *he1_top_next, *he1_top_next_next, *he1_top_next_next_next;
     
@@ -212,6 +212,66 @@ static void i_test_crea_hexaedro(void)
     csmsolid_print_debug(solido, CIERTO);
     
     csmsolid_destruye(&solido);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_crea_hexaedro_y_copia(void)
+{
+    struct csmsolid_t *solido;
+    unsigned long id_nuevo_elemento;
+    struct csmhedge_t *hei, *he1, *he2, *he3, *he4;
+    struct csmhedge_t *he1_top, *he2_top, *he3_top, *he4_top;
+    struct csmhedge_t *he1_top_next, *he1_top_next_next, *he1_top_next_next_next;
+    struct csmsolid_t *copia_solido;
+    
+    id_nuevo_elemento = 0;
+    
+    solido = csmeuler_mvfs(0., 0., 0., &hei);
+    
+    // Cara inferior...
+    {
+        csmeuler_lmev_strut_edge(hei, 10.,  0., 0., &he1);
+        csmeuler_lmev_strut_edge(he1, 10., 10., 0., &he2);
+        csmeuler_lmev_strut_edge(he2,  0., 10., 0., &he3);
+        csmeuler_lmef(hei, he3, NULL, &he4, NULL);
+        assert(csmopbas_mate(he1) == hei);
+    }
+
+    // Aristas verticales...
+    {
+        csmeuler_lmev_strut_edge(he1, 10.,  0., 10., &he1_top);
+        csmeuler_lmev_strut_edge(he2, 10., 10., 10., &he2_top);
+        csmeuler_lmev_strut_edge(he3,  0., 10., 10., &he3_top);
+        csmeuler_lmev_strut_edge(he4,  0.,  0., 10., &he4_top);
+        
+        assert(csmhedge_loop(he1_top) == csmhedge_loop(he2_top));
+        assert(csmhedge_loop(he1_top) == csmhedge_loop(he3_top));
+        assert(csmhedge_loop(he1_top) == csmhedge_loop(he4_top));
+    }
+
+    csmeuler_lmef(he4_top, he3_top, NULL, NULL, NULL);
+    csmeuler_lmef(he3_top, he2_top, NULL, NULL, NULL);
+    csmeuler_lmef(he2_top, he1_top, NULL, NULL, NULL);
+
+    //csmeuler_lmef(he1_top, he4_top, &id_nuevo_elemento, NULL, NULL, NULL);
+    
+    he1_top_next = csmhedge_next(he1_top);
+    assert(he1_top_next == he1);
+    
+    he1_top_next_next = csmhedge_next(he1_top_next);
+    he1_top_next_next_next = csmhedge_next(he1_top_next_next);
+    assert(csmhedge_vertex(he1_top_next_next_next) == csmhedge_vertex(he4_top));
+
+    csmeuler_lmef(he1_top, he1_top_next_next_next, NULL, NULL, NULL);
+    
+    csmsolid_print_debug(solido, CIERTO);
+    
+    copia_solido = csmsolid_duplicate(solido);
+    csmsolid_print_debug(copia_solido, CIERTO);
+    
+    csmsolid_destruye(&solido);
+    csmsolid_destruye(&copia_solido);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -281,6 +341,7 @@ void csmtest_test(void)
     i_test_crea_lamina();
     i_test_crea_lamina_con_hueco();
     i_test_crea_hexaedro();
+    i_test_crea_hexaedro_y_copia();
     i_test_tabla_hash();
 }
 

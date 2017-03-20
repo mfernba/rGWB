@@ -160,6 +160,29 @@ void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct cs
 
 // ------------------------------------------------------------------------------------------
 
+void csmnode_nousar_insert_node2_after_node1(struct csmnode_t *node1, struct csmnode_t *node2, const char *tipo_clase_derivada)
+{
+    assert_no_null(node1);
+    assert_no_null(node2);
+    assert(cad_cadenas_iguales(node1->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+    assert(cad_cadenas_iguales(node2->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+
+    csmnode_nousar_remove_from_own_list(node2, tipo_clase_derivada);
+    
+    if (node1->next != NULL)
+    {
+        assert(node1->next->prev == node1);
+
+        i_set_ptr_next_or_prev(&node2->next, node1->next);
+        i_set_ptr_next_or_prev(&node1->next->prev, node2);
+    }
+
+    i_set_ptr_next_or_prev(&node1->next, node2);
+    i_set_ptr_next_or_prev(&node2->prev, node1);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived, const char *tipo_clase_derivada)
 {
     struct csmnode_derivada_t *head_node_derived_loc;

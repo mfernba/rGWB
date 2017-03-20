@@ -4,6 +4,13 @@
 
 CONSTRUCTOR(struct csmface_t *, csmface_crea, (struct csmsolid_t *solido, unsigned long *id_nuevo_elemento));
 
+CONSTRUCTOR(struct csmface_t *, csmface_duplicate, (
+                        struct csmface_t *face,
+                        struct csmsolid_t *fsolid,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
+
 void csmface_destruye(struct csmface_t **face);
 
 unsigned long csmface_id(const struct csmface_t *face);

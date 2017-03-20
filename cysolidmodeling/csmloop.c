@@ -3,6 +3,7 @@
 #include "csmloop.inl"
 
 #include "csmnode.inl"
+#include "csmhedge.inl"
 
 #include "cyassert.h"
 #include "cypeid.h"
@@ -66,12 +67,66 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
 
 // --------------------------------------------------------------------------------------------------------------
 
-CYBOOL csmloop_ids_iguales(const struct csmloop_t *loop1, const struct csmloop_t *loop2)
+CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lface, unsigned long *id_nuevo_elemento))
 {
-    assert_no_null(loop1);
-    assert_no_null(loop2);
+    unsigned long id;
+    struct csmhedge_t *ledge;
     
-    return ES_CIERTO(loop1->clase_base.id == loop2->clase_base.id);
+    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    
+    ledge = NULL;
+    
+    return i_crea(id, ledge, lface);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+struct csmloop_t *csmloop_duplicate(
+                        const struct csmloop_t *loop,
+                        struct csmface_t *lface,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
+{
+    struct csmloop_t *new_loop;
+    register struct csmhedge_t *iterator, *last_hedge;
+    unsigned long num_iteraciones;
+    
+    assert_no_null(loop);
+    
+    new_loop = i_duplicate_loop(lface, id_nuevo_elemento);
+    assert_no_null(new_loop);
+    
+    iterator = loop->ledge;
+    last_hedge = NULL;
+    num_iteraciones = 0;
+    
+    do
+    {
+        struct csmhedge_t *iterator_copy;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        iterator_copy = csmhedge_duplicate(iterator, new_loop, id_nuevo_elemento, relation_svertexs_old_to_new, relation_shedges_old_to_new);
+        
+        if (new_loop->ledge == NULL)
+            new_loop->ledge = iterator_copy;
+        else
+            csmnode_insert_node2_after_node1(last_hedge, iterator_copy, csmhedge_t);
+        
+        last_hedge = iterator_copy;
+        iterator = csmhedge_next(iterator);
+    }
+    while (iterator != loop->ledge);
+
+    assert(csmhedge_next(last_hedge) == NULL);
+    csmhedge_set_next(last_hedge, new_loop->ledge);
+
+    assert(csmhedge_prev(new_loop->ledge) == NULL);
+    csmhedge_set_prev(new_loop->ledge, last_hedge);
+    
+    return new_loop;
 }
 
 // --------------------------------------------------------------------------------------------------------------

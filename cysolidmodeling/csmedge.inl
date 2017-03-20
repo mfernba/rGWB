@@ -4,6 +4,11 @@
 
 CONSTRUCTOR(struct csmedge_t *, csmedge_crea, (unsigned long *id_nuevo_elemento));
 
+CONSTRUCTOR(struct csmedge_t *, csmedge_duplicate, (
+                        const struct csmedge_t *edge,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
+
 void csmedge_destruye(struct csmedge_t **edge);
 
 unsigned long csmedge_id(const struct csmedge_t *edge);

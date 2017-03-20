@@ -4,8 +4,13 @@
 
 CONSTRUCTOR(struct csmloop_t *, csmloop_crea, (struct csmface_t *face, unsigned long *id_nuevo_elemento));
 
+CONSTRUCTOR(struct csmloop_t *, csmloop_duplicate, (
+                        const struct csmloop_t *loop,
+                        struct csmface_t *lface,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
-CYBOOL csmloop_ids_iguales(const struct csmloop_t *loop1, const struct csmloop_t *loop2);
 
 // Topología...
 

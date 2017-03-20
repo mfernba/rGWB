@@ -63,6 +63,139 @@ struct csmsolid_t *csmsolid_crea_vacio(void)
 
 // ----------------------------------------------------------------------------------------------------
 
+CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (unsigned long id_nuevo_elemento))
+{
+    struct csmhashtb(csmface_t) *sfaces;
+    struct csmhashtb(csmedge_t) *sedges;
+    struct csmhashtb(csmvertex_t) *svertexs;
+    
+    sfaces = csmhashtb_create_empty(csmface_t);
+    sedges = csmhashtb_create_empty(csmedge_t);
+    svertexs = csmhashtb_create_empty(csmvertex_t);
+    
+    return i_crea(id_nuevo_elemento, &sfaces, &sedges, &svertexs);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_duplicate_vertexs_table(
+                        const struct csmhashtb(csmvertex_t) *svertexs,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmvertex_t) *new_svertexs,
+                        struct csmhashtb(csmvertex_t) **relation_svertexs_old_to_new)
+{
+    struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new_loc;
+    struct csmhashtb_iterator(csmvertex_t) *iterator;
+    
+    assert_no_null(relation_svertexs_old_to_new);
+    
+    relation_svertexs_old_to_new_loc = csmhashtb_create_empty(csmvertex_t);
+    
+    iterator = csmhashtb_create_iterator(svertexs, csmvertex_t);
+    
+    while (csmhashtb_has_next(iterator, csmvertex_t) == CIERTO)
+    {
+        struct csmvertex_t *old_vertex;
+        struct csmvertex_t *new_vertex;
+        
+        csmhashtb_next_pair(iterator, NULL, &old_vertex, csmvertex_t);
+        
+        new_vertex = csmvertex_duplicate(old_vertex, id_nuevo_elemento, relation_svertexs_old_to_new_loc);
+        csmhashtb_add_item(new_svertexs, csmvertex_id(new_vertex), new_vertex, csmvertex_t);
+    }
+    
+    *relation_svertexs_old_to_new = relation_svertexs_old_to_new_loc;
+    
+    csmhashtb_free_iterator(&iterator, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_duplicate_faces_table(
+                        struct csmhashtb(csmface_t) *sfaces,
+                        struct csmsolid_t *fsolid,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmface_t) *new_sfaces,
+                        struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
+                        struct csmhashtb(csmhedge_t) **relation_shedges_old_to_new)
+{
+    struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new_loc;
+    struct csmhashtb_iterator(csmface_t) *iterator;
+    
+    assert_no_null(relation_svertexs_old_to_new);
+    
+    relation_shedges_old_to_new_loc = csmhashtb_create_empty(csmhedge_t);
+    
+    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *old_face;
+        struct csmface_t *new_face;
+        
+        csmhashtb_next_pair(iterator, NULL, &old_face, csmface_t);
+        
+        new_face = csmface_duplicate(old_face, fsolid, id_nuevo_elemento, relation_svertexs_old_to_new, relation_shedges_old_to_new_loc);
+        csmhashtb_add_item(new_sfaces, csmface_id(new_face), new_face, csmface_t);
+    }
+    
+    *relation_shedges_old_to_new = relation_shedges_old_to_new_loc;
+    
+    csmhashtb_free_iterator(&iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_duplicate_edges_table(
+                        struct csmhashtb(csmedge_t) *sedges,
+                        struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new,
+                        unsigned long *id_nuevo_elemento,
+                        struct csmhashtb(csmedge_t) *new_sedges)
+{
+    struct csmhashtb_iterator(csmedge_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    
+    while (csmhashtb_has_next(iterator, csmedge_t) == CIERTO)
+    {
+        struct csmedge_t *old_edge;
+        struct csmedge_t *new_edge;
+        
+        csmhashtb_next_pair(iterator, NULL, &old_edge, csmedge_t);
+        
+        new_edge = csmedge_duplicate(old_edge, id_nuevo_elemento, relation_shedges_old_to_new);
+        csmhashtb_add_item(new_sedges, csmedge_id(new_edge), new_edge, csmedge_t);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmsolid_t *csmsolid_duplicate(const struct csmsolid_t *solid)
+{
+    struct csmsolid_t *new_solid;
+    struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new;
+    struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new;
+    
+    assert_no_null(solid);
+    
+    new_solid = i_duplicate_solid(solid->id_nuevo_elemento);
+    assert_no_null(new_solid);
+
+    i_duplicate_vertexs_table(solid->svertexs, &new_solid->id_nuevo_elemento, new_solid->svertexs, &relation_svertexs_old_to_new);
+    i_duplicate_faces_table(solid->sfaces, new_solid, &new_solid->id_nuevo_elemento, new_solid->sfaces, relation_svertexs_old_to_new, &relation_shedges_old_to_new);
+    i_duplicate_edges_table(solid->sedges, relation_shedges_old_to_new, &new_solid->id_nuevo_elemento, new_solid->sedges);
+    
+    csmhashtb_free(&relation_svertexs_old_to_new, csmvertex_t, NULL);
+    csmhashtb_free(&relation_shedges_old_to_new, csmhedge_t, NULL);
+    
+    
+    return new_solid;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_destruye(struct csmsolid_t **solido)
 {
     assert_no_null(solido);
