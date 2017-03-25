@@ -251,7 +251,7 @@ static void i_create_lateral_faces(
         hedge_next_next = csmhedge_next(csmhedge_next(scan));
         
         csmeuler_lmef(hedge_prev, hedge_next_next, NULL, NULL, NULL);
-        csmsolid_print_debug(solid, CIERTO);
+        //csmsolid_print_debug(solid, CIERTO);
         
         scan = csmhedge_next(hedge_next_next);
     }
@@ -303,7 +303,7 @@ static void i_append_holes_to_solid(
     
     original_ring_loop = csmhedge_loop(he_from_ring);
     
-    csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CIERTO);
     
     i_append_loop_from_hedge(
                         he_from_ring,
@@ -320,7 +320,7 @@ static void i_append_holes_to_solid(
     csmeuler_lkfmrh(bottom_face, &top_hole_face_loc);
     csmeuler_lmfkrh(original_ring_loop, &top_hole_face_loc);
     
-    csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CIERTO);
 
     i_create_hedges_from_bottom_to_top_face(
                         shape2d_top,
@@ -330,15 +330,15 @@ static void i_append_holes_to_solid(
                         hedges_from_vertexs_bottom_face,
                         &hedges_from_vertexs_bottom_to_top_face);
 
-    csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CIERTO);
     
     i_create_lateral_faces(hedges_from_vertexs_bottom_to_top_face, solid);
  
-    csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CIERTO);
     
     csmeuler_lkfmrh(top_face, &top_hole_face_loc);
     
-    csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CIERTO);
 
     arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
     arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_to_top_face, NULL, csmhedge_t);
@@ -425,7 +425,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
     
     i_create_lateral_faces(hedges_from_vertexs_bottom_to_top_face, solid);
 
-    csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CIERTO);
     
     arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
     arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_to_top_face, NULL, csmhedge_t);
