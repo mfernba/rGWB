@@ -5,6 +5,13 @@
 //  Created by Manuel Fernández on 22/3/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.
 //
+//  csmsweepshape_create_solid_from_shape creates a new solid given top and bottom shapes.
+//  Shapes must have the same number of polygons and points per polygon.
+//
+//  Sweep its made in such way that the original face becomes the new top face.
+//  Shapes can have holes;
+//
+
 
 #include "csmsweepshape.h"
 
@@ -306,6 +313,10 @@ static void i_append_holes_to_solid(
                         &top_hole_face_loc,
                         &hedges_from_vertexs_bottom_face);
 
+    // Sweep is made in such way that the old face contains the extruded hedges,
+    // because hole is initially made in the bottom face, I exchange the generated face and the
+    // old ring in order to make the extruded hedges appear in the new face, which will be part of
+    // the top face.
     csmeuler_lkfmrh(bottom_face, &top_hole_face_loc);
     csmeuler_lmfkrh(original_ring_loop, &top_hole_face_loc);
     
