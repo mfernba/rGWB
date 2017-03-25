@@ -36,7 +36,7 @@ void csmeuler_lkfmrh(struct csmface_t *face_to_add_loop, struct csmface_t **face
         num_iteraciones++;
         
         next_loop = csmloop_next(loop_iterator);
-        csmface_add_loop_while_removing_from_old(face_to_add_loop, next_loop);
+        csmface_add_loop_while_removing_from_old(face_to_add_loop, loop_iterator);
         
         loop_iterator = next_loop;
     }

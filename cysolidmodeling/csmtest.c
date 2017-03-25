@@ -18,9 +18,12 @@
 #include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmhashtb.inl"
+#include "csmsweepshape.h"
 
 #include "cyassert.h"
 #include "a_pto3d.h"
+#include <geomcomp/gccontorno.h>
+#include <geomcomp/gcelem2d.h>
 
 // ------------------------------------------------------------------------------------------
 
@@ -334,6 +337,44 @@ static void i_test_tabla_hash(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_solid_from_shape2D(void)
+{
+    struct gccontorno_t *shape2d;
+    struct csmsolid_t *solid;
+    
+    shape2d = gcelem2d_contorno_rectangular(0.3, 0.3);
+    
+    solid = csmsweepshape_create_solid_from_shape(
+                                shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                                shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+    
+    csmsolid_print_debug(solid, CIERTO);
+    
+    gccontorno_destruye(&shape2d);
+    csmsolid_destruye(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_solid_from_shape2D_with_hole(void)
+{
+    struct gccontorno_t *shape2d;
+    struct csmsolid_t *solid;
+    
+    shape2d = gcelem2d_contorno_rectangular_hueco(0.6, 0.6, 0.3, 0.3);
+    
+    solid = csmsweepshape_create_solid_from_shape(
+                                shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                                shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+    
+    csmsolid_print_debug(solid, CIERTO);
+    
+    gccontorno_destruye(&shape2d);
+    csmsolid_destruye(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     i_test_crea_destruye_solido_vacio();
@@ -343,6 +384,8 @@ void csmtest_test(void)
     i_test_crea_hexaedro();
     i_test_crea_hexaedro_y_copia();
     i_test_tabla_hash();
+    i_test_solid_from_shape2D();
+    i_test_solid_from_shape2D_with_hole();
 }
 
 

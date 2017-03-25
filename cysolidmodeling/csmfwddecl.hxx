@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 
 #define CYBOOL char
 #define CIERTO 1
@@ -20,6 +21,8 @@
 #define ES_CIERTO(condicion) (condicion) ? CIERTO: FALSO
 
 #define ASIGNA_OPC(a, b) if ((a) != NULL) *(a) = (b)
+
+#define DLL_CYSOLIDMODELING
 
 struct csmnode_t;
 struct csmvertex_t;
@@ -39,5 +42,8 @@ struct csmhashtb(csmface_t);
 struct csmhashtb(csmedge_t);
 struct csmhashtb(csmvertex_t);
 struct csmhashtb(csmhedge_t);
+
+struct gccontorno_t;
+
 
 #endif /* csmfwddecl_hxx */

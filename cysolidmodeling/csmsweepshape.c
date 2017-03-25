@@ -19,6 +19,7 @@
 #include "csmeuler_lmef.inl"
 #include "csmeuler_lkemr.inl"
 #include "csmeuler_lkfmrh.inl"
+#include "csmeuler_lmfkrh.inl"
 
 #include "a_punter.h"
 #include "cont2d.h"
@@ -272,6 +273,7 @@ static void i_append_holes_to_solid(
     struct csmloop_t *bottom_face_outer_loop;
     struct csmhedge_t *ledge;
     struct csmhedge_t *he_from_vertex, *he_to_vertex, *he_from_ring;
+    struct csmloop_t *original_ring_loop;
     struct csmface_t *top_hole_face_loc;
     ArrEstructura(csmhedge_t) *hedges_from_vertexs_bottom_face;
     ArrEstructura(csmhedge_t) *hedges_from_vertexs_bottom_to_top_face;
@@ -292,6 +294,8 @@ static void i_append_holes_to_solid(
     csmeuler_lmev(ledge, ledge, x, y, z, NULL, NULL, &he_from_vertex, &he_to_vertex);
     csmeuler_lkemr(&he_to_vertex, &he_from_vertex, NULL, &he_from_ring);
     
+    original_ring_loop = csmhedge_loop(he_from_ring);
+    
     csmsolid_print_debug(solid, CIERTO);
     
     i_append_loop_from_hedge(
@@ -301,6 +305,9 @@ static void i_append_holes_to_solid(
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
                         &top_hole_face_loc,
                         &hedges_from_vertexs_bottom_face);
+
+    csmeuler_lkfmrh(bottom_face, &top_hole_face_loc);
+    csmeuler_lmfkrh(original_ring_loop, &top_hole_face_loc);
     
     csmsolid_print_debug(solid, CIERTO);
 
@@ -320,6 +327,8 @@ static void i_append_holes_to_solid(
     
     csmeuler_lkfmrh(top_face, &top_hole_face_loc);
     
+    csmsolid_print_debug(solid, CIERTO);
+
     arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
     arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_to_top_face, NULL, csmhedge_t);
 }
@@ -367,28 +376,28 @@ static void i_append_holes_to_solid_if_proceed(
 
 // --------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsweepshape_create_solid_from_shape(
+CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes, (
                         const struct gccontorno_t *shape2d_top,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
                         const struct gccontorno_t *shape2d_bot,
                         double Xo_bot, double Yo_bot, double Zo_bot,
-                        double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot)
+                        double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot,
+                        struct csmface_t **bottom_face, struct csmface_t **top_face))
 {
     struct csmsolid_t *solid;
     unsigned long idx_outer_loop;
-    struct csmface_t *bottom_face, *top_face;
     ArrEstructura(csmhedge_t) *hedges_from_vertexs_bottom_face;
     ArrEstructura(csmhedge_t) *hedges_from_vertexs_bottom_to_top_face;
     
     i_check_compatibility_between_shapes(shape2d_top, shape2d_bot, &idx_outer_loop);
-    
+
     solid = i_create_solid_from_face(
                         shape2d_bot,
                         idx_outer_loop,
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
-                        &bottom_face, &top_face,
+                        bottom_face, top_face,
                         &hedges_from_vertexs_bottom_face);
     
     //csmsolid_print_debug(solid, CIERTO);
@@ -407,6 +416,34 @@ struct csmsolid_t *csmsweepshape_create_solid_from_shape(
 
     csmsolid_print_debug(solid, CIERTO);
     
+    arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
+    arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_to_top_face, NULL, csmhedge_t);
+    
+    return solid;
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsolid_t *csmsweepshape_create_solid_from_shape(
+                        const struct gccontorno_t *shape2d_top,
+                        double Xo_top, double Yo_top, double Zo_top,
+                        double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
+                        const struct gccontorno_t *shape2d_bot,
+                        double Xo_bot, double Yo_bot, double Zo_bot,
+                        double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot)
+{
+    struct csmsolid_t *solid;
+    struct csmface_t *bottom_face, *top_face;
+    
+    solid = i_create_solid_from_shape_without_holes(
+                        shape2d_top,
+                        Xo_top, Yo_top, Zo_top,
+                        Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
+                        shape2d_bot,
+                        Xo_bot, Yo_bot, Zo_bot,
+                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
+                        &bottom_face, &top_face);
+    
     i_append_holes_to_solid_if_proceed(
                         solid,
                         top_face, bottom_face,
@@ -417,11 +454,6 @@ struct csmsolid_t *csmsweepshape_create_solid_from_shape(
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
 
-    csmsolid_print_debug(solid, CIERTO);
-    
-    arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
-    arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_to_top_face, NULL, csmhedge_t);
-    
     return solid;
 }
 

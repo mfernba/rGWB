@@ -305,11 +305,11 @@ static void i_edge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_
     he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
     
     edge_node = CSMNODE(edge);
-    fprintf(stdout, "\tEdge %lu", csmnode_id(edge_node));
+    fprintf(stdout, "\tEdge %5lu", csmnode_id(edge_node));
     
     if (he1 != NULL)
     {
-        fprintf(stdout, "\tHe1 %lu [%d]", csmnode_id(CSMNODE(he1)), ES_CIERTO(csmhedge_edge(he1) == edge));
+        fprintf(stdout, "\tHe1 %5lu [%d]", csmnode_id(CSMNODE(he1)), ES_CIERTO(csmhedge_edge(he1) == edge));
         
         if (assert_si_no_es_integro == CIERTO)
             assert(csmhedge_edge(he1) == edge);
@@ -321,7 +321,7 @@ static void i_edge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_
     
     if (he2 != NULL)
     {
-        fprintf(stdout, "\tHe2 %lu [%d]", csmnode_id(CSMNODE(he2)), ES_CIERTO(csmhedge_edge(he2) == edge));
+        fprintf(stdout, "\tHe2 %5lu [%d]", csmnode_id(CSMNODE(he2)), ES_CIERTO(csmhedge_edge(he2) == edge));
         
         if (assert_si_no_es_integro == CIERTO)
             assert(csmhedge_edge(he2) == edge);
@@ -374,7 +374,7 @@ static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CYBOOL assert_
     vertex_node = CSMNODE(vertex);
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
     
-    fprintf(stdout, "\tVertex %4lu\t%6.3lf\t%6.3lf\t%6.3lf ", csmnode_id(vertex_node), x, y, z);
+    fprintf(stdout, "\tVertex %6lu\t%6.3lf\t%6.3lf\t%6.3lf ", csmnode_id(vertex_node), x, y, z);
     
     hedge = csmvertex_hedge(vertex);
     

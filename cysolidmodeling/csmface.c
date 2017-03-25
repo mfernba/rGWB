@@ -229,7 +229,6 @@ void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csm
     struct csmface_t *loop_old_face;
     
     assert_no_null(face);
-    assert_no_null(face->floops);
     assert_no_null(loop);
     
     loop_old_face = csmloop_lface(loop);
@@ -244,8 +243,18 @@ void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csm
     
     csmloop_set_lface(loop, face);
     
-    csmnode_insert_node2_before_node1(face->floops, loop, csmloop_t);
-    face->floops = loop;
+    if (face->floops == NULL)
+    {
+        csmnode_remove_from_own_list(loop, csmloop_t);
+        
+        face->floops = loop;
+        face->flout = loop;
+    }
+    else
+    {
+        csmnode_insert_node2_before_node1(face->floops, loop, csmloop_t);
+        face->floops = loop;
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
