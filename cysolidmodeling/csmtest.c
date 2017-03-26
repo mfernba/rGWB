@@ -18,7 +18,7 @@
 #include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmhashtb.inl"
-#include "csmsweepshape.h"
+#include "csmsweep.h"
 
 #include "cyassert.h"
 #include "a_pto3d.h"
@@ -363,7 +363,7 @@ static void i_test_solid_from_shape2D_with_hole(void)
     
     shape2d = gcelem2d_contorno_rectangular_hueco(0.6, 0.6, 0.3, 0.3);
     
-    solid = csmsweepshape_create_solid_from_shape(
+    solid = csmsweep_create_solid_from_shape(
                                 shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
                                 shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     
