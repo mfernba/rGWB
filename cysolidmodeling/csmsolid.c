@@ -333,7 +333,8 @@ static void i_nousar_move_elements_between_tables(
         csmhashtb_add_item(table_destination, item_id, item, i_item_t);
     }
     
-    csmhashtb_clear(table_origin, i_item_t, NULL);    
+    csmhashtb_clear(table_origin, i_item_t, NULL);
+    csmhashtb_free_iterator(&iterator, i_item_t);
 }
 
 #define i_move_elements_between_tables(\
@@ -355,10 +356,31 @@ static void i_nousar_move_elements_between_tables(
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_assign_faces_to_solid(struct csmhashtb(csmface_t) *sfaces, struct csmsolid_t *solid)
+{
+    struct csmhashtb_iterator(csmface_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        csmface_set_fsolid(face, solid);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to_merge)
 {
     assert_no_null(solid);
     assert_no_null(solid_to_merge);
+
+    i_assign_faces_to_solid(solid_to_merge->sfaces, solid);
     
     i_move_elements_between_tables(
                         solid_to_merge->sfaces,
