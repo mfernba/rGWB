@@ -14,6 +14,8 @@ void csmvertex_destruye(struct csmvertex_t **vertex);
 
 unsigned long csmvertex_id(const struct csmvertex_t *vertex);
 
+void csmvertex_reassign_id(struct csmvertex_t *vertex, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
+
 
 // Topología...
 

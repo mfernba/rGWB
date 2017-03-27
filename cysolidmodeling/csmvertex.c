@@ -106,6 +106,14 @@ unsigned long csmvertex_id(const struct csmvertex_t *vertex)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmvertex_reassign_id(struct csmvertex_t *vertex, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
+{
+    assert_no_null(vertex);
+    vertex->id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 struct csmhedge_t *csmvertex_hedge(struct csmvertex_t *vertex)
 {
     assert_no_null(vertex);

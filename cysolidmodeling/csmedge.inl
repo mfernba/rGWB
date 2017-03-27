@@ -13,6 +13,8 @@ void csmedge_destruye(struct csmedge_t **edge);
 
 unsigned long csmedge_id(const struct csmedge_t *edge);
 
+void csmedge_reassign_id(struct csmedge_t *edge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
+
 
 // Topología...
 

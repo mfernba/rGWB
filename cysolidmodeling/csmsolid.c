@@ -22,6 +22,12 @@
 #include "cypeid.h"
 #include "cypespy.h"
 
+struct i_item_t;
+struct csmhashtb(i_item_t);
+
+typedef void (*i_FPtr_reassign_id)(struct i_item_t *item, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
+#define i_CHECK_FUNC_REASSIGN_ID(function, type) ((void(*)(struct type *, unsigned long *, unsigned long *))function == function)
+
 // ----------------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
@@ -292,6 +298,88 @@ void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vert
 
     csmhashtb_remove_item(solido->svertexs, csmvertex_id(*vertex), csmvertex_t);
     csmvertex_destruye(vertex);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_face)
+{
+    assert_no_null(solid);
+    return csmhashtb_ptr_for_id(solid->sfaces, id_face, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_nousar_move_elements_between_tables(
+                        struct csmhashtb(i_item_t) *table_origin,
+                        unsigned long *id_nuevo_elemento,
+                        i_FPtr_reassign_id func_reassign_id,
+                        struct csmhashtb(i_item_t) *table_destination)
+{
+    struct csmhashtb_iterator(i_item_t) *iterator;
+    
+    assert_no_null(func_reassign_id);
+    
+    iterator = csmhashtb_create_iterator(table_origin, i_item_t);
+    
+    while (csmhashtb_has_next(iterator, i_item_t) == CIERTO)
+    {
+        unsigned long item_id;
+        struct i_item_t *item;
+        
+        csmhashtb_next_pair(iterator, NULL, &item, i_item_t);
+        func_reassign_id(item, id_nuevo_elemento, &item_id);
+        
+        csmhashtb_add_item(table_destination, item_id, item, i_item_t);
+    }
+    
+    csmhashtb_clear(table_origin, i_item_t, NULL);    
+}
+
+#define i_move_elements_between_tables(\
+                        table_origin,\
+                        id_nuevo_elemento,\
+                        func_reassign_id,\
+                        table_destination,\
+                        type)\
+(\
+    ((struct csmhashtb(type) *)table_origin == table_origin),\
+    ((struct csmhashtb(type) *)table_destination == table_destination),\
+    i_CHECK_FUNC_REASSIGN_ID(func_reassign_id, type),\
+    i_nousar_move_elements_between_tables(\
+                        (struct csmhashtb(i_item_t) *)table_origin,\
+                        id_nuevo_elemento,\
+                        (i_FPtr_reassign_id)func_reassign_id,\
+                        (struct csmhashtb(i_item_t) *)table_destination)\
+)
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to_merge)
+{
+    assert_no_null(solid);
+    assert_no_null(solid_to_merge);
+    
+    i_move_elements_between_tables(
+                        solid_to_merge->sfaces,
+                        &solid->id_nuevo_elemento,
+                        csmface_reassign_id,
+                        solid->sfaces,
+                        csmface_t);
+    
+    i_move_elements_between_tables(
+                        solid_to_merge->sedges,
+                        &solid->id_nuevo_elemento,
+                        csmedge_reassign_id,
+                        solid->sedges,
+                        csmedge_t);
+    
+    i_move_elements_between_tables(
+                        solid_to_merge->svertexs,
+                        &solid->id_nuevo_elemento,
+                        csmvertex_reassign_id,
+                        solid->svertexs,
+                        csmvertex_t);
 }
 
 // ----------------------------------------------------------------------------------------------------

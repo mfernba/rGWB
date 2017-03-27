@@ -15,6 +15,8 @@ void csmface_destruye(struct csmface_t **face);
 
 unsigned long csmface_id(const struct csmface_t *face);
 
+void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
+
 
 // Topología...
 

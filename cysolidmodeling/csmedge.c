@@ -108,6 +108,14 @@ unsigned long csmedge_id(const struct csmedge_t *edge)
     return edge->id;
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+void csmedge_reassign_id(struct csmedge_t *edge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
+{
+    assert_no_null(edge);
+    edge->id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
+}
+
 // --------------------------------------------------------------------------------------------------------------
 
 struct csmhedge_t *csmedge_hedge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lado)

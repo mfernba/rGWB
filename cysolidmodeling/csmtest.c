@@ -344,7 +344,7 @@ static void i_test_solid_from_shape2D(void)
     
     shape2d = gcelem2d_contorno_rectangular(0.3, 0.3);
     
-    solid = csmsweepshape_create_solid_from_shape(
+    solid = csmsweep_create_solid_from_shape(
                                 shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
                                 shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     
