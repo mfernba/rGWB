@@ -30,3 +30,5 @@ void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge);
 void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, double *y, double *z);
 
 void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, double z);
+
+CYBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, double epsilon);

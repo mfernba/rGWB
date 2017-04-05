@@ -17,6 +17,7 @@
 #include "csmeuler_lkev.inl"
 #include "csmloop.inl"
 #include "csmopbas.inl"
+#include "csmsolid.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 
@@ -141,6 +142,8 @@ static CYBOOL i_is_possible_to_merge_faces(
                         is_possible_to_merge_faces = FALSO;
                     else if (iterator_hedge1 != lhedge_face1 && iterator_hedge2 == lhedge_face2)
                         is_possible_to_merge_faces = FALSO;
+                    else if (iterator_hedge1 == lhedge_face1 && iterator_hedge2 == lhedge_face2)
+                        break;
                 }
                 
             } while(is_possible_to_merge_faces == CIERTO);
@@ -192,7 +195,7 @@ void csmloopglue_merge_faces(struct csmface_t *face1, struct csmface_t **face2)
     csmeuler_lkfmrh(face1, face2);
     assert(csmloop_lface(csmhedge_loop(common_hedge_face2)) == face1);
     
-    csmeuler_lmekr(common_hedge_face1, common_hedge_face2, &he_prev_common_edge_face1, &he_prev_common_edge_face2);
+    csmeuler_lmekr(common_hedge_face1, common_hedge_face2, &he_prev_common_edge_face2, &he_prev_common_edge_face1);
     csmeuler_lkev(&he_prev_common_edge_face1, &he_prev_common_edge_face2, NULL, &he1_next, NULL, &he2_next);
     assert(he1_next == common_hedge_face1);
     assert(he2_next == common_hedge_face2);
@@ -200,6 +203,8 @@ void csmloopglue_merge_faces(struct csmface_t *face1, struct csmface_t **face2)
     he_iterator = common_hedge_face1;
     num_iters = 0;
     
+    //csmsolid_print_debug(csmface_fsolid(face1), CIERTO);
+
     while (csmhedge_next(he_iterator) != common_hedge_face2)
     {
         struct csmhedge_t *he_next, *he_prev;
@@ -214,15 +219,19 @@ void csmloopglue_merge_faces(struct csmface_t *face1, struct csmface_t **face2)
         csmeuler_lmef(he_next, he_prev, NULL, NULL, NULL);
         
         he_iterator_next = csmhedge_next(he_iterator);
-        he_iterator_next_mate = csmopbas_mate(he_iterator);
+        he_iterator_next_mate = csmopbas_mate(he_iterator_next);
         csmeuler_lkev(&he_iterator_next, &he_iterator_next_mate, NULL, NULL, NULL, NULL);
         
         he_iterator_mate = csmopbas_mate(he_iterator);
         csmeuler_lkef(&he_iterator_mate, &he_iterator);
+
+        //csmsolid_print_debug(csmopbas_solid_from_hedge(he_iterator), CIERTO);
         
         he_iterator = he_next;
     }
 
+    //csmsolid_print_debug(csmopbas_solid_from_hedge(he_iterator), CIERTO);
+    
     he_iterator_mate = csmopbas_mate(he_iterator);
     csmeuler_lkef(&he_iterator_mate, &he_iterator);
 }

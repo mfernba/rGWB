@@ -281,3 +281,24 @@ void csmface_remove_loop(struct csmface_t *face, struct csmloop_t **loop)
     
     csmnode_free_node_in_list(loop, csmloop_t);
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmface_has_holes(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    
+    if (face->floops != NULL && csmloop_next(face->floops) != NULL)
+        return CIERTO;
+    else
+        return FALSO;
+}
+
+
+
+
+
+
+
+
+

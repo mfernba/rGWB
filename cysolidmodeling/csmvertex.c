@@ -3,6 +3,7 @@
 #include "csmvertex.inl"
 
 #include "csmhashtb.inl"
+#include "csmmath.inl"
 
 #include "cyassert.h"
 #include "cypeid.h"
@@ -152,3 +153,14 @@ void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, d
     vertex->y = y;
     vertex->z = z;
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, double epsilon)
+{
+    assert_no_null(vertex1);
+    assert_no_null(vertex2);
+    
+    return csmmath_equal_coords(vertex1->x, vertex1->y, vertex1->z, vertex2->x, vertex2->y, vertex2->z, epsilon);
+}
+

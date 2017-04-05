@@ -148,7 +148,8 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
         if (csmvertex_hedge(vertex) == hedge_loc)
             csmvertex_set_hedge(vertex, NULL);
         
-        csmloop_set_ledge(loop, hedge_prev);
+        if (loop != NULL)
+            csmloop_set_ledge(loop, hedge_prev);
         
         csmnode_free_node_in_list(&hedge_loc, csmhedge_t);
     }

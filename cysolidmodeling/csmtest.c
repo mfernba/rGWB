@@ -18,6 +18,7 @@
 #include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmhashtb.inl"
+#include "csmglue.h"
 #include "csmsweep.h"
 
 #include "cyassert.h"
@@ -375,6 +376,34 @@ static void i_test_solid_from_shape2D_with_hole(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_union_solidos(void)
+{
+    struct gccontorno_t *shape2d;
+    struct csmsolid_t *solid1, *solid2;
+    CYBOOL could_merge_solids;
+    
+    shape2d = gcelem2d_contorno_rectangular(0.3, 0.3);
+    
+    solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+    csmsolid_print_debug(solid1, CIERTO);
+
+    solid2 = csmsweep_create_solid_from_shape(shape2d, 0.3, 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0.3, 0., 0., 1., 0., 0., 0., 1., 0.);
+    csmsolid_print_debug(solid2, CIERTO);
+
+    csmglue_join_solid2_to_solid1_given_equal_faces(
+                        solid1, 46,
+                        &solid2, 36,
+                        &could_merge_solids);
+    assert(could_merge_solids == CIERTO);
+
+    csmsolid_print_debug(solid1, CIERTO);
+    
+    gccontorno_destruye(&shape2d);
+    csmsolid_destruye(&solid1);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     i_test_crea_destruye_solido_vacio();
@@ -386,6 +415,7 @@ void csmtest_test(void)
     i_test_tabla_hash();
     i_test_solid_from_shape2D();
     i_test_solid_from_shape2D_with_hole();
+    i_test_union_solidos();
 }
 
 
