@@ -112,9 +112,11 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     he2_loop_face = csmloop_lface(he2_loop);
     csmface_remove_loop(he2_loop_face, &he2_loop);
     
+    csmhedge_set_loop(*he1, NULL);
     csmhedge_set_next(*he1, NULL);
     csmhedge_set_prev(*he1, NULL);
 
+    csmhedge_set_loop(*he2, NULL);
     csmhedge_set_next(*he2, NULL);
     csmhedge_set_prev(*he2, NULL);
     
