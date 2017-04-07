@@ -390,10 +390,7 @@ static void i_test_union_solidos(void)
     solid2 = csmsweep_create_solid_from_shape(shape2d, 0.3, 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0.3, 0., 0., 1., 0., 0., 0., 1., 0.);
     csmsolid_print_debug(solid2, CIERTO);
 
-    csmglue_join_solid2_to_solid1_given_equal_faces(
-                        solid1, 46,
-                        &solid2, 36,
-                        &could_merge_solids);
+    csmglue_join_solid2_to_solid1_given_equal_faces(solid1, 46, &solid2, 36, &could_merge_solids);
     assert(could_merge_solids == CIERTO);
 
     csmsolid_print_debug(solid1, CIERTO);
