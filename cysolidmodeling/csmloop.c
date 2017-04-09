@@ -200,7 +200,7 @@ void csmloop_face_equation(
     assert(num_vertexs >= 3);
     
     csmmath_make_unit_vector3D(&A_loc, &B_loc, &C_loc);
-    D_loc = -csmmath_dot_product(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs;
+    D_loc = -csmmath_dot_product3D(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs;
     
     *A = A_loc;
     *B = B_loc;

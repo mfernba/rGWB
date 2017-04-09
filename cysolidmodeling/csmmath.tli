@@ -1,0 +1,7 @@
+
+enum csmmath_double_relation_t
+{
+    CSMMATH_VALUE1_LESS_THAN_VALUE2,
+    CSMMATH_EQUAL_VALUES,
+    CSMMATH_VALUE1_GREATER_THAN_VALUE2
+};
