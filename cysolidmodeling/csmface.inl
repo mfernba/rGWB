@@ -18,7 +18,12 @@ unsigned long csmface_id(const struct csmface_t *face);
 void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
 
 
-// Topología...
+// Geometry...
+
+void csmface_redo_geometric_generated_data(struct csmface_t *face);
+
+
+// Topology...
 
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face);
 void csmface_set_fsolid(struct csmface_t *face, struct csmsolid_t *solid);

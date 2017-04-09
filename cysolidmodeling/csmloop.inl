@@ -12,7 +12,20 @@ CONSTRUCTOR(struct csmloop_t *, csmloop_duplicate, (
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
 
-// Topología...
+// Geometry...
+
+void csmloop_face_equation(
+                        const struct csmloop_t *loop,
+                        double *A, double *B, double *C, double *D);
+
+void csmloop_update_bounding_box(const struct csmloop_t *loop, struct csmbbox_t *bbox);
+
+double csmloop_max_distance_to_plane(
+                        const struct csmloop_t *loop,
+                        double A, double B, double C, double D);
+
+                           
+// Topology...
 
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop);
 void csmloop_set_ledge(struct csmloop_t *loop, struct csmhedge_t *ledge);

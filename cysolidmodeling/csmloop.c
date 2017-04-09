@@ -2,12 +2,17 @@
 
 #include "csmloop.inl"
 
+#include "csmbbox.inl"
+#include "csmmath.inl"
 #include "csmnode.inl"
 #include "csmhedge.inl"
+#include "csmvertex.inl"
 
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
+#include "defmath.tlh"
+#include "standarc.h"
 
 struct csmloop_t
 {
@@ -127,6 +132,149 @@ struct csmloop_t *csmloop_duplicate(
     csmhedge_set_prev(new_loop->ledge, last_hedge);
     
     return new_loop;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+void csmloop_face_equation(
+                        const struct csmloop_t *loop,
+                        double *A, double *B, double *C, double *D)
+{
+    double A_loc, B_loc, C_loc, D_loc;
+    double xc, yc, zc;
+    register struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    unsigned long num_vertexs;
+    
+    assert_no_null(loop);
+    assert_no_null(A);
+    assert_no_null(B);
+    assert_no_null(C);
+    assert_no_null(D);
+    
+    A_loc = 0.;
+    B_loc = 0.;
+    C_loc = 0.;
+    D_loc = 0.;
+    
+    xc = 0.;
+    yc = 0.;
+    zc = 0.;
+    
+    num_vertexs = 0;
+    
+    iterator = loop->ledge;
+    num_iteraciones = 0;
+    
+    do
+    {
+        struct csmhedge_t *next_hedge;
+        struct csmvertex_t *vertex, *next_vertex;
+        double x1, y1, z1, x2, y2, z2;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        next_hedge = csmhedge_next(iterator);
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x1, &y1, &z1);
+        
+        next_vertex = csmhedge_vertex(next_hedge);
+        csmvertex_get_coordenadas(next_vertex, &x2, &y2, &z2);
+        
+        A_loc += (y1 - y2) * (z1 + z2);
+        B_loc += (z1 - z2) * (x1 + x2);
+        C_loc += (x1 - x2) * (y1 + y2);
+        
+        xc += x1;
+        yc += y1;
+        zc += z1;
+        
+        num_vertexs++;
+        
+        iterator = next_hedge;
+        
+    } while (iterator != loop->ledge);
+    
+    assert(num_vertexs >= 3);
+    
+    csmmath_make_unit_vector3D(&A_loc, &B_loc, &C_loc);
+    D_loc = -csmmath_dot_product(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs;
+    
+    *A = A_loc;
+    *B = B_loc;
+    *C = C_loc;
+    *D = D_loc;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+void csmloop_update_bounding_box(const struct csmloop_t *loop, struct csmbbox_t *bbox)
+{
+    register struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    
+    assert_no_null(loop);
+    
+    iterator = loop->ledge;
+    num_iteraciones = 0;
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x, y, z;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        
+        csmbbox_maximize_coord(bbox, x, y, z);
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != loop->ledge);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+double csmloop_max_distance_to_plane(
+                        const struct csmloop_t *loop,
+                        double A, double B, double C, double D)
+{
+    double max_distance_to_plane;
+    register struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    
+    assert_no_null(loop);
+    
+    iterator = loop->ledge;
+    num_iteraciones = 0;
+    
+    max_distance_to_plane = 0.;
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x, y, z;
+        double distance;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        
+        distance = fabs(csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D));
+        max_distance_to_plane = MAX(max_distance_to_plane, distance);
+
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != loop->ledge);
+    
+    return max_distance_to_plane;
 }
 
 // --------------------------------------------------------------------------------------------------------------

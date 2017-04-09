@@ -9,6 +9,7 @@
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
+#include "defmath.tlh"
 
 struct csmface_t
 {
@@ -20,6 +21,7 @@ struct csmface_t
     struct csmloop_t *floops;
     
     double A, B, C, D;
+    double fuzzy_epsilon;
     struct csmbbox_t *bbox;
 };
 
@@ -30,7 +32,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         struct csmsolid_t *fsolid,
                         struct csmloop_t *flout,
                         struct csmloop_t *floops,
-                        double A, double B, double C, double D,
+                        double A, double B, double C, double D, double fuzzy_epsilon,
                         struct csmbbox_t **bbox))
 {
     struct csmface_t *face;
@@ -48,6 +50,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     face->B = B;
     face->C = C;
     face->D = D;
+    face->fuzzy_epsilon = fuzzy_epsilon;
     
     face->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
     
@@ -62,7 +65,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     struct csmsolid_t *fsolid;
     struct csmloop_t *flout;
     struct csmloop_t *floops;
-    double A, B, C, D;
+    double A, B, C, D, fuzzy_epsilon;
     struct csmbbox_t *bbox;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
@@ -75,17 +78,18 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     B = 0.;
     C = 0.;
     D = 0.;
+    fuzzy_epsilon = 1.e-6;
     
-    bbox = csmbbox_crea_vacia();
+    bbox = csmbbox_create_empty_box();
     
-    return i_crea(id, fsolid, flout, floops, A, B, C, D, &bbox);
+    return i_crea(id, fsolid, flout, floops, A, B, C, D, fuzzy_epsilon, &bbox);
 }
 
 // ------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                         struct csmsolid_t *fsolid,
-                        double A, double B, double C, double D,
+                        double A, double B, double C, double D, double fuzzy_epsilon,
                         unsigned long *id_nuevo_elemento))
 {
     unsigned long id;
@@ -95,9 +99,9 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
     flout = NULL;
     floops = NULL;
-    bbox = csmbbox_crea_vacia();
+    bbox = csmbbox_create_empty_box();
     
-    return i_crea(id, fsolid, flout, floops, A, B, C, D, &bbox);
+    return i_crea(id, fsolid, flout, floops, A, B, C, D, fuzzy_epsilon, &bbox);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -114,7 +118,7 @@ struct csmface_t *csmface_duplicate(
     
     assert_no_null(face);
 
-    new_face = i_duplicate_face(fsolid, face->A, face->B, face->C, face->D, id_nuevo_elemento);
+    new_face = i_duplicate_face(fsolid, face->A, face->B, face->C, face->D, face->fuzzy_epsilon, id_nuevo_elemento);
     assert_no_null(new_face);
     
     iterator = face->floops;
@@ -159,6 +163,8 @@ void csmface_destruye(struct csmface_t **face)
     if ((*face)->floops != NULL)
         csmnode_free_node_list(&(*face)->floops, csmloop_t);
     
+    csmbbox_free(&(*face)->bbox);
+    
     FREE_PP(face, struct csmface_t);
 }
 
@@ -178,6 +184,78 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
     face->id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+static void i_compute_bounding_box(struct csmloop_t *floops, struct csmbbox_t *bbox)
+{
+    register struct csmloop_t *iterator;
+    unsigned long num_iters;
+    
+    csmbbox_reset(bbox);
+    
+    iterator = floops;
+    num_iters = 0;
+    
+    do
+    {
+        assert(num_iters < 100000);
+        num_iters++;
+
+        csmloop_update_bounding_box(iterator, bbox);
+        iterator = csmloop_next(iterator);
+        
+    } while (iterator != NULL);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, double C, double D, double max_tolerable_distance, struct csmloop_t *floops)
+{
+    register struct csmloop_t *iterator;
+    unsigned long num_iters;
+    double max_distance_to_plane;
+    
+    iterator = floops;
+    num_iters = 0;
+    max_distance_to_plane = 0.;
+    
+    do
+    {
+        double distance;
+        
+        assert(num_iters < 100000);
+        num_iters++;
+
+        distance = csmloop_max_distance_to_plane(iterator, A, B, C, D);
+        assert(distance >= 0.);
+        assert(distance <= max_tolerable_distance);
+        
+        max_distance_to_plane = MAX(max_distance_to_plane, distance);
+        
+        iterator = csmloop_next(iterator);
+        
+    } while (iterator != NULL);
+    
+    return 1.05 * max_distance_to_plane;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_redo_geometric_generated_data(struct csmface_t *face)
+{
+    double max_tolerable_distance;
+    assert_no_null(face);
+    assert_no_null(face->flout);
+    assert_no_null(face->floops);
+    
+    csmloop_face_equation(face->flout, &face->A, &face->B, &face->C, &face->D);
+    
+    max_tolerable_distance = 1.1 * csmloop_max_distance_to_plane(face->flout, face->A, face->B, face->C, face->D);
+    face->fuzzy_epsilon = i_compute_fuzzy_epsilon_for_containing_test(face->A, face->B, face->C, face->D, max_tolerable_distance, face->floops);
+    
+    i_compute_bounding_box(face->floops, face->bbox);
+}
+                                           
 // ------------------------------------------------------------------------------------------
 
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face)

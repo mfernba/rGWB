@@ -41,14 +41,14 @@ CONSTRUCTOR(static struct csmbbox_t *, i_crea, (
 
 // ------------------------------------------------------------------------------------------
 
-struct csmbbox_t *csmbbox_crea_vacia(void)
+struct csmbbox_t *csmbbox_create_empty_box(void)
 {
     return i_crea(0., 0., 0., 0., 0., 0.);
 }
 
 // ------------------------------------------------------------------------------------------
 
-void csmbbox_destruye(struct csmbbox_t **bbox)
+void csmbbox_free(struct csmbbox_t **bbox)
 {
     assert_no_null(bbox);
     assert_no_null(*bbox);
@@ -58,7 +58,22 @@ void csmbbox_destruye(struct csmbbox_t **bbox)
 
 // ------------------------------------------------------------------------------------------
 
-void csmbbox_maximiza_coordenada(struct csmbbox_t *bbox, double x, double y, double z)
+void csmbbox_reset(struct csmbbox_t *bbox)
+{
+    assert_no_null(bbox);
+
+    bbox->x_min = 0.;
+    bbox->y_min = 0.;
+    bbox->z_min = 0.;
+    
+    bbox->x_max = 0.;
+    bbox->y_max = 0.;
+    bbox->z_max = 0.;
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmbbox_maximize_coord(struct csmbbox_t *bbox, double x, double y, double z)
 {
     assert_no_null(bbox);
 
@@ -73,7 +88,7 @@ void csmbbox_maximiza_coordenada(struct csmbbox_t *bbox, double x, double y, dou
 
 // ------------------------------------------------------------------------------------------
 
-void csmbbox_maximiza_bbox(struct csmbbox_t *bbox_maximizar, const struct csmbbox_t *bbox)
+void csmbbox_maximize_bbox(struct csmbbox_t *bbox_maximizar, const struct csmbbox_t *bbox)
 {
     assert_no_null(bbox_maximizar);
     assert_no_null(bbox);

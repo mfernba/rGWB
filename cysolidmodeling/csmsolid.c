@@ -406,6 +406,27 @@ void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
+{
+    struct csmhashtb_iterator(csmface_t) *iterator;
+    
+    assert_no_null(solid);
+    
+    iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        csmface_redo_geometric_generated_data(face);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_edge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_es_integro)
 {
     struct csmnode_t *edge_node;
