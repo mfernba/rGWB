@@ -22,6 +22,22 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
 
 void csmface_redo_geometric_generated_data(struct csmface_t *face);
 
+CYBOOL csmface_contains_vertex(
+                        const struct csmface_t *face,
+                        const struct csmvertex_t *vertex,
+                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        struct csmvertex_t **hit_vertex_opc,
+                        struct csmhedge_t **hit_hedge_opc);
+
+CYBOOL csmface_contains_point(
+                        const struct csmface_t *face,
+                        double x, double y, double z,
+                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        struct csmvertex_t **hit_vertex_opc,
+                        struct csmhedge_t **hit_hedge_opc);
+
+CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_t *loop);
+
 
 // Topology...
 

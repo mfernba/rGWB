@@ -145,6 +145,17 @@ void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, doub
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmvertex_get_coords_not_dropped(
+                        const struct csmvertex_t *vertex,
+                        enum csmmath_dropped_coord_t dropped_coord,
+                        double *x, double *y)
+{
+    assert_no_null(vertex);
+    csmmath_select_not_dropped_coords(vertex->x, vertex->y, vertex->z, dropped_coord, x, y);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, double z)
 {
     assert_no_null(vertex);

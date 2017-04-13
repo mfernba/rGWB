@@ -4,7 +4,10 @@
 
 #include "csmbbox.inl"
 #include "csmloop.inl"
+#include "csmhedge.inl"
+#include "csmmath.inl"
 #include "csmnode.inl"
+#include "csmvertex.inl"
 
 #include "cyassert.h"
 #include "cypeid.h"
@@ -22,6 +25,7 @@ struct csmface_t
     
     double A, B, C, D;
     double fuzzy_epsilon;
+    enum csmmath_dropped_coord_t dropped_coord;
     struct csmbbox_t *bbox;
 };
 
@@ -32,7 +36,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         struct csmsolid_t *fsolid,
                         struct csmloop_t *flout,
                         struct csmloop_t *floops,
-                        double A, double B, double C, double D, double fuzzy_epsilon,
+                        double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         struct csmbbox_t **bbox))
 {
     struct csmface_t *face;
@@ -51,6 +55,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     face->C = C;
     face->D = D;
     face->fuzzy_epsilon = fuzzy_epsilon;
+    face->dropped_coord = dropped_coord;
     
     face->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
     
@@ -66,6 +71,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     struct csmloop_t *flout;
     struct csmloop_t *floops;
     double A, B, C, D, fuzzy_epsilon;
+    enum csmmath_dropped_coord_t dropped_coord;
     struct csmbbox_t *bbox;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
@@ -79,17 +85,18 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     C = 0.;
     D = 0.;
     fuzzy_epsilon = 1.e-6;
+    dropped_coord = (enum csmmath_dropped_coord_t)USHRT_MAX;
     
     bbox = csmbbox_create_empty_box();
     
-    return i_crea(id, fsolid, flout, floops, A, B, C, D, fuzzy_epsilon, &bbox);
+    return i_crea(id, fsolid, flout, floops, A, B, C, D, fuzzy_epsilon, dropped_coord, &bbox);
 }
 
 // ------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                         struct csmsolid_t *fsolid,
-                        double A, double B, double C, double D, double fuzzy_epsilon,
+                        double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         unsigned long *id_nuevo_elemento))
 {
     unsigned long id;
@@ -101,7 +108,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     floops = NULL;
     bbox = csmbbox_create_empty_box();
     
-    return i_crea(id, fsolid, flout, floops, A, B, C, D, fuzzy_epsilon, &bbox);
+    return i_crea(id, fsolid, flout, floops, A, B, C, D, fuzzy_epsilon, dropped_coord, &bbox);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -118,7 +125,7 @@ struct csmface_t *csmface_duplicate(
     
     assert_no_null(face);
 
-    new_face = i_duplicate_face(fsolid, face->A, face->B, face->C, face->D, face->fuzzy_epsilon, id_nuevo_elemento);
+    new_face = i_duplicate_face(fsolid, face->A, face->B, face->C, face->D, face->fuzzy_epsilon, face->dropped_coord, id_nuevo_elemento);
     assert_no_null(new_face);
     
     iterator = face->floops;
@@ -252,10 +259,95 @@ void csmface_redo_geometric_generated_data(struct csmface_t *face)
     
     max_tolerable_distance = 1.1 * csmloop_max_distance_to_plane(face->flout, face->A, face->B, face->C, face->D);
     face->fuzzy_epsilon = i_compute_fuzzy_epsilon_for_containing_test(face->A, face->B, face->C, face->D, max_tolerable_distance, face->floops);
+    face->dropped_coord = csmmath_dropped_coord(face->A, face->B, face->C);
     
     i_compute_bounding_box(face->floops, face->bbox);
 }
-                                           
+
+// ------------------------------------------------------------------------------------------
+
+CYBOOL csmface_contains_vertex(
+                        const struct csmface_t *face,
+                        const struct csmvertex_t *vertex,
+                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        struct csmvertex_t **hit_vertex_opc,
+                        struct csmhedge_t **hit_hedge_opc)
+{
+    double x, y, z;
+    
+    assert_no_null(face);
+    
+    csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    
+    return csmloop_is_point_inside_loop(
+                        face->flout,
+                        x, y, z, face->dropped_coord,
+                        face->fuzzy_epsilon,
+                        type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
+}
+
+// ------------------------------------------------------------------------------------------
+
+CYBOOL csmface_contains_point(
+                        const struct csmface_t *face,
+                        double x, double y, double z,
+                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        struct csmvertex_t **hit_vertex_opc,
+                        struct csmhedge_t **hit_hedge_opc)
+{
+    assert_no_null(face);
+    
+    return csmloop_is_point_inside_loop(
+                        face->flout,
+                        x, y, z, face->dropped_coord,
+                        face->fuzzy_epsilon,
+                        type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
+}
+
+// ------------------------------------------------------------------------------------------
+
+CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_t *loop)
+{
+    assert_no_null(face);
+    
+    if (face->flout == loop)
+    {
+        return CIERTO;
+    }
+    else
+    {
+        register struct csmhedge_t *iterator;
+        unsigned long num_iteraciones;
+        
+        iterator = csmloop_ledge(loop);
+        num_iteraciones = 0;
+        
+        do
+        {
+            struct csmvertex_t *vertex;
+            double x, y, z;
+            
+            assert(num_iteraciones < 100000);
+            num_iteraciones++;
+            
+            vertex = csmhedge_vertex(iterator);
+            csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    
+            if (csmloop_is_point_inside_loop(
+                        face->flout,
+                        x, y, z, face->dropped_coord,
+                        face->fuzzy_epsilon,
+                        NULL, NULL, NULL) == FALSO)
+            {
+                return FALSO;
+            }
+            
+        } while (iterator != csmloop_ledge(loop));
+        
+        return CIERTO;
+    }
+}
+
 // ------------------------------------------------------------------------------------------
 
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face)

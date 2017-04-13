@@ -4,10 +4,17 @@
 
 enum csmmath_double_relation_t csmmath_compare_doubles(double value1, double value2, double epsilon);
 
+enum csmmath_dropped_coord_t csmmath_dropped_coord(double x, double y, double z);
+
+void csmmath_select_not_dropped_coords(
+                        double x, double y, double z,
+                        enum csmmath_dropped_coord_t dropped_coord,
+                        double *x_not_dropped, double *y_not_dropped);
+
 CYBOOL csmmath_equal_coords(
-                    double x1, double y1, double z1,
-                    double x2, double y2, double z2,
-                    double epsilon);
+                        double x1, double y1, double z1,
+                        double x2, double y2, double z2,
+                        double epsilon);
 
 // Vectors...
 

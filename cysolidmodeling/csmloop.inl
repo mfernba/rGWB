@@ -24,7 +24,14 @@ double csmloop_max_distance_to_plane(
                         const struct csmloop_t *loop,
                         double A, double B, double C, double D);
 
-                           
+CYBOOL csmloop_is_point_inside_loop(
+                        const struct csmloop_t *loop,
+                        double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
+                        double tolerance,
+                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        struct csmvertex_t **hit_vertex_opc,
+                        struct csmhedge_t **hit_hedge_opc);
+
 // Topology...
 
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop);

@@ -31,6 +31,58 @@ enum csmmath_double_relation_t csmmath_compare_doubles(double value1, double val
 
 // ------------------------------------------------------------------------------------------
 
+enum csmmath_dropped_coord_t csmmath_dropped_coord(double x, double y, double z)
+{
+    double x_abs, y_abs, z_abs;
+    
+    x_abs = fabs(x);
+    y_abs = fabs(y);
+    z_abs = fabs(z);
+    
+    if (x_abs >= y_abs && x_abs >= z_abs)
+        return CSMMATH_DROPPED_COORD_X;
+    else if (y_abs >= x_abs && y_abs >= z_abs)
+        return CSMMATH_DROPPED_COORD_Y;
+    else
+        return CSMMATH_DROPPED_COORD_Z;
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmmath_select_not_dropped_coords(
+                        double x, double y, double z,
+                        enum csmmath_dropped_coord_t dropped_coord,
+                        double *x_not_dropped, double *y_not_dropped)
+{
+    assert_no_null(x_not_dropped);
+    assert_no_null(y_not_dropped);
+    
+    switch (dropped_coord)
+    {
+        case CSMMATH_DROPPED_COORD_X:
+            
+            *x_not_dropped = y;
+            *y_not_dropped = z;
+            break;
+            
+        case CSMMATH_DROPPED_COORD_Y:
+            
+            *x_not_dropped = x;
+            *y_not_dropped = z;
+            break;
+            
+        case CSMMATH_DROPPED_COORD_Z:
+            
+            *x_not_dropped = x;
+            *y_not_dropped = y;
+            break;
+            
+        default_error();
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 CYBOOL csmmath_equal_coords(
                         double x1, double y1, double z1,
                         double x2, double y2, double z2,
@@ -39,8 +91,8 @@ CYBOOL csmmath_equal_coords(
     double diff;
     
     diff = CUAD(x1 - x2) + CUAD(y1 - y2) + CUAD(z1 - z2);
-    
-    if (diff < CUAD(epsilon))
+
+    if (csmmath_compare_doubles(diff, 0.0, CUAD(epsilon)) == CSMMATH_EQUAL_VALUES)
         return CIERTO;
     else
         return FALSO;
@@ -232,52 +284,55 @@ CYBOOL csmmath_is_point_in_segment3D(
 						double x, double y, double z,
 						double x1, double y1, double z1, double x2, double y2, double z2,
 						double precision, 
-						double *posicion_relativa_opc)
+						double *t_opc)
 {
-    CYBOOL pertenece;
-    double posicion_relativa_loc;
-    double distancia_con_signo_a_recta;
+    CYBOOL is_point_on_segment;
+    CYBOOL is_point_on_line;
+    double t_loc;
     double Ux_seg, Uy_seg, Uz_seg;
+    double squared_dot_product_seg;
 
 	assert(precision > 0.);
 	
 	Ux_seg = x2 - x1;
 	Uy_seg = y2 - y1;
 	Uz_seg = z2 - z1;
-    csmmath_make_unit_vector3D(&Ux_seg, &Uy_seg, &Uz_seg);
     
-    distancia_con_signo_a_recta = csmmath_distance_from_point_to_line3D(
-                        x, y, z,
-                        x1, y1, z1, Ux_seg, Uy_seg, Uz_seg);
+    squared_dot_product_seg = csmmath_dot_product3D(Ux_seg, Uy_seg, Uz_seg, Ux_seg, Uy_seg, Uz_seg);
     
-    if (fabs(distancia_con_signo_a_recta) < precision)
+    if (squared_dot_product_seg < CUAD(precision))
     {
-        double longitud_segmento, distancia_punto_a_origen_segmento;
-        
-        distancia_punto_a_origen_segmento = csmmath_length_vector3D(x - x1, y - y1, z - z1);
-        longitud_segmento = csmmath_distance_3D(x1, y1, z1, x2, y2, z2);
-        
-        posicion_relativa_loc  = distancia_punto_a_origen_segmento / longitud_segmento;
-        
-        if (posicion_relativa_loc + precision > 0. && posicion_relativa_loc - precision < 1.)
-        {
-            pertenece = CIERTO;
-        }
-        else
-        {
-            pertenece = FALSO;
-            posicion_relativa_loc = 0.;
-        }
+        is_point_on_line = csmmath_equal_coords(x, y, z, x1, y1, z1, precision);
+        t_loc = 0.;
     }
     else
     {
-        pertenece = FALSO;
-        posicion_relativa_loc = 0.;
+        double Ux_to_point, Uy_to_point, Uz_to_point;
+        double t_prime;
+        double x_proj_seg, y_proj_seg, z_proj_seg;
+        
+        Ux_to_point = x - x1;
+        Uy_to_point = y - y1;
+        Uz_to_point = z - z1;
+        
+        t_prime = csmmath_dot_product3D(Ux_seg, Uy_seg, Uz_seg, Ux_to_point, Uy_to_point, Uz_to_point) / squared_dot_product_seg;
+        
+        x_proj_seg = x1 + t_prime * Ux_seg;
+        y_proj_seg = y1 + t_prime * Uy_seg;
+        z_proj_seg = z1 + t_prime * Uz_seg;
+        
+        is_point_on_line = csmmath_equal_coords(x, y, z, x_proj_seg, y_proj_seg, z_proj_seg, precision);
+        t_loc = t_prime;
     }
     
-    ASIGNA_OPC(posicion_relativa_opc, posicion_relativa_loc);
+    if (is_point_on_line == CIERTO && t_loc >= -precision && t_loc <= 1. + precision)
+        is_point_on_segment = CIERTO;
+    else
+        is_point_on_segment = FALSO;
     
-    return pertenece;
+    ASIGNA_OPC(t_opc, t_loc);
+    
+    return is_point_on_segment;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -290,7 +345,7 @@ CYBOOL csmmath_exists_intersection_between_two_lines3D(
 {
 	double x_mas_cercano_recta1, y_mas_cercano_recta1, z_mas_cercano_recta1;
 	double x_mas_cercano_recta2, y_mas_cercano_recta2, z_mas_cercano_recta2;
-	double distancia_entre_puntos;
+	double squared_distance;
 	
 	assert(precision > 0.);
 	assert_no_null(x_corte);
@@ -298,16 +353,14 @@ CYBOOL csmmath_exists_intersection_between_two_lines3D(
 	assert_no_null(z_corte);
 
 	csmmath_nearer_points_between_two_lines3D(
-							Xo_recta1, Yo_recta1, Zo_recta1, Ux_recta1, Uy_recta1, Uz_recta1,
-							Xo_recta2, Yo_recta2, Zo_recta2, Ux_recta2, Uy_recta2, Uz_recta2,
-							&x_mas_cercano_recta1, &y_mas_cercano_recta1, &z_mas_cercano_recta1,
-							&x_mas_cercano_recta2, &y_mas_cercano_recta2, &z_mas_cercano_recta2);
+                        Xo_recta1, Yo_recta1, Zo_recta1, Ux_recta1, Uy_recta1, Uz_recta1,
+                        Xo_recta2, Yo_recta2, Zo_recta2, Ux_recta2, Uy_recta2, Uz_recta2,
+                        &x_mas_cercano_recta1, &y_mas_cercano_recta1, &z_mas_cercano_recta1,
+                        &x_mas_cercano_recta2, &y_mas_cercano_recta2, &z_mas_cercano_recta2);
+			
+    squared_distance = CUAD(x_mas_cercano_recta2 - x_mas_cercano_recta1) + CUAD(y_mas_cercano_recta2 - y_mas_cercano_recta1) + CUAD(z_mas_cercano_recta2 - z_mas_cercano_recta1);
 							
-	distancia_entre_puntos	= csmmath_distance_3D(
-							x_mas_cercano_recta1, y_mas_cercano_recta1, z_mas_cercano_recta1,
-							x_mas_cercano_recta2, y_mas_cercano_recta2, z_mas_cercano_recta2);
-							
-	if (distancia_entre_puntos < precision)
+	if (squared_distance <= CUAD(precision))
 	{	
 		*x_corte = x_mas_cercano_recta1;
 		*y_corte = y_mas_cercano_recta1;
