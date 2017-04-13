@@ -44,6 +44,26 @@
 		5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F11E7B450C008B9F73 /* csmhashtb.hxx */; };
 		5507A6F51E7B451E008B9F73 /* csmhashtb.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F41E7B451E008B9F73 /* csmhashtb.inl */; };
 		5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6FA1E7B47CB008B9F73 /* csmuthash.hxx */; };
+		55089F4E1E8996B500B9570B /* csmglue.c in Sources */ = {isa = PBXBuildFile; fileRef = 55089F4C1E8996B500B9570B /* csmglue.c */; };
+		55089F4F1E8996B500B9570B /* csmglue.h in Headers */ = {isa = PBXBuildFile; fileRef = 55089F4D1E8996B500B9570B /* csmglue.h */; };
+		55244B1D1E9F9DC0006F546E /* csmeuler_laringmv.c in Sources */ = {isa = PBXBuildFile; fileRef = 55244B1B1E9F9DC0006F546E /* csmeuler_laringmv.c */; };
+		55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55244B1C1E9F9DC0006F546E /* csmeuler_laringmv.inl */; };
+		55244B241EA0255A006F546E /* csmtransform.c in Sources */ = {isa = PBXBuildFile; fileRef = 55244B221EA0255A006F546E /* csmtransform.c */; };
+		55244B251EA0255A006F546E /* csmtransform.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55244B231EA0255A006F546E /* csmtransform.inl */; };
+		55244B271EA02AED006F546E /* csmsolid.h in Headers */ = {isa = PBXBuildFile; fileRef = 55244B261EA02A68006F546E /* csmsolid.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5532DDB81E8FFE810047B9DF /* csmloopglue.c in Sources */ = {isa = PBXBuildFile; fileRef = 5532DDB61E8FFE810047B9DF /* csmloopglue.c */; };
+		5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5532DDB71E8FFE810047B9DF /* csmloopglue.inl */; };
+		5532DDBF1E9001390047B9DF /* csmtolerance.c in Sources */ = {isa = PBXBuildFile; fileRef = 5532DDBD1E9001390047B9DF /* csmtolerance.c */; };
+		5532DDC01E9001390047B9DF /* csmtolerance.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5532DDBE1E9001390047B9DF /* csmtolerance.inl */; };
+		55354A441E9AE595007B0692 /* csmmath.tli in Headers */ = {isa = PBXBuildFile; fileRef = 55354A431E9AE595007B0692 /* csmmath.tli */; };
+		557012A01E8328E400DFC490 /* csmsweep.c in Sources */ = {isa = PBXBuildFile; fileRef = 5570129E1E8328E400DFC490 /* csmsweep.c */; };
+		557012A11E8328E400DFC490 /* csmsweep.h in Headers */ = {isa = PBXBuildFile; fileRef = 5570129F1E8328E400DFC490 /* csmsweep.h */; };
+		557012A31E832A2F00DFC490 /* cont2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 557012A21E832A2F00DFC490 /* cont2d.h */; };
+		557012B91E832A7800DFC490 /* geomcomp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557012B41E832A5900DFC490 /* geomcomp.framework */; };
+		557012BC1E832F0300DFC490 /* csmgeom.c in Sources */ = {isa = PBXBuildFile; fileRef = 557012BA1E832F0300DFC490 /* csmgeom.c */; };
+		557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557012BB1E832F0300DFC490 /* csmgeom.inl */; };
+		557012C01E832F9600DFC490 /* csmmath.c in Sources */ = {isa = PBXBuildFile; fileRef = 557012BE1E832F9600DFC490 /* csmmath.c */; };
+		557012C11E832F9600DFC490 /* csmmath.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557012BF1E832F9600DFC490 /* csmmath.inl */; };
 		5579545D1E5DB074000FC91E /* cysolidmodeling.h in Headers */ = {isa = PBXBuildFile; fileRef = 5579545B1E5DB074000FC91E /* cysolidmodeling.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		557954671E5DB0A8000FC91E /* cyassert.h in Resources */ = {isa = PBXBuildFile; fileRef = 557954631E5DB0A8000FC91E /* cyassert.h */; };
 		557954681E5DB0A8000FC91E /* cyassert.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954641E5DB0A8000FC91E /* cyassert.c */; };
@@ -119,6 +139,27 @@
 			remoteGlobalIDString = 55321FD819E6766C002BB462;
 			remoteInfo = cypearrays;
 		};
+		557012B31E832A5900DFC490 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5532210419E678F2002BB462;
+			remoteInfo = geomcomp;
+		};
+		557012B51E832A5900DFC490 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5532210F19E678F3002BB462;
+			remoteInfo = geomcompTests;
+		};
+		557012B71E832A6F00DFC490 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 5532210319E678F2002BB462;
+			remoteInfo = geomcomp;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -157,6 +198,27 @@
 		5507A6F11E7B450C008B9F73 /* csmhashtb.hxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csmhashtb.hxx; sourceTree = "<group>"; };
 		5507A6F41E7B451E008B9F73 /* csmhashtb.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmhashtb.inl; sourceTree = "<group>"; };
 		5507A6FA1E7B47CB008B9F73 /* csmuthash.hxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csmuthash.hxx; sourceTree = "<group>"; };
+		55089F4C1E8996B500B9570B /* csmglue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmglue.c; sourceTree = "<group>"; };
+		55089F4D1E8996B500B9570B /* csmglue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = csmglue.h; sourceTree = "<group>"; };
+		55244B1B1E9F9DC0006F546E /* csmeuler_laringmv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmeuler_laringmv.c; sourceTree = "<group>"; };
+		55244B1C1E9F9DC0006F546E /* csmeuler_laringmv.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmeuler_laringmv.inl; sourceTree = "<group>"; };
+		55244B221EA0255A006F546E /* csmtransform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmtransform.c; sourceTree = "<group>"; };
+		55244B231EA0255A006F546E /* csmtransform.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmtransform.inl; sourceTree = "<group>"; };
+		55244B261EA02A68006F546E /* csmsolid.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmsolid.h; sourceTree = "<group>"; };
+		5532DDB61E8FFE810047B9DF /* csmloopglue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmloopglue.c; sourceTree = "<group>"; };
+		5532DDB71E8FFE810047B9DF /* csmloopglue.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmloopglue.inl; sourceTree = "<group>"; };
+		5532DDBD1E9001390047B9DF /* csmtolerance.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmtolerance.c; sourceTree = "<group>"; };
+		5532DDBE1E9001390047B9DF /* csmtolerance.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmtolerance.inl; sourceTree = "<group>"; };
+		55354A3F1E9AE121007B0692 /* standarc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = standarc.h; sourceTree = "<group>"; };
+		55354A431E9AE595007B0692 /* csmmath.tli */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmmath.tli; sourceTree = "<group>"; };
+		5570129E1E8328E400DFC490 /* csmsweep.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsweep.c; sourceTree = "<group>"; };
+		5570129F1E8328E400DFC490 /* csmsweep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = csmsweep.h; sourceTree = "<group>"; };
+		557012A21E832A2F00DFC490 /* cont2d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cont2d.h; sourceTree = "<group>"; };
+		557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = geomcomp.xcodeproj; path = /Users/manueru/Desarrollo/proyectos/xDesignC/cypearrays/../geomcomp/geomcomp.xcodeproj; sourceTree = "<absolute>"; };
+		557012BA1E832F0300DFC490 /* csmgeom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmgeom.c; sourceTree = "<group>"; };
+		557012BB1E832F0300DFC490 /* csmgeom.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmgeom.inl; sourceTree = "<group>"; };
+		557012BE1E832F9600DFC490 /* csmmath.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmmath.c; sourceTree = "<group>"; };
+		557012BF1E832F9600DFC490 /* csmmath.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmmath.inl; sourceTree = "<group>"; };
 		557954581E5DB074000FC91E /* cysolidmodeling.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = cysolidmodeling.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5579545B1E5DB074000FC91E /* cysolidmodeling.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cysolidmodeling.h; sourceTree = "<group>"; };
 		5579545C1E5DB074000FC91E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -198,6 +260,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				557012B91E832A7800DFC490 /* geomcomp.framework in Frameworks */,
 				5507A6EE1E7B40C1008B9F73 /* Foundation.framework in Frameworks */,
 				5507A6EC1E7B40BA008B9F73 /* Cocoa.framework in Frameworks */,
 				5507A6E91E7B40B4008B9F73 /* basicSystem.framework in Frameworks */,
@@ -255,10 +318,33 @@
 			name = "Hash Table";
 			sourceTree = "<group>";
 		};
+		5570129B1E83286400DFC490 /* Algorithms */ = {
+			isa = PBXGroup;
+			children = (
+				5570129F1E8328E400DFC490 /* csmsweep.h */,
+				5570129E1E8328E400DFC490 /* csmsweep.c */,
+				55089F4D1E8996B500B9570B /* csmglue.h */,
+				55089F4C1E8996B500B9570B /* csmglue.c */,
+				5532DDB71E8FFE810047B9DF /* csmloopglue.inl */,
+				5532DDB61E8FFE810047B9DF /* csmloopglue.c */,
+			);
+			name = Algorithms;
+			sourceTree = "<group>";
+		};
+		557012AF1E832A5900DFC490 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				557012B41E832A5900DFC490 /* geomcomp.framework */,
+				557012B61E832A5900DFC490 /* geomcompTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		5579544E1E5DB074000FC91E = {
 			isa = PBXGroup;
 			children = (
 				5507A6D71E7B4011008B9F73 /* basicSystem.xcodeproj */,
+				557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */,
 				5507A6CE1E7B400D008B9F73 /* cypearrays.xcodeproj */,
 				5579545A1E5DB074000FC91E /* cysolidmodeling */,
 				557954591E5DB074000FC91E /* Products */,
@@ -282,6 +368,7 @@
 				557954711E5DB275000FC91E /* csmfwddecl.hxx */,
 				5579546B1E5DB209000FC91E /* Cype Wrapper */,
 				5579549B1E5E4823000FC91E /* Utility */,
+				5570129B1E83286400DFC490 /* Algorithms */,
 				557954A71E60D0F7000FC91E /* Low Level Euler Operators */,
 				557954891E5E41A0000FC91E /* Half-Edge Data Structure */,
 				5507A6261E6B8721008B9F73 /* Test */,
@@ -304,6 +391,8 @@
 				5507A6E01E7B402D008B9F73 /* a_punter.h */,
 				5507A6E11E7B405D008B9F73 /* a_pto3d.h */,
 				5507A6E31E7B4077008B9F73 /* a_pto2d.h */,
+				557012A21E832A2F00DFC490 /* cont2d.h */,
+				55354A3F1E9AE121007B0692 /* standarc.h */,
 			);
 			name = "Cype Wrapper";
 			sourceTree = "<group>";
@@ -326,6 +415,7 @@
 				557954941E5E4742000FC91E /* csmface.inl */,
 				557954931E5E4742000FC91E /* csmface.c */,
 				5579549E1E5F942E000FC91E /* csmsolid.inl */,
+				55244B261EA02A68006F546E /* csmsolid.h */,
 				5579549D1E5F942E000FC91E /* csmsolid.c */,
 				557954A11E60D064000FC91E /* csmsolid.tli */,
 			);
@@ -335,9 +425,18 @@
 		5579549B1E5E4823000FC91E /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				5507A6FC1E7B51B0008B9F73 /* Hash Table */,
 				557954981E5E4811000FC91E /* csmbbox.inl */,
 				557954971E5E4811000FC91E /* csmbbox.c */,
-				5507A6FC1E7B51B0008B9F73 /* Hash Table */,
+				557012BF1E832F9600DFC490 /* csmmath.inl */,
+				557012BE1E832F9600DFC490 /* csmmath.c */,
+				55354A431E9AE595007B0692 /* csmmath.tli */,
+				557012BB1E832F0300DFC490 /* csmgeom.inl */,
+				557012BA1E832F0300DFC490 /* csmgeom.c */,
+				5532DDBE1E9001390047B9DF /* csmtolerance.inl */,
+				5532DDBD1E9001390047B9DF /* csmtolerance.c */,
+				55244B231EA0255A006F546E /* csmtransform.inl */,
+				55244B221EA0255A006F546E /* csmtransform.c */,
 			);
 			name = Utility;
 			sourceTree = "<group>";
@@ -369,6 +468,8 @@
 				5507A6821E736565008B9F73 /* csmeuler_lmfkrh.c */,
 				5507A6871E736714008B9F73 /* csmeuler_lringmv.inl */,
 				5507A6861E736714008B9F73 /* csmeuler_lringmv.c */,
+				55244B1C1E9F9DC0006F546E /* csmeuler_laringmv.inl */,
+				55244B1B1E9F9DC0006F546E /* csmeuler_laringmv.c */,
 			);
 			name = "Low Level Euler Operators";
 			sourceTree = "<group>";
@@ -385,11 +486,17 @@
 				5507A62A1E700F7C008B9F73 /* csmeuler_lmef.inl in Headers */,
 				5507A6251E6B8714008B9F73 /* csmtest.h in Headers */,
 				5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */,
+				557012C11E832F9600DFC490 /* csmmath.inl in Headers */,
+				55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */,
 				557954881E5E2DCB000FC91E /* cypestr.h in Headers */,
 				557954921E5E446C000FC91E /* csmloop.inl in Headers */,
+				557012A11E8328E400DFC490 /* csmsweep.h in Headers */,
 				5507A62E1E701441008B9F73 /* csmeuler_lkef.inl in Headers */,
 				5507A5CB1E662758008B9F73 /* csmeuler_lmev.inl in Headers */,
 				5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */,
+				55244B251EA0255A006F546E /* csmtransform.inl in Headers */,
+				55354A441E9AE595007B0692 /* csmmath.tli in Headers */,
+				5532DDC01E9001390047B9DF /* csmtolerance.inl in Headers */,
 				5507A6891E736714008B9F73 /* csmeuler_lringmv.inl in Headers */,
 				5507A6851E736565008B9F73 /* csmeuler_lmfkrh.inl in Headers */,
 				5507A6EF1E7B42C8008B9F73 /* a_punter.h in Headers */,
@@ -397,6 +504,7 @@
 				557954821E5E1AA9000FC91E /* csmnode.inl in Headers */,
 				557954A61E60D0EF000FC91E /* csmeuler_mvfs.inl in Headers */,
 				557954A01E5F942E000FC91E /* csmsolid.inl in Headers */,
+				557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */,
 				557954A21E60D064000FC91E /* csmsolid.tli in Headers */,
 				557954781E5E0694000FC91E /* cypeid.h in Headers */,
 				5507A5C71E6624E7008B9F73 /* csmopbas.inl in Headers */,
@@ -404,7 +512,11 @@
 				557954961E5E4742000FC91E /* csmface.inl in Headers */,
 				557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */,
 				5507A6211E6B744A008B9F73 /* csmeuler_lkev.inl in Headers */,
+				557012A31E832A2F00DFC490 /* cont2d.h in Headers */,
 				5507A6E41E7B4077008B9F73 /* a_pto2d.h in Headers */,
+				5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */,
+				55244B271EA02AED006F546E /* csmsolid.h in Headers */,
+				55089F4F1E8996B500B9570B /* csmglue.h in Headers */,
 				5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */,
 				5579547E1E5E1403000FC91E /* csmhedge.inl in Headers */,
 				5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */,
@@ -431,6 +543,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				557012B81E832A6F00DFC490 /* PBXTargetDependency */,
 				5507A6E61E7B40AA008B9F73 /* PBXTargetDependency */,
 				5507A6E81E7B40AA008B9F73 /* PBXTargetDependency */,
 			);
@@ -473,6 +586,10 @@
 					ProductGroup = 5507A6CF1E7B400D008B9F73 /* Products */;
 					ProjectRef = 5507A6CE1E7B400D008B9F73 /* cypearrays.xcodeproj */;
 				},
+				{
+					ProductGroup = 557012AF1E832A5900DFC490 /* Products */;
+					ProjectRef = 557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -510,6 +627,20 @@
 			remoteRef = 5507A6DE1E7B4012008B9F73 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		557012B41E832A5900DFC490 /* geomcomp.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = geomcomp.framework;
+			remoteRef = 557012B31E832A5900DFC490 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		557012B61E832A5900DFC490 /* geomcompTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = geomcompTests.xctest;
+			remoteRef = 557012B51E832A5900DFC490 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -531,6 +662,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55089F4E1E8996B500B9570B /* csmglue.c in Sources */,
+				557012C01E832F9600DFC490 /* csmmath.c in Sources */,
 				557954951E5E4742000FC91E /* csmface.c in Sources */,
 				5507A6291E700F7C008B9F73 /* csmeuler_lmef.c in Sources */,
 				5507A62D1E701441008B9F73 /* csmeuler_lkef.c in Sources */,
@@ -541,12 +674,17 @@
 				557954911E5E446C000FC91E /* csmloop.c in Sources */,
 				5507A5C61E6624E7008B9F73 /* csmopbas.c in Sources */,
 				5507A6781E7341CD008B9F73 /* csmeuler_lkemr.c in Sources */,
+				557012A01E8328E400DFC490 /* csmsweep.c in Sources */,
 				5579546A1E5DB0A8000FC91E /* cypespy.c in Sources */,
+				5532DDB81E8FFE810047B9DF /* csmloopglue.c in Sources */,
 				5579546F1E5DB24E000FC91E /* csmvertex.c in Sources */,
+				557012BC1E832F0300DFC490 /* csmgeom.c in Sources */,
 				5507A6881E736714008B9F73 /* csmeuler_lringmv.c in Sources */,
+				55244B241EA0255A006F546E /* csmtransform.c in Sources */,
 				5579548C1E5E41C1000FC91E /* csmedge.c in Sources */,
 				557954681E5DB0A8000FC91E /* cyassert.c in Sources */,
 				557954991E5E4811000FC91E /* csmbbox.c in Sources */,
+				55244B1D1E9F9DC0006F546E /* csmeuler_laringmv.c in Sources */,
 				5507A6501E705618008B9F73 /* csmeuler_kvfs.c in Sources */,
 				557954871E5E2DCB000FC91E /* cypestr.c in Sources */,
 				557954811E5E1AA9000FC91E /* csmnode.c in Sources */,
@@ -557,6 +695,7 @@
 				5507A64D1E70372E008B9F73 /* csmeuler_lkev.c in Sources */,
 				557954771E5E0694000FC91E /* cypeid.c in Sources */,
 				5579547D1E5E1403000FC91E /* csmhedge.c in Sources */,
+				5532DDBF1E9001390047B9DF /* csmtolerance.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -572,6 +711,11 @@
 			isa = PBXTargetDependency;
 			name = cypearrays;
 			targetProxy = 5507A6E71E7B40AA008B9F73 /* PBXContainerItemProxy */;
+		};
+		557012B81E832A6F00DFC490 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = geomcomp;
+			targetProxy = 557012B71E832A6F00DFC490 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

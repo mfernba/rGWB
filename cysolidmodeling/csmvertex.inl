@@ -37,3 +37,6 @@ void csmvertex_get_coords_not_dropped(
 void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, double z);
 
 CYBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, double epsilon);
+
+
+void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtransform_t *transform);

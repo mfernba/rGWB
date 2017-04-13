@@ -31,11 +31,12 @@ struct csmedge_t;
 struct csmloop_t;
 struct csmface_t;
 struct csmsolid_t;
-struct csmsolidtopology_t;
-
+struct csmtransform_t;
 enum csmedge_lado_hedge_t;
 
 struct csmbbox_t;
+struct csmtransform_t;
+
 
 #include "csmhashtb.hxx"
 struct csmhashtb(csmface_t);
@@ -43,7 +44,9 @@ struct csmhashtb(csmedge_t);
 struct csmhashtb(csmvertex_t);
 struct csmhashtb(csmhedge_t);
 
+
 struct gccontorno_t;
 
+#include "csmmath.tli"
 
 #endif /* csmfwddecl_hxx */

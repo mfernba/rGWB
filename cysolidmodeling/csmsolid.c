@@ -6,6 +6,7 @@
 //  Copyright © 2017 Manuel Fernández. All rights reserved.
 //
 
+#include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmsolid.tli"
 
@@ -16,6 +17,7 @@
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmnode.inl"
+#include "csmtransform.inl"
 #include "csmvertex.inl"
 
 #include "cyassert.h"
@@ -202,7 +204,7 @@ struct csmsolid_t *csmsolid_duplicate(const struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_destruye(struct csmsolid_t **solido)
+void csmsolid_free(struct csmsolid_t **solido)
 {
     assert_no_null(solido);
     assert_no_null(*solido);
@@ -406,13 +408,11 @@ void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
+static void i_redo_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces)
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
     
-    assert_no_null(solid);
-    
-    iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
+    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
     
     while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
     {
@@ -423,6 +423,14 @@ void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    i_redo_geometric_generated_data(solid->sfaces);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -712,6 +720,82 @@ void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_inte
     fprintf(stdout, "\n");
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+static void i_apply_transformation_to_vertexs(
+                        struct csmhashtb(csmface_t) *sfaces,
+                        struct csmhashtb(csmvertex_t) *svertexs,
+                        const struct csmtransform_t *transform)
+{
+    struct csmhashtb_iterator(csmvertex_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(svertexs, csmvertex_t);
+    
+    while (csmhashtb_has_next(iterator, csmvertex_t) == CIERTO)
+    {
+        struct csmvertex_t *vertex;
+        
+        csmhashtb_next_pair(iterator, NULL, &vertex, csmvertex_t);
+        csmvertex_apply_transform(vertex, transform);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmvertex_t);
+    
+    i_redo_geometric_generated_data(sfaces);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_move(struct csmsolid_t *solid, double dx, double dy, double dz)
+{
+    struct csmtransform_t *transform;
+    
+    assert_no_null(solid);
+    
+    transform = csmtransform_make_displacement(dx, dy, dz);
+    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform);
+    
+    csmtransform_free(&transform);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_rotate(
+                    struct csmsolid_t *solid,
+                    double angulo_rotacion_rad,
+                    double Xo, double Yo, double Zo, double Ux, double Uy, double Uz)
+{
+    struct csmtransform_t *transform;
+    
+    assert_no_null(solid);
+    
+    transform = csmtransform_make_arbitrary_axis_rotation(angulo_rotacion_rad, Xo, Yo, Zo, Ux, Uy, Uz);
+    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform);
+    
+    csmtransform_free(&transform);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_general_transform(
+                    struct csmsolid_t *solid,
+                    double Ux, double Uy, double Uz, double Dx,
+                    double Vx, double Vy, double Vz, double Dy,
+                    double Wx, double Wy, double Wz, double Dz)
+{
+    struct csmtransform_t *transform;
+    
+    assert_no_null(solid);
+    
+    transform = csmtransform_make_general(
+                    Ux, Uy, Uz, Dx,
+                    Vx, Vy, Vz, Dy,
+                    Wx, Wy, Wz, Dz);
+    
+    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform);
+    
+    csmtransform_free(&transform);
+}
 
 
 

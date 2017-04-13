@@ -4,10 +4,6 @@
 
 CONSTRUCTOR(struct csmsolid_t *, csmsolid_crea_vacio, (void));
 
-CONSTRUCTOR(struct csmsolid_t *, csmsolid_duplicate, (const struct csmsolid_t *solid));
-
-void csmsolid_destruye(struct csmsolid_t **solido);
-
 
 unsigned long *csmsolid_id_new_element(struct csmsolid_t *solido);
 

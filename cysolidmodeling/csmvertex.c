@@ -4,6 +4,7 @@
 
 #include "csmhashtb.inl"
 #include "csmmath.inl"
+#include "csmtransform.inl"
 
 #include "cyassert.h"
 #include "cypeid.h"
@@ -174,4 +175,18 @@ CYBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct cs
     
     return csmmath_equal_coords(vertex1->x, vertex1->y, vertex1->z, vertex2->x, vertex2->y, vertex2->z, epsilon);
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtransform_t *transform)
+{
+    assert_no_null(vertex);
+    csmtransform_transform_point(transform, vertex->x, vertex->y, vertex->z, &vertex->x, &vertex->y, &vertex->z);
+}
+
+
+
+
+
+
 

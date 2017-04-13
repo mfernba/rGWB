@@ -17,7 +17,7 @@ unsigned long csmhedge_id(const struct csmhedge_t *hedge);
 CYBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2);
 
 
-// Topología...
+// Topology...
 
 struct csmedge_t *csmhedge_edge(struct csmhedge_t *hedge);
 void csmhedge_set_edge(struct csmhedge_t *hedge, struct csmedge_t *edge);

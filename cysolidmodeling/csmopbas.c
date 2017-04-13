@@ -7,6 +7,7 @@
 #include "csmface.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
+#include "csmmath.inl"
 #include "csmnode.inl"
 #include "csmsolid.inl"
 #include "csmvertex.inl"
@@ -157,3 +158,17 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     ASIGNA_OPC(hedge_prev_opc, hedge_prev);
     ASIGNA_OPC(hedge_next_opc, hedge_next);
 }
+
+// ------------------------------------------------------------------------------------------
+
+CYBOOL csmopbas_is_convex_hedge(struct csmhedge_t *hedge)
+{
+    struct csmface_t *face;
+
+    face = csmopbas_face_from_hedge(hedge);
+    return csmface_is_convex_hedge(face, hedge);
+}
+
+
+
+

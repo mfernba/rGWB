@@ -532,7 +532,6 @@ CYBOOL csmloop_is_point_inside_loop(
             struct csmhedge_t *next_ray_hedge;
             struct csmvertex_t *vertex1, *vertex2;
             double x_vertex1, y_vertex1, x_vertex2, y_vertex2;
-            unsigned long count;
             
             assert(num_iteraciones < 100000);
             num_iteraciones++;

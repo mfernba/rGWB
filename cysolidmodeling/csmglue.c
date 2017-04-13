@@ -10,6 +10,7 @@
 
 #include "csmloopglue.inl"
 
+#include "csmsolid.h"
 #include "csmsolid.inl"
 
 #include "cyassert.h"
@@ -48,7 +49,7 @@ void csmglue_join_solid2_to_solid1_given_equal_faces(
         
         csmloopglue_merge_faces(face1, &face2);
                         
-        csmsolid_destruye(&solid2_loc);
+        csmsolid_free(&solid2_loc);
     }
     
     *could_merge_solids = could_merge_solids_loc;

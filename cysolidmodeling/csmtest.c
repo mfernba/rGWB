@@ -19,6 +19,7 @@
 #include "csmopbas.inl"
 #include "csmhashtb.inl"
 #include "csmglue.h"
+#include "csmsolid.h"
 #include "csmsweep.h"
 
 #include "cyassert.h"
@@ -36,7 +37,7 @@ static void i_test_crea_destruye_solido_vacio(void)
     
     csmeuler_kvfs(solido);
     
-    csmsolid_destruye(&solido);
+    csmsolid_free(&solido);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -56,7 +57,7 @@ static void i_test_basico_solido_una_arista(void)
 
     csmeuler_kvfs(solido);
     
-    csmsolid_destruye(&solido);
+    csmsolid_free(&solido);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -96,7 +97,7 @@ static void i_test_crea_lamina(void)
     
     csmeuler_kvfs(solido);
     
-    csmsolid_destruye(&solido);
+    csmsolid_free(&solido);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -153,7 +154,7 @@ static void i_test_crea_lamina_con_hueco(void)
     
     csmeuler_kvfs(solido);
     
-    csmsolid_destruye(&solido);
+    csmsolid_free(&solido);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -215,7 +216,7 @@ static void i_test_crea_hexaedro(void)
     
     csmsolid_print_debug(solido, CIERTO);
     
-    csmsolid_destruye(&solido);
+    csmsolid_free(&solido);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -274,8 +275,8 @@ static void i_test_crea_hexaedro_y_copia(void)
     copia_solido = csmsolid_duplicate(solido);
     csmsolid_print_debug(copia_solido, CIERTO);
     
-    csmsolid_destruye(&solido);
-    csmsolid_destruye(&copia_solido);
+    csmsolid_free(&solido);
+    csmsolid_free(&copia_solido);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -352,7 +353,7 @@ static void i_test_solid_from_shape2D(void)
     csmsolid_print_debug(solid, CIERTO);
     
     gccontorno_destruye(&shape2d);
-    csmsolid_destruye(&solid);
+    csmsolid_free(&solid);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -371,7 +372,7 @@ static void i_test_solid_from_shape2D_with_hole(void)
     csmsolid_print_debug(solid, CIERTO);
     
     gccontorno_destruye(&shape2d);
-    csmsolid_destruye(&solid);
+    csmsolid_free(&solid);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -396,7 +397,7 @@ static void i_test_union_solidos(void)
     csmsolid_print_debug(solid1, CIERTO);
     
     gccontorno_destruye(&shape2d);
-    csmsolid_destruye(&solid1);
+    csmsolid_free(&solid1);
 }
 
 // ------------------------------------------------------------------------------------------

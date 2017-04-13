@@ -22,3 +22,8 @@ void csmopbas_addhe(
                 struct csmhedge_t **new_hedge_opc);
 
 void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_opc, struct csmhedge_t **hedge_next_opc);
+
+
+// Geometry...
+
+CYBOOL csmopbas_is_convex_hedge(struct csmhedge_t *hedge);

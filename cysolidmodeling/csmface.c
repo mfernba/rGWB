@@ -7,12 +7,14 @@
 #include "csmhedge.inl"
 #include "csmmath.inl"
 #include "csmnode.inl"
+#include "csmtolerance.inl"
 #include "csmvertex.inl"
 
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
 #include "defmath.tlh"
+#include "standarc.h"
 
 struct csmface_t
 {
@@ -243,7 +245,7 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
         
     } while (iterator != NULL);
     
-    return 1.05 * max_distance_to_plane;
+    return 1.01 * max_distance_to_plane;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -346,6 +348,51 @@ CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_
         
         return CIERTO;
     }
+}
+
+// ------------------------------------------------------------------------------------------
+
+CYBOOL csmface_is_convex_hedge(struct csmface_t *face, struct csmhedge_t *hedge)
+{
+    struct csmhedge_t *hedge_prev, *hedge_next;
+    const struct csmvertex_t *vertex_prev, *vertex, *vertex_next;
+    double x_prev, y_prev, z_prev, x, y, z, x_next, y_next, z_next;
+    double Ux_to_prev, Uy_to_prev, Uz_to_prev;
+    double Ux_to_next, Uy_to_next, Uz_to_next;
+    double Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next;
+    double angle;
+    double dot_product_face_normal;
+    
+    assert_no_null(face);
+    
+    hedge_prev = csmhedge_prev(hedge);
+    vertex_prev = csmhedge_vertex(hedge_prev);
+    csmvertex_get_coordenadas(vertex_prev, &x_prev, &y_prev, &z_prev);
+    
+    vertex = csmhedge_vertex(hedge);
+    csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    
+    hedge_next = csmhedge_next(hedge);
+    vertex_next = csmhedge_vertex(hedge_next);
+    csmvertex_get_coordenadas(vertex_next, &x_next, &y_next, &z_next);
+    
+    csmmath_vector_between_two_3D_points(x, y, z, x_prev, y_prev, z_prev, &Ux_to_prev, &Uy_to_prev, &Uz_to_prev);
+    csmmath_vector_between_two_3D_points(x, y, z, x_next, y_next, z_next, &Ux_to_next, &Uy_to_next, &Uz_to_next);
+
+    csmmath_cross_product3D(
+                        Ux_to_next, Uy_to_next, Uz_to_next, Ux_to_prev, Uy_to_prev, Uz_to_prev,
+                        &Ux_cross_prev_next, &Uy_cross_prev_next, &Uz_cross_prev_next);
+
+    dot_product_face_normal =csmmath_dot_product3D(Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next, face->A, face->B, face->C);
+    angle = acos(csmmath_dot_product3D(Ux_to_prev, Uy_to_prev, Uz_to_prev, Ux_to_next, Uy_to_next, Uz_to_next));
+    
+    if (dot_product_face_normal < 0.)
+        angle = 2. * PI - angle;
+    
+    if (angle - csmtolerance_angle_rad () < PI)
+        return CIERTO;
+    else
+        return FALSO;
 }
 
 // ------------------------------------------------------------------------------------------
