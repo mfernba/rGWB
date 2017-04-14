@@ -245,7 +245,7 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
         
     } while (iterator != NULL);
     
-    return 1.01 * max_distance_to_plane;
+    return MAX(1.01 * max_distance_to_plane, 1.e-4);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -276,13 +276,15 @@ CYBOOL csmface_contains_vertex(
                         struct csmhedge_t **hit_hedge_opc)
 {
     double x, y, z;
+    CYBOOL is_outer_loop;
     
     assert_no_null(face);
     
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    is_outer_loop = CIERTO;
     
     return csmloop_is_point_inside_loop(
-                        face->flout,
+                        face->flout, is_outer_loop,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
@@ -297,10 +299,13 @@ CYBOOL csmface_contains_point(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc)
 {
+    CYBOOL is_outer_loop;
+    
     assert_no_null(face);
     
+    is_outer_loop = CIERTO;
     return csmloop_is_point_inside_loop(
-                        face->flout,
+                        face->flout, is_outer_loop,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
@@ -320,9 +325,11 @@ CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_
     {
         register struct csmhedge_t *iterator;
         unsigned long num_iteraciones;
+        CYBOOL is_outer_loop;
         
         iterator = csmloop_ledge(loop);
         num_iteraciones = 0;
+        is_outer_loop = CIERTO;
         
         do
         {
@@ -336,7 +343,7 @@ CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_
             csmvertex_get_coordenadas(vertex, &x, &y, &z);
     
             if (csmloop_is_point_inside_loop(
-                        face->flout,
+                        face->flout, is_outer_loop,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         NULL, NULL, NULL) == FALSO)

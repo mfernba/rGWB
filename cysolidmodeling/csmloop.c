@@ -355,131 +355,10 @@ static CYBOOL i_is_point_on_loop_boundary(
     return is_point_on_loop_boundary;
 }
 
-/*
-http://geomalgorithms.com/a03-_inclusion.html
-Edge Crossing Rules
-
-1. an upward edge includes its starting endpoint, and excludes its final endpoint;
- 
-2. a downward edge excludes its starting endpoint, and includes its final endpoint;
- 
-3. horizontal edges are excluded
- 
-4. the edge-ray intersection point must be strictly right of the point P.
-One can apply these rules to the preceding special cases, and see that they correctly determine valid crossings. 
-Note that Rule #4 results in points on a right-side boundary edge being outside, and ones on a left-side edge being inside.
-
-Pseudo-Code: Crossing # Inclusion
-
-Code for this algorithm is well-known, and the edge crossing rules are easily expressed. For a polygon represented as an array V[n+1] of vertex points with V[n]=V[0], 
-popular implementation logic ([Franklin, 2000], [O'Rourke, 1998]) is as follows:
-
-typedef struct {int x, y;} Point;
-
-cn_PnPoly( Point P, Point V[], int n )
-{
-    int    cn = 0;    // the  crossing number counter
-
-    // loop through all edges of the polygon
-    for (each edge E[i]:V[i]V[i+1] of the polygon) {
-        if (E[i] crosses upward ala Rule #1
-         || E[i] crosses downward ala  Rule #2) {
-            if (P.x <  x_intersect of E[i] with y=P.y)   // Rule #4
-                 ++cn;   // a valid crossing to the right of P.x
-        }
-    }
-    return (cn&1);    // 0 if even (out), and 1 if  odd (in)
-
-}
- 
-
-Note that the tests for upward and downward crossing satisfying Rules #1 and #2 also exclude horizontal edges (Rule #3). 
- 
-All-in-all, a lot of work is done by just a few tests which makes this an elegant algorithm.
-
-However, the validity of the crossing number method is based on the "Jordan Curve Theorem" which says that a simple closed curve divides the 2D plane into exactly 2 connected 
-components: a bounded "inside" one and an unbounded "outside" one. The catch is that the curve must be simple (without self intersections),
-otherwise there can be more than 2 components and then there is no guarantee that crossing a boundary changes the in-out parity.
- 
- For a closed (and thus bounded) curve, there is exactly one unbounded "outside" component; but bounded components can be either inside or outside. 
- And two of the bounded components that have a shared boundary may both be inside, and crossing over their shared boundary would not change the in-out parity.
- 
-// a Point is defined by its coordinates {int x, y;}
-//===================================================================
- 
-
-// isLeft(): tests if a point is Left|On|Right of an infinite line.
-//    Input:  three points P0, P1, and P2
-//    Return: >0 for P2 left of the line through P0 and P1
-//            =0 for P2  on the line
-//            <0 for P2  right of the line
-//    See: Algorithm 1 "Area of Triangles and Polygons"
-inline int
-isLeft( Point P0, Point P1, Point P2 )
-{
-    return ( (P1.x - P0.x) * (P2.y - P0.y)
-            - (P2.x -  P0.x) * (P1.y - P0.y) );
-}
-//===================================================================
-
-
-// cn_PnPoly(): crossing number test for a point in a polygon
-//      Input:   P = a point,
-//               V[] = vertex points of a polygon V[n+1] with V[n]=V[0]
-//      Return:  0 = outside, 1 = inside
-// This code is patterned after [Franklin, 2000]
-int
-cn_PnPoly( Point P, Point* V, int n )
-{
-    int    cn = 0;    // the  crossing number counter
-
-    // loop through all edges of the polygon
-    for (int i=0; i<n; i++) {    // edge from V[i]  to V[i+1]
-       if (((V[i].y <= P.y) && (V[i+1].y > P.y))     // an upward crossing
-        || ((V[i].y > P.y) && (V[i+1].y <=  P.y))) { // a downward crossing
-            // compute  the actual edge-ray intersect x-coordinate
-            float vt = (float)(P.y  - V[i].y) / (V[i+1].y - V[i].y);
-            if (P.x <  V[i].x + vt * (V[i+1].x - V[i].x)) // P.x < intersect
-                 ++cn;   // a valid crossing of y=P.y right of P.x
-        }
-    }
-    return (cn&1);    // 0 if even (out), and 1 if  odd (in)
-
-}
-//===================================================================
-
-
-// wn_PnPoly(): winding number test for a point in a polygon
-//      Input:   P = a point,
-//               V[] = vertex points of a polygon V[n+1] with V[n]=V[0]
-//      Return:  wn = the winding number (=0 only when P is outside)
-int
-wn_PnPoly( Point P, Point* V, int n )
-{
-    int    wn = 0;    // the  winding number counter
-
-    // loop through all edges of the polygon
-    for (int i=0; i<n; i++) {   // edge from V[i] to  V[i+1]
-        if (V[i].y <= P.y) {          // start y <= P.y
-            if (V[i+1].y  > P.y)      // an upward crossing
-                 if (isLeft( V[i], V[i+1], P) > 0)  // P left of  edge
-                     ++wn;            // have  a valid up intersect
-        }
-        else {                        // start y > P.y (no test needed)
-            if (V[i+1].y  <= P.y)     // a downward crossing
-                 if (isLeft( V[i], V[i+1], P) < 0)  // P right of  edge
-                     --wn;            // have  a valid down intersect
-        }
-    }
-    return wn;
-}
-//===================================================================
- */
-
 // --------------------------------------------------------------------------------------------------------------
 
 CYBOOL csmloop_is_point_inside_loop(
-                        const struct csmloop_t *loop,
+                        const struct csmloop_t *loop, CYBOOL is_outer_loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         double tolerance,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
@@ -514,6 +393,8 @@ CYBOOL csmloop_is_point_inside_loop(
         register struct csmhedge_t *ray_hedge;
         unsigned long num_iteraciones;
         int count;
+        
+        // According to "Geometric tools for computer graphics", Page 701 (different from Mäntyllä)
     
         csmmath_select_not_dropped_coords(x, y, z, dropped_coord, &x_not_dropped, &y_not_dropped);
         
@@ -544,15 +425,21 @@ CYBOOL csmloop_is_point_inside_loop(
             vertex2 = csmhedge_vertex(next_ray_hedge);
             csmvertex_get_coords_not_dropped(vertex2, dropped_coord, &x_vertex2, &y_vertex2);
             
-            if (((y_vertex1 - tolerance < y_not_dropped) && (y_vertex2 > y_not_dropped))     // an upward crossing
-                    || ((y_vertex1 > y_not_dropped) && (y_vertex2 - tolerance < y_not_dropped)))// a downward crossing
+            if ((y_vertex1 - tolerance < y_not_dropped && y_not_dropped < y_vertex2)
+                    || (y_vertex2 - tolerance < y_not_dropped && y_not_dropped < y_vertex1))
             {
-                double vt;
+                double x = x_vertex1 + ((y_not_dropped - y_vertex1) * (x_vertex2 - x_vertex1) / (y_vertex2 - y_vertex1));
                 
-                vt = (double )(y_not_dropped - y_vertex1) / (y_vertex2 - y_vertex1);
-                
-                if (x_not_dropped > x_vertex1 + vt * (x_vertex2 - x_vertex1))
-                    count++;
+                if (is_outer_loop == CIERTO)
+                {
+                    if (x < x_not_dropped)
+                        count++;
+                }
+                else
+                {
+                    if (x > x_not_dropped)
+                        count++;
+                }
             }
             
             ray_hedge = next_ray_hedge;
@@ -560,9 +447,9 @@ CYBOOL csmloop_is_point_inside_loop(
         } while (ray_hedge != loop->ledge);
         
         if (count % 2 == 0)
-            is_point_inside_loop = CIERTO;
-        else
             is_point_inside_loop = FALSO;
+        else
+            is_point_inside_loop = CIERTO;
     }
     
     ASIGNA_OPC(hit_vertex_opc, hit_vertex_loc);
