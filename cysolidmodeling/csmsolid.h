@@ -23,3 +23,6 @@ DLL_CYSOLIDMODELING void csmsolid_general_transform(
                     double Wx, double Wy, double Wz, double Dz);
 
 
+// Properties...
+
+DLL_CYSOLIDMODELING double csmsolid_volume(const struct csmsolid_t *solid);

@@ -19,6 +19,7 @@
 #include "csmopbas.inl"
 #include "csmhashtb.inl"
 #include "csmglue.h"
+#include "csmface.inl"
 #include "csmsolid.h"
 #include "csmsweep.h"
 
@@ -66,15 +67,31 @@ static void i_test_crea_lamina(void)
 {
     struct csmsolid_t *solido;
     struct csmhedge_t *initial_hedge, *hedge_from_vertex1, *hedge_from_vertex2, *hedge_from_vertex3;
+    struct csmface_t *initial_face, *new_face;
     struct csmhedge_t *he_pos, *he_neg;
     struct csmhedge_t *he1, *he2;
     
     solido = csmeuler_mvfs(0., 0., 0., &initial_hedge);
+    initial_face = csmopbas_face_from_hedge(initial_hedge);
     
-    csmeuler_lmev_strut_edge(initial_hedge, 1., 0., 0., &hedge_from_vertex1);
-    csmeuler_lmev_strut_edge(hedge_from_vertex1, 1., 1., 0., &hedge_from_vertex2);
+    csmeuler_lmev_strut_edge(initial_hedge, 1., 0., 1., &hedge_from_vertex1);
+    csmeuler_lmev_strut_edge(hedge_from_vertex1, 1., 1., 1., &hedge_from_vertex2);
     csmeuler_lmev_strut_edge(hedge_from_vertex2, 0., 1., 0., &hedge_from_vertex3);
-    csmeuler_lmef(initial_hedge, hedge_from_vertex3, NULL, &he_pos, &he_neg);
+    csmeuler_lmef(initial_hedge, hedge_from_vertex3, &new_face, &he_pos, &he_neg);
+    
+    {
+        csmsolid_redo_geometric_generated_data(solido);
+        
+        assert(initial_face != new_face);
+
+        assert(csmface_contains_point(initial_face, 0.5, 0.5, 0.5, NULL, NULL, NULL) == CIERTO);
+        assert(csmface_contains_point(initial_face, 1., 1., 1., NULL, NULL, NULL) == CIERTO);
+        assert(csmface_contains_point(initial_face, 5., 5., 0., NULL, NULL, NULL) == FALSO);
+        
+        assert(csmface_contains_point(new_face, 0.5, 0.5, 0.5, NULL, NULL, NULL) == CIERTO);
+        assert(csmface_contains_point(new_face, 1., 1., 1., NULL, NULL, NULL) == CIERTO);
+        assert(csmface_contains_point(new_face, 5., 5., 0., NULL, NULL, NULL) == FALSO);
+    }
     
     csmeuler_lkef(&he_pos, &he_neg);
     assert(he_pos != NULL);

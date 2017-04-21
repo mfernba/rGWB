@@ -36,6 +36,7 @@ void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid);
 
 
+
 // Debug...
 
 void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro);

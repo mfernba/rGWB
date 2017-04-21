@@ -404,6 +404,14 @@ CYBOOL csmface_is_convex_hedge(struct csmface_t *face, struct csmhedge_t *hedge)
 
 // ------------------------------------------------------------------------------------------
 
+double csmface_tolerace(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->fuzzy_epsilon;
+}
+
+// ------------------------------------------------------------------------------------------
+
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face)
 {
     assert_no_null(face);

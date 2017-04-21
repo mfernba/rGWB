@@ -17,6 +17,7 @@
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmnode.inl"
+#include "csmmath.inl"
 #include "csmtransform.inl"
 #include "csmvertex.inl"
 
@@ -797,7 +798,76 @@ void csmsolid_general_transform(
     csmtransform_free(&transform);
 }
 
+// ----------------------------------------------------------------------------------------------------
+// Note.: Improve using a point for the signed tetrahedra interior to the solid (or as close as possible but out of it).
 
+double csmsolid_volume(const struct csmsolid_t *solid)
+{
+    double volume;
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    assert_no_null(solid);
+
+    i_redo_geometric_generated_data(solid->sfaces);
+    
+    volume = 0.;
+    face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        register struct csmloop_t *loop_iterator;
+        unsigned long num_loop_iterations;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        loop_iterator = csmface_floops(face);
+        num_loop_iterations = 0;
+        
+        while (loop_iterator != NULL)
+        {
+            struct csmhedge_t *loop_ledge;
+            register struct csmhedge_t *he_iterator;
+            double x1, y1, z1;
+            unsigned long num_he_iterations;
+            
+            assert(num_loop_iterations < 1000);
+            num_loop_iterations++;
+            
+            loop_ledge = csmloop_ledge(loop_iterator);
+            csmvertex_get_coordenadas(csmhedge_vertex(loop_ledge), &x1, &y1, &z1);
+            
+            he_iterator = loop_ledge;
+            num_he_iterations = 0;
+            
+            do
+            {
+                double x2, y2, z2;
+                double Ux_cross, Uy_cross, Uz_cross;
+                struct csmhedge_t *next_hedge;
+                double x_next, y_next, z_next;
+                
+                assert(num_he_iterations < 10000);
+                num_he_iterations++;
+                
+                csmvertex_get_coordenadas(csmhedge_vertex(he_iterator), &x2, &y2, &z2);
+                csmmath_cross_product3D(x1, y1, z1, x2, y2, z2, &Ux_cross, &Uy_cross, &Uz_cross);
+                
+                next_hedge = csmhedge_next(he_iterator);
+                csmvertex_get_coordenadas(csmhedge_vertex(next_hedge), &x_next, &y_next, &z_next);
+                
+                volume += csmmath_dot_product3D(x_next, y_next, z_next, Ux_cross, Uy_cross, Uz_cross);
+                
+            }
+            while (he_iterator != loop_ledge);
+            
+            loop_iterator = csmloop_next(loop_iterator);
+        }
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+    
+    return volume / 6.;
+}
 
 
 

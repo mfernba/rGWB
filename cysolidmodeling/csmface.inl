@@ -40,6 +40,8 @@ CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_
 
 CYBOOL csmface_is_convex_hedge(struct csmface_t *face, struct csmhedge_t *hedge);
 
+double csmface_tolerace(const struct csmface_t *face);
+
 
 // Topology...
 
