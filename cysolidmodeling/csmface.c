@@ -412,6 +412,46 @@ double csmface_tolerace(const struct csmface_t *face)
 
 // ------------------------------------------------------------------------------------------
 
+CYBOOL csmface_is_coplanar_to_plane(
+                        const struct csmface_t *face,
+                        double A, double B, double C, double D,
+                        double tolerance,
+                        CYBOOL *same_orientation_opt)
+{
+    CYBOOL is_coplanar;
+    CYBOOL same_orientation_loc;
+    double Wx, Wy, Wz;
+    double dot;
+    
+    assert_no_null(face);
+    
+    csmmath_cross_product3D(face->A, face->B, face->C, A, B, C, &Wx, &Wy, &Wz);
+    dot = csmmath_dot_product3D(Wx, Wy, Wz, Wx, Wy, Wz);
+    
+    if (csmmath_compare_doubles(dot, 0., tolerance * tolerance) == CSMMATH_EQUAL_VALUES)
+    {
+        is_coplanar = CIERTO;
+        
+        dot = csmmath_dot_product3D(face->A, face->B, face->C, A, B, C);
+
+        if (csmmath_compare_doubles(dot, 0., tolerance) == CSMMATH_VALUE1_GREATER_THAN_VALUE2)
+            same_orientation_loc = CIERTO;
+        else
+            same_orientation_loc = FALSO;
+    }
+    else
+    {
+        is_coplanar = FALSO;
+        same_orientation_loc = FALSO;
+    }
+    
+    ASIGNA_OPC(same_orientation_opt, same_orientation_loc);
+    
+    return is_coplanar;
+}
+
+// ------------------------------------------------------------------------------------------
+
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face)
 {
     assert_no_null(face);

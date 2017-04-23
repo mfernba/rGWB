@@ -42,6 +42,12 @@ CYBOOL csmface_is_convex_hedge(struct csmface_t *face, struct csmhedge_t *hedge)
 
 double csmface_tolerace(const struct csmface_t *face);
 
+CYBOOL csmface_is_coplanar_to_plane(
+                        const struct csmface_t *face,
+                        double A, double B, double C, double D,
+                        double tolerance,
+                        CYBOOL *same_orientation);
+
 
 // Topology...
 
