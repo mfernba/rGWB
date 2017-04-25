@@ -158,6 +158,14 @@ struct csmvertex_t *csmhedge_vertex(struct csmhedge_t *hedge)
 
 // --------------------------------------------------------------------------------------------------------------
 
+const struct csmvertex_t *csmhedge_vertex_const(const struct csmhedge_t *hedge)
+{
+    assert_no_null(hedge);
+    return hedge->vertex;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 void csmhedge_set_vertex(struct csmhedge_t *hedge, struct csmvertex_t *vertex)
 {
     assert_no_null(hedge);

@@ -24,6 +24,18 @@ void csmsolid_remove_edge(struct csmsolid_t *solido, struct csmedge_t **edge);
 void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vertex);
 
 
+void csmsolid_move_face_to_solid(struct csmsolid_t *face_solid, struct csmface_t *face, struct csmsolid_t *destination_solid);
+
+void csmsolid_move_edge_to_solid(struct csmsolid_t *edge_solid, struct csmedge_t *edge, struct csmsolid_t *destination_solid);
+
+void csmsolid_move_vertex_to_solid(struct csmsolid_t *vertex_solid, struct csmvertex_t *vertex, struct csmsolid_t *destination_solid);
+
+
+CYBOOL csmsolid_contains_edge(const struct csmsolid_t *solid, const struct csmedge_t *edge);
+
+CYBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csmvertex_t *vertex);
+
+
 // Glue...
 
 struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_face);

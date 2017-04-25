@@ -23,6 +23,8 @@ struct csmedge_t *csmhedge_edge(struct csmhedge_t *hedge);
 void csmhedge_set_edge(struct csmhedge_t *hedge, struct csmedge_t *edge);
 
 struct csmvertex_t *csmhedge_vertex(struct csmhedge_t *hedge);
+const struct csmvertex_t *csmhedge_vertex_const(const struct csmhedge_t *hedge);
+
 void csmhedge_set_vertex(struct csmhedge_t *hedge, struct csmvertex_t *vertex);
 
 struct csmloop_t *csmhedge_loop(struct csmhedge_t *hedge);

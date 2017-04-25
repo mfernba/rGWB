@@ -305,6 +305,61 @@ void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vert
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_move_face_to_solid(struct csmsolid_t *face_solid, struct csmface_t *face, struct csmsolid_t *destination_solid)
+{
+    assert_no_null(face_solid);
+    assert_no_null(destination_solid);
+    
+    csmhashtb_remove_item(face_solid->sfaces, csmface_id(face), csmface_t);
+    
+    csmface_reassign_id(face, &destination_solid->id_nuevo_elemento, NULL);
+    csmhashtb_add_item(destination_solid->sfaces, csmface_id(face), face, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_move_edge_to_solid(struct csmsolid_t *edge_solid, struct csmedge_t *edge, struct csmsolid_t *destination_solid)
+{
+    assert_no_null(edge_solid);
+    assert_no_null(destination_solid);
+    
+    csmhashtb_remove_item(edge_solid->sedges, csmedge_id(edge), csmedge_t);
+    
+    csmedge_reassign_id(edge, &destination_solid->id_nuevo_elemento, NULL);
+    csmhashtb_add_item(destination_solid->sedges, csmedge_id(edge), edge, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_move_vertex_to_solid(struct csmsolid_t *vertex_solid, struct csmvertex_t *vertex, struct csmsolid_t *destination_solid)
+{
+    assert_no_null(vertex_solid);
+    assert_no_null(destination_solid);
+    
+    csmhashtb_remove_item(vertex_solid->svertexs, csmvertex_id(vertex), csmvertex_t);
+    
+    csmvertex_reassign_id(vertex, &destination_solid->id_nuevo_elemento, NULL);
+    csmhashtb_add_item(destination_solid->svertexs, csmvertex_id(vertex), vertex, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmsolid_contains_edge(const struct csmsolid_t *solid, const struct csmedge_t *edge)
+{
+    assert_no_null(solid);
+    return csmhashtb_contains_id(solid->sedges, csmedge_t, csmedge_id(edge), NULL);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csmvertex_t *vertex)
+{
+    assert_no_null(solid);
+    return csmhashtb_contains_id(solid->svertexs, csmvertex_t, csmvertex_id(vertex), NULL);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_face)
 {
     assert_no_null(solid);

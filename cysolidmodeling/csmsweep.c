@@ -232,6 +232,7 @@ static void i_create_lateral_faces(
     
     scan = arr_GetPunteroST(hedges_from_vertexs_bottom_face, 0, csmhedge_t);
     stop_hedge = csmhedge_prev(csmhedge_prev(scan));
+    num_iters = 0;
     
     while (csmhedge_next(scan) != stop_hedge)
     {

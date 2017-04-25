@@ -132,6 +132,20 @@ struct csmhedge_t *csmedge_hedge_lado(struct csmedge_t *edge, enum csmedge_lado_
 
 // --------------------------------------------------------------------------------------------------------------
 
+const struct csmhedge_t *csmedge_hedge_lado_const(const struct csmedge_t *edge, enum csmedge_lado_hedge_t lado)
+{
+    assert_no_null(edge);
+    
+    switch (lado)
+    {
+        case CSMEDGE_LADO_HEDGE_POS: return edge->he1;
+        case CSMEDGE_LADO_HEDGE_NEG: return edge->he2;
+        default_error();
+    }
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lado, struct csmhedge_t *hedge)
 {
     assert_no_null(edge);

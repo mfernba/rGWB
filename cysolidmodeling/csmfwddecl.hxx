@@ -13,9 +13,18 @@
 #include <stdio.h>
 #include <limits.h>
 
+#ifndef __cplusplus
 #define CYBOOL char
 #define CIERTO 1
 #define FALSO 0
+#endif
+
+#ifdef __cplusplus
+#define CYBOOL bool
+#define CIERTO true
+#define FALSO false
+#endif
+
 #define CONSTRUCTOR(type, name, params) type name params
 
 #define ES_CIERTO(condicion) (condicion) ? CIERTO: FALSO
@@ -23,6 +32,12 @@
 #define ASIGNA_OPC(a, b) if ((a) != NULL) *(a) = (b)
 
 #define DLL_CYSOLIDMODELING
+
+#define comparac_t ecomparacion_t
+#define comparac_IGUALES ECOMPARACION_IGUALES
+#define comparac_PRIMERO_MENOR ECOMPARACION_PRIMERO_MENOR
+#define comparac_PRIMERO_MAYOR ECOMPARACION_PRIMERO_MAYOR
+
 
 struct csmnode_t;
 struct csmvertex_t;
