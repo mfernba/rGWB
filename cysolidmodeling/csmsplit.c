@@ -1152,7 +1152,7 @@ CYBOOL csmsplit_does_plane_split_solid(
         does_plane_split_solid = FALSO;
         
         solid_above_loc = NULL;
-        solid_below = NULL;
+        solid_below_loc = NULL;
     }
     else
     {
