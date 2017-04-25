@@ -1049,6 +1049,7 @@ static void i_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_t *
         
             loop_ledge = csmloop_ledge(loop_iterator);
             he_iterator = loop_ledge;
+            no_iters = 0;
             
             do
             {
