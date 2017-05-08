@@ -32,6 +32,11 @@ double csmmath_dot_product3D(double Ux, double Uy, double Uz, double Vx, double 
 
 void csmmath_cross_product3D(double Ux, double Uy, double Uz, double Vx, double Vy, double Vz, double *Wx, double *Wy, double *Wz);
 
+void csmmath_move_point(
+						double x, double y, double z,
+						double Ux, double Uy, double Uz, double desp,
+                        double *x_desp, double *y_desp, double *z_desp);
+
 
 // Lines...
 
@@ -68,3 +73,13 @@ CYBOOL csmmath_exists_intersection_between_two_segments3D(
 // Planes...
 
 double csmmath_signed_distance_point_to_plane(double x, double y, double z, double A, double B, double C, double D);
+
+void csmmath_implicit_plane_equation(
+						double Xo, double Yo, double Zo,
+						double Ux, double Uy, double Uz,double Vx, double Vy, double Vz,
+                        double *A, double *B, double *C, double *D);
+
+void csmmath_plane_axis_from_implicit_plane_equation(
+						double A, double B, double C, double D,
+						double *Xo, double *Yo, double *Zo, 
+                        double *Ux, double *Uy, double *Uz, double *Vx, double *Vy, double *Vz);

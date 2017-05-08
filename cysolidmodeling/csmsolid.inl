@@ -7,6 +7,8 @@ CONSTRUCTOR(struct csmsolid_t *, csmsolid_crea_vacio, (void));
 
 unsigned long *csmsolid_id_new_element(struct csmsolid_t *solido);
 
+CYBOOL csmsolid_is_empty(const struct csmsolid_t *solido);
+
 
 // Adding, removing faces, edges, vertexs...
 

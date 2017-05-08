@@ -31,6 +31,8 @@ struct csmhashtb(i_item_t);
 typedef void (*i_FPtr_reassign_id)(struct i_item_t *item, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
 #define i_CHECK_FUNC_REASSIGN_ID(function, type) ((void(*)(struct type *, unsigned long *, unsigned long *))function == function)
 
+static CYBOOL i_DEBUG = CIERTO;
+
 // ----------------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
@@ -227,6 +229,24 @@ unsigned long *csmsolid_id_new_element(struct csmsolid_t *solido)
 
 // ----------------------------------------------------------------------------------------------------
 
+CYBOOL csmsolid_is_empty(const struct csmsolid_t *solido)
+{
+    assert_no_null(solido);
+    
+    if (csmhashtb_count(solido->sedges, csmedge_t) > 0)
+        return FALSO;
+    
+    if (csmhashtb_count(solido->sfaces, csmface_t) > 0)
+        return FALSO;
+    
+    if (csmhashtb_count(solido->svertexs, csmvertex_t) > 0)
+        return FALSO;
+    
+    return CIERTO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_append_new_face(struct csmsolid_t *solido, struct csmface_t **face)
 {
     struct csmface_t *face_loc;
@@ -310,10 +330,15 @@ void csmsolid_move_face_to_solid(struct csmsolid_t *face_solid, struct csmface_t
     assert_no_null(face_solid);
     assert_no_null(destination_solid);
     
+    if (i_DEBUG == CIERTO)
+        fprintf(stdout, "\tcsmsolid_move_face_to_solid(): face: %lu, solid: %p to solid: %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
+    
     csmhashtb_remove_item(face_solid->sfaces, csmface_id(face), csmface_t);
     
     csmface_reassign_id(face, &destination_solid->id_nuevo_elemento, NULL);
     csmhashtb_add_item(destination_solid->sfaces, csmface_id(face), face, csmface_t);
+    
+    csmface_set_fsolid(face, destination_solid);
 }
 
 // ----------------------------------------------------------------------------------------------------

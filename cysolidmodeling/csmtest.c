@@ -20,8 +20,10 @@
 #include "csmhashtb.inl"
 #include "csmglue.h"
 #include "csmface.inl"
+#include "csmmath.inl"
 #include "csmsolid.h"
 #include "csmsweep.h"
+#include "csmsplit.h"
 
 #include "cyassert.h"
 #include "a_pto3d.h"
@@ -394,7 +396,7 @@ static void i_test_solid_from_shape2D_with_hole(void)
 
 // ------------------------------------------------------------------------------------------
 
-static void i_test_union_solidos(void)
+static void i_test_union_solidos_por_loopglue(void)
 {
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1, *solid2;
@@ -419,6 +421,36 @@ static void i_test_union_solidos(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_divide_solido_rectangular_por_plano_medio(void)
+{
+    struct gccontorno_t *shape2d;
+    struct csmsolid_t *solid1;
+    double A, B, C, D;
+    CYBOOL splitted;
+    struct csmsolid_t *solid_above, *solid_below;
+    
+    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    
+    solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+    csmsolid_print_debug(solid1, CIERTO);
+    
+    csmmath_implicit_plane_equation(0., 0., .5, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
+    
+    splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
+    assert(splitted == CIERTO);
+
+    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid_above, CIERTO);
+    csmsolid_print_debug(solid_below, CIERTO);
+    
+    gccontorno_destruye(&shape2d);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid_above);
+    csmsolid_free(&solid_below);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     i_test_crea_destruye_solido_vacio();
@@ -430,7 +462,8 @@ void csmtest_test(void)
     i_test_tabla_hash();
     i_test_solid_from_shape2D();
     i_test_solid_from_shape2D_with_hole();
-    i_test_union_solidos();
+    i_test_union_solidos_por_loopglue();
+    i_test_divide_solido_rectangular_por_plano_medio();
 }
 
 

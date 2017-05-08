@@ -23,7 +23,7 @@ enum csmmath_double_relation_t csmmath_compare_doubles(double value1, double val
     
     if (diff < epsilon)
         return CSMMATH_EQUAL_VALUES;
-    else if (value1 < value1)
+    else if (value1 < value2)
         return CSMMATH_VALUE1_LESS_THAN_VALUE2;
     else
         return CSMMATH_VALUE1_GREATER_THAN_VALUE2;
@@ -169,6 +169,22 @@ void csmmath_cross_product3D(double Ux, double Uy, double Uz, double Vx, double 
 	*Wx = (Uy * Vz - Vy * Uz);
 	*Wy = -(Ux * Vz - Vx * Uz);
 	*Wz = (Ux * Vy - Vx * Uy);
+}
+
+//-------------------------------------------------------------------------------------------
+
+void csmmath_move_point(
+						double x, double y, double z,
+						double Ux, double Uy, double Uz, double desp,
+						double *x_desp, double *y_desp, double *z_desp)
+{
+	assert_no_null(x_desp);
+	assert_no_null(y_desp);
+	assert_no_null(z_desp);
+
+	*x_desp = x + Ux * desp;
+	*y_desp = y + Uy * desp;
+	*z_desp = z + Uz * desp;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -460,3 +476,81 @@ double csmmath_signed_distance_point_to_plane(double x, double y, double z, doub
 {
 	return A * x + B * y + C * z + D;
 }
+
+
+//-------------------------------------------------------------------------------------------
+
+void csmmath_implicit_plane_equation(
+						double Xo, double Yo, double Zo,
+						double Ux, double Uy, double Uz,double Vx, double Vy, double Vz,
+						double *A, double *B, double *C, double *D)
+{
+	assert_no_null(A);
+	assert_no_null(B);
+	assert_no_null(C);
+	assert_no_null(D);
+
+	csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, A, B, C);
+	csmmath_make_unit_vector3D(A, B, C);
+	
+	*D = -csmmath_dot_product3D(*A, *B, *C, Xo, Yo, Zo);
+}
+
+//-------------------------------------------------------------------------------------------
+
+static void i_anula_valores_despreciables(double *valor)
+{
+	assert_no_null(valor);
+	
+	if (ABS(*valor) < 1.e-20)
+		*valor = 0.;
+}
+
+//-------------------------------------------------------------------------------------------
+
+void csmmath_plane_axis_from_implicit_plane_equation(
+						double A, double B, double C, double D,
+						double *Xo, double *Yo, double *Zo, 
+						double *Ux, double *Uy, double *Uz, double *Vx, double *Vy, double *Vz)
+{
+	double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
+	
+	assert_no_null(Ux);
+	assert_no_null(Uy);
+	assert_no_null(Uz);
+	assert_no_null(Vx);
+	assert_no_null(Vy);
+	assert_no_null(Vz);
+	
+	if (ABS(A) < 1.e-6 && ABS(B) < 1.e-6 && ABS(C) > 1.e-6)
+	{	
+		Ux1 = 1.;
+		Uy1 = 0.;
+		Uz1 = 0.;
+	}
+	else
+	{
+		csmmath_cross_product3D(0., 0., 1., A, B, C, &Ux1, &Uy1, &Uz1);
+		i_anula_valores_despreciables(&Ux1);
+		i_anula_valores_despreciables(&Uy1);
+		i_anula_valores_despreciables(&Uz1);		
+		csmmath_make_unit_vector3D(&Ux1, &Uy1, &Uz1);
+	}
+		
+	csmmath_cross_product3D(A, B, C, Ux1, Uy1, Uz1, &Ux2, &Uy2, &Uz2);
+	i_anula_valores_despreciables(&Ux2);
+	i_anula_valores_despreciables(&Uy2);
+	i_anula_valores_despreciables(&Uz2);		
+	csmmath_make_unit_vector3D(&Ux2, &Uy2, &Uz2);
+	
+	csmmath_move_point(0., 0., 0., A, B, C, -D, Xo, Yo, Zo);
+	
+	*Ux = Ux1;
+	*Uy = Uy1;
+	*Uz = Uz1;
+	
+	*Vx = Ux2;
+	*Vy = Uy2;
+	*Vz = Uz2;
+}
+

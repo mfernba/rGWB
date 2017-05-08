@@ -65,7 +65,7 @@ void csmeuler_lkemr(
     new_loop = csmloop_crea(he1_and_he2_face, id_nuevo_elemento);
     csmface_add_loop_while_removing_from_old(he1_and_he2_face, new_loop);
  
-    he_iterator = csmhedge_next(he2_loc);
+    he_iterator = he2_loc;
     num_iteraciones = 0;
     
     do
