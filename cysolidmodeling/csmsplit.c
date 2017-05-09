@@ -891,7 +891,10 @@ static void i_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
             csmeuler_lmef(he1, he2_next, &new_face, NULL, NULL);
             
             if (i_DEBUG == CIERTO)
+            {
                 fprintf(stdout, "Split(): (SAME LOOP) joining edges (%lu, %lu) with LMEF, new face %lu.\n", csmhedge_id(he1), csmhedge_id(he2), csmface_id(new_face));
+                csmsolid_print_debug(csmface_fsolid(new_face), CIERTO);
+            }
         }
         else
         {
@@ -942,17 +945,36 @@ static void i_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_cut_he(struct csmhedge_t *hedge, ArrEstructura(csmface_t) *set_of_null_faces)
+static bool i_is_same_edge_by_ptr(const struct csmedge_t *edge1, const struct csmedge_t *edge2)
 {
+    return edge1 == edge2;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_cut_he(
+                    struct csmhedge_t *hedge,
+                    ArrEstructura(csmedge_t) *set_of_null_edges,
+                    ArrEstructura(csmface_t) *set_of_null_faces,
+                    unsigned long *no_null_edges_deleted)
+{
+    unsigned long idx;
     struct csmsolid_t *solid;
     struct csmedge_t *edge;
     struct csmhedge_t *he1_edge, *he2_edge;
+    
+    assert_no_null(no_null_edges_deleted);
     
     solid = csmopbas_solid_from_hedge(hedge);
     
     edge = csmhedge_edge(hedge);
     he1_edge = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
     he2_edge = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+
+    idx = arr_BuscarEstructuraST(set_of_null_edges, csmedge_t, edge, struct csmedge_t, i_is_same_edge_by_ptr);
+    assert(idx != ULONG_MAX);
+    arr_BorrarEstructuraST(set_of_null_edges, idx, NULL, csmedge_t);
+    (*no_null_edges_deleted)++;
     
     if (csmhedge_loop(he1_edge) == csmhedge_loop(he2_edge))
     {
@@ -1029,11 +1051,48 @@ static void i_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_null_edges)
+{
+    unsigned long i, num_null_edges;
+    
+    num_null_edges = arr_NumElemsPunteroST(set_of_null_edges, csmedge_t);
+    
+    fprintf(stdout, "Set of null edges:\n");
+    
+    for (i = 0; i < num_null_edges; i++)
+    {
+        const struct csmedge_t *edge;
+        const struct csmhedge_t *he1, *he2;
+        const struct csmvertex_t *vertex1;
+        double x, y, z;
+        
+        edge = arr_GetPunteroST(set_of_null_edges, i, csmedge_t);
+        assert_no_null(edge);
+        
+        he1 = csmedge_hedge_lado_const(edge, CSMEDGE_LADO_HEDGE_POS);
+        he2 = csmedge_hedge_lado_const(edge, CSMEDGE_LADO_HEDGE_NEG);
+        
+        vertex1 = csmhedge_vertex_const(he1);
+        csmvertex_get_coordenadas(vertex1, &x, &y, &z);
+        
+        
+        fprintf(
+                stdout,
+                "\t[%lu] (%5.3g, %5.3g, %5.3g)\t[he1, loop, face] = (%lu, %lu, %lu)\t[he2, loop, face] = (%lu, %lu, %lu)) \n",
+                csmedge_id(edge), x, y, z,
+                csmhedge_id(he1), csmloop_id(csmhedge_loop((struct csmhedge_t *)he1)), csmface_id(csmopbas_face_from_hedge((struct csmhedge_t *)he1)),
+                csmhedge_id(he2), csmloop_id(csmhedge_loop((struct csmhedge_t *)he2)), csmface_id(csmopbas_face_from_hedge((struct csmhedge_t *)he2)));
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEstructura(csmface_t) **set_of_null_faces)
 {
     ArrEstructura(csmface_t) *set_of_null_faces_loc;
     ArrEstructura(csmhedge_t) *loose_ends;
     unsigned long i, no_null_edges;
+    unsigned long no_null_edges_deleted;
     
     arr_QSortPunteroST(set_of_null_edges, i_compare_edges_by_coord, csmedge_t);
     no_null_edges = arr_NumElemsPunteroST(set_of_null_edges, csmedge_t);
@@ -1043,13 +1102,20 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
     set_of_null_faces_loc = arr_CreaPunteroST(0, csmface_t);
     loose_ends = arr_CreaPunteroST(0, csmhedge_t);
     
+    no_null_edges_deleted = 0;
+    
     for (i = 0; i < no_null_edges; i++)
     {
+        unsigned long idx;
         struct csmedge_t *next_edge;
         struct csmhedge_t *he1_next_edge, *he2_next_edge;
         struct csmhedge_t *matching_loose_end_he1, *matching_loose_end_he2;
         
-        next_edge = arr_GetPunteroST(set_of_null_edges, i, csmedge_t);
+        if (i_DEBUG == CIERTO)
+            i_print_set_of_null_edges(set_of_null_edges);
+        
+        idx = i - no_null_edges_deleted;
+        next_edge = arr_GetPunteroST(set_of_null_edges, idx, csmedge_t);
         
         he1_next_edge = csmedge_hedge_lado(next_edge, CSMEDGE_LADO_HEDGE_POS);
         he2_next_edge = csmedge_hedge_lado(next_edge, CSMEDGE_LADO_HEDGE_NEG);
@@ -1059,7 +1125,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
             i_join_hedges(matching_loose_end_he1, he1_next_edge);
             
             if (i_is_loose_end(csmopbas_mate(matching_loose_end_he1), loose_ends) == FALSO)
-                i_cut_he(matching_loose_end_he1, set_of_null_faces_loc);
+                i_cut_he(matching_loose_end_he1, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         }
         else
         {
@@ -1071,7 +1137,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
             i_join_hedges(matching_loose_end_he2, he2_next_edge);
             
             if (i_is_loose_end(csmopbas_mate(matching_loose_end_he2), loose_ends) == FALSO)
-                i_cut_he(matching_loose_end_he2, set_of_null_faces_loc);
+                i_cut_he(matching_loose_end_he2, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         }
         else
         {
@@ -1079,7 +1145,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
         }
         
         if (matching_loose_end_he1 != NULL && matching_loose_end_he2 != NULL)
-            i_cut_he(he1_next_edge, set_of_null_faces_loc);
+            i_cut_he(he1_next_edge, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         
         if (i_DEBUG == CIERTO)
         {
@@ -1090,6 +1156,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
     
     *set_of_null_faces = set_of_null_faces_loc;
     
+    assert(arr_NumElemsPunteroST(set_of_null_edges, csmedge_t) == 0);
     assert(arr_NumElemsPunteroST(loose_ends, csmhedge_t) == 0);
     arr_DestruyeEstructurasST(&loose_ends, NULL, csmhedge_t);
 }
@@ -1139,51 +1206,55 @@ static void i_move_face_to_solid(
                         struct csmface_t *face, struct csmsolid_t *face_solid,
                         struct csmsolid_t *destination_solid)
 {
-    register struct csmloop_t *loop_iterator;
-    
     assert(recursion_level < 10000);
-    assert(csmface_fsolid(face) == face_solid);
     
-    if (i_DEBUG == CIERTO)
+    if (csmface_fsolid(face) != destination_solid)
     {
-        fprintf(stdout, "Split(): Moving face %lu (solid %p) to solid %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
+        register struct csmloop_t *loop_iterator;
+    
         assert(csmface_fsolid(face) == face_solid);
-    }
-    
-    csmsolid_move_face_to_solid(face_solid, face, destination_solid);
-    
-    loop_iterator = csmface_floops(face);
-    
-    while (loop_iterator != NULL)
-    {
-        register struct csmhedge_t *loop_ledge, *he_iterator;
-        unsigned long no_iters;
         
-        loop_ledge = csmloop_ledge(loop_iterator);
-        he_iterator = loop_ledge;
-        no_iters = 0;
-        
-        do
+        if (i_DEBUG == CIERTO)
         {
-            struct csmhedge_t *he_mate_iterator;
-            struct csmface_t *he_mate_iterator_face;
-            struct csmsolid_t *he_mate_iterator_face_solid;
-            
-            assert(no_iters < 10000);
-            no_iters++;
-            
-            he_mate_iterator = csmopbas_mate(he_iterator);
-            he_mate_iterator_face = csmopbas_face_from_hedge(he_mate_iterator);
-            he_mate_iterator_face_solid = csmface_fsolid(he_mate_iterator_face);
-            
-            if (he_mate_iterator_face_solid != destination_solid)
-                i_move_face_to_solid(recursion_level + 1, he_mate_iterator_face, he_mate_iterator_face_solid, destination_solid);
-            
-            he_iterator = csmhedge_next(he_iterator);
+            fprintf(stdout, "Split(): Moving face %lu (solid %p) to solid %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
+            assert(csmface_fsolid(face) == face_solid);
         }
-        while (he_iterator != loop_ledge);
         
-        loop_iterator = csmloop_next(loop_iterator);
+        csmsolid_move_face_to_solid(face_solid, face, destination_solid);
+        
+        loop_iterator = csmface_floops(face);
+        
+        while (loop_iterator != NULL)
+        {
+            register struct csmhedge_t *loop_ledge, *he_iterator;
+            unsigned long no_iters;
+            
+            loop_ledge = csmloop_ledge(loop_iterator);
+            he_iterator = loop_ledge;
+            no_iters = 0;
+            
+            do
+            {
+                struct csmhedge_t *he_mate_iterator;
+                struct csmface_t *he_mate_iterator_face;
+                struct csmsolid_t *he_mate_iterator_face_solid;
+                
+                assert(no_iters < 10000);
+                no_iters++;
+                
+                he_mate_iterator = csmopbas_mate(he_iterator);
+                he_mate_iterator_face = csmopbas_face_from_hedge(he_mate_iterator);
+                he_mate_iterator_face_solid = csmface_fsolid(he_mate_iterator_face);
+                
+                if (he_mate_iterator_face_solid != destination_solid)
+                    i_move_face_to_solid(recursion_level + 1, he_mate_iterator_face, he_mate_iterator_face_solid, destination_solid);
+                
+                he_iterator = csmhedge_next(he_iterator);
+            }
+            while (he_iterator != loop_ledge);
+            
+            loop_iterator = csmloop_next(loop_iterator);
+        }
     }
 }
 

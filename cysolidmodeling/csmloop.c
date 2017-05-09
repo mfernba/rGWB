@@ -137,6 +137,14 @@ struct csmloop_t *csmloop_duplicate(
 
 // --------------------------------------------------------------------------------------------------------------
 
+unsigned long csmloop_id(const struct csmloop_t *loop)
+{
+    assert_no_null(loop);
+    return csmnode_id(CSMNODE(loop));
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 void csmloop_face_equation(
                         const struct csmloop_t *loop,
                         double *A, double *B, double *C, double *D)

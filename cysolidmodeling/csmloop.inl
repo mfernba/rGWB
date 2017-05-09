@@ -12,6 +12,9 @@ CONSTRUCTOR(struct csmloop_t *, csmloop_duplicate, (
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
 
+unsigned long csmloop_id(const struct csmloop_t *loop);
+
+
 // Geometry...
 
 void csmloop_face_equation(
