@@ -37,12 +37,15 @@ CYBOOL csmsolid_contains_edge(const struct csmsolid_t *solid, const struct csmed
 
 CYBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csmvertex_t *vertex);
 
+void csmsolid_clear_algorithm_vertex_mask(struct csmsolid_t *solid);
+
 
 // Glue...
 
 struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_face);
 
 void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to_merge);
+
 
 
 // Geometry...

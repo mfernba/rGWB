@@ -1,6 +1,7 @@
 // Vertex...
 
 #include "csmvertex.inl"
+#include "csmvertex.tli"
 
 #include "csmhashtb.inl"
 #include "csmmath.inl"
@@ -16,6 +17,8 @@ struct csmvertex_t
     
     double x, y, z;
     struct csmhedge_t *hedge;
+    
+    csmvertex_mask_t algorithm_attrib_mask;
 };
 
 // ----------------------------------------------------------------------------------------------------
@@ -23,7 +26,8 @@ struct csmvertex_t
 CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
 						unsigned long id,
                         double x, double y, double z,
-                        struct csmhedge_t *hedge))
+                        struct csmhedge_t *hedge,
+                        csmvertex_mask_t algorithm_attrib_mask))
 {
     struct csmvertex_t *vertex;
     
@@ -36,6 +40,8 @@ CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
     vertex->z = z;
     
     vertex->hedge = hedge;
+    
+    vertex->algorithm_attrib_mask = algorithm_attrib_mask;
 
     return vertex;
 }
@@ -46,12 +52,15 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
 {
     unsigned long id;
     struct csmhedge_t *hedge;
+    csmvertex_mask_t algorithm_attrib_mask;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
     
     hedge = NULL;
     
-    return i_crea(id, x, y, z, hedge);
+    algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
+    
+    return i_crea(id, x, y, z, hedge, algorithm_attrib_mask);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -60,12 +69,15 @@ CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y
 {
     unsigned long id;
     struct csmhedge_t *hedge;
+    csmvertex_mask_t algorithm_attrib_mask;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
     
     hedge = NULL;
     
-    return i_crea(id, x, y, z, hedge);
+    algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
+    
+    return i_crea(id, x, y, z, hedge, algorithm_attrib_mask);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -128,6 +140,46 @@ void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge)
 {
     assert_no_null(vertex);
     vertex->hedge = hedge;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmvertex_has_mask_attrib(const struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib)
+{
+    assert_no_null(vertex);
+    return ES_CIERTO((vertex->algorithm_attrib_mask & mask_attrib) == (csmvertex_mask_t)1);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+csmvertex_mask_t csmvertex_get_mask_attrib(const struct csmvertex_t *vertex)
+{
+    assert_no_null(vertex);
+    return vertex->algorithm_attrib_mask;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmvertex_set_mask_attrib(struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib)
+{
+    assert_no_null(vertex);
+    vertex->algorithm_attrib_mask |= mask_attrib;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmvertex_clear_mask_attrib(struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib)
+{
+    assert_no_null(vertex);
+    vertex->algorithm_attrib_mask &= ~mask_attrib;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmvertex_clear_mask(struct csmvertex_t *vertex)
+{
+    assert_no_null(vertex);
+    vertex->algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
 }
 
 // ----------------------------------------------------------------------------------------------------

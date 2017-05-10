@@ -1,6 +1,8 @@
 // Vertex...
 
 #include "csmfwddecl.hxx"
+#include "csmvertex.hxx"
+
 
 CONSTRUCTOR(struct csmvertex_t *, csmvertex_crea, (double x, double y, double z, unsigned long *id_nuevo_elemento));
 
@@ -17,15 +19,28 @@ unsigned long csmvertex_id(const struct csmvertex_t *vertex);
 void csmvertex_reassign_id(struct csmvertex_t *vertex, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
 
 
-// Topología...
+// Topology...
 
 struct csmhedge_t *csmvertex_hedge(struct csmvertex_t *vertex);
 
 void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge);
 
 
+// Algorithm masks...
 
-// Geometría...
+CYBOOL csmvertex_has_mask_attrib(const struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib);
+
+csmvertex_mask_t csmvertex_get_mask_attrib(const struct csmvertex_t *vertex);
+
+void csmvertex_set_mask_attrib(struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib);
+
+void csmvertex_clear_mask_attrib(struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib);
+
+void csmvertex_clear_mask(struct csmvertex_t *vertex);
+
+
+
+// Geometry...
 
 void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, double *y, double *z);
 

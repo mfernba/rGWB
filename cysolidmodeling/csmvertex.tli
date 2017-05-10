@@ -1,0 +1,4 @@
+// Vertex...
+
+#define CSMVERTEX_NULL_MASK ((long)0)
+#define CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP 0x00000001

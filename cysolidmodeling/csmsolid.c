@@ -385,6 +385,28 @@ CYBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csm
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_clear_algorithm_vertex_mask(struct csmsolid_t *solid)
+{
+    struct csmhashtb_iterator(csmvertex_t) *iterator;
+    
+    assert_no_null(solid);
+    
+    iterator = csmhashtb_create_iterator(solid->svertexs, csmvertex_t);
+    
+    while (csmhashtb_has_next(iterator, csmvertex_t) == CIERTO)
+    {
+        struct csmvertex_t *vertex;
+        
+        csmhashtb_next_pair(iterator, NULL, &vertex, csmvertex_t);
+        csmvertex_clear_mask(vertex);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmvertex_t);
+    
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_face)
 {
     assert_no_null(solid);

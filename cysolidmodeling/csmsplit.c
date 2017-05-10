@@ -14,6 +14,7 @@
 #include "csmeuler_lmfkrh.inl"
 #include "csmeuler_lkef.inl"
 #include "csmeuler_lkemr.inl"
+#include "csmeuler_lkfmrh.inl"
 #include "csmeuler_laringmv.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
@@ -23,6 +24,7 @@
 #include "csmsolid.tli"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
+#include "csmvertex.tli"
 
 #include "a_punter.h"
 #include "cyassert.h"
@@ -232,6 +234,71 @@ static void i_append_vertex_if_not_exists(struct csmvertex_t *vertex, ArrEstruct
 
 // ----------------------------------------------------------------------------------------------------
 
+static CYBOOL i_is_hedge_on_inner_loop(struct csmhedge_t *hedge)
+{
+    struct csmloop_t *hedge_loop;
+    struct csmface_t *face_loop;
+    
+    hedge_loop = csmhedge_loop(hedge);
+    face_loop = csmloop_lface(hedge_loop);
+    
+    if (csmface_flout(face_loop) != hedge_loop)
+        return CIERTO;
+    else
+        return FALSO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static CYBOOL i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(struct csmhedge_t *hedge)
+{
+    register struct csmhedge_t *iterator;
+    unsigned long no_iters;
+    
+    iterator = hedge;
+    no_iters = 0;
+    
+    do
+    {
+        struct csmhedge_t *iterator_mate;
+
+        assert(no_iters < 100000);
+        no_iters++;
+
+        iterator_mate = csmopbas_mate(iterator);
+        
+        if (i_is_hedge_on_inner_loop(iterator) == CIERTO || i_is_hedge_on_inner_loop(iterator_mate) == CIERTO)
+            return CIERTO;
+        else
+            iterator = csmhedge_next(iterator);
+        
+    } while (iterator != hedge);
+    
+    return FALSO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static CYBOOL i_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(struct csmedge_t *edge)
+{
+    struct csmhedge_t *hedge_pos, *hedge_neg;
+    
+    hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+    hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+    
+    if (i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(hedge_pos) == CIERTO
+            || i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(hedge_neg) == CIERTO)
+    {
+        return CIERTO;
+    }
+    else
+    {
+        return FALSO;
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
                         struct csmsolid_t *work_solid,
                         double A, double B, double C, double D))
@@ -251,6 +318,7 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
         struct csmvertex_t *vertex_pos, *vertex_neg;
         double dist_to_plane_pos, dist_to_plane_neg;
         enum i_position_t cl_resp_plane_pos, cl_resp_plane_neg;
+        csmvertex_mask_t new_vertex_algorithm_attrib_mask;
         
         csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
         
@@ -260,6 +328,11 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
         hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
         i_classify_hedge_respect_to_plane(hedge_neg, A, B, C, D, &vertex_neg, &dist_to_plane_neg, &cl_resp_plane_neg);
         
+        if (i_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(edge) == CIERTO)
+            new_vertex_algorithm_attrib_mask = CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP;
+        else
+            new_vertex_algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
+
         if (i_DEBUG == CIERTO)
         {
             double x_pos, y_pos, z_pos, x_neg, y_neg, z_neg;
@@ -299,6 +372,8 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
             csmeuler_lmev(hedge_pos, hedge_neg_next, x_inters, y_inters, z_inters, &new_vertex, NULL, NULL, NULL);
             arr_AppendPunteroST(set_of_on_vertices, new_vertex, csmvertex_t);
             
+            csmvertex_set_mask_attrib(new_vertex, new_vertex_algorithm_attrib_mask);
+            
             if (i_DEBUG == CIERTO)
                 fprintf(stdout, "\tIntersection at (%g, %g, %g), New Vertex Id: %lu\n", x_inters, y_inters, z_inters, csmvertex_id(new_vertex));
         }
@@ -306,6 +381,7 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
         {
             if (cl_resp_plane_pos == i_POSITION_ON)
             {
+                csmvertex_set_mask_attrib(vertex_pos, new_vertex_algorithm_attrib_mask);
                 i_append_vertex_if_not_exists(vertex_pos, set_of_on_vertices);
                 
                 if (i_DEBUG == CIERTO)
@@ -314,6 +390,7 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
             
             if (cl_resp_plane_neg == i_POSITION_ON)
             {
+                csmvertex_set_mask_attrib(vertex_neg, new_vertex_algorithm_attrib_mask);
                 i_append_vertex_if_not_exists(vertex_neg, set_of_on_vertices);
                 
                 if (i_DEBUG == CIERTO)
@@ -627,6 +704,9 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
 {
     ArrEstructura(i_neighborhood_t) *vertex_neighborhood;
     unsigned long start_idx;
+    csmvertex_mask_t vertex_algorithm_mask;
+    
+    vertex_algorithm_mask = csmvertex_get_mask_attrib(vertex);
     
     vertex_neighborhood = i_initial_vertex_neighborhood(vertex, A, B, C, D);
     i_print_debug_info_vertex_neighborhood("Initial", vertex, vertex_neighborhood);
@@ -662,6 +742,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
         while (process_next_sequence == CIERTO)
         {
             struct i_neighborhood_t *tail_neighborhood;
+            struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
             
             assert(num_iters < 100000);
@@ -688,8 +769,10 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
                         csmhedge_id(tail_neighborhood->hedge));
             }
             
-            csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, NULL, &null_edge, NULL, NULL);
+            csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
             arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+            
+            csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             
             while (i_is_below_above_sequence_at_index(vertex_neighborhood, idx) == FALSO)
             {
@@ -1163,12 +1246,15 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_convert_inner_loops_of_null_faces_to_faces_solid_below(ArrEstructura(csmface_t) *set_of_null_faces)
+CONSTRUCTOR(static ArrEstructura(csmface_t) *, i_convert_inner_loops_of_null_faces_to_faces_solid_below, (ArrEstructura(csmface_t) *set_of_null_faces))
 {
+    ArrEstructura(csmface_t) *set_of_null_faces_below;
     unsigned long i, no_null_faces;
     
     no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
     assert(no_null_faces > 0);
+    
+    set_of_null_faces_below = arr_CreaPunteroST(0, csmface_t);
     
     for (i = 0; i < no_null_faces; i++)
     {
@@ -1190,13 +1276,111 @@ static void i_convert_inner_loops_of_null_faces_to_faces_solid_below(ArrEstructu
             if (loop_to_move != csmface_flout(null_face))
             {
                 csmeuler_lmfkrh(loop_to_move, &new_face);
-                arr_AppendPunteroST(set_of_null_faces, new_face, csmface_t);
+                arr_AppendPunteroST(set_of_null_faces_below, new_face, csmface_t);
             }
             
             loop_to_move = next_loop;
                 
         } while (loop_to_move != NULL);
     }
+    
+    return set_of_null_faces_below;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static CYBOOL i_is_face_originated_by_hole(struct csmface_t *face)
+{
+    struct csmloop_t *floops;
+    
+    floops = csmface_floops(face);
+    
+    if (csmloop_next(floops) != NULL)
+    {
+        return FALSO;
+    }
+    else
+    {
+        struct csmhedge_t *loop_ledge, *hedge_iterator;
+        unsigned long no_iters;
+        
+        loop_ledge = csmloop_ledge(floops);
+        hedge_iterator = loop_ledge;
+        no_iters = 0;
+        
+        do
+        {
+            struct csmvertex_t *vertex;
+            
+            assert(no_iters < 100000);
+            no_iters++;
+            
+            vertex = csmhedge_vertex(hedge_iterator);
+            
+            if (csmvertex_has_mask_attrib(vertex, CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP) == FALSO)
+                return FALSO;
+            
+        } while (hedge_iterator != loop_ledge);
+        
+        return CIERTO;
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_t) *set_of_null_faces)
+{
+    unsigned long no_iters;
+    CYBOOL did_delete_faces;
+    
+    no_iters = 0;
+    
+    do
+    {
+        unsigned long i, no_null_faces;
+
+        assert(no_iters < 1000000);
+        no_iters++;
+        
+        no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+        assert(no_null_faces > 0);
+        
+        did_delete_faces = FALSO;
+        
+        for (i = 0; i < no_null_faces && did_delete_faces == FALSO; i++)
+        {
+            struct csmface_t *face_i;
+            
+            face_i = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+            
+            if (i_is_face_originated_by_hole(face_i) == CIERTO)
+            {
+                unsigned long j;
+                struct csmloop_t *floops_face_i;
+                
+                floops_face_i = csmface_floops(face_i);
+            
+                for (j = 0; j < no_null_faces && did_delete_faces == FALSO; j++)
+                {
+                    if (i != j)
+                    {
+                        struct csmface_t *face_j;
+                    
+                        face_j = arr_GetPunteroST(set_of_null_faces, j, csmface_t);
+                    
+                        if (csmface_is_loop_contained_in_face(face_j, floops_face_i) == CIERTO)
+                        {
+                            did_delete_faces = CIERTO;
+                            
+                            csmeuler_lkfmrh(face_j, &face_i);
+                            arr_BorrarEstructuraST(set_of_null_faces, i, NULL, csmface_t);
+                        }
+                    }
+                }
+            }
+        }
+        
+    } while (did_delete_faces == CIERTO);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1330,17 +1514,23 @@ static void i_finish_split(
 {
     unsigned long i, no_null_faces;
     struct csmsolid_t *solid_above_loc, *solid_below_loc;
+    ArrEstructura(csmface_t) *set_of_null_faces_below;
 
-    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
-    assert(no_null_faces > 0);
     assert_no_null(solid_above);
     assert_no_null(solid_below);
 
     if (i_DEBUG == CIERTO)
         csmsolid_print_debug(work_solid, CIERTO);
 
-    i_convert_inner_loops_of_null_faces_to_faces_solid_below(set_of_null_faces);
-    assert(2 * no_null_faces == arr_NumElemsPunteroST(set_of_null_faces, csmface_t));
+    set_of_null_faces_below = i_convert_inner_loops_of_null_faces_to_faces_solid_below(set_of_null_faces);
+    
+    csmsolid_redo_geometric_generated_data(work_solid);
+    i_reintroduce_holes_in_corresponding_faces(set_of_null_faces);
+    i_reintroduce_holes_in_corresponding_faces(set_of_null_faces_below);
+
+    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_below, csmface_t));
+    assert(no_null_faces > 0);
     
     if (i_DEBUG == CIERTO)
         csmsolid_print_debug(work_solid, CIERTO);
@@ -1356,7 +1546,7 @@ static void i_finish_split(
         face_to_solid_above = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
         i_move_face_to_solid(0, face_to_solid_above, work_solid, solid_above_loc);
         
-        face_to_solid_below = arr_GetPunteroST(set_of_null_faces, i + no_null_faces, csmface_t);
+        face_to_solid_below = arr_GetPunteroST(set_of_null_faces_below, i, csmface_t);
         i_move_face_to_solid(0, face_to_solid_below, work_solid, solid_below_loc);
     }
     
@@ -1372,6 +1562,8 @@ static void i_finish_split(
     
     *solid_above = solid_above_loc;
     *solid_below = solid_below_loc;
+    
+    arr_DestruyeEstructurasST(&set_of_null_faces_below, NULL, csmface_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1392,6 +1584,7 @@ CYBOOL csmsplit_does_plane_split_solid(
     
     work_solid = csmsolid_duplicate(solid);
     csmsolid_redo_geometric_generated_data(work_solid);
+    csmsolid_clear_algorithm_vertex_mask(work_solid);
     
     set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D);
     set_of_null_edges = i_insert_nulledges_to_split_solid(A, B, C, D, set_of_on_vertices);
@@ -1412,6 +1605,9 @@ CYBOOL csmsplit_does_plane_split_solid(
         i_join_null_edges(set_of_null_edges, &set_of_null_faces);
         i_finish_split(set_of_null_faces, work_solid, &solid_above_loc, &solid_below_loc);
 
+        csmsolid_clear_algorithm_vertex_mask(solid_above_loc);
+        csmsolid_clear_algorithm_vertex_mask(solid_below_loc);
+        
         assert(csmsolid_is_empty(work_solid) == CIERTO);
 
         arr_DestruyeEstructurasST(&set_of_null_faces, NULL, csmface_t);
