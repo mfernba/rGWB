@@ -47,6 +47,8 @@
 		55089F4E1E8996B500B9570B /* csmglue.c in Sources */ = {isa = PBXBuildFile; fileRef = 55089F4C1E8996B500B9570B /* csmglue.c */; };
 		55089F4F1E8996B500B9570B /* csmglue.h in Headers */ = {isa = PBXBuildFile; fileRef = 55089F4D1E8996B500B9570B /* csmglue.h */; };
 		551327701EC3AF1100F2B04D /* csmvertex.tli in Headers */ = {isa = PBXBuildFile; fileRef = 5513276F1EC3AF1100F2B04D /* csmvertex.tli */; };
+		551327771ECB9A6000F2B04D /* csmsetopcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 551327751ECB9A6000F2B04D /* csmsetopcom.c */; };
+		551327781ECB9A6000F2B04D /* csmsetopcom.inl in Headers */ = {isa = PBXBuildFile; fileRef = 551327761ECB9A6000F2B04D /* csmsetopcom.inl */; };
 		55244B1D1E9F9DC0006F546E /* csmeuler_laringmv.c in Sources */ = {isa = PBXBuildFile; fileRef = 55244B1B1E9F9DC0006F546E /* csmeuler_laringmv.c */; };
 		55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55244B1C1E9F9DC0006F546E /* csmeuler_laringmv.inl */; };
 		55244B241EA0255A006F546E /* csmtransform.c in Sources */ = {isa = PBXBuildFile; fileRef = 55244B221EA0255A006F546E /* csmtransform.c */; };
@@ -205,6 +207,8 @@
 		55089F4D1E8996B500B9570B /* csmglue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = csmglue.h; sourceTree = "<group>"; };
 		5513276F1EC3AF1100F2B04D /* csmvertex.tli */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmvertex.tli; sourceTree = "<group>"; };
 		551327741EC3B06800F2B04D /* csmvertex.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmvertex.hxx; sourceTree = "<group>"; };
+		551327751ECB9A6000F2B04D /* csmsetopcom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetopcom.c; sourceTree = "<group>"; };
+		551327761ECB9A6000F2B04D /* csmsetopcom.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsetopcom.inl; sourceTree = "<group>"; };
 		55244B1B1E9F9DC0006F546E /* csmeuler_laringmv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmeuler_laringmv.c; sourceTree = "<group>"; };
 		55244B1C1E9F9DC0006F546E /* csmeuler_laringmv.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmeuler_laringmv.inl; sourceTree = "<group>"; };
 		55244B221EA0255A006F546E /* csmtransform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmtransform.c; sourceTree = "<group>"; };
@@ -325,17 +329,27 @@
 			name = "Hash Table";
 			sourceTree = "<group>";
 		};
+		551327791ECB9F7400F2B04D /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				5532DDB71E8FFE810047B9DF /* csmloopglue.inl */,
+				5532DDB61E8FFE810047B9DF /* csmloopglue.c */,
+				551327761ECB9A6000F2B04D /* csmsetopcom.inl */,
+				551327751ECB9A6000F2B04D /* csmsetopcom.c */,
+			);
+			name = Common;
+			sourceTree = "<group>";
+		};
 		5570129B1E83286400DFC490 /* Algorithms */ = {
 			isa = PBXGroup;
 			children = (
+				551327791ECB9F7400F2B04D /* Common */,
 				5570129F1E8328E400DFC490 /* csmsweep.h */,
 				5570129E1E8328E400DFC490 /* csmsweep.c */,
 				55089F4D1E8996B500B9570B /* csmglue.h */,
 				55089F4C1E8996B500B9570B /* csmglue.c */,
 				55244B291EAA57C4006F546E /* csmsplit.h */,
 				55244B281EAA57C4006F546E /* csmsplit.c */,
-				5532DDB71E8FFE810047B9DF /* csmloopglue.inl */,
-				5532DDB61E8FFE810047B9DF /* csmloopglue.c */,
 			);
 			name = Algorithms;
 			sourceTree = "<group>";
@@ -529,6 +543,7 @@
 				5507A6E41E7B4077008B9F73 /* a_pto2d.h in Headers */,
 				5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */,
 				55244B271EA02AED006F546E /* csmsolid.h in Headers */,
+				551327781ECB9A6000F2B04D /* csmsetopcom.inl in Headers */,
 				55089F4F1E8996B500B9570B /* csmglue.h in Headers */,
 				5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */,
 				5579547E1E5E1403000FC91E /* csmhedge.inl in Headers */,
@@ -694,6 +709,7 @@
 				5579546F1E5DB24E000FC91E /* csmvertex.c in Sources */,
 				557012BC1E832F0300DFC490 /* csmgeom.c in Sources */,
 				5507A6881E736714008B9F73 /* csmeuler_lringmv.c in Sources */,
+				551327771ECB9A6000F2B04D /* csmsetopcom.c in Sources */,
 				55244B241EA0255A006F546E /* csmtransform.c in Sources */,
 				5579548C1E5E41C1000FC91E /* csmedge.c in Sources */,
 				557954681E5DB0A8000FC91E /* cyassert.c in Sources */,
