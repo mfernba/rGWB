@@ -538,6 +538,53 @@ void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
+struct csmhashtb_iterator(csmvertex_t) *csmsolid_vertex_iterator(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    return csmhashtb_create_iterator(solid->svertexs, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
+                        struct csmsolid_t *solid,
+                        const struct csmvertex_t *vertex,
+                        double tolerance,
+                        struct csmvertex_t **coincident_vertex)
+{
+    CYBOOL contains_vertex;
+    struct csmvertex_t *coincident_vertex_loc;
+    struct csmhashtb_iterator(csmvertex_t) *iterator;
+    
+    assert_no_null(solid);
+    assert_no_null(coincident_vertex);
+
+    contains_vertex = FALSO;
+    coincident_vertex_loc = NULL;
+    
+    iterator = csmhashtb_create_iterator(solid->svertexs, csmvertex_t);
+    
+    while (csmhashtb_has_next(iterator, csmvertex_t) == CIERTO)
+    {
+        struct csmvertex_t *vertex_i;
+        
+        csmhashtb_next_pair(iterator, NULL, &vertex_i, csmvertex_t);
+        
+        if (csmvertex_equal_coords(vertex, vertex_i, tolerance) == CIERTO)
+        {
+            contains_vertex = CIERTO;
+            coincident_vertex_loc = vertex_i;
+            break;
+        }
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmvertex_t);
+    
+    return contains_vertex;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_edge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_es_integro)
 {
     struct csmnode_t *edge_node;

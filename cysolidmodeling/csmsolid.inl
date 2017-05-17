@@ -52,6 +52,13 @@ void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to
 
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid);
 
+CONSTRUCTOR(struct csmhashtb_iterator(csmvertex_t) *, csmsolid_vertex_iterator, (struct csmsolid_t *solid));
+
+CYBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
+                        struct csmsolid_t *solid,
+                        const struct csmvertex_t *vertex,
+                        double tolerance,
+                        struct csmvertex_t **coincident_vertex);
 
 
 // Debug...
