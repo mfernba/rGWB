@@ -247,144 +247,6 @@ CYBOOL csmsolid_is_empty(const struct csmsolid_t *solido)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_append_new_face(struct csmsolid_t *solido, struct csmface_t **face)
-{
-    struct csmface_t *face_loc;
-    
-    assert_no_null(solido);
-    assert_no_null(face);
-    
-    face_loc = csmface_crea(solido, &solido->id_nuevo_elemento);
-    csmhashtb_add_item(solido->sfaces, csmface_id(face_loc), face_loc, csmface_t);
-    
-    *face = face_loc;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsolid_append_new_edge(struct csmsolid_t *solido, struct csmedge_t **edge)
-{
-    struct csmedge_t *edge_loc;
-    
-    assert_no_null(solido);
-    assert_no_null(edge);
-    
-    edge_loc = csmedge_crea(&solido->id_nuevo_elemento);
-    csmhashtb_add_item(solido->sedges, csmedge_id(edge_loc), edge_loc, csmedge_t);
-    
-    *edge = edge_loc;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, double z, struct csmvertex_t **vertex)
-{
-    struct csmvertex_t *vertex_loc;
-    
-    assert_no_null(solido);
-    assert_no_null(vertex);
-    
-    vertex_loc = csmvertex_crea(x, y, z, &solido->id_nuevo_elemento);
-    csmhashtb_add_item(solido->svertexs, csmvertex_id(vertex_loc), vertex_loc, csmvertex_t);
-    
-    *vertex = vertex_loc;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsolid_remove_face(struct csmsolid_t *solido, struct csmface_t **face)
-{
-    assert_no_null(solido);
-    assert_no_null(face);
-    
-    csmhashtb_remove_item(solido->sfaces, csmface_id(*face), csmface_t);
-    csmface_destruye(face);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsolid_remove_edge(struct csmsolid_t *solido, struct csmedge_t **edge)
-{
-    assert_no_null(solido);
-    assert_no_null(edge);
-
-    csmhashtb_remove_item(solido->sedges, csmedge_id(*edge), csmedge_t);
-    csmedge_destruye(edge);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vertex)
-{
-    assert_no_null(solido);
-    assert_no_null(vertex);
-
-    csmhashtb_remove_item(solido->svertexs, csmvertex_id(*vertex), csmvertex_t);
-    csmvertex_destruye(vertex);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsolid_move_face_to_solid(struct csmsolid_t *face_solid, struct csmface_t *face, struct csmsolid_t *destination_solid)
-{
-    assert_no_null(face_solid);
-    assert_no_null(destination_solid);
-    
-    if (i_DEBUG == CIERTO)
-        fprintf(stdout, "\tcsmsolid_move_face_to_solid(): face: %lu, solid: %p to solid: %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
-    
-    csmhashtb_remove_item(face_solid->sfaces, csmface_id(face), csmface_t);
-    
-    csmface_reassign_id(face, &destination_solid->id_nuevo_elemento, NULL);
-    csmhashtb_add_item(destination_solid->sfaces, csmface_id(face), face, csmface_t);
-    
-    csmface_set_fsolid(face, destination_solid);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsolid_move_edge_to_solid(struct csmsolid_t *edge_solid, struct csmedge_t *edge, struct csmsolid_t *destination_solid)
-{
-    assert_no_null(edge_solid);
-    assert_no_null(destination_solid);
-    
-    csmhashtb_remove_item(edge_solid->sedges, csmedge_id(edge), csmedge_t);
-    
-    csmedge_reassign_id(edge, &destination_solid->id_nuevo_elemento, NULL);
-    csmhashtb_add_item(destination_solid->sedges, csmedge_id(edge), edge, csmedge_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsolid_move_vertex_to_solid(struct csmsolid_t *vertex_solid, struct csmvertex_t *vertex, struct csmsolid_t *destination_solid)
-{
-    assert_no_null(vertex_solid);
-    assert_no_null(destination_solid);
-    
-    csmhashtb_remove_item(vertex_solid->svertexs, csmvertex_id(vertex), csmvertex_t);
-    
-    csmvertex_reassign_id(vertex, &destination_solid->id_nuevo_elemento, NULL);
-    csmhashtb_add_item(destination_solid->svertexs, csmvertex_id(vertex), vertex, csmvertex_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-CYBOOL csmsolid_contains_edge(const struct csmsolid_t *solid, const struct csmedge_t *edge)
-{
-    assert_no_null(solid);
-    return csmhashtb_contains_id(solid->sedges, csmedge_t, csmedge_id(edge), NULL);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-CYBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csmvertex_t *vertex)
-{
-    assert_no_null(solid);
-    return csmhashtb_contains_id(solid->svertexs, csmvertex_t, csmvertex_id(vertex), NULL);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 void csmsolid_clear_algorithm_vertex_mask(struct csmsolid_t *solid)
 {
     struct csmhashtb_iterator(csmvertex_t) *iterator;
@@ -402,15 +264,33 @@ void csmsolid_clear_algorithm_vertex_mask(struct csmsolid_t *solid)
     }
     
     csmhashtb_free_iterator(&iterator, csmvertex_t);
-    
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_face)
+static void i_redo_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces)
+{
+    struct csmhashtb_iterator(csmface_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        csmface_redo_geometric_generated_data(face);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
-    return csmhashtb_ptr_for_id(solid->sfaces, id_face, csmface_t);
+    i_redo_geometric_generated_data(solid->sfaces);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -511,29 +391,164 @@ void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_redo_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces)
+void csmsolid_append_new_face(struct csmsolid_t *solido, struct csmface_t **face)
 {
-    struct csmhashtb_iterator(csmface_t) *iterator;
+    struct csmface_t *face_loc;
     
-    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    assert_no_null(solido);
+    assert_no_null(face);
     
-    while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
-    {
-        struct csmface_t *face;
-        
-        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
-        csmface_redo_geometric_generated_data(face);
-    }
+    face_loc = csmface_crea(solido, &solido->id_nuevo_elemento);
+    csmhashtb_add_item(solido->sfaces, csmface_id(face_loc), face_loc, csmface_t);
     
-    csmhashtb_free_iterator(&iterator, csmface_t);
+    *face = face_loc;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
+void csmsolid_remove_face(struct csmsolid_t *solido, struct csmface_t **face)
+{
+    assert_no_null(solido);
+    assert_no_null(face);
+    
+    csmhashtb_remove_item(solido->sfaces, csmface_id(*face), csmface_t);
+    csmface_destruye(face);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_move_face_to_solid(struct csmsolid_t *face_solid, struct csmface_t *face, struct csmsolid_t *destination_solid)
+{
+    assert_no_null(face_solid);
+    assert_no_null(destination_solid);
+    
+    if (i_DEBUG == CIERTO)
+        fprintf(stdout, "\tcsmsolid_move_face_to_solid(): face: %lu, solid: %p to solid: %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
+    
+    csmhashtb_remove_item(face_solid->sfaces, csmface_id(face), csmface_t);
+    
+    csmface_reassign_id(face, &destination_solid->id_nuevo_elemento, NULL);
+    csmhashtb_add_item(destination_solid->sfaces, csmface_id(face), face, csmface_t);
+    
+    csmface_set_fsolid(face, destination_solid);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmhashtb_iterator(csmface_t) *csmsolid_face_iterator(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
-    i_redo_geometric_generated_data(solid->sfaces);
+    return csmhashtb_create_iterator(solid->sfaces, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_face)
+{
+    assert_no_null(solid);
+    return csmhashtb_ptr_for_id(solid->sfaces, id_face, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_append_new_edge(struct csmsolid_t *solido, struct csmedge_t **edge)
+{
+    struct csmedge_t *edge_loc;
+    
+    assert_no_null(solido);
+    assert_no_null(edge);
+    
+    edge_loc = csmedge_crea(&solido->id_nuevo_elemento);
+    csmhashtb_add_item(solido->sedges, csmedge_id(edge_loc), edge_loc, csmedge_t);
+    
+    *edge = edge_loc;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_remove_edge(struct csmsolid_t *solido, struct csmedge_t **edge)
+{
+    assert_no_null(solido);
+    assert_no_null(edge);
+
+    csmhashtb_remove_item(solido->sedges, csmedge_id(*edge), csmedge_t);
+    csmedge_destruye(edge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_move_edge_to_solid(struct csmsolid_t *edge_solid, struct csmedge_t *edge, struct csmsolid_t *destination_solid)
+{
+    assert_no_null(edge_solid);
+    assert_no_null(destination_solid);
+    
+    csmhashtb_remove_item(edge_solid->sedges, csmedge_id(edge), csmedge_t);
+    
+    csmedge_reassign_id(edge, &destination_solid->id_nuevo_elemento, NULL);
+    csmhashtb_add_item(destination_solid->sedges, csmedge_id(edge), edge, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmsolid_contains_edge(const struct csmsolid_t *solid, const struct csmedge_t *edge)
+{
+    assert_no_null(solid);
+    return csmhashtb_contains_id(solid->sedges, csmedge_t, csmedge_id(edge), NULL);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmhashtb_iterator(csmedge_t) *csmsolid_edge_iterator(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    return csmhashtb_create_iterator(solid->sedges, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, double z, struct csmvertex_t **vertex)
+{
+    struct csmvertex_t *vertex_loc;
+    
+    assert_no_null(solido);
+    assert_no_null(vertex);
+    
+    vertex_loc = csmvertex_crea(x, y, z, &solido->id_nuevo_elemento);
+    csmhashtb_add_item(solido->svertexs, csmvertex_id(vertex_loc), vertex_loc, csmvertex_t);
+    
+    *vertex = vertex_loc;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vertex)
+{
+    assert_no_null(solido);
+    assert_no_null(vertex);
+
+    csmhashtb_remove_item(solido->svertexs, csmvertex_id(*vertex), csmvertex_t);
+    csmvertex_destruye(vertex);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_move_vertex_to_solid(struct csmsolid_t *vertex_solid, struct csmvertex_t *vertex, struct csmsolid_t *destination_solid)
+{
+    assert_no_null(vertex_solid);
+    assert_no_null(destination_solid);
+    
+    csmhashtb_remove_item(vertex_solid->svertexs, csmvertex_id(vertex), csmvertex_t);
+    
+    csmvertex_reassign_id(vertex, &destination_solid->id_nuevo_elemento, NULL);
+    csmhashtb_add_item(destination_solid->svertexs, csmvertex_id(vertex), vertex, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csmvertex_t *vertex)
+{
+    assert_no_null(solid);
+    return csmhashtb_contains_id(solid->svertexs, csmvertex_t, csmvertex_id(vertex), NULL);
 }
 
 // ----------------------------------------------------------------------------------------------------
