@@ -36,6 +36,13 @@ CYBOOL csmface_contains_point(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc);
 
+enum csmmath_double_relation_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex);
+
+CYBOOL csmface_exists_intersection_between_line_and_face_plane(
+                        const struct csmface_t *face,
+                        double x1, double y1, double z1, double x2, double y2, double z2,
+                        double *x_inters_opc, double *y_inters_opc, double *z_inters_opc, double *t_inters_opc);
+
 CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_t *loop);
 
 CYBOOL csmface_is_convex_hedge(struct csmface_t *face, struct csmhedge_t *hedge);

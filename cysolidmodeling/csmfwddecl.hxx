@@ -34,10 +34,12 @@
 #define DLL_CYSOLIDMODELING
 
 #define comparac_t ecomparacion_t
+
+#ifndef __cplusplus
 #define comparac_IGUALES ECOMPARACION_IGUALES
 #define comparac_PRIMERO_MENOR ECOMPARACION_PRIMERO_MENOR
 #define comparac_PRIMERO_MAYOR ECOMPARACION_PRIMERO_MAYOR
-
+#endif
 
 struct csmnode_t;
 struct csmvertex_t;

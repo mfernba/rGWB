@@ -9,6 +9,16 @@
 #include "csmsetop.h"
 
 #include "csmhashtb.inl"
+#include "csmhedge.inl"
+#include "csmedge.inl"
+#include "csmedge.tli"
+#include "csmeuler_lmev.inl"
+#include "csmeuler_lkemr.inl"
+#include "csmface.inl"
+#include "csmloop.inl"
+#include "csmmath.inl"
+#include "csmmath.tli"
+#include "csmopbas.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmtolerance.inl"
@@ -21,6 +31,7 @@
 
 ArrEstructura(i_vv_inters_t);
 ArrEstructura(i_vf_inters_t);
+ArrEstructura(i_edge_intersection_t);
 ArrEstructura(csmedge_t);
 ArrEstructura(csmface_t);
 
@@ -39,7 +50,9 @@ struct i_vv_inters_t
 struct i_vf_inters_t
 {
     struct csmvertex_t *vertex;
+    
     struct csmface_t *face;
+    struct csmhedge_t *null_edge_internal_loop;
 };
 
 struct i_solid_data_t
@@ -64,7 +77,7 @@ struct i_edge_intersection_t
 
     enum i_type_edge_intersection_t type;
     struct csmvertex_t *vertex;
-    struct csmedge_t *edge;
+    struct csmhedge_t *hedge;
     struct csmface_t *face;
 };
 
@@ -94,14 +107,19 @@ static void i_free_vv_inters(struct i_vv_inters_t **vv_inters)
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct i_vf_inters_t *, i_create_vf_inters, (struct csmvertex_t *vertex, struct csmface_t *face))
+CONSTRUCTOR(static struct i_vf_inters_t *, i_create_vf_inters, (
+                        struct csmvertex_t *vertex,
+                        struct csmface_t *face,
+                        struct csmhedge_t *null_edge_internal_loop))
 {
     struct i_vf_inters_t *vf_inters;
     
     vf_inters = MALLOC(struct i_vf_inters_t);
     
     vf_inters->vertex = vertex;
+    
     vf_inters->face = face;
+    vf_inters->null_edge_internal_loop = null_edge_internal_loop;
     
     return vf_inters;
 }
@@ -172,7 +190,7 @@ CONSTRUCTOR(static struct i_edge_intersection_t *, i_create_edge_intersection, (
                         double t,
                         enum i_type_edge_intersection_t type,
                         struct csmvertex_t *vertex,
-                        struct csmedge_t *edge,
+                        struct csmhedge_t *hedge,
                         struct csmface_t *face))
 {
     struct i_edge_intersection_t *edge_intersection;
@@ -186,7 +204,7 @@ CONSTRUCTOR(static struct i_edge_intersection_t *, i_create_edge_intersection, (
     
     edge_intersection->type = type;
     edge_intersection->vertex = vertex;
-    edge_intersection->edge = edge;
+    edge_intersection->hedge = hedge;
     edge_intersection->face = face;
     
     return edge_intersection;
@@ -241,20 +259,318 @@ static void i_append_common_vertices_solid_A_on_solid_B(
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static ArrEstructura(i_vv_inters_t) *, i_locate_common_vertices, (struct csmsolid_t *solid_A, struct csmsolid_t *solid_B))
+static void i_append_common_vertices_solid_A_and_B_not_previously_found(
+                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        ArrEstructura(i_vv_inters_t) *vv_intersections)
 {
-    ArrEstructura(i_vv_inters_t) *vv_intersections;
-    
-    assert_no_null(solid_A);
-    assert_no_null(solid_B);
-    
-    vv_intersections = arr_CreaPunteroST(0, i_vv_inters_t);
     i_append_common_vertices_solid_A_on_solid_B(solid_A, solid_B, vv_intersections);
     i_append_common_vertices_solid_A_on_solid_B(solid_B, solid_A, vv_intersections);
-    
-    return vv_intersections;
 }
+
+// ------------------------------------------------------------------------------------------
+
+static CYBOOL i_exists_intersection_between_A_edge_and_B_face(
+                        struct csmedge_t *edge_A, struct csmface_t *face_B,
+                        struct i_edge_intersection_t **edge_intersection)
+{
+    CYBOOL exists_intersection;
+    struct i_edge_intersection_t *edge_intersection_loc;
+    struct csmhedge_t *hedge_pos, *hedge_neg;
+    struct csmvertex_t *vertex_pos, *vertex_neg;
+    double x1, y1, z1, x2, y2, z2, t;
+    double x_inters, y_inters, z_inters;
+    
+    assert_no_null(edge_intersection);
+    
+    hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_POS);
+    vertex_pos = csmhedge_vertex(hedge_pos);
+    csmvertex_get_coordenadas(vertex_pos, &x1, &y1, &z1);
+
+    hedge_neg = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_NEG);
+    vertex_neg = csmhedge_vertex(hedge_neg);
+    csmvertex_get_coordenadas(vertex_neg, &x2, &y2, &z2);
+
+    if (csmface_exists_intersection_between_line_and_face_plane(
+                    face_B,
+                    x1, y1, z1, x2, y2, z2,
+                    &x_inters, &y_inters, &z_inters, &t) == FALSO)
+    {
+        exists_intersection = FALSO;
+        edge_intersection_loc = NULL;
+    }
+    else
+    {
+        enum csmmath_contaiment_point_loop_t type_of_containment;
+        struct csmvertex_t *hit_vertex;
+        struct csmhedge_t *hit_hedge;
+        
+        exists_intersection = CIERTO;
+
+        hit_vertex = NULL;
+        hit_hedge = NULL;
+        
+        if (csmface_contains_point(
+                        face_B,
+                        x_inters, y_inters, z_inters,
+                        &type_of_containment,
+                        &hit_vertex,
+                        &hit_hedge) == FALSO)
+        {
+            exists_intersection = FALSO;
+            edge_intersection_loc = NULL;
+        }
+        else
+        {
+            enum i_type_edge_intersection_t intersection_type;
             
+            exists_intersection = CIERTO;
+            
+            switch (type_of_containment)
+            {
+                case CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR:
+                    
+                    intersection_type = i_TYPE_EDGE_INTERSECTION_INTERIOR_FACE;
+                    break;
+                    
+                case CSMMATH_CONTAIMENT_POINT_LOOP_ON_VERTEX:
+                    
+                    intersection_type = i_TYPE_EDGE_INTERSECTION_VERTEX;
+                    break;
+                    
+                case CSMMATH_CONTAIMENT_POINT_LOOP_ON_HEDGE:
+                    
+                    intersection_type = i_TYPE_EDGE_INTERSECTION_INTERIOR_EDGE;
+                    break;
+                    
+                default_error();
+            }
+            
+            edge_intersection_loc = i_create_edge_intersection(
+                        x_inters, y_inters, z_inters,
+                        t,
+                        intersection_type,
+                        hit_vertex, hit_hedge, face_B);
+        }
+    }
+    
+    *edge_intersection = edge_intersection_loc;
+    
+    return exists_intersection;
+}
+
+// ------------------------------------------------------------------------------------------
+    
+static enum comparac_t i_compara_edge_intersection(
+                        const struct i_edge_intersection_t *edge_intersection1,
+                        const struct i_edge_intersection_t *edge_intersection2)
+{
+    double tolerance;
+    
+    assert_no_null(edge_intersection1);
+    assert_no_null(edge_intersection2);
+    
+    tolerance = csmtolerance_relative_position_over_edge();
+    
+    switch (csmmath_compare_doubles(edge_intersection1->t, edge_intersection2->t, tolerance))
+    {
+        case CSMMATH_VALUE1_LESS_THAN_VALUE2:
+            
+            return comparac_PRIMERO_MENOR;
+            
+        case CSMMATH_EQUAL_VALUES:
+            
+            return comparac_IGUALES;
+            
+        case CSMMATH_VALUE1_GREATER_THAN_VALUE2:
+            
+            return comparac_PRIMERO_MAYOR;
+            
+        default_error();
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_append_new_vv_inters(
+                        struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b,
+                        ArrEstructura(i_vv_inters_t) *vv_intersections)
+{
+    struct i_vv_inters_t *vv_inters;
+    
+    csmvertex_set_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
+    csmvertex_set_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
+    
+    vv_inters = i_create_vv_inters(vertex_a, vertex_b);
+    arr_AppendPunteroST(vv_intersections, vv_inters, i_vv_inters_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_append_new_vf_inters(
+                        struct csmvertex_t *vertex_a, struct csmface_t *face_b, struct csmhedge_t *null_edge_internal_loop,
+                        ArrEstructura(i_vf_inters_t) *vertex_face_neighborhood)
+{
+    struct i_vf_inters_t *vf_inters;
+    
+    vf_inters = i_create_vf_inters(vertex_a, face_b, null_edge_internal_loop);
+    arr_AppendPunteroST(vertex_face_neighborhood, vf_inters, i_vf_inters_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_process_edge_intersections(
+                        struct csmedge_t *edge,
+                        const ArrEstructura(i_edge_intersection_t) *edge_intersecctions,
+                        ArrEstructura(i_vv_inters_t) *vv_intersections,
+                        ArrEstructura(i_vf_inters_t) *vertex_face_neighborhood)
+{
+    unsigned long i, num_intersections;
+    
+    num_intersections = arr_NumElemsPunteroST(edge_intersecctions, i_edge_intersection_t);
+    assert(num_intersections > 0);
+    
+    for (i = 0; i < num_intersections; i++)
+    {
+        const struct i_edge_intersection_t *edge_intersection;
+        struct csmhedge_t *hedge_pos, *hedge_neg;
+        struct csmhedge_t *hedge_pos_next;
+        struct csmvertex_t *new_vertex;
+        
+        edge_intersection = arr_GetPunteroConstST(edge_intersecctions, i, i_edge_intersection_t);
+        assert_no_null(edge_intersection);
+        
+        hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+        hedge_pos_next = csmhedge_next(hedge_pos);
+        
+        hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+        
+        csmeuler_lmev(
+                    hedge_neg, hedge_pos_next, 
+                    edge_intersection->x, edge_intersection->y, edge_intersection->z,
+                    &new_vertex,
+                    NULL,
+                    NULL, NULL);
+        
+        switch (edge_intersection->type)
+        {
+            case i_TYPE_EDGE_INTERSECTION_VERTEX:
+                
+                i_append_new_vv_inters(new_vertex, edge_intersection->vertex, vv_intersections);
+                break;
+                
+            case i_TYPE_EDGE_INTERSECTION_INTERIOR_EDGE:
+            {
+                struct csmhedge_t *hedge_on_B, *mate_hedge_on_B, *mate_hedge_on_B_next;
+                struct csmvertex_t *new_vertex_on_B;
+                
+                hedge_on_B = edge_intersection->hedge;
+                
+                mate_hedge_on_B = csmopbas_mate(edge_intersection->hedge);
+                mate_hedge_on_B_next = csmhedge_next(mate_hedge_on_B);
+                
+                csmeuler_lmev(
+                              hedge_on_B, mate_hedge_on_B_next,
+                              edge_intersection->x, edge_intersection->y, edge_intersection->z,
+                              &new_vertex_on_B,
+                              NULL,
+                              NULL, NULL);
+                
+                i_append_new_vv_inters(new_vertex, new_vertex_on_B, vv_intersections);
+                break;
+            }
+                
+            case i_TYPE_EDGE_INTERSECTION_INTERIOR_FACE:
+            {
+                struct csmloop_t *flout_face;
+                struct csmhedge_t *ledge_flout_face;
+                struct csmvertex_t *new_vertex_on_B;
+                struct csmedge_t *edge_to_delete_on_B;
+                struct csmhedge_t *hedge_pos_to_delete, *hedge_neg_to_delete;
+                struct csmhedge_t *null_edge_internal_loop;
+                
+                flout_face = csmface_flout(edge_intersection->face);
+                ledge_flout_face = csmloop_ledge(flout_face);
+
+                csmeuler_lmev(
+                              ledge_flout_face, ledge_flout_face,
+                              edge_intersection->x, edge_intersection->y, edge_intersection->z,
+                              &new_vertex_on_B,
+                              &edge_to_delete_on_B,
+                              NULL, NULL);
+                
+                hedge_pos_to_delete = csmedge_hedge_lado(edge_to_delete_on_B, CSMEDGE_LADO_HEDGE_POS);
+                hedge_neg_to_delete = csmedge_hedge_lado(edge_to_delete_on_B, CSMEDGE_LADO_HEDGE_NEG);
+                
+                csmeuler_lkemr(&hedge_pos_to_delete, &hedge_neg_to_delete, NULL, &null_edge_internal_loop);
+                assert(csmhedge_vertex(null_edge_internal_loop) == new_vertex_on_B);
+                
+                i_append_new_vv_inters(new_vertex, new_vertex_on_B, vv_intersections);
+                i_append_new_vf_inters(new_vertex, edge_intersection->face, null_edge_internal_loop, vertex_face_neighborhood);
+                break;
+            }
+                
+             default_error();
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_generate_intersections_edge_with_solid_faces(
+                        struct csmedge_t *edge_A,
+                        struct csmsolid_t *solid_B,
+                        ArrEstructura(i_vv_inters_t) *vv_intersections,
+                        ArrEstructura(i_vf_inters_t) *vertex_face_neighborhood)
+{
+    ArrEstructura(i_edge_intersection_t) *edge_intersecctions;
+    struct csmhashtb_iterator(csmface_t) *face_iterator_B;
+    
+    edge_intersecctions = arr_CreaPunteroST(0, i_edge_intersection_t);
+    face_iterator_B = csmsolid_face_iterator(solid_B);
+
+    while (csmhashtb_has_next(face_iterator_B, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face_B;
+        struct i_edge_intersection_t *edge_intersection;
+    
+        csmhashtb_next_pair(face_iterator_B, NULL, &face_B, csmface_t);
+        
+        if (i_exists_intersection_between_A_edge_and_B_face(edge_A, face_B, &edge_intersection) == CIERTO)
+            arr_AppendPunteroST(edge_intersecctions, edge_intersection, i_edge_intersection_t);
+    }
+    
+    if (arr_NumElemsPunteroST(edge_intersecctions, i_edge_intersection_t) > 0)
+    {
+        arr_QSortPunteroST(edge_intersecctions, i_compara_edge_intersection, i_edge_intersection_t);
+        i_process_edge_intersections(edge_A, edge_intersecctions, vv_intersections, vertex_face_neighborhood);
+    }
+    
+    csmhashtb_free_iterator(&face_iterator_B, csmface_t);
+    arr_DestruyeEstructurasST(&edge_intersecctions, i_free_edge_intersection, i_edge_intersection_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_generate_edge_intersections_solid_A_with_solid_B(
+                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        ArrEstructura(i_vv_inters_t) *vv_intersections,
+                        ArrEstructura(i_vf_inters_t) *vertex_face_neighborhood)
+{
+    struct csmhashtb_iterator(csmedge_t) *edge_iterator_A;
+    
+    edge_iterator_A = csmsolid_edge_iterator(solid_A);
+    
+    while (csmhashtb_has_next(edge_iterator_A, csmedge_t) == CIERTO)
+    {
+        struct csmedge_t *edge_A;
+        
+        csmhashtb_next_pair(edge_iterator_A, NULL, &edge_A, csmedge_t);
+        i_generate_intersections_edge_with_solid_faces(edge_A, solid_B, vv_intersections, vertex_face_neighborhood);
+    }
+    
+    csmhashtb_free_iterator(&edge_iterator_A, csmedge_t);
+}
+
 // ------------------------------------------------------------------------------------------
 
 static void i_generate_intersections_on_both_solids(
@@ -269,11 +585,18 @@ static void i_generate_intersections_on_both_solids(
     assert_no_null(vv_intersections);
     assert_no_null(solid_data_A);
     assert_no_null(solid_data_B);
-    
+
+    vv_intersections_loc = arr_CreaPunteroST(0, i_vv_inters_t);
+
     solid_data_A_loc = i_create_empty_solid_data();
-    solid_data_B_loc = i_create_empty_solid_data();
+    assert_no_null(solid_data_A_loc);
     
-    vv_intersections_loc = i_locate_common_vertices(solid_A, solid_B);
+    solid_data_B_loc = i_create_empty_solid_data();
+    assert_no_null(solid_data_B_loc);
+
+    i_generate_edge_intersections_solid_A_with_solid_B(solid_A, solid_B, vv_intersections_loc, solid_data_A_loc->vertex_face_neighborhood);
+    i_generate_edge_intersections_solid_A_with_solid_B(solid_B, solid_A, vv_intersections_loc, solid_data_B_loc->vertex_face_neighborhood);
+    i_append_common_vertices_solid_A_and_B_not_previously_found(solid_A, solid_B, vv_intersections_loc);
     
     *vv_intersections = vv_intersections_loc;
     *solid_data_A = solid_data_A_loc;

@@ -313,6 +313,90 @@ CYBOOL csmface_contains_point(
 
 // ------------------------------------------------------------------------------------------
 
+enum csmmath_double_relation_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex)
+{
+    double x, y, z;
+    double dist;
+    
+    assert_no_null(face);
+    
+    csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    dist = csmmath_signed_distance_point_to_plane(x, y, z, face->A, face->B, face->C, face->D);
+    
+    return csmmath_compare_doubles(dist, 0., face->fuzzy_epsilon);
+}
+
+// ------------------------------------------------------------------------------------------
+
+CYBOOL csmface_exists_intersection_between_line_and_face_plane(
+                        const struct csmface_t *face,
+                        double x1, double y1, double z1, double x2, double y2, double z2,
+                        double *x_inters_opc, double *y_inters_opc, double *z_inters_opc, double *t_inters_opc)
+{
+    CYBOOL exists_intersection;
+    double x_inters_loc, y_inters_loc, z_inters_loc, t_inters_loc;
+    double dist1, dist2;
+    enum csmmath_double_relation_t relation1, relation2;
+    
+    assert_no_null(face);
+    
+    dist1 = csmmath_signed_distance_point_to_plane(x1, y1, z1, face->A, face->B, face->C, face->D);
+    relation1 = csmmath_compare_doubles(dist1, 0., face->fuzzy_epsilon);
+    
+    dist2 = csmmath_signed_distance_point_to_plane(x2, y2, z2, face->A, face->B, face->C, face->D);
+    relation2 = csmmath_compare_doubles(dist2, 0., face->fuzzy_epsilon);
+    
+    if ((relation1 == CSMMATH_VALUE1_LESS_THAN_VALUE2 && relation2 == CSMMATH_VALUE1_GREATER_THAN_VALUE2)
+            || (relation1 == CSMMATH_VALUE1_GREATER_THAN_VALUE2 && relation2 == CSMMATH_VALUE1_LESS_THAN_VALUE2))
+    {
+        exists_intersection = CIERTO;
+        
+        t_inters_loc = dist1 / (dist1 - dist2);
+            
+        x_inters_loc = x1 + t_inters_loc * (x2 - x1);
+        y_inters_loc = y1 + t_inters_loc * (y2 - y1);
+        z_inters_loc = z1 + t_inters_loc * (z2 - z1);
+    }
+    else if (relation1 == CSMMATH_EQUAL_VALUES && relation2 != CSMMATH_EQUAL_VALUES)
+    {
+        exists_intersection = CIERTO;
+        
+        t_inters_loc = 0.;
+            
+        x_inters_loc = x1;
+        y_inters_loc = y1;
+        z_inters_loc = z1;
+    }
+    else if (relation1 != CSMMATH_EQUAL_VALUES && relation2 == CSMMATH_EQUAL_VALUES)
+    {
+        exists_intersection = CIERTO;
+        
+        t_inters_loc = 1.;
+            
+        x_inters_loc = x2;
+        y_inters_loc = y2;
+        z_inters_loc = z2;
+    }
+    else
+    {
+        exists_intersection = FALSO;
+        
+        x_inters_loc = 0.;
+        y_inters_loc = 0.;
+        z_inters_loc = 0.;
+        t_inters_loc = 0.;
+    }
+    
+    ASIGNA_OPC(x_inters_opc, x_inters_loc);
+    ASIGNA_OPC(y_inters_opc, y_inters_loc);
+    ASIGNA_OPC(z_inters_opc, z_inters_loc);
+    ASIGNA_OPC(t_inters_opc, t_inters_loc);
+    
+    return exists_intersection;
+}
+
+// ------------------------------------------------------------------------------------------
+
 CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
