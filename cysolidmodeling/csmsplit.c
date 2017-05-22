@@ -454,6 +454,8 @@ static void i_reclassify_on_edge_vertex_neighborhood(
             assert(prev_hedge_neighborhood->position == i_POSITION_BELOW && next_hedge_neighborhood->position == i_POSITION_ABOVE);
             new_position = i_POSITION_BELOW;
         }
+        
+        hedge_neighborhood->position = new_position;
     }
 }
 
