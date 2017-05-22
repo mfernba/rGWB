@@ -1,0 +1,21 @@
+// Boolean operations on solids...
+
+#ifndef csmsetop_tli_h
+#define csmsetop_tli_h
+
+enum csmsetop_operation_t
+{
+    CSMSETOP_OPERATION_UNION,
+    CSMSETOP_OPERATION_INTERSECTION,
+    CSMSETOP_OPERATION_DIFFERENCE
+};
+
+enum csmsetop_classify_resp_solid_t
+{
+    CSMSETOP_CLASSIFY_RESP_SOLID_OUT,
+    CSMSETOP_CLASSIFY_RESP_SOLID_IN,
+    CSMSETOP_CLASSIFY_RESP_SOLID_ON
+};
+
+
+#endif /* csmsetop_tli_h */
