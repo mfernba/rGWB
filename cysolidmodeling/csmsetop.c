@@ -431,13 +431,20 @@ static void i_append_new_vv_inters(
                         struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b,
                         ArrEstructura(i_vv_inters_t) *vv_intersections)
 {
-    struct i_vv_inters_t *vv_inters;
+    if (csmvertex_has_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CIERTO)
+    {
+        assert(csmvertex_has_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CIERTO);
+    }
+    else
+    {
+        struct i_vv_inters_t *vv_inters;
+        
+        csmvertex_set_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
+        csmvertex_set_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
     
-    csmvertex_set_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
-    csmvertex_set_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
-    
-    vv_inters = i_create_vv_inters(vertex_a, vertex_b);
-    arr_AppendPunteroST(vv_intersections, vv_inters, i_vv_inters_t);
+        vv_inters = i_create_vv_inters(vertex_a, vertex_b);
+        arr_AppendPunteroST(vv_intersections, vv_inters, i_vv_inters_t);
+    }
 }
 
 // ------------------------------------------------------------------------------------------
@@ -503,11 +510,11 @@ static void i_process_edge_intersections(
                 mate_hit_hedge_next = csmhedge_next(mate_hit_hedge);
                 
                 csmeuler_lmev(
-                              edge_intersection->hit_hedge, mate_hit_hedge_next,
-                              edge_intersection->x, edge_intersection->y, edge_intersection->z,
-                              &new_vertex_on_hit_hedge,
-                              NULL,
-                              NULL, NULL);
+                          edge_intersection->hit_hedge, mate_hit_hedge_next,
+                          edge_intersection->x, edge_intersection->y, edge_intersection->z,
+                          &new_vertex_on_hit_hedge,
+                          NULL,
+                          NULL, NULL);
                 
                 i_append_new_vv_inters(new_vertex, new_vertex_on_hit_hedge, vv_intersections);
                 break;
@@ -526,11 +533,11 @@ static void i_process_edge_intersections(
                 ledge_flout_face = csmloop_ledge(flout_face);
 
                 csmeuler_lmev(
-                              ledge_flout_face, ledge_flout_face,
-                              edge_intersection->x, edge_intersection->y, edge_intersection->z,
-                              &new_vertex_on_B,
-                              &edge_to_delete_on_B,
-                              NULL, NULL);
+                          ledge_flout_face, ledge_flout_face,
+                          edge_intersection->x, edge_intersection->y, edge_intersection->z,
+                          &new_vertex_on_B,
+                          &edge_to_delete_on_B,
+                          NULL, NULL);
                 
                 hedge_pos_to_delete = csmedge_hedge_lado(edge_to_delete_on_B, CSMEDGE_LADO_HEDGE_POS);
                 hedge_neg_to_delete = csmedge_hedge_lado(edge_to_delete_on_B, CSMEDGE_LADO_HEDGE_NEG);
