@@ -1,7 +1,6 @@
 // Vertex - face classifier...
 
 #include "csmfwddecl.hxx"
-#include "csmsetop.tli"
 #include "a_punter.h"
 ArrEstructura(csmsetop_vtxfacc_inters_t);
 ArrEstructura(csmedge_t);
@@ -18,5 +17,6 @@ void csmsetop_vtxfacc_free_inters(struct csmsetop_vtxfacc_inters_t **vf_inters);
 
 void csmsetop_vtxfacc_append_null_edges(
                         const ArrEstructura(csmsetop_vtxfacc_inters_t) *vf_intersections,
-                        enum csmsetop_operation_t set_operation,
-                        ArrEstructura(csmedge_t) *set_of_null_edges);
+                        enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
+                        ArrEstructura(csmedge_t) *set_of_null_edges,
+                        ArrEstructura(csmedge_t) *set_of_null_edges_other_solid);

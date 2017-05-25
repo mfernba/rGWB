@@ -50,6 +50,9 @@ struct csmface_t;
 struct csmsolid_t;
 struct csmtransform_t;
 enum csmedge_lado_hedge_t;
+enum csmsetop_operation_t;
+enum csmsetop_classify_resp_solid_t;
+enum csmsetop_a_vs_b_t;
 
 struct csmbbox_t;
 struct csmtransform_t;

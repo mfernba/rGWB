@@ -1,8 +1,5 @@
 // Boolean operations on solids...
 
-#ifndef csmsetop_tli_h
-#define csmsetop_tli_h
-
 enum csmsetop_operation_t
 {
     CSMSETOP_OPERATION_UNION,
@@ -17,5 +14,8 @@ enum csmsetop_classify_resp_solid_t
     CSMSETOP_CLASSIFY_RESP_SOLID_ON
 };
 
-
-#endif /* csmsetop_tli_h */
+enum csmsetop_a_vs_b_t
+{
+    CSMSETOP_A_VS_B,
+    CSMSETOP_B_VS_A
+};

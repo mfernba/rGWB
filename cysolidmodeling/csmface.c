@@ -536,6 +536,24 @@ CYBOOL csmface_is_coplanar_to_plane(
 
 // ------------------------------------------------------------------------------------------
 
+void csmface_face_equation(
+                        const struct csmface_t *face,
+                        double *A, double *B, double *C, double *D)
+{
+    assert_no_null(face);
+    assert_no_null(A);
+    assert_no_null(B);
+    assert_no_null(C);
+    assert_no_null(D);
+    
+    *A = face->A;
+    *B = face->B;
+    *C = face->C;
+    *D = face->D;
+}
+
+// ------------------------------------------------------------------------------------------
+
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face)
 {
     assert_no_null(face);

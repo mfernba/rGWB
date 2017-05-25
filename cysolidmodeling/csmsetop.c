@@ -26,6 +26,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     struct csmsolid_t *result;
     ArrEstructura(csmsetop_vtxvtx_inters_t) *vv_intersections;
     ArrEstructura(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
+    ArrEstructura(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
 
     csmsolid_redo_geometric_generated_data(solid_A);
     csmsolid_clear_algorithm_vertex_mask(solid_A);
@@ -38,8 +39,14 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
                         &vv_intersections,
                         &vf_intersections_A, &vf_intersections_B);
     
-    result = NULL;
+    set_of_null_edges_A = arr_CreaPunteroST(0, csmedge_t);
+    set_of_null_edges_B = arr_CreaPunteroST(0, csmedge_t);
     
+    csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, set_of_null_edges_A, set_of_null_edges_B);
+    csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, set_of_null_edges_B, set_of_null_edges_A);
+    csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, set_of_null_edges_A, set_of_null_edges_B);
+    
+    result = NULL;
     
     
     arr_DestruyeEstructurasST(&vv_intersections, csmsetop_vtxvtx_free_inters, csmsetop_vtxvtx_inters_t);

@@ -55,6 +55,10 @@ CYBOOL csmface_is_coplanar_to_plane(
                         double tolerance,
                         CYBOOL *same_orientation);
 
+void csmface_face_equation(
+                        const struct csmface_t *face,
+                        double *A, double *B, double *C, double *D);
+
 
 // Topology...
 
