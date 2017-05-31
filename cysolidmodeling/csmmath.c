@@ -189,6 +189,16 @@ void csmmath_move_point(
 
 //-------------------------------------------------------------------------------------------
 
+CYBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance)
+{
+    double squared_norm;
+    
+    squared_norm = CUAD(Ux) + CUAD(Uy) + CUAD(Uz);
+    return csmmath_compare_doubles(squared_norm, 0.0, CUAD(tolerance));
+}
+
+//-------------------------------------------------------------------------------------------
+
 double csmmath_distance_from_point_to_line3D(
 						double x, double y, double z,
 						double Xo_recta, double Yo_recta, double Zo_recta, double Ux_recta, double Uy_recta, double Uz_recta)

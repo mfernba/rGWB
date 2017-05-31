@@ -37,6 +37,8 @@ void csmmath_move_point(
 						double Ux, double Uy, double Uz, double desp,
                         double *x_desp, double *y_desp, double *z_desp);
 
+CYBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance);
+
 
 // Lines...
 

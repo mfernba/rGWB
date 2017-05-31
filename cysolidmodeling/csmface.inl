@@ -55,6 +55,8 @@ CYBOOL csmface_is_coplanar_to_plane(
                         double tolerance,
                         CYBOOL *same_orientation);
 
+CYBOOL csmface_is_oriented_in_direction(const struct csmface_t *face, double Wx, double Wy, double Wz);
+
 void csmface_face_equation(
                         const struct csmface_t *face,
                         double *A, double *B, double *C, double *D);

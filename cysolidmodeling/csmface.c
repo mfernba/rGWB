@@ -536,6 +536,18 @@ CYBOOL csmface_is_coplanar_to_plane(
 
 // ------------------------------------------------------------------------------------------
 
+CYBOOL csmface_is_oriented_in_direction(const struct csmface_t *face, double Wx, double Wy, double Wz)
+{
+    double dot_product;
+    
+    assert_no_null(face);
+    
+    dot_product = csmmath_dot_product3D(face->A, face->B, face->C, Wx, Wy, Wz);
+    return ES_CIERTO(dot_product > 0.);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmface_face_equation(
                         const struct csmface_t *face,
                         double *A, double *B, double *C, double *D)

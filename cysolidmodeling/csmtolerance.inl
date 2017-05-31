@@ -7,3 +7,5 @@ double csmtolerance_angle_rad(void);
 double csmtolerance_coplanarity(void);
 
 double csmtolerance_relative_position_over_edge(void);
+
+double csmtolerance_null_vector(void);
