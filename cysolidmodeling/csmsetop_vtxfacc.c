@@ -103,26 +103,7 @@ static void i_classify_point_respect_to_plane(
     enum csmsetop_classify_resp_solid_t cl_resp_plane_loc;
     
     dist_to_plane_loc = csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D);
-    
-    switch (csmmath_compare_doubles(dist_to_plane_loc, 0., tolerance))
-    {
-        case CSMMATH_VALUE1_LESS_THAN_VALUE2:
-            
-            cl_resp_plane_loc = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-            break;
-            
-        case CSMMATH_EQUAL_VALUES:
-            
-            cl_resp_plane_loc = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
-            break;
-            
-        case CSMMATH_VALUE1_GREATER_THAN_VALUE2:
-            
-            cl_resp_plane_loc = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-            break;
-            
-        default_error();
-    }
+    cl_resp_plane_loc = csmsetopcom_classify_value_respect_to_plane(dist_to_plane_loc, tolerance);
 
     ASIGNA_OPC(dist_to_plane_opc, dist_to_plane_loc);
     ASIGNA_OPC(cl_resp_plane_opc, cl_resp_plane_loc);
