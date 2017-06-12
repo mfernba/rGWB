@@ -625,6 +625,214 @@ static void i_reclassify_on_sectors(
 
 // ------------------------------------------------------------------------------------------
 
+static void i_reclasssify_double_on_edges(
+                        enum csmsetop_operation_t set_operation,
+                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
+                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+{
+    unsigned long num_sectors_a, num_sectors_b;
+    unsigned long i, num_sectors;
+    
+    num_sectors_a = arr_NumElemsPunteroST(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = arr_NumElemsPunteroST(neighborhood_B, i_neighborhood_t);
+    
+    num_sectors = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+    
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_inters_sectors_t *sector_i;
+        
+        sector_i = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+        assert_no_null(sector_i);
+        
+        /* double "on"-edge ? */
+        if(sector_i->intersect == CIERTO
+                && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            struct i_neighborhood_t *nba, *nbb;
+            unsigned long idx_prev_sector_a, idx_prev_sector_b;
+            enum csmsetop_classify_resp_solid_t newsa, newsb;
+            unsigned long j;
+            
+            nba = arr_GetPunteroST(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+            assert_no_null(nba);
+
+            nbb = arr_GetPunteroST(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+            assert_no_null(nbb);
+            
+            idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
+            idx_prev_sector_b = csmmath_prev_idx(sector_i->idx_nbb, num_sectors_b);
+            
+            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CIERTO)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
+                        sector_j->s1a = newsa;
+                        sector_j->s1b = newsb;
+                    }
+
+                    if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
+                        sector_j->s2a = newsa;
+                        sector_j->s1b = newsb;
+                    }
+
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
+                    {
+                        sector_j->s1a = newsa;
+                        sector_j->s2b = newsb;
+                    }
+                    
+                    if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == idx_prev_sector_b)
+                    {
+                        sector_j->s2a = newsa;
+                        sector_j->s2b = newsb;
+                    }
+                    
+                    if (sector_j->s1a == sector_j->s2a
+                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = FALSO;
+                    }
+
+                    if (sector_j->s1b == sector_j->s2b
+                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = FALSO;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_reclasssify_single_on_edges(
+                        enum csmsetop_operation_t set_operation,
+                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
+                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+{
+    unsigned long num_sectors_a, num_sectors_b;
+    unsigned long i, num_sectors;
+    
+    num_sectors_a = arr_NumElemsPunteroST(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = arr_NumElemsPunteroST(neighborhood_B, i_neighborhood_t);
+    
+    num_sectors = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_inters_sectors_t *sector_i;
+        struct i_neighborhood_t *nba, *nbb;
+        unsigned long idx_prev_sector_a, idx_prev_sector_b;
+        
+        sector_i = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+        assert_no_null(sector_i);
+
+        nba = arr_GetPunteroST(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+        assert_no_null(nba);
+
+        nbb = arr_GetPunteroST(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+        assert_no_null(nbb);
+        
+        idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
+        idx_prev_sector_b = csmmath_prev_idx(sector_i->idx_nbb, num_sectors_b);
+        
+        if(sector_i->intersect == CIERTO && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            enum csmsetop_classify_resp_solid_t newsa;
+            unsigned long j;
+            
+            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+    
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CIERTO)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s1a = newsa;
+                    
+                    if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s2a = newsa;
+                    
+                    if (sector_j->s1a == sector_j->s2a
+                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = FALSO;
+                    }
+                }
+            }
+        }
+        else if(sector_i->intersect == CIERTO && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            enum csmsetop_classify_resp_solid_t newsb;
+            unsigned long j;
+            
+            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+    
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CIERTO)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s1b = newsb;
+                    
+                    if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
+                        sector_j->s2b = newsb;
+                    
+                    if (sector_j->s1b == sector_j->s2b
+                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = FALSO;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_reclasssify_on_edges(
+                        enum csmsetop_operation_t set_operation,
+                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
+                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+{
+    i_reclasssify_double_on_edges(
+                        set_operation,
+                        neighborhood_A, neighborhood_B,
+                        neighborhood_intersections);
+    
+    i_reclasssify_single_on_edges(
+                        set_operation,
+                        neighborhood_A, neighborhood_B,
+                        neighborhood_intersections);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_vtxvtx_append_null_edges(
                         const struct csmsetop_vtxvtx_inters_t *vv_intersection,
                         enum csmsetop_operation_t set_operation,
@@ -642,6 +850,11 @@ static void i_vtxvtx_append_null_edges(
                         &neighborhood_intersections);
     
     i_reclassify_on_sectors(
+                        set_operation,
+                        neighborhood_A, neighborhood_B,
+                        neighborhood_intersections);
+    
+    i_reclasssify_on_edges(
                         set_operation,
                         neighborhood_A, neighborhood_B,
                         neighborhood_intersections);
