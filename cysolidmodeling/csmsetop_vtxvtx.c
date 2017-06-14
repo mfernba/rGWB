@@ -4,6 +4,9 @@
 
 #include "csmmath.inl"
 #include "csmhedge.inl"
+#include "csmedge.inl"
+#include "csmedge.tli"
+#include "csmeuler_lmev.inl"
 #include "csmface.inl"
 #include "csmopbas.inl"
 #include "csmsetop.tli"
@@ -500,17 +503,6 @@ static void i_generate_neighboorhoods(
 
 // ------------------------------------------------------------------------------------------
 
-static void i_hedge_plane_equation(struct csmhedge_t *he, double *A, double *B, double *C)
-{
-    struct csmface_t *face;
-    double D;
-    
-    face = csmopbas_face_from_hedge(he);
-    csmface_face_equation(face, A, B, C, &D);
-}
-
-// ------------------------------------------------------------------------------------------
-
 static void i_reclassify_on_sectors(
                         enum csmsetop_operation_t set_operation,
                         ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
@@ -645,7 +637,6 @@ static void i_reclasssify_double_on_edges(
         sector_i = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
         assert_no_null(sector_i);
         
-        /* double "on"-edge ? */
         if(sector_i->intersect == CIERTO
                 && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
                 && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
@@ -833,6 +824,411 @@ static void i_reclasssify_on_edges(
 
 // ------------------------------------------------------------------------------------------
 
+static struct i_inters_sectors_t *i_get_next_sector(ArrEstructura(i_inters_sectors_t) *neighborhood_intersections, unsigned long *last_idx)
+{
+    struct i_inters_sectors_t *intersection;
+    unsigned long num_intersections;
+    
+    num_intersections = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+    assert_no_null(last_idx);
+    
+    intersection = NULL;
+    
+    while (*last_idx < num_intersections)
+    {
+        intersection = arr_GetPunteroST(neighborhood_intersections, *last_idx, i_inters_sectors_t);
+        assert_no_null(intersection);
+        
+        if (intersection->intersect == FALSO)
+        {
+            (*last_idx)++;
+            intersection = NULL;
+        }
+    }
+    
+    return intersection;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CYBOOL i_is_null_edge(struct csmhedge_t *he)
+{
+    struct csmvertex_t *vertex, *vertex_nxt;
+    
+    vertex = csmhedge_vertex(he);
+    vertex_nxt = csmhedge_vertex(csmhedge_next(he));
+    
+    return csmvertex_equal_coords(vertex, vertex_nxt, csmtolerance_equal_coords());
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CYBOOL i_is_strutnulledge(struct csmhedge_t *he)
+{
+    struct csmhedge_t *he_mate;
+    
+    he_mate = csmopbas_mate(he);
+    
+    if (he == csmhedge_next(he_mate) || he == csmhedge_prev(he_mate))
+        return CIERTO;
+    else
+        return FALSO;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_face_normal_of_he_face(struct csmhedge_t *he, double *A, double *B, double *C)
+{
+    struct csmface_t *face;
+    double D;
+    
+    face = csmopbas_face_from_hedge(he);
+    csmface_face_equation(face, A, B, C, &D);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CYBOOL i_is_convex_edge(struct csmhedge_t *he)
+{
+    double A_he, B1_he, C_he;
+    struct csmhedge_t *mate_he;
+    double A_mate_he, B1_mate_he, C_mate_he;
+    double Wx, Wy, Wz;
+
+    i_face_normal_of_he_face(he, &A_he, &B1_he, &C_he);
+    
+    mate_he = csmopbas_mate(he);
+    i_face_normal_of_he_face(mate_he, &A_mate_he, &B1_mate_he, &C_mate_he);
+    
+    csmmath_cross_product3D(A_he, B1_he, C_he, A_mate_he, B1_mate_he, C_mate_he, &Wx, &Wy, &Wz);
+    
+    if (csmmath_is_null_vector(Wx, Wy, Wz, csmtolerance_null_vector()) == CIERTO)
+    {
+        return CIERTO;
+    }
+    else
+    {
+        struct csmhedge_t *he2;
+        struct csmvertex_t *vertex_he, *vertex_he2;
+        double Ux, Uy, Uz;
+        double dot_product;
+    
+        he2 = csmhedge_next(he);
+    
+        if (i_is_null_edge(he2) == CIERTO)
+            he2 = csmhedge_next(he2);
+        
+        vertex_he = csmhedge_vertex(he);
+        vertex_he2 = csmhedge_vertex(he2);
+        csmvertex_vector_from_vertex1_to_vertex2(vertex_he, vertex_he2, &Ux, &Uy, &Uz);
+        
+        dot_product = csmmath_dot_product3D(Ux, Uy, Uz, Wx, Wy, Wz);
+        
+        if (dot_product < 0.)
+            return CIERTO;
+        else
+            return FALSO;
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CYBOOL i_is_wide_sector(struct csmhedge_t *he)
+{
+    struct csmvertex_t *vertex, *vertex_prv, *vertex_nxt;
+    double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
+    double Ux12, Uy12, Uz12;
+    
+    vertex = csmhedge_vertex(he);
+    vertex_prv = csmhedge_vertex(csmhedge_prev(he));
+    vertex_nxt = csmhedge_vertex(csmhedge_next(he));
+    
+    csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_prv, &Ux1, &Uy1, &Uz1);
+    csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_nxt, &Ux2, &Uy2, &Uz2);
+    
+    csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Ux12, &Uy12, &Uz12);
+    
+    if (csmmath_is_null_vector(Ux12, Uy12, Uz12, csmtolerance_null_vector()))
+    {
+        return CIERTO;
+    }
+    else
+    {
+        double A, B, C;
+        double dot_product;
+        
+        i_face_normal_of_he_face(he, &A, &B, &C);
+        dot_product = csmmath_dot_product3D(A, B, C, Ux12, Uy12, Uz12);
+        
+        if (dot_product > 0.)
+            return FALSO;
+        else
+            return CIERTO;
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CYBOOL i_get_orient(struct csmhedge_t *ref, struct csmhedge_t *he1, struct csmhedge_t *he2)
+{
+    CYBOOL orient;
+    struct csmhedge_t *mhe1, *mhe2;
+    
+    mhe1 = csmhedge_next(csmopbas_mate(he1));
+    mhe2 = csmhedge_next(csmopbas_mate(he2));
+    
+    if (mhe1 != he2 && mhe2 == he1)
+        orient = i_is_convex_edge(he2);
+    else
+        orient = i_is_convex_edge(he1);
+    
+    if (i_is_wide_sector(mhe1) == CIERTO && i_is_wide_sector(ref) == CIERTO)
+        orient = INVIERTE_CYBOOL(orient);
+    
+    return INVIERTE_CYBOOL(orient);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_separateEdgeSequence(
+                        struct csmhedge_t *from, struct csmhedge_t *to,
+                        ArrEstructura(csmedge_t) *set_of_null_edges)
+{
+    struct csmhedge_t *from_prv, *to_prv;
+    struct csmvertex_t *split_vertex;
+    double x, y, z;
+    struct csmedge_t *null_edge;
+    
+    from_prv = csmhedge_prev(from);
+    
+    /* recover from null edges already inserted */
+    if(i_is_null_edge(from_prv) == CIERTO && i_is_strutnulledge(from_prv) == CIERTO)
+    {
+        struct csmedge_t *from_prv_edge;
+        struct csmhedge_t *from_prv_edge_he2;
+        
+        from_prv_edge = csmhedge_edge(from_prv);
+        from_prv_edge_he2 = csmedge_hedge_lado(from_prv_edge, CSMEDGE_LADO_HEDGE_NEG);
+        
+        /* look at orientation */
+        if (from_prv == from_prv_edge_he2)
+            from = csmhedge_prev(from_prv);
+    }
+
+    to_prv = csmhedge_prev(to);
+    
+    if(i_is_null_edge(to_prv) == CIERTO && i_is_strutnulledge(to_prv) == CIERTO)
+    {
+        struct csmedge_t *to_prv_edge;
+        struct csmhedge_t *to_prv_edge_he1;
+        
+        to_prv_edge = csmhedge_edge(to_prv);
+        to_prv_edge_he1 = csmedge_hedge_lado(to_prv_edge, CSMEDGE_LADO_HEDGE_POS);
+        
+        /* look at orientation */
+        if (to_prv == to_prv_edge_he1)
+            to = csmhedge_prev(to_prv);
+    }
+    
+    if (csmhedge_vertex(from) != csmhedge_vertex(to))
+    {
+        struct csmhedge_t *from_prv, *to_prv;
+        
+        from_prv = csmhedge_prev(from);
+        to_prv = csmhedge_prev(to);
+        
+        if (from_prv == csmopbas_mate(to_prv))
+        {
+            from = from_prv;
+        }
+        else if(csmhedge_vertex(from_prv) == csmhedge_vertex(to))
+        {
+            from = from_prv;
+        }
+        else if(csmhedge_vertex(to_prv) == csmhedge_vertex(from))
+        {
+            to = to_prv;
+        }
+    }
+    
+    split_vertex = csmhedge_vertex(from);
+    csmvertex_get_coordenadas(split_vertex, &x, &y, &z);
+    
+    csmeuler_lmev(from, to, x, y, z, NULL, NULL, NULL, NULL);
+    
+    null_edge = csmhedge_edge(csmhedge_prev(from));
+    arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_separateInteriorHedge(
+                        struct csmhedge_t *he,
+                        CYBOOL orient,
+                        ArrEstructura(csmedge_t) *set_of_null_edges)
+{
+    struct csmhedge_t *he_prv;
+    struct csmvertex_t *split_vertex;
+    double x, y, z;
+    struct csmedge_t *null_edge;
+    
+    he_prv = csmhedge_prev(he);
+
+    /* recover from null edges inserted */
+    if(i_is_null_edge(he_prv) == CIERTO)
+    {
+        struct csmedge_t *he_prv_edge;
+        struct csmhedge_t *he1_edge_he_prv, *he2_edge_he_prv;
+        
+        he_prv_edge = csmhedge_edge(he_prv);
+        he1_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS);
+        he2_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_NEG);
+        
+        if (he_prv == he1_edge_he_prv && orient == CIERTO)
+            he = he_prv;
+        else if (he_prv == he2_edge_he_prv && orient == FALSO)
+            he = he_prv;
+    }
+    
+    split_vertex = csmhedge_vertex(he);
+    csmvertex_get_coordenadas(split_vertex, &x, &y, &z);
+    
+    csmeuler_lmev(he, he, x, y, z, NULL, NULL, NULL, NULL);
+
+    /* a piece of Black Art: reverse orientation of the null edge */
+    if (orient == CIERTO)
+    {
+        struct csmedge_t *he_prv_edge;
+        struct csmhedge_t *he1_edge_he_prv, *he2_edge_he_prv;
+        
+        he_prv_edge = csmhedge_edge(he_prv);
+        he1_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS);
+        he2_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_NEG);
+        
+        csmedge_set_edge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_NEG, he1_edge_he_prv);
+        csmedge_set_edge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS, he2_edge_he_prv);
+    }
+    
+    null_edge = csmhedge_edge(csmhedge_prev(he));
+    arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_insert_null_edges(
+                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
+                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections,
+                        ArrEstructura(csmedge_t) *set_of_null_edges_A,
+                        ArrEstructura(csmedge_t) *set_of_null_edges_B)
+{
+    struct csmhedge_t *ha1, *ha2, *hb1, *hb2;
+    unsigned long num_iters;
+    unsigned long last_idx;
+    
+    ha1 = NULL;
+    ha2 = NULL;
+    
+    hb1 = NULL;
+    hb2 = NULL;
+    
+    num_iters = 0;
+    last_idx = 0;
+    
+    while (1)
+    {
+        struct i_inters_sectors_t *sector;
+        
+        assert(num_iters < 10000);
+        num_iters++;
+        
+        sector = i_get_next_sector(neighborhood_intersections, &last_idx);
+        
+        if (sector == NULL)
+        {
+            break;
+        }
+        else
+        {
+            struct i_neighborhood_t *nba, *nbb;
+            
+            nba = arr_GetPunteroST(neighborhood_A, sector->idx_nba, i_neighborhood_t);
+            assert_no_null(nba);
+
+            nbb = arr_GetPunteroST(neighborhood_B, sector->idx_nbb, i_neighborhood_t);
+            assert_no_null(nbb);
+            
+            if (sector->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+                ha1 = nba->he;
+            else
+                ha2 = nba->he;
+            
+            if (sector->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
+                hb1 = nbb->he;
+            else
+                hb2 = nbb->he;
+            
+            last_idx++;
+            sector = i_get_next_sector(neighborhood_intersections, &last_idx);
+            
+            if (sector == NULL)
+            {
+                break;
+            }
+            else
+            {
+                nba = arr_GetPunteroST(neighborhood_A, sector->idx_nba, i_neighborhood_t);
+                assert_no_null(nba);
+
+                nbb = arr_GetPunteroST(neighborhood_B, sector->idx_nbb, i_neighborhood_t);
+                assert_no_null(nbb);
+                
+                if (sector->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+                    ha1 = nba->he;
+                else
+                    ha2 = nba->he;
+                
+                if (sector->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
+                    hb1 = nbb->he;
+                else
+                    hb2 = nbb->he;
+                
+                last_idx++;
+                
+                assert_no_null(ha1);
+                assert_no_null(ha2);
+                assert_no_null(hb1);
+                assert_no_null(hb2);
+                
+                if (ha1 == ha2)
+                {
+                    CYBOOL orient;
+                    
+                    orient = i_get_orient(ha1, hb1, hb2);
+                    i_separateInteriorHedge(ha1, orient, set_of_null_edges_A);
+                    
+                    i_separateEdgeSequence(hb1, hb2, set_of_null_edges_B);
+                }
+                else if (hb1 == hb2)
+                {
+                    CYBOOL orient;
+                    
+                    orient = i_get_orient(hb1, ha2, ha1);
+                    i_separateInteriorHedge(hb1, orient, set_of_null_edges_B);
+                    
+                    i_separateEdgeSequence(ha2, ha1, set_of_null_edges_A);
+                }
+                else
+                {
+                    i_separateEdgeSequence(ha2, ha1, set_of_null_edges_A);
+                    i_separateEdgeSequence(hb1, hb2, set_of_null_edges_B);
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_vtxvtx_append_null_edges(
                         const struct csmsetop_vtxvtx_inters_t *vv_intersection,
                         enum csmsetop_operation_t set_operation,
@@ -858,6 +1254,12 @@ static void i_vtxvtx_append_null_edges(
                         set_operation,
                         neighborhood_A, neighborhood_B,
                         neighborhood_intersections);
+    
+    i_insert_null_edges(
+                        neighborhood_A, neighborhood_B,
+                        neighborhood_intersections,
+                        set_of_null_edges_A,
+                        set_of_null_edges_B);
     
     arr_DestruyeEstructurasST(&neighborhood_A, i_free_neighborhood, i_neighborhood_t);
     arr_DestruyeEstructurasST(&neighborhood_B, i_free_neighborhood, i_neighborhood_t);
