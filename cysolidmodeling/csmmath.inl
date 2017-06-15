@@ -16,6 +16,11 @@ CYBOOL csmmath_equal_coords(
                         double x2, double y2, double z2,
                         double epsilon);
 
+unsigned long csmmath_next_idx(unsigned long idx, unsigned long num_elems);
+
+unsigned long csmmath_prev_idx(unsigned long idx, unsigned long num_elems);
+
+
 // Vectors...
 
 double csmmath_length_vector3D(double x, double y, double z);

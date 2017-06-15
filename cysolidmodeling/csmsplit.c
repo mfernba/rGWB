@@ -774,49 +774,6 @@ static CYBOOL i_can_join_he(struct csmhedge_t *he, ArrEstructura(csmhedge_t) *lo
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends)
-{
-    unsigned long i, no_loose_end;
-    
-    no_loose_end = arr_NumElemsPunteroST(loose_ends, csmhedge_t);
-    
-    for (i = 0; i < no_loose_end; i++)
-    {
-        if (arr_GetPunteroST(loose_ends, i, csmhedge_t) == hedge)
-            return CIERTO;
-    }
-    
-    return FALSO;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static void i_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose_ends)
-{
-    unsigned long i, no_loose_end;
-    
-    fprintf(stdout, "Split(): Loose ends [");
-    
-    no_loose_end = arr_NumElemsPunteroST(loose_ends, csmhedge_t);
-    
-    for (i = 0; i < no_loose_end; i++)
-    {
-        const struct csmhedge_t *hedge;
-        
-        hedge = arr_GetPunteroConstST(loose_ends, i, csmhedge_t);
-        assert_no_null(hedge);
-        
-        if (i > 0)
-            fprintf(stdout, ", ");
-        
-        fprintf(stdout, "%lu", csmhedge_id(hedge));
-    }
-    
-    fprintf(stdout, "]\n");
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEstructura(csmface_t) **set_of_null_faces)
 {
     ArrEstructura(csmface_t) *set_of_null_faces_loc;
@@ -854,7 +811,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
         {
             csmsetopcom_join_hedges(matching_loose_end_he1, he1_next_edge);
             
-            if (i_is_loose_end(csmopbas_mate(matching_loose_end_he1), loose_ends) == FALSO)
+            if (csmsetopcom_is_loose_end(csmopbas_mate(matching_loose_end_he1), loose_ends) == FALSO)
                 csmsetopcom_cut_he(matching_loose_end_he1, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         }
         else
@@ -866,7 +823,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
         {
             csmsetopcom_join_hedges(matching_loose_end_he2, he2_next_edge);
             
-            if (i_is_loose_end(csmopbas_mate(matching_loose_end_he2), loose_ends) == FALSO)
+            if (csmsetopcom_is_loose_end(csmopbas_mate(matching_loose_end_he2), loose_ends) == FALSO)
                 csmsetopcom_cut_he(matching_loose_end_he2, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         }
         else
@@ -879,7 +836,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
         
         if (i_DEBUG == CIERTO)
         {
-            i_print_debug_info_loose_ends(loose_ends);
+            csmsetopcom_print_debug_info_loose_ends(loose_ends);
             csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge), CIERTO);
         }
     }

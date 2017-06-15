@@ -6,6 +6,7 @@
 ArrEstructura(csmvertex_t);
 ArrEstructura(csmedge_t);
 ArrEstructura(csmface_t);
+ArrEstructura(csmhedge_t);
 
 // Vertexs...
 
@@ -24,6 +25,10 @@ CYBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge_
 void csmsetopcom_sort_edges_lexicographically_by_xyz(ArrEstructura(csmedge_t) *set_of_null_edges);
 
 void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_null_edges);
+
+CYBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends);
+
+void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose_ends);
 
 void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2);
 
@@ -45,7 +50,13 @@ void csmsetopcom_move_face_to_solid(
                         struct csmface_t *face, struct csmsolid_t *face_solid,
                         struct csmsolid_t *destination_solid);
 
+enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(double value, double tolerance);
+
 
 // Finish algorithm...
 
 void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_t *destination_solid);
+
+void csmsetopcom_cleanup_solid_setop(
+                        struct csmsolid_t *origin_solid_A, struct csmsolid_t *origin_solid_B,
+                        struct csmsolid_t *destination_solid);

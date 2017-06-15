@@ -17,6 +17,7 @@
 #include "csmhashtb.inl"
 #include "csmmath.inl"
 #include "csmopbas.inl"
+#include "csmsetop.tli"
 #include "csmsolid.inl"
 #include "csmsolid.tli"
 #include "csmtolerance.inl"
@@ -250,6 +251,50 @@ void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_
                 csmhedge_id(he2), csmloop_id(csmhedge_loop((struct csmhedge_t *)he2)), csmface_id(csmopbas_face_from_hedge((struct csmhedge_t *)he2)));
     }
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends)
+{
+    unsigned long i, no_loose_end;
+    
+    no_loose_end = arr_NumElemsPunteroST(loose_ends, csmhedge_t);
+    
+    for (i = 0; i < no_loose_end; i++)
+    {
+        if (arr_GetPunteroST(loose_ends, i, csmhedge_t) == hedge)
+            return CIERTO;
+    }
+    
+    return FALSO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose_ends)
+{
+    unsigned long i, no_loose_end;
+    
+    fprintf(stdout, "Split(): Loose ends [");
+    
+    no_loose_end = arr_NumElemsPunteroST(loose_ends, csmhedge_t);
+    
+    for (i = 0; i < no_loose_end; i++)
+    {
+        const struct csmhedge_t *hedge;
+        
+        hedge = arr_GetPunteroConstST(loose_ends, i, csmhedge_t);
+        assert_no_null(hedge);
+        
+        if (i > 0)
+            fprintf(stdout, ", ");
+        
+        fprintf(stdout, "%lu", csmhedge_id(hedge));
+    }
+    
+    fprintf(stdout, "]\n");
+}
+
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -590,6 +635,28 @@ void csmsetopcom_move_face_to_solid(
 
 // ----------------------------------------------------------------------------------------------------
 
+enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(double value, double tolerance)
+{
+    switch (csmmath_compare_doubles(value, 0., tolerance))
+    {
+        case CSMMATH_VALUE1_LESS_THAN_VALUE2:
+            
+            return CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+            
+        case CSMMATH_EQUAL_VALUES:
+            
+            return CSMSETOP_CLASSIFY_RESP_SOLID_ON;
+            
+        case CSMMATH_VALUE1_GREATER_THAN_VALUE2:
+            
+            return CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            
+        default_error();
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_t *destination_solid)
 {
     struct csmhashtb_iterator(csmface_t) *face_iterator;
@@ -637,6 +704,98 @@ void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_
                 else
                 {
                     assert(csmvertex_hedge(vertex) == he_iterator);
+                    csmsolid_move_vertex_to_solid(origin_solid, vertex, destination_solid);
+                }
+                
+                he_iterator = csmhedge_next(he_iterator);
+            }
+            while (he_iterator != loop_ledge);
+            
+            loop_iterator = csmloop_next(loop_iterator);
+        }
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_cleanup_solid_setop(
+                        struct csmsolid_t *origin_solid_A, struct csmsolid_t *origin_solid_B,
+                        struct csmsolid_t *destination_solid)
+{
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    assert_no_null(destination_solid);
+
+    face_iterator = csmhashtb_create_iterator(destination_solid->sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        struct csmloop_t *loop_iterator;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        loop_iterator = csmface_floops(face);
+        
+        while (loop_iterator != NULL)
+        {
+            register struct csmhedge_t *loop_ledge, *he_iterator;
+            unsigned long no_iters;
+        
+            loop_ledge = csmloop_ledge(loop_iterator);
+            he_iterator = loop_ledge;
+            no_iters = 0;
+            
+            do
+            {
+                struct csmedge_t *edge;
+                struct csmvertex_t *vertex;
+                
+                assert(no_iters < 10000);
+                no_iters++;
+                
+                edge = csmhedge_edge(he_iterator);
+                vertex = csmhedge_vertex(he_iterator);
+                
+                if (edge != NULL)
+                {
+                    struct csmsolid_t *origin_solid;
+                    
+                    if (csmsolid_contains_edge(origin_solid_A, edge) == CIERTO)
+                    {
+                        assert(csmsolid_contains_edge(origin_solid_B, edge) == FALSO);
+                        origin_solid = origin_solid_A;
+                    }
+                    else
+                    {
+                        assert(csmsolid_contains_edge(origin_solid_B, edge) == CIERTO);
+                        origin_solid = origin_solid_B;
+                    }
+                    
+                    if (csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS) == he_iterator)
+                        csmsolid_move_edge_to_solid(origin_solid, edge, destination_solid);
+                    
+                    if (csmvertex_hedge(vertex) == he_iterator)
+                        csmsolid_move_vertex_to_solid(origin_solid, vertex, destination_solid);
+                }
+                else
+                {
+                    struct csmsolid_t *origin_solid;
+                    
+                    assert(csmvertex_hedge(vertex) == he_iterator);
+                    
+                    if (csmsolid_contains_vertex(origin_solid_A, vertex) == CIERTO)
+                    {
+                        assert(csmsolid_contains_vertex(origin_solid_B, vertex) == FALSO);
+                        origin_solid = origin_solid_A;
+                    }
+                    else
+                    {
+                        assert(csmsolid_contains_vertex(origin_solid_B, vertex) == CIERTO);
+                        origin_solid = origin_solid_B;
+                    }
+                    
                     csmsolid_move_vertex_to_solid(origin_solid, vertex, destination_solid);
                 }
                 

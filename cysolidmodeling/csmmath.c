@@ -100,6 +100,32 @@ CYBOOL csmmath_equal_coords(
 
 // ------------------------------------------------------------------------------------------
 
+unsigned long csmmath_next_idx(unsigned long idx, unsigned long num_elems)
+{
+    assert(num_elems > 0);
+    assert(idx < num_elems);
+    
+    if (idx == num_elems - 1)
+        return 0;
+    else
+        return idx + 1;
+}
+
+// ------------------------------------------------------------------------------------------
+
+unsigned long csmmath_prev_idx(unsigned long idx, unsigned long num_elems)
+{
+    assert(num_elems > 0);
+    assert(idx < num_elems);
+    
+    if (idx == 0)
+        return num_elems - 1;
+    else
+        return idx - 1;
+}
+
+// ------------------------------------------------------------------------------------------
+
 double csmmath_length_vector3D(double x, double y, double z)
 {
     return sqrt(x * x + y * y + z * z);

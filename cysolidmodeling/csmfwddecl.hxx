@@ -35,6 +35,8 @@
 
 #define comparac_t ecomparacion_t
 
+#define INVIERTE_CYBOOL(valor) (((valor) == CIERTO) ? FALSO: CIERTO)
+
 #ifndef __cplusplus
 #define comparac_IGUALES ECOMPARACION_IGUALES
 #define comparac_PRIMERO_MENOR ECOMPARACION_PRIMERO_MENOR
