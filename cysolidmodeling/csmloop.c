@@ -460,6 +460,8 @@ CYBOOL csmloop_is_point_inside_loop(
             is_point_inside_loop = CIERTO;
     }
     
+    
+    ASIGNA_OPC(type_of_containment_opc, type_of_containment_loc);
     ASIGNA_OPC(hit_vertex_opc, hit_vertex_loc);
     ASIGNA_OPC(hit_hedge_opc, hit_hedge_loc);
     

@@ -195,6 +195,17 @@ void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, doub
     *y = vertex->y;
     *z = vertex->z;
 }
+// ----------------------------------------------------------------------------------------------------
+
+void csmvertex_vector_from_vertex1_to_vertex2(
+                        const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2,
+                        double *Ux, double *Uy, double *Uz)
+{
+    assert_no_null(vertex1);
+    assert_no_null(vertex2);
+    
+    csmmath_vector_between_two_3D_points(vertex1->x, vertex1->y, vertex1->z, vertex2->x, vertex2->y, vertex2->z, Ux, Uy, Uz);
+}
 
 // ----------------------------------------------------------------------------------------------------
 

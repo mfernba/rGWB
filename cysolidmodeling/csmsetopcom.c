@@ -657,6 +657,81 @@ enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_revert_loop_orientation(struct csmloop_t *loop)
+{
+    register struct csmhedge_t *loop_ledge, *he_iterator;
+    struct csmvertex_t *prev_vertex;
+    unsigned long no_iters;
+        
+    loop_ledge = csmloop_ledge(loop);
+    he_iterator = loop_ledge;
+    no_iters = 0;
+            
+    do
+    {
+        struct csmhedge_t *he_iter_prv, *he_iter_nxt;
+        
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        he_iter_prv = csmhedge_prev(he_iterator);
+        he_iter_nxt = csmhedge_next(he_iterator);
+        
+        csmhedge_set_next(he_iterator, he_iter_prv);
+        csmhedge_set_prev(he_iterator, he_iter_nxt);
+        
+        he_iterator = he_iter_nxt;
+    }
+    while (he_iterator != loop_ledge);
+    
+    prev_vertex = csmhedge_vertex(csmhedge_prev(he_iterator));
+    
+    do
+    {
+        struct csmvertex_t *vertex_aux;
+        
+        vertex_aux = csmhedge_vertex(he_iterator);
+        
+        csmhedge_set_vertex(he_iterator, prev_vertex);
+        csmvertex_set_hedge(prev_vertex, he_iterator);
+        
+        prev_vertex = vertex_aux;
+        
+        he_iterator = csmhedge_next(he_iterator);
+    }
+    while (he_iterator != loop_ledge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_revert_solid(struct csmsolid_t *solid)
+{
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    assert_no_null(solid);
+
+    face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        struct csmloop_t *loop_iterator;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        loop_iterator = csmface_floops(face);
+        
+        while (loop_iterator != NULL)
+        {
+            i_revert_loop_orientation(loop_iterator);
+            loop_iterator = csmloop_next(loop_iterator);
+        }
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_t *destination_solid)
 {
     struct csmhashtb_iterator(csmface_t) *face_iterator;

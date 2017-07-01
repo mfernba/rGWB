@@ -44,6 +44,10 @@ void csmvertex_clear_mask(struct csmvertex_t *vertex);
 
 void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, double *y, double *z);
 
+void csmvertex_vector_from_vertex1_to_vertex2(
+                        const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2,
+                        double *Ux, double *Uy, double *Uz);
+
 void csmvertex_get_coords_not_dropped(
                         const struct csmvertex_t *vertex,
                         enum csmmath_dropped_coord_t dropped_coord,

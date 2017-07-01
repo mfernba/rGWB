@@ -262,14 +262,14 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
             
             face_desp_a = 0;
             face_desp_b = half_no_null_faces;
-            
-            //TODO: Revert solid B
+
+            csmsetopcom_revert_solid(solid_B);
             break;
             
         case CSMSETOP_OPERATION_INTERSECTION:
             
             face_desp_a = half_no_null_faces;
-            face_desp_b = half_no_null_faces;
+            face_desp_b = half_no_null_faces;            
             break;
             
         default_error();

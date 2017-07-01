@@ -149,19 +149,27 @@ static void i_append_new_edge_intersection(
     switch (type_of_containment)
     {
         case CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR:
+        {
+            assert(hit_vertex == NULL);
+            assert(hit_hedge == NULL);
             
             intersection_type = i_TYPE_EDGE_INTERSECTION_INTERIOR_FACE;
             break;
+        }
             
         case CSMMATH_CONTAIMENT_POINT_LOOP_ON_VERTEX:
-            
+        {
+            assert(hit_vertex != NULL);
             intersection_type = i_TYPE_EDGE_INTERSECTION_VERTEX;
             break;
+        }
             
         case CSMMATH_CONTAIMENT_POINT_LOOP_ON_HEDGE:
-            
+        {
+            assert(hit_hedge != NULL);
             intersection_type = i_TYPE_EDGE_INTERSECTION_INTERIOR_EDGE;
             break;
+        }
             
         default_error();
     }

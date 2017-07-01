@@ -21,6 +21,7 @@
 #include "csmglue.h"
 #include "csmface.inl"
 #include "csmmath.inl"
+#include "csmsetop.h"
 #include "csmsolid.h"
 #include "csmsweep.h"
 #include "csmsplit.h"
@@ -573,8 +574,37 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior2(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_union_solidos(void)
+{
+    struct gccontorno_t *shape2d;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    
+    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    
+    solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+    csmsolid_print_debug(solid1, CIERTO);
+
+    solid2 = csmsweep_create_solid_from_shape(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0.);
+    csmsolid_print_debug(solid2, CIERTO);
+    
+    solid_res = csmsetop_union_A_and_B(solid1, solid2);
+    csmsolid_print_debug(solid_res, CIERTO);
+
+    
+    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid2, CIERTO);
+    
+    gccontorno_destruye(&shape2d);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+    csmsolid_free(&solid_res);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
+    /*
     i_test_crea_destruye_solido_vacio();
     i_test_basico_solido_una_arista();
     i_test_crea_lamina();
@@ -590,6 +620,8 @@ void csmtest_test(void)
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
     i_test_divide_solido_rectangular_hueco_por_plano_superior2();
+    */
+    i_test_union_solidos();
 }
 
 
