@@ -10,6 +10,7 @@
 #include "csmsolid.inl"
 #include "csmsolid.tli"
 
+#include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
@@ -30,8 +31,6 @@ struct csmhashtb(i_item_t);
 
 typedef void (*i_FPtr_reassign_id)(struct i_item_t *item, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
 #define i_CHECK_FUNC_REASSIGN_ID(function, type) ((void(*)(struct type *, unsigned long *, unsigned long *))function == function)
-
-static CYBOOL i_DEBUG = CIERTO;
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -422,8 +421,7 @@ void csmsolid_move_face_to_solid(struct csmsolid_t *face_solid, struct csmface_t
     assert_no_null(face_solid);
     assert_no_null(destination_solid);
     
-    if (i_DEBUG == CIERTO)
-        fprintf(stdout, "\tcsmsolid_move_face_to_solid(): face: %lu, solid: %p to solid: %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
+    csmdebug_print_debug_info("csmsolid_move_face_to_solid(): face: %lu, solid: %p to solid: %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
     
     csmhashtb_remove_item(face_solid->sfaces, csmface_id(face), csmface_t);
     
@@ -593,6 +591,8 @@ CYBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
         }
     }
     
+    *coincident_vertex = coincident_vertex_loc;
+    
     csmhashtb_free_iterator(&iterator, csmvertex_t);
     
     return contains_vertex;
@@ -604,38 +604,54 @@ static void i_edge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_
 {
     struct csmnode_t *edge_node;
     struct csmhedge_t *he1, *he2;
+    double x1, y1, z1, x2, y2, z2;
     
     he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
     he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
     
     edge_node = CSMNODE(edge);
-    fprintf(stdout, "\tEdge %5lu", csmnode_id(edge_node));
+    csmdebug_print_debug_info("\tEdge %5lu", csmnode_id(edge_node));
     
     if (he1 != NULL)
     {
-        fprintf(stdout, "\tHe1 %5lu [%d]", csmnode_id(CSMNODE(he1)), ES_CIERTO(csmhedge_edge(he1) == edge));
+        const struct csmvertex_t *vertex;
+        
+        csmdebug_print_debug_info("\tHe1 %5lu [%d]", csmnode_id(CSMNODE(he1)), ES_CIERTO(csmhedge_edge(he1) == edge));
         
         if (assert_si_no_es_integro == CIERTO)
             assert(csmhedge_edge(he1) == edge);
+        
+        vertex = csmhedge_vertex_const(he1);
+        csmvertex_get_coordenadas(vertex, &x1, &y1, &z1);
     }
     else
     {
-        fprintf(stdout, "\tHe1 (null)");
+        csmdebug_print_debug_info("\tHe1 (null)");
+        x1 = y1 = z1 = 0.;
     }
     
     if (he2 != NULL)
     {
-        fprintf(stdout, "\tHe2 %5lu [%d]", csmnode_id(CSMNODE(he2)), ES_CIERTO(csmhedge_edge(he2) == edge));
+        const struct csmvertex_t *vertex;
+        
+        csmdebug_print_debug_info("\tHe2 %5lu [%d]", csmnode_id(CSMNODE(he2)), ES_CIERTO(csmhedge_edge(he2) == edge));
         
         if (assert_si_no_es_integro == CIERTO)
             assert(csmhedge_edge(he2) == edge);
+        
+        vertex = csmhedge_vertex_const(he2);
+        csmvertex_get_coordenadas(vertex, &x2, &y2, &z2);
     }
     else
     {
-        fprintf(stdout, "\tHe2 (null)");
+        csmdebug_print_debug_info("\tHe2 (null)");
+        x2 = y2 = z2 = 0.;
     }
     
-    fprintf(stdout, "\n");
+    if (he1 != NULL && he2 != NULL )
+        csmdebug_print_debug_info("\t(%5.3lf, %5.3lf, %5.3lf)\t(%5.3lf, %5.3lf, %5.3lf)", x1, y1, z1, x2, y2, z2);
+    
+    csmdebug_print_debug_info("\n");
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -659,7 +675,7 @@ static void i_print_debug_info_edges(struct csmhashtb(csmedge_t) *sedges, CYBOOL
         (*num_edges)++;
     }
     
-    fprintf(stdout, "\tNo. of egdes: %lu\n", *num_edges);
+    csmdebug_print_debug_info("\tNo. of egdes: %lu\n", *num_edges);
     
     assert(*num_edges == csmhashtb_count(sedges, csmedge_t));
     csmhashtb_free_iterator(&iterator, csmedge_t);
@@ -678,20 +694,20 @@ static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CYBOOL assert_
     vertex_node = CSMNODE(vertex);
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
     
-    fprintf(stdout, "\tVertex %6lu\t%6.3lf\t%6.3lf\t%6.3lf ", csmnode_id(vertex_node), x, y, z);
+    csmdebug_print_debug_info("\tVertex %6lu\t%6.3lf\t%6.3lf\t%6.3lf ", csmnode_id(vertex_node), x, y, z);
     
     hedge = csmvertex_hedge(vertex);
     
     if (hedge != NULL)
     {
-        fprintf(stdout, "He %6lu\n", csmnode_id(CSMNODE(hedge)));
+        csmdebug_print_debug_info("He %6lu\n", csmnode_id(CSMNODE(hedge)));
         
         if (assert_si_no_es_integro == CIERTO)
             assert(csmhedge_vertex(hedge) == vertex);
     }
     else
     {
-        fprintf(stdout, "He (null)\n");
+        csmdebug_print_debug_info("He (null)\n");
     }
 }
 
@@ -721,7 +737,7 @@ static void i_print_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, 
         (*num_vertexs)++;
     }
     
-    fprintf(stdout, "\tNo. of vertexs: %lu\n", *num_vertexs);
+    csmdebug_print_debug_info("\tNo. of vertexs: %lu\n", *num_vertexs);
     
     assert(*num_vertexs == csmhashtb_count(svertexs, csmvertex_t));
     csmhashtb_free_iterator(&iterator, csmvertex_t);
@@ -737,7 +753,7 @@ static void i_print_info_debug_loop(struct csmloop_t *loop, CYBOOL is_outer_loop
     
     ledge = csmloop_ledge(loop);
     iterator = ledge;
-    fprintf(stdout, "\tLoop %4lu: Outer = %d\n", csmnode_id(CSMNODE(loop)), is_outer_loop);
+    csmdebug_print_debug_info("\tLoop %4lu: Outer = %d\n", csmnode_id(CSMNODE(loop)), is_outer_loop);
     
     num_iters = 0;
     
@@ -797,7 +813,7 @@ static void i_print_info_debug_face(struct csmface_t *face, CYBOOL assert_si_no_
     
     assert_no_null(num_holes);
     
-    fprintf(stdout, "\tFace %lu\n", csmnode_id(CSMNODE(face)));
+    csmdebug_print_debug_info("\tFace %lu\n", csmnode_id(CSMNODE(face)));
     
     loop_iterator = csmface_floops(face);
     
@@ -857,7 +873,7 @@ static void i_print_info_debug_faces(
             assert(csmface_fsolid(face) == solid);
     }
     
-    fprintf(stdout, "\tNo. of faces: %lu\n", *num_faces);
+    csmdebug_print_debug_info("\tNo. of faces: %lu\n", *num_faces);
     
     csmhashtb_free_iterator(&iterator, csmface_t);
 }
@@ -870,19 +886,99 @@ void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_inte
     
     assert_no_null(solido);
 
-    fprintf(stdout, "*******************************\n");
-    fprintf(stdout, "*******************************\n");
-    fprintf(stdout, "Face table\n");
+    csmdebug_begin_context("SOLID DESCRIPTION");
+    csmdebug_print_debug_info("Solid Address: %p\n", solido);
+    
+    csmdebug_print_debug_info("Face table\n");
     i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
-    fprintf(stdout, "\n");
+    csmdebug_print_debug_info("\n");
     
-    fprintf(stdout, "Edge table\n");
+    csmdebug_print_debug_info("Edge table\n");
     i_print_debug_info_edges(solido->sedges, assert_si_no_es_integro, &num_edges);
-    fprintf(stdout, "\n");
+    csmdebug_print_debug_info("\n");
     
-    fprintf(stdout, "Vertex table\n");
+    csmdebug_print_debug_info("Vertex table\n");
     i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, &num_vertexs);
-    fprintf(stdout, "\n");
+    csmdebug_print_debug_info("\n");
+    
+    csmdebug_end_context();
+}
+
+// ----------------------------------------------------------------------------------------------------
+#include <basicGraphics/bsgraphics2.h>
+
+static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphics2_t *graphics)
+{
+    double x, y, z;
+    
+    assert_no_null(vertex);
+    
+    csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    bsgraphics2_escr_punto3D(graphics, x, y, z);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_draw_edge_debug_info(struct csmedge_t *edge, struct bsgraphics2_t *graphics)
+{
+    double x1, y1, z1, x2, y2, z2;
+    
+    csmedge_vertex_coordinates(edge, &x1, &y1, &z1, &x2, &y2, &z2);
+    bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_draw_debug_info_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgraphics2_t *graphics)
+{
+    struct csmhashtb_iterator(csmedge_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    
+    while (csmhashtb_has_next(iterator, csmedge_t) == CIERTO)
+    {
+        struct csmedge_t *edge;
+        
+        csmhashtb_next_pair(iterator, NULL, &edge, csmedge_t);
+        i_draw_edge_debug_info(edge, graphics);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_draw_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, struct bsgraphics2_t *graphics)
+{
+    struct csmhashtb_iterator(csmvertex_t) *iterator;
+    unsigned long num_iters;
+    
+    iterator = csmhashtb_create_iterator(svertexs, csmvertex_t);
+    num_iters = 0;
+    
+    while (csmhashtb_has_next(iterator, csmvertex_t) == CIERTO)
+    {
+        struct csmvertex_t *vertex;
+        
+        assert(num_iters < 1000000);
+        num_iters++;
+        
+        csmhashtb_next_pair(iterator, NULL, &vertex, csmvertex_t);
+        i_draw_debug_info_vertex(vertex, graphics);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_draw(struct csmsolid_t *solido, struct bsgraphics2_t *graphics)
+{
+    assert_no_null(solido);
+    
+    csmsolid_redo_geometric_generated_data(solido);
+    i_draw_debug_info_vertexs(solido->svertexs, graphics);
+    i_draw_debug_info_edges(solido->sedges, graphics);
 }
 
 // ----------------------------------------------------------------------------------------------------

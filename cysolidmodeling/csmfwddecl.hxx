@@ -9,6 +9,10 @@
 #ifndef csmfwddecl_hxx
 #define csmfwddecl_hxx
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
@@ -51,14 +55,24 @@ struct csmloop_t;
 struct csmface_t;
 struct csmsolid_t;
 struct csmtransform_t;
+    
+#ifdef __cplusplus
+enum csmedge_lado_hedge_t: int;
+enum csmsetop_operation_t: int;
+enum csmsetop_classify_resp_solid_t: int;
+enum csmsetop_a_vs_b_t: int;
+#else
 enum csmedge_lado_hedge_t;
 enum csmsetop_operation_t;
 enum csmsetop_classify_resp_solid_t;
 enum csmsetop_a_vs_b_t;
+#endif
 
 struct csmbbox_t;
 struct csmtransform_t;
-
+    
+struct bsgraphics2_t;
+struct csmviewer_t;
 
 #include "csmhashtb.hxx"
 struct csmhashtb(csmface_t);
@@ -70,5 +84,9 @@ struct csmhashtb(csmhedge_t);
 struct gccontorno_t;
 
 #include "csmmath.tli"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* csmfwddecl_hxx */

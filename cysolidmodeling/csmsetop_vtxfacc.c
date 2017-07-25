@@ -2,6 +2,7 @@
 
 #include "csmsetop_vtxfacc.inl"
 
+#include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
@@ -41,8 +42,6 @@ struct i_neighborhood_t
     enum csmsetop_classify_resp_solid_t position;
 };
 
-static CYBOOL i_DEBUG = FALSO;
-
 // ------------------------------------------------------------------------------------------
 
 struct csmsetop_vtxfacc_inters_t *csmsetop_vtxfacc_create_inters(struct csmvertex_t *vertex, struct csmface_t *face)
@@ -65,6 +64,26 @@ void csmsetop_vtxfacc_free_inters(struct csmsetop_vtxfacc_inters_t **vf_inters)
     assert_no_null(*vf_inters);
     
     FREE_PP(vf_inters, struct csmsetop_vtxfacc_inters_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmsetop_vtxfacc_equals(const struct csmsetop_vtxfacc_inters_t *vf_inters1, const struct csmsetop_vtxfacc_inters_t *vf_inters2)
+{
+    assert_no_null(vf_inters1);
+    assert_no_null(vf_inters2);
+    
+    if (vf_inters1->vertex == vf_inters2->vertex)
+    {
+        if (vf_inters1->face == vf_inters2->face)
+            return CIERTO;
+        else
+            return FALSO;
+    }
+    else
+    {
+        return FALSO;
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -525,13 +544,13 @@ static CYBOOL i_is_out_in_sequence_at_index(const ArrEstructura(i_neighborhood_t
 
 static void i_print_debug_info_vertex_neighborhood(const char *description, const struct csmvertex_t *vertex, ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
 {
-    if (i_DEBUG == CIERTO)
+    if (csmdebug_debug_enabled() == CIERTO)
     {
         double x, y, z;
         unsigned long i, num_sectors;
         
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
-        fprintf(stdout, "Split(): Vertex neighborhood [%s]: %lu (%g, %g, %g): ", description, csmvertex_id(vertex), x, y, z);
+        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g): ", description, csmvertex_id(vertex), x, y, z);
         
         num_sectors = arr_NumElemsPunteroST(vertex_neighborhood, i_neighborhood_t);
         
@@ -542,10 +561,10 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
             hedge_neighborhood = arr_GetPunteroST(vertex_neighborhood, i, i_neighborhood_t);
             assert_no_null(hedge_neighborhood);
             
-            fprintf(stdout, "(hedge = %lu, classification: %d): ", csmhedge_id(hedge_neighborhood->hedge), hedge_neighborhood->position);
+            csmdebug_print_debug_info("(he = %lu, cl: %d): ", csmhedge_id(hedge_neighborhood->hedge), hedge_neighborhood->position);
         }
         
-        fprintf(stdout, "\n");
+        csmdebug_print_debug_info("\n");
     }
 }
 
@@ -592,6 +611,7 @@ static void i_process_vf_inters(
     assert_no_null(vf_inters);
     
     csmface_face_equation(vf_inters->face, &A, &B, &C, &D);
+    csmdebug_set_plane(A, B, C, D);
     
     vertex_algorithm_mask = csmvertex_get_mask_attrib(vf_inters->vertex);
     
@@ -646,11 +666,10 @@ static void i_process_vf_inters(
             tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, idx, i_neighborhood_t);
             assert_no_null(tail_neighborhood);
             
-            if (i_DEBUG == CIERTO)
+            if (csmdebug_debug_enabled() == CIERTO)
             {
-                fprintf(
-                        stdout,
-                        "\tInserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
+                csmdebug_print_debug_info(
+                        "Inserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
                         x_split, y_split, z_split,
                         csmhedge_id(head_neighborhood->hedge),
                         csmhedge_id(tail_neighborhood->hedge));
@@ -683,6 +702,8 @@ static void i_process_vf_inters(
     }
     
     arr_DestruyeEstructurasST(&vertex_neighborhood, i_free_neighborhood, i_neighborhood_t);
+    
+    csmdebug_show_viewer();
 }
 
 // ------------------------------------------------------------------------------------------
@@ -699,9 +720,13 @@ void csmsetop_vtxfacc_append_null_edges(
     
     for (i = 0; i < num_intersections; i++)
     {
-        const struct csmsetop_vtxfacc_inters_t *vf_inters;
-        
-        vf_inters = arr_GetPunteroConstST(vf_intersections, i, csmsetop_vtxfacc_inters_t);
-        i_process_vf_inters(vf_inters, set_operation, a_vs_b, set_of_null_edges, set_of_null_edges_other_solid);
+        csmdebug_begin_context("VF INTERS");
+        {
+            const struct csmsetop_vtxfacc_inters_t *vf_inters;
+            
+            vf_inters = arr_GetPunteroConstST(vf_intersections, i, csmsetop_vtxfacc_inters_t);
+            i_process_vf_inters(vf_inters, set_operation, a_vs_b, set_of_null_edges, set_of_null_edges_other_solid);
+        }
+        csmdebug_end_context();
     }
 }

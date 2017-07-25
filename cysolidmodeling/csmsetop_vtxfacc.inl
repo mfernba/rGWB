@@ -12,6 +12,8 @@ CONSTRUCTOR(struct csmsetop_vtxfacc_inters_t *, csmsetop_vtxfacc_create_inters, 
 
 void csmsetop_vtxfacc_free_inters(struct csmsetop_vtxfacc_inters_t **vf_inters);
 
+CYBOOL csmsetop_vtxfacc_equals(const struct csmsetop_vtxfacc_inters_t *vf_inters1, const struct csmsetop_vtxfacc_inters_t *vf_inters2);
+
 
 // Classifier...
 

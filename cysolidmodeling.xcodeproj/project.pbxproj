@@ -62,6 +62,8 @@
 		5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5532DDB71E8FFE810047B9DF /* csmloopglue.inl */; };
 		5532DDBF1E9001390047B9DF /* csmtolerance.c in Sources */ = {isa = PBXBuildFile; fileRef = 5532DDBD1E9001390047B9DF /* csmtolerance.c */; };
 		5532DDC01E9001390047B9DF /* csmtolerance.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5532DDBE1E9001390047B9DF /* csmtolerance.inl */; };
+		5534BDD11F26A6B900A4565F /* copiafor.c in Sources */ = {isa = PBXBuildFile; fileRef = 5534BDCF1F26A6B900A4565F /* copiafor.c */; };
+		5534BDD21F26A6B900A4565F /* copiafor.h in Headers */ = {isa = PBXBuildFile; fileRef = 5534BDD01F26A6B900A4565F /* copiafor.h */; };
 		55354A441E9AE595007B0692 /* csmmath.tli in Headers */ = {isa = PBXBuildFile; fileRef = 55354A431E9AE595007B0692 /* csmmath.tli */; };
 		557012A01E8328E400DFC490 /* csmsweep.c in Sources */ = {isa = PBXBuildFile; fileRef = 5570129E1E8328E400DFC490 /* csmsweep.c */; };
 		557012A11E8328E400DFC490 /* csmsweep.h in Headers */ = {isa = PBXBuildFile; fileRef = 5570129F1E8328E400DFC490 /* csmsweep.h */; };
@@ -101,6 +103,21 @@
 		557954A21E60D064000FC91E /* csmsolid.tli in Headers */ = {isa = PBXBuildFile; fileRef = 557954A11E60D064000FC91E /* csmsolid.tli */; };
 		557954A51E60D0EF000FC91E /* csmeuler_mvfs.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954A31E60D0EF000FC91E /* csmeuler_mvfs.c */; };
 		557954A61E60D0EF000FC91E /* csmeuler_mvfs.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954A41E60D0EF000FC91E /* csmeuler_mvfs.inl */; };
+		5598D6131F24E7F600EA1876 /* csmviewer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5598D6111F24E7F600EA1876 /* csmviewer.mm */; };
+		5598D6141F24E7F600EA1876 /* csmviewer.inl in Resources */ = {isa = PBXBuildFile; fileRef = 5598D6121F24E7F600EA1876 /* csmviewer.inl */; };
+		5598D65B1F24EE4000EA1876 /* basicAppFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D62E1F24E8AF00EA1876 /* basicAppFramework.framework */; };
+		5598D65C1F24EE4000EA1876 /* basicGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6341F24E8AF00EA1876 /* basicGraphics.framework */; };
+		5598D65D1F24EE4000EA1876 /* RcpOpcFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D63A1F24E8AF00EA1876 /* RcpOpcFramework.framework */; };
+		5598D65E1F24EE4000EA1876 /* WinFrames.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6401F24E8AF00EA1876 /* WinFrames.framework */; };
+		5598D65F1F24EE4000EA1876 /* WinFrames2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6461F24E8AF00EA1876 /* WinFrames2.framework */; };
+		5598D6601F24EE4000EA1876 /* WinFrames3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D64C1F24E8AF00EA1876 /* WinFrames3.framework */; };
+		5598D6661F24EE4000EA1876 /* basicMenu.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6611F24EE4000EA1876 /* basicMenu.framework */; };
+		5598D6671F24EE4000EA1876 /* basicReceptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6621F24EE4000EA1876 /* basicReceptor.framework */; };
+		5598D6681F24EE4000EA1876 /* callback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6631F24EE4000EA1876 /* callback.framework */; };
+		5598D6691F24EE4000EA1876 /* cyscngraf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6641F24EE4000EA1876 /* cyscngraf.framework */; };
+		5598D66A1F24EE4000EA1876 /* SnapFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6651F24EE4000EA1876 /* SnapFramework.framework */; };
+		55E30FA91F24BAB300EDE74F /* csmdebug.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55E30FA71F24BAB300EDE74F /* csmdebug.mm */; };
+		55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55E30FA81F24BAB300EDE74F /* csmdebug.inl */; };
 		55EA991A1ED389C0006C063C /* csmsetop_vtxfacc.c in Sources */ = {isa = PBXBuildFile; fileRef = 55EA99181ED389C0006C063C /* csmsetop_vtxfacc.c */; };
 		55EA991B1ED389C0006C063C /* csmsetop_vtxfacc.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55EA99191ED389C0006C063C /* csmsetop_vtxfacc.inl */; };
 		55EA991F1ED38E66006C063C /* csmsetop_vtxvtx.c in Sources */ = {isa = PBXBuildFile; fileRef = 55EA991D1ED38E66006C063C /* csmsetop_vtxvtx.c */; };
@@ -173,6 +190,132 @@
 			remoteGlobalIDString = 5532210319E678F2002BB462;
 			remoteInfo = geomcomp;
 		};
+		5598D62D1F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6251F24E8AF00EA1876 /* basicAppFramework.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5532293019E6927A002BB462;
+			remoteInfo = basicAppFramework;
+		};
+		5598D62F1F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6251F24E8AF00EA1876 /* basicAppFramework.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5532293B19E6927A002BB462;
+			remoteInfo = basicAppFrameworkTests;
+		};
+		5598D6331F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6191F24E8AF00EA1876 /* basicGraphics.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 553220AB19E67826002BB462;
+			remoteInfo = basicGraphics;
+		};
+		5598D6351F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6191F24E8AF00EA1876 /* basicGraphics.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 553220B619E67826002BB462;
+			remoteInfo = basicGraphicsTests;
+		};
+		5598D6391F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6281F24E8AF00EA1876 /* RcpOpcFramework.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 55B57A2919E6982500FBB914;
+			remoteInfo = RcpOpcFramework;
+		};
+		5598D63B1F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6281F24E8AF00EA1876 /* RcpOpcFramework.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 55B57A3419E6982500FBB914;
+			remoteInfo = RcpOpcFrameworkTests;
+		};
+		5598D63F1F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D61C1F24E8AF00EA1876 /* WinFrames.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5532223119E67DAF002BB462;
+			remoteInfo = WinFrames;
+		};
+		5598D6411F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D61C1F24E8AF00EA1876 /* WinFrames.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5532223C19E67DAF002BB462;
+			remoteInfo = WinFramesTests;
+		};
+		5598D6451F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D61F1F24E8AF00EA1876 /* WinFrames2.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5532230319E68004002BB462;
+			remoteInfo = WinFrames2;
+		};
+		5598D6471F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D61F1F24E8AF00EA1876 /* WinFrames2.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5532230E19E68004002BB462;
+			remoteInfo = WinFrames2Tests;
+		};
+		5598D64B1F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6221F24E8AF00EA1876 /* WinFrames3.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 553226B519E68D29002BB462;
+			remoteInfo = WinFrames3;
+		};
+		5598D64D1F24E8AF00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6221F24E8AF00EA1876 /* WinFrames3.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 553226C019E68D29002BB462;
+			remoteInfo = WinFrames3Tests;
+		};
+		5598D64F1F24E8BA00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6191F24E8AF00EA1876 /* basicGraphics.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 553220AA19E67826002BB462;
+			remoteInfo = basicGraphics;
+		};
+		5598D6511F24E8BA00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D61C1F24E8AF00EA1876 /* WinFrames.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 5532223019E67DAF002BB462;
+			remoteInfo = WinFrames;
+		};
+		5598D6531F24E8BA00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D61F1F24E8AF00EA1876 /* WinFrames2.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 5532230219E68004002BB462;
+			remoteInfo = WinFrames2;
+		};
+		5598D6551F24E8BA00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6221F24E8AF00EA1876 /* WinFrames3.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 553226B419E68D29002BB462;
+			remoteInfo = WinFrames3;
+		};
+		5598D6571F24E8BA00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6251F24E8AF00EA1876 /* basicAppFramework.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 5532292F19E6927A002BB462;
+			remoteInfo = basicAppFramework;
+		};
+		5598D6591F24E8BA00EA1876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5598D6281F24E8AF00EA1876 /* RcpOpcFramework.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 55B57A2819E6982500FBB914;
+			remoteInfo = RcpOpcFramework;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -230,6 +373,8 @@
 		5532DDB71E8FFE810047B9DF /* csmloopglue.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmloopglue.inl; sourceTree = "<group>"; };
 		5532DDBD1E9001390047B9DF /* csmtolerance.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmtolerance.c; sourceTree = "<group>"; };
 		5532DDBE1E9001390047B9DF /* csmtolerance.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmtolerance.inl; sourceTree = "<group>"; };
+		5534BDCF1F26A6B900A4565F /* copiafor.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = copiafor.c; sourceTree = "<group>"; };
+		5534BDD01F26A6B900A4565F /* copiafor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = copiafor.h; sourceTree = "<group>"; };
 		55354A3F1E9AE121007B0692 /* standarc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = standarc.h; sourceTree = "<group>"; };
 		55354A431E9AE595007B0692 /* csmmath.tli */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmmath.tli; sourceTree = "<group>"; };
 		5570129E1E8328E400DFC490 /* csmsweep.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsweep.c; sourceTree = "<group>"; };
@@ -269,11 +414,26 @@
 		557954971E5E4811000FC91E /* csmbbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmbbox.c; sourceTree = "<group>"; };
 		557954981E5E4811000FC91E /* csmbbox.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmbbox.inl; sourceTree = "<group>"; };
 		5579549C1E5E4967000FC91E /* defmath.tlh */ = {isa = PBXFileReference; lastKnownFileType = text; path = defmath.tlh; sourceTree = "<group>"; };
-		5579549D1E5F942E000FC91E /* csmsolid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmsolid.c; sourceTree = "<group>"; };
+		5579549D1E5F942E000FC91E /* csmsolid.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsolid.c; sourceTree = "<group>"; };
 		5579549E1E5F942E000FC91E /* csmsolid.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsolid.inl; sourceTree = "<group>"; };
 		557954A11E60D064000FC91E /* csmsolid.tli */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsolid.tli; sourceTree = "<group>"; };
 		557954A31E60D0EF000FC91E /* csmeuler_mvfs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmeuler_mvfs.c; sourceTree = "<group>"; };
 		557954A41E60D0EF000FC91E /* csmeuler_mvfs.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmeuler_mvfs.inl; sourceTree = "<group>"; };
+		5598D6111F24E7F600EA1876 /* csmviewer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = csmviewer.mm; sourceTree = "<group>"; };
+		5598D6121F24E7F600EA1876 /* csmviewer.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmviewer.inl; sourceTree = "<group>"; };
+		5598D6191F24E8AF00EA1876 /* basicGraphics.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = basicGraphics.xcodeproj; path = ../basicGraphics/basicGraphics.xcodeproj; sourceTree = "<group>"; };
+		5598D61C1F24E8AF00EA1876 /* WinFrames.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = WinFrames.xcodeproj; path = ../WinFrames/WinFrames.xcodeproj; sourceTree = "<group>"; };
+		5598D61F1F24E8AF00EA1876 /* WinFrames2.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = WinFrames2.xcodeproj; path = ../WinFrames2/WinFrames2.xcodeproj; sourceTree = "<group>"; };
+		5598D6221F24E8AF00EA1876 /* WinFrames3.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = WinFrames3.xcodeproj; path = ../WinFrames3/WinFrames3.xcodeproj; sourceTree = "<group>"; };
+		5598D6251F24E8AF00EA1876 /* basicAppFramework.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = basicAppFramework.xcodeproj; path = ../basicAppFramework/basicAppFramework.xcodeproj; sourceTree = "<group>"; };
+		5598D6281F24E8AF00EA1876 /* RcpOpcFramework.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RcpOpcFramework.xcodeproj; path = ../RcpOpcFramework/RcpOpcFramework.xcodeproj; sourceTree = "<group>"; };
+		5598D6611F24EE4000EA1876 /* basicMenu.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = basicMenu.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/basicMenu.framework"; sourceTree = "<group>"; };
+		5598D6621F24EE4000EA1876 /* basicReceptor.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = basicReceptor.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/basicReceptor.framework"; sourceTree = "<group>"; };
+		5598D6631F24EE4000EA1876 /* callback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = callback.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/callback.framework"; sourceTree = "<group>"; };
+		5598D6641F24EE4000EA1876 /* cyscngraf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = cyscngraf.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/cyscngraf.framework"; sourceTree = "<group>"; };
+		5598D6651F24EE4000EA1876 /* SnapFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SnapFramework.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/SnapFramework.framework"; sourceTree = "<group>"; };
+		55E30FA71F24BAB300EDE74F /* csmdebug.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = csmdebug.mm; sourceTree = "<group>"; };
+		55E30FA81F24BAB300EDE74F /* csmdebug.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmdebug.inl; sourceTree = "<group>"; };
 		55EA99181ED389C0006C063C /* csmsetop_vtxfacc.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetop_vtxfacc.c; sourceTree = "<group>"; };
 		55EA99191ED389C0006C063C /* csmsetop_vtxfacc.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsetop_vtxfacc.inl; sourceTree = "<group>"; };
 		55EA991C1ED38C22006C063C /* csmsetop.tli */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmsetop.tli; sourceTree = "<group>"; };
@@ -288,6 +448,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5598D6661F24EE4000EA1876 /* basicMenu.framework in Frameworks */,
+				5598D6671F24EE4000EA1876 /* basicReceptor.framework in Frameworks */,
+				5598D6681F24EE4000EA1876 /* callback.framework in Frameworks */,
+				5598D6691F24EE4000EA1876 /* cyscngraf.framework in Frameworks */,
+				5598D66A1F24EE4000EA1876 /* SnapFramework.framework in Frameworks */,
+				5598D65B1F24EE4000EA1876 /* basicAppFramework.framework in Frameworks */,
+				5598D65C1F24EE4000EA1876 /* basicGraphics.framework in Frameworks */,
+				5598D65D1F24EE4000EA1876 /* RcpOpcFramework.framework in Frameworks */,
+				5598D65E1F24EE4000EA1876 /* WinFrames.framework in Frameworks */,
+				5598D65F1F24EE4000EA1876 /* WinFrames2.framework in Frameworks */,
+				5598D6601F24EE4000EA1876 /* WinFrames3.framework in Frameworks */,
 				557012B91E832A7800DFC490 /* geomcomp.framework in Frameworks */,
 				5507A6EE1E7B40C1008B9F73 /* Foundation.framework in Frameworks */,
 				5507A6EC1E7B40BA008B9F73 /* Cocoa.framework in Frameworks */,
@@ -311,6 +482,11 @@
 		5507A6441E701EC5008B9F73 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5598D6611F24EE4000EA1876 /* basicMenu.framework */,
+				5598D6621F24EE4000EA1876 /* basicReceptor.framework */,
+				5598D6631F24EE4000EA1876 /* callback.framework */,
+				5598D6641F24EE4000EA1876 /* cyscngraf.framework */,
+				5598D6651F24EE4000EA1876 /* SnapFramework.framework */,
 				5507A6ED1E7B40C1008B9F73 /* Foundation.framework */,
 				5507A6EB1E7B40BA008B9F73 /* Cocoa.framework */,
 			);
@@ -392,9 +568,7 @@
 		5579544E1E5DB074000FC91E = {
 			isa = PBXGroup;
 			children = (
-				5507A6D71E7B4011008B9F73 /* basicSystem.xcodeproj */,
-				557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */,
-				5507A6CE1E7B400D008B9F73 /* cypearrays.xcodeproj */,
+				5598D66B1F24F3C700EA1876 /* Dependencies */,
 				5579545A1E5DB074000FC91E /* cysolidmodeling */,
 				557954591E5DB074000FC91E /* Products */,
 				5507A6441E701EC5008B9F73 /* Frameworks */,
@@ -435,6 +609,8 @@
 				557954761E5E0694000FC91E /* cypeid.h */,
 				557954751E5E0694000FC91E /* cypeid.c */,
 				557954861E5E2DCB000FC91E /* cypestr.h */,
+				5534BDCF1F26A6B900A4565F /* copiafor.c */,
+				5534BDD01F26A6B900A4565F /* copiafor.h */,
 				557954851E5E2DCB000FC91E /* cypestr.c */,
 				5579549C1E5E4967000FC91E /* defmath.tlh */,
 				5507A6E01E7B402D008B9F73 /* a_punter.h */,
@@ -477,6 +653,7 @@
 			isa = PBXGroup;
 			children = (
 				5507A6FC1E7B51B0008B9F73 /* Hash Table */,
+				5598D6181F24E81100EA1876 /* Viewer */,
 				557954981E5E4811000FC91E /* csmbbox.inl */,
 				557954971E5E4811000FC91E /* csmbbox.c */,
 				557012BF1E832F9600DFC490 /* csmmath.inl */,
@@ -488,6 +665,8 @@
 				5532DDBD1E9001390047B9DF /* csmtolerance.c */,
 				55244B231EA0255A006F546E /* csmtransform.inl */,
 				55244B221EA0255A006F546E /* csmtransform.c */,
+				55E30FA71F24BAB300EDE74F /* csmdebug.mm */,
+				55E30FA81F24BAB300EDE74F /* csmdebug.inl */,
 			);
 			name = Utility;
 			sourceTree = "<group>";
@@ -525,6 +704,85 @@
 			name = "Low Level Euler Operators";
 			sourceTree = "<group>";
 		};
+		5598D6181F24E81100EA1876 /* Viewer */ = {
+			isa = PBXGroup;
+			children = (
+				5598D6111F24E7F600EA1876 /* csmviewer.mm */,
+				5598D6121F24E7F600EA1876 /* csmviewer.inl */,
+			);
+			name = Viewer;
+			sourceTree = "<group>";
+		};
+		5598D61A1F24E8AF00EA1876 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5598D6341F24E8AF00EA1876 /* basicGraphics.framework */,
+				5598D6361F24E8AF00EA1876 /* basicGraphicsTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5598D61D1F24E8AF00EA1876 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5598D6401F24E8AF00EA1876 /* WinFrames.framework */,
+				5598D6421F24E8AF00EA1876 /* WinFramesTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5598D6201F24E8AF00EA1876 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5598D6461F24E8AF00EA1876 /* WinFrames2.framework */,
+				5598D6481F24E8AF00EA1876 /* WinFrames2Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5598D6231F24E8AF00EA1876 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5598D64C1F24E8AF00EA1876 /* WinFrames3.framework */,
+				5598D64E1F24E8AF00EA1876 /* WinFrames3Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5598D6261F24E8AF00EA1876 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5598D62E1F24E8AF00EA1876 /* basicAppFramework.framework */,
+				5598D6301F24E8AF00EA1876 /* basicAppFrameworkTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5598D6291F24E8AF00EA1876 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5598D63A1F24E8AF00EA1876 /* RcpOpcFramework.framework */,
+				5598D63C1F24E8AF00EA1876 /* RcpOpcFrameworkTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5598D66B1F24F3C700EA1876 /* Dependencies */ = {
+			isa = PBXGroup;
+			children = (
+				5598D6191F24E8AF00EA1876 /* basicGraphics.xcodeproj */,
+				5598D61C1F24E8AF00EA1876 /* WinFrames.xcodeproj */,
+				5598D61F1F24E8AF00EA1876 /* WinFrames2.xcodeproj */,
+				5598D6221F24E8AF00EA1876 /* WinFrames3.xcodeproj */,
+				5598D6251F24E8AF00EA1876 /* basicAppFramework.xcodeproj */,
+				5598D6281F24E8AF00EA1876 /* RcpOpcFramework.xcodeproj */,
+				5507A6D71E7B4011008B9F73 /* basicSystem.xcodeproj */,
+				557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */,
+				5507A6CE1E7B400D008B9F73 /* cypearrays.xcodeproj */,
+			);
+			name = Dependencies;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -534,6 +792,7 @@
 			files = (
 				5579545D1E5DB074000FC91E /* cysolidmodeling.h in Headers */,
 				5507A6811E7362EF008B9F73 /* csmeuler_lkfmrh.inl in Headers */,
+				55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */,
 				5507A62A1E700F7C008B9F73 /* csmeuler_lmef.inl in Headers */,
 				5507A6251E6B8714008B9F73 /* csmtest.h in Headers */,
 				55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */,
@@ -544,6 +803,7 @@
 				557954921E5E446C000FC91E /* csmloop.inl in Headers */,
 				557012A11E8328E400DFC490 /* csmsweep.h in Headers */,
 				551327701EC3AF1100F2B04D /* csmvertex.tli in Headers */,
+				5534BDD21F26A6B900A4565F /* copiafor.h in Headers */,
 				5507A62E1E701441008B9F73 /* csmeuler_lkef.inl in Headers */,
 				5507A5CB1E662758008B9F73 /* csmeuler_lmev.inl in Headers */,
 				5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */,
@@ -601,6 +861,12 @@
 			buildRules = (
 			);
 			dependencies = (
+				5598D6501F24E8BA00EA1876 /* PBXTargetDependency */,
+				5598D6521F24E8BA00EA1876 /* PBXTargetDependency */,
+				5598D6541F24E8BA00EA1876 /* PBXTargetDependency */,
+				5598D6561F24E8BA00EA1876 /* PBXTargetDependency */,
+				5598D6581F24E8BA00EA1876 /* PBXTargetDependency */,
+				5598D65A1F24E8BA00EA1876 /* PBXTargetDependency */,
 				557012B81E832A6F00DFC490 /* PBXTargetDependency */,
 				5507A6E61E7B40AA008B9F73 /* PBXTargetDependency */,
 				5507A6E81E7B40AA008B9F73 /* PBXTargetDependency */,
@@ -637,6 +903,14 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 5598D6261F24E8AF00EA1876 /* Products */;
+					ProjectRef = 5598D6251F24E8AF00EA1876 /* basicAppFramework.xcodeproj */;
+				},
+				{
+					ProductGroup = 5598D61A1F24E8AF00EA1876 /* Products */;
+					ProjectRef = 5598D6191F24E8AF00EA1876 /* basicGraphics.xcodeproj */;
+				},
+				{
 					ProductGroup = 5507A6D81E7B4011008B9F73 /* Products */;
 					ProjectRef = 5507A6D71E7B4011008B9F73 /* basicSystem.xcodeproj */;
 				},
@@ -647,6 +921,22 @@
 				{
 					ProductGroup = 557012AF1E832A5900DFC490 /* Products */;
 					ProjectRef = 557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */;
+				},
+				{
+					ProductGroup = 5598D6291F24E8AF00EA1876 /* Products */;
+					ProjectRef = 5598D6281F24E8AF00EA1876 /* RcpOpcFramework.xcodeproj */;
+				},
+				{
+					ProductGroup = 5598D61D1F24E8AF00EA1876 /* Products */;
+					ProjectRef = 5598D61C1F24E8AF00EA1876 /* WinFrames.xcodeproj */;
+				},
+				{
+					ProductGroup = 5598D6201F24E8AF00EA1876 /* Products */;
+					ProjectRef = 5598D61F1F24E8AF00EA1876 /* WinFrames2.xcodeproj */;
+				},
+				{
+					ProductGroup = 5598D6231F24E8AF00EA1876 /* Products */;
+					ProjectRef = 5598D6221F24E8AF00EA1876 /* WinFrames3.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -699,6 +989,90 @@
 			remoteRef = 557012B51E832A5900DFC490 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		5598D62E1F24E8AF00EA1876 /* basicAppFramework.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = basicAppFramework.framework;
+			remoteRef = 5598D62D1F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D6301F24E8AF00EA1876 /* basicAppFrameworkTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = basicAppFrameworkTests.xctest;
+			remoteRef = 5598D62F1F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D6341F24E8AF00EA1876 /* basicGraphics.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = basicGraphics.framework;
+			remoteRef = 5598D6331F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D6361F24E8AF00EA1876 /* basicGraphicsTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = basicGraphicsTests.xctest;
+			remoteRef = 5598D6351F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D63A1F24E8AF00EA1876 /* RcpOpcFramework.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = RcpOpcFramework.framework;
+			remoteRef = 5598D6391F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D63C1F24E8AF00EA1876 /* RcpOpcFrameworkTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = RcpOpcFrameworkTests.xctest;
+			remoteRef = 5598D63B1F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D6401F24E8AF00EA1876 /* WinFrames.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = WinFrames.framework;
+			remoteRef = 5598D63F1F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D6421F24E8AF00EA1876 /* WinFramesTests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = WinFramesTests.xctest;
+			remoteRef = 5598D6411F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D6461F24E8AF00EA1876 /* WinFrames2.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = WinFrames2.framework;
+			remoteRef = 5598D6451F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D6481F24E8AF00EA1876 /* WinFrames2Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = WinFrames2Tests.xctest;
+			remoteRef = 5598D6471F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D64C1F24E8AF00EA1876 /* WinFrames3.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = WinFrames3.framework;
+			remoteRef = 5598D64B1F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5598D64E1F24E8AF00EA1876 /* WinFrames3Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = WinFrames3Tests.xctest;
+			remoteRef = 5598D64D1F24E8AF00EA1876 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -708,6 +1082,7 @@
 			files = (
 				5507A6741E706175008B9F73 /* csmtest.h in Resources */,
 				5507A6731E70610D008B9F73 /* cysolidmodeling.h in Resources */,
+				5598D6141F24E7F600EA1876 /* csmviewer.inl in Resources */,
 				557954691E5DB0A8000FC91E /* cypespy.h in Resources */,
 				557954671E5DB0A8000FC91E /* cyassert.h in Resources */,
 			);
@@ -729,6 +1104,7 @@
 				5507A5CA1E662758008B9F73 /* csmeuler_lmev.c in Sources */,
 				55EA991F1ED38E66006C063C /* csmsetop_vtxvtx.c in Sources */,
 				5507A6241E6B8714008B9F73 /* csmtest.c in Sources */,
+				55E30FA91F24BAB300EDE74F /* csmdebug.mm in Sources */,
 				5507A6841E736565008B9F73 /* csmeuler_lmfkrh.c in Sources */,
 				557954A51E60D0EF000FC91E /* csmeuler_mvfs.c in Sources */,
 				557954911E5E446C000FC91E /* csmloop.c in Sources */,
@@ -753,6 +1129,8 @@
 				557954871E5E2DCB000FC91E /* cypestr.c in Sources */,
 				557954811E5E1AA9000FC91E /* csmnode.c in Sources */,
 				5507A6F21E7B450C008B9F73 /* csmhashtb.c in Sources */,
+				5534BDD11F26A6B900A4565F /* copiafor.c in Sources */,
+				5598D6131F24E7F600EA1876 /* csmviewer.mm in Sources */,
 				5507A67C1E73484D008B9F73 /* csmeuler_lmekr.c in Sources */,
 				5507A6801E7362EF008B9F73 /* csmeuler_lkfmrh.c in Sources */,
 				5579549F1E5F942E000FC91E /* csmsolid.c in Sources */,
@@ -780,6 +1158,36 @@
 			isa = PBXTargetDependency;
 			name = geomcomp;
 			targetProxy = 557012B71E832A6F00DFC490 /* PBXContainerItemProxy */;
+		};
+		5598D6501F24E8BA00EA1876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = basicGraphics;
+			targetProxy = 5598D64F1F24E8BA00EA1876 /* PBXContainerItemProxy */;
+		};
+		5598D6521F24E8BA00EA1876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = WinFrames;
+			targetProxy = 5598D6511F24E8BA00EA1876 /* PBXContainerItemProxy */;
+		};
+		5598D6541F24E8BA00EA1876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = WinFrames2;
+			targetProxy = 5598D6531F24E8BA00EA1876 /* PBXContainerItemProxy */;
+		};
+		5598D6561F24E8BA00EA1876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = WinFrames3;
+			targetProxy = 5598D6551F24E8BA00EA1876 /* PBXContainerItemProxy */;
+		};
+		5598D6581F24E8BA00EA1876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = basicAppFramework;
+			targetProxy = 5598D6571F24E8BA00EA1876 /* PBXContainerItemProxy */;
+		};
+		5598D65A1F24E8BA00EA1876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = RcpOpcFramework;
+			targetProxy = 5598D6591F24E8BA00EA1876 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

@@ -8,8 +8,16 @@
 
 #include "csmfwddecl.hxx"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 CYBOOL cad_cadenas_iguales(const char *cadena1, const char *cadena2);
 
 char *cad_copia_cadena(const char *cadena);
 
 void cypestr_destruye(char **cadena);
+
+#ifdef __cplusplus
+}
+#endif

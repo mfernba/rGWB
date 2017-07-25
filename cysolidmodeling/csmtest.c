@@ -31,6 +31,9 @@
 #include <geomcomp/gccontorno.h>
 #include <geomcomp/gcelem2d.h>
 
+#include "csmdebug.inl"
+#include "csmviewer.inl"
+
 // ------------------------------------------------------------------------------------------
 
 static void i_test_crea_destruye_solido_vacio(void)
@@ -574,22 +577,26 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior2(void)
 
 // ------------------------------------------------------------------------------------------
 
-static void i_test_union_solidos(void)
+static void i_test_union_solidos(struct csmviewer_t *viewer)
 {
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
-    solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
-    csmsolid_print_debug(solid1, CIERTO);
+    // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
+    //solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+    //solid2 = csmsweep_create_solid_from_shape(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0.);
 
+    // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
+    solid1 = csmsweep_create_solid_from_shape(shape2d, 0., -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0., -0.25, 0., 1., 0., 0., 0., 1., 0.);
     solid2 = csmsweep_create_solid_from_shape(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0.);
-    csmsolid_print_debug(solid2, CIERTO);
     
     solid_res = csmsetop_union_A_and_B(solid1, solid2);
     csmsolid_print_debug(solid_res, CIERTO);
 
+    csmviewer_set_results(viewer, solid_res, NULL);
+    csmviewer_show(viewer);
     
     csmsolid_print_debug(solid1, CIERTO);
     csmsolid_print_debug(solid2, CIERTO);
@@ -604,6 +611,11 @@ static void i_test_union_solidos(void)
 
 void csmtest_test(void)
 {
+    struct csmviewer_t *viewer;
+
+    viewer = csmviewer_new();
+    csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_set_parameters, csmviewer_set_results);
+    
     /*
     i_test_crea_destruye_solido_vacio();
     i_test_basico_solido_una_arista();
@@ -621,7 +633,9 @@ void csmtest_test(void)
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
     i_test_divide_solido_rectangular_hueco_por_plano_superior2();
     */
-    i_test_union_solidos();
+    i_test_union_solidos(viewer);
+    
+    csmviewer_free(&viewer);
 }
 
 

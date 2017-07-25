@@ -4,6 +4,7 @@
 
 #include "csmmath.inl"
 #include "csmhedge.inl"
+#include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmeuler_lmev.inl"
@@ -461,6 +462,7 @@ static void i_generate_neighboorhoods(
     ArrEstructura(i_inters_sectors_t) *neighborhood_intersections_loc;
     unsigned long i, num_neighborhoods_a, num_neighborhoods_b;
 
+    assert(csmvertex_equal_coords(vertex_a, vertex_b, csmtolerance_equal_coords()) == CIERTO);
     assert_no_null(neighborhood_A);
     assert_no_null(neighborhood_B);
     assert_no_null(neighborhood_intersections);
@@ -843,6 +845,10 @@ static struct i_inters_sectors_t *i_get_next_sector(ArrEstructura(i_inters_secto
         {
             (*last_idx)++;
             intersection = NULL;
+        }
+        else
+        {
+            break;
         }
     }
     
@@ -1280,10 +1286,14 @@ void csmsetop_vtxvtx_append_null_edges(
     
     for (i = 0; i < num_intersections; i++)
     {
-        const struct csmsetop_vtxvtx_inters_t *vv_intersection;
+        csmdebug_begin_context("VV Intersection");
+        {
+            const struct csmsetop_vtxvtx_inters_t *vv_intersection;
         
-        vv_intersection = arr_GetPunteroConstST(vv_intersections, i, csmsetop_vtxvtx_inters_t);
-        i_vtxvtx_append_null_edges(vv_intersection, set_operation, set_of_null_edges_A, set_of_null_edges_B);
+            vv_intersection = arr_GetPunteroConstST(vv_intersections, i, csmsetop_vtxvtx_inters_t);
+            i_vtxvtx_append_null_edges(vv_intersection, set_operation, set_of_null_edges_A, set_of_null_edges_B);
+        }
+        csmdebug_end_context();
     }
 }
 

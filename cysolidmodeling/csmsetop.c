@@ -3,6 +3,7 @@
 #include "csmsetop.h"
 #include "csmsetop.tli"
 
+#include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmeuler_lkfmrh.inl"
@@ -22,8 +23,6 @@
 ArrEstructura(csmsetop_vtxvtx_inters_t);
 ArrEstructura(csmsetop_vtxfacc_inters_t);
 ArrEstructura(csmhedge_t);
-
-static const CYBOOL i_DEBUG = FALSO;
 
 // ------------------------------------------------------------------------------------------
 
@@ -65,6 +64,15 @@ static CYBOOL i_can_join(
             arr_BorrarEstructuraST(loose_ends_B, i, NULL, csmhedge_t);
             break;
         }
+    }
+    
+    if (can_join == FALSO)
+    {
+        matching_loose_end_hea_loc = NULL;
+        matching_loose_end_heb_loc = NULL;
+        
+        arr_AppendPunteroST(loose_ends_A, hea, csmhedge_t);
+        arr_AppendPunteroST(loose_ends_B, heb, csmhedge_t);
     }
     
     *matching_loose_end_hea = matching_loose_end_hea_loc;
@@ -109,7 +117,7 @@ static void i_join_null_edges(
         struct csmhedge_t *he1_next_edge_A, *he2_next_edge_A, *he1_next_edge_B, *he2_next_edge_B;
         struct csmhedge_t *h1a, *h2a, *h1b, *h2b;
         
-        if (i_DEBUG == CIERTO)
+        if (csmdebug_debug_enabled() == CIERTO)
         {
             csmsetopcom_print_set_of_null_edges(set_of_null_edges_A);
             csmsetopcom_print_set_of_null_edges(set_of_null_edges_B);
@@ -171,7 +179,7 @@ static void i_join_null_edges(
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
         
-        if (i_DEBUG == CIERTO)
+        if (csmdebug_debug_enabled() == CIERTO)
         {
             csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
             csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge_A), CIERTO);
@@ -315,13 +323,24 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     ArrEstructura(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
     ArrEstructura(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
     ArrEstructura(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
+    
+    csmdebug_begin_context("SETOP");
 
+    csmdebug_set_viewer_parameters(solid_A, solid_B);
+    csmdebug_show_viewer();
+    
     csmsolid_redo_geometric_generated_data(solid_A);
     csmsolid_clear_algorithm_vertex_mask(solid_A);
     
     csmsolid_redo_geometric_generated_data(solid_B);
     csmsolid_clear_algorithm_vertex_mask(solid_B);
 
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        csmsolid_print_debug(solid_A, CIERTO);
+        csmsolid_print_debug(solid_B, CIERTO);
+    }
+    
     csmsetop_procedges_generate_intersections_on_both_solids(
                         solid_A, solid_B,
                         &vv_intersections,
@@ -342,6 +361,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
                         set_operation,
                         solid_A, set_of_null_faces_A,
                         solid_B, set_of_null_faces_B);
+    
+    csmdebug_set_viewer_results(result, NULL);
+    csmdebug_end_context();
     
     arr_DestruyeEstructurasST(&vv_intersections, csmsetop_vtxvtx_free_inters, csmsetop_vtxvtx_inters_t);
     arr_DestruyeEstructurasST(&vf_intersections_A, csmsetop_vtxfacc_free_inters, csmsetop_vtxfacc_inters_t);

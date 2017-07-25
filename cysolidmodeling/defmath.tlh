@@ -1,5 +1,5 @@
 
-#define ABS(A) ((A) >= 0.0) ? (A): (-A)
+#define ABS(A) (((A) >= 0.0) ? (A): (-A))
 
 #define MIN(A, B) ((A) < (B)) ? (A): (B)
 #define MAX(A, B) ((A) > (B)) ? (A): (B)

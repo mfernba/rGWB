@@ -147,7 +147,7 @@ void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge)
 CYBOOL csmvertex_has_mask_attrib(const struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib)
 {
     assert_no_null(vertex);
-    return ES_CIERTO((vertex->algorithm_attrib_mask & mask_attrib) == (csmvertex_mask_t)1);
+    return ES_CIERTO((vertex->algorithm_attrib_mask & mask_attrib) == mask_attrib);
 }
 
 // ----------------------------------------------------------------------------------------------------

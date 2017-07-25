@@ -220,7 +220,11 @@ CYBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance)
     double squared_norm;
     
     squared_norm = CUAD(Ux) + CUAD(Uy) + CUAD(Uz);
-    return csmmath_compare_doubles(squared_norm, 0.0, CUAD(tolerance));
+    
+    if (fabs(squared_norm) < CUAD(tolerance))
+        return CIERTO;
+    else
+        return FALSO;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -567,16 +571,10 @@ void csmmath_plane_axis_from_implicit_plane_equation(
 	else
 	{
 		csmmath_cross_product3D(0., 0., 1., A, B, C, &Ux1, &Uy1, &Uz1);
-		i_anula_valores_despreciables(&Ux1);
-		i_anula_valores_despreciables(&Uy1);
-		i_anula_valores_despreciables(&Uz1);		
 		csmmath_make_unit_vector3D(&Ux1, &Uy1, &Uz1);
 	}
 		
 	csmmath_cross_product3D(A, B, C, Ux1, Uy1, Uz1, &Ux2, &Uy2, &Uz2);
-	i_anula_valores_despreciables(&Ux2);
-	i_anula_valores_despreciables(&Uy2);
-	i_anula_valores_despreciables(&Uz2);		
 	csmmath_make_unit_vector3D(&Ux2, &Uy2, &Uz2);
 	
 	csmmath_move_point(0., 0., 0., A, B, C, -D, Xo, Yo, Zo);

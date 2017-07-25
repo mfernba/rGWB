@@ -2,6 +2,7 @@
 
 #include "csmsplit.h"
 
+#include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
@@ -49,8 +50,6 @@ struct i_neighborhood_t
     struct csmhedge_t *hedge;
     enum i_position_t position;
 };
-
-static CYBOOL i_DEBUG = FALSO;
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -244,16 +243,15 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
         else
             new_vertex_algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
 
-        if (i_DEBUG == CIERTO)
+        if (csmdebug_debug_enabled() == CIERTO)
         {
             double x_pos, y_pos, z_pos, x_neg, y_neg, z_neg;
 
             csmvertex_get_coordenadas(vertex_pos, &x_pos, &y_pos, &z_pos);
             csmvertex_get_coordenadas(vertex_neg, &x_neg, &y_neg, &z_neg);
             
-            fprintf(
-                    stdout,
-                    "Split(): Analizing edge %lu (%g, %g, %g) -> (%g, %g, %g)\n",
+            csmdebug_print_debug_info(
+                    "Analizing edge %lu (%g, %g, %g) -> (%g, %g, %g)\n",
                     csmedge_id(edge),
                     x_pos, y_pos, z_pos, x_neg, y_neg, z_neg);
         }
@@ -285,8 +283,8 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
             
             csmvertex_set_mask_attrib(new_vertex, new_vertex_algorithm_attrib_mask);
             
-            if (i_DEBUG == CIERTO)
-                fprintf(stdout, "\tIntersection at (%g, %g, %g), New Vertex Id: %lu\n", x_inters, y_inters, z_inters, csmvertex_id(new_vertex));
+            if (csmdebug_debug_enabled() == CIERTO)
+                csmdebug_print_debug_info("Intersection at (%g, %g, %g), New Vertex Id: %lu\n", x_inters, y_inters, z_inters, csmvertex_id(new_vertex));
         }
         else
         {
@@ -295,8 +293,8 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
                 csmvertex_set_mask_attrib(vertex_pos, new_vertex_algorithm_attrib_mask);
                 csmsetopcom_append_vertex_if_not_exists(vertex_pos, set_of_on_vertices);
                 
-                if (i_DEBUG == CIERTO)
-                    fprintf(stdout, "\tSplit(): Already On Vertex %lu\n", csmvertex_id(vertex_pos));
+                if (csmdebug_debug_enabled() == CIERTO)
+                    csmdebug_print_debug_info("Already On Vertex %lu\n", csmvertex_id(vertex_pos));
             }
             
             if (cl_resp_plane_neg == i_POSITION_ON)
@@ -304,8 +302,8 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
                 csmvertex_set_mask_attrib(vertex_neg, new_vertex_algorithm_attrib_mask);
                 csmsetopcom_append_vertex_if_not_exists(vertex_neg, set_of_on_vertices);
                 
-                if (i_DEBUG == CIERTO)
-                    fprintf(stdout, "\tSplit(): Already On Vertex %lu\n", csmvertex_id(vertex_neg));
+                if (csmdebug_debug_enabled() == CIERTO)
+                    csmdebug_print_debug_info("Already On Vertex %lu\n", csmvertex_id(vertex_neg));
             }
         }
     }
@@ -584,13 +582,13 @@ static CYBOOL i_is_above_below_sequence_at_index(const ArrEstructura(i_neighborh
 
 static void i_print_debug_info_vertex_neighborhood(const char *description, const struct csmvertex_t *vertex, ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
 {
-    if (i_DEBUG == CIERTO)
+    if (csmdebug_debug_enabled() == CIERTO)
     {
         double x, y, z;
         unsigned long i, num_sectors;
         
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
-        fprintf(stdout, "Split(): Vertex neighborhood [%s]: %lu (%g, %g, %g): ", description, csmvertex_id(vertex), x, y, z);
+        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g): ", description, csmvertex_id(vertex), x, y, z);
         
         num_sectors = arr_NumElemsPunteroST(vertex_neighborhood, i_neighborhood_t);
         
@@ -601,10 +599,10 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
             hedge_neighborhood = arr_GetPunteroST(vertex_neighborhood, i, i_neighborhood_t);
             assert_no_null(hedge_neighborhood);
             
-            fprintf(stdout, "(hedge = %lu, classification: %d): ", csmhedge_id(hedge_neighborhood->hedge), hedge_neighborhood->position);
+            csmdebug_print_debug_info("(hedge = %lu, classification: %d): ", csmhedge_id(hedge_neighborhood->hedge), hedge_neighborhood->position);
         }
         
-        fprintf(stdout, "\n");
+        csmdebug_print_debug_info("\n");
     }
 }
 
@@ -672,11 +670,10 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
             tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, idx, i_neighborhood_t);
             assert_no_null(tail_neighborhood);
             
-            if (i_DEBUG == CIERTO)
+            if (csmdebug_debug_enabled() == CIERTO)
             {
-                fprintf(
-                        stdout,
-                        "\tInserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
+                csmdebug_print_debug_info(
+                        "Inserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
                         x_split, y_split, z_split,
                         csmhedge_id(head_neighborhood->hedge),
                         csmhedge_id(tail_neighborhood->hedge));
@@ -798,7 +795,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
         struct csmhedge_t *he1_next_edge, *he2_next_edge;
         struct csmhedge_t *matching_loose_end_he1, *matching_loose_end_he2;
         
-        if (i_DEBUG == CIERTO)
+        if (csmdebug_debug_enabled() == CIERTO)
             csmsetopcom_print_set_of_null_edges(set_of_null_edges);
         
         idx = i - no_null_edges_deleted;
@@ -834,7 +831,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
         if (matching_loose_end_he1 != NULL && matching_loose_end_he2 != NULL)
             csmsetopcom_cut_he(he1_next_edge, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         
-        if (i_DEBUG == CIERTO)
+        if (csmdebug_debug_enabled() == CIERTO)
         {
             csmsetopcom_print_debug_info_loose_ends(loose_ends);
             csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge), CIERTO);
@@ -862,7 +859,7 @@ static void i_finish_split(
     assert_no_null(solid_above);
     assert_no_null(solid_below);
 
-    if (i_DEBUG == CIERTO)
+    if (csmdebug_debug_enabled() == CIERTO)
         csmsolid_print_debug(work_solid, CIERTO);
 
     set_of_null_faces_below = csmsetopcom_convert_inner_loops_of_null_faces_to_faces_solid_below(set_of_null_faces);
@@ -875,7 +872,7 @@ static void i_finish_split(
     assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_below, csmface_t));
     assert(no_null_faces > 0);
     
-    if (i_DEBUG == CIERTO)
+    if (csmdebug_debug_enabled() == CIERTO)
         csmsolid_print_debug(work_solid, CIERTO);
     
     solid_above_loc = csmsolid_crea_vacio();
@@ -896,7 +893,7 @@ static void i_finish_split(
     csmsetopcom_cleanup_solid(work_solid, solid_above_loc);
     csmsetopcom_cleanup_solid(work_solid, solid_below_loc);
 
-    if (i_DEBUG == CIERTO)
+    if (csmdebug_debug_enabled() == CIERTO)
     {
         csmsolid_print_debug(work_solid, CIERTO);
         csmsolid_print_debug(solid_above_loc, CIERTO);
