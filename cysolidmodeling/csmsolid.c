@@ -22,9 +22,11 @@
 #include "csmtransform.inl"
 #include "csmvertex.inl"
 
+#include "copiafor.h"
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
+#include "cypestr.h"
 
 struct i_item_t;
 struct csmhashtb(i_item_t);
@@ -925,6 +927,23 @@ static void i_draw_edge_debug_info(struct csmedge_t *edge, struct bsgraphics2_t 
     
     csmedge_vertex_coordinates(edge, &x1, &y1, &z1, &x2, &y2, &z2);
     bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
+    
+    bsgraphics2_append_desplazamiento_3D(graphics, .5 * (x1 + x2), .5 * (y1 + y2), .5 * (z1 + z2));
+    bsgraphics2_append_ejes_plano_pantalla(graphics);
+    {
+        struct csmhedge_t *he1, *he2;
+        char *description;
+        
+        he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+        he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+    
+        description = copiafor_codigo2("+%lu,-%lu", csmhedge_id(he1), csmhedge_id(he2));
+        bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_CEN_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.05);
+        
+        cypestr_destruye(&description);
+    }
+    bsgraphics2_desapila_transformacion(graphics);
+    bsgraphics2_desapila_transformacion(graphics);
 }
 
 // ----------------------------------------------------------------------------------------------------
