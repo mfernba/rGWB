@@ -9,9 +9,9 @@ enum csmsetop_operation_t
 
 enum csmsetop_classify_resp_solid_t
 {
-    CSMSETOP_CLASSIFY_RESP_SOLID_OUT,
-    CSMSETOP_CLASSIFY_RESP_SOLID_IN,
-    CSMSETOP_CLASSIFY_RESP_SOLID_ON
+    CSMSETOP_CLASSIFY_RESP_SOLID_OUT = -1,
+    CSMSETOP_CLASSIFY_RESP_SOLID_IN = 1,
+    CSMSETOP_CLASSIFY_RESP_SOLID_ON = 0
 };
 
 enum csmsetop_a_vs_b_t

@@ -36,12 +36,14 @@ void *cypespy_dontuse_malloc(size_t n_bytes)
 
 void cypespy_dontuse_free(void **data, size_t bytes)
 {
+    void *data_loc;
+    
     assert(data != NULL);
     
-    memset(*data, i_MEMORY_DELETION_MARK, bytes);
-    free(*data);
-    
+    data_loc = *data;
     *data = NULL;
+    
+    free(data_loc);
 }
 
 // ---------------------------------------------------------------------------------

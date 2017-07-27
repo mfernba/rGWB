@@ -21,6 +21,7 @@
 #include "csmvertex.tli"
 
 #include "a_punter.h"
+#include "copiafor.h"
 #include "cyassert.h"
 #include "cypespy.h"
 #include "defmath.tlh"
@@ -125,8 +126,7 @@ static void i_classify_point_respect_to_plane(
     cl_resp_plane_loc = csmsetopcom_classify_value_respect_to_plane(dist_to_plane_loc, tolerance);
 
     ASIGNA_OPC(dist_to_plane_opc, dist_to_plane_loc);
-    ASIGNA_OPC(cl_resp_plane_opc, cl_resp_plane_loc);
-    
+    ASIGNA_OPC(cl_resp_plane_opc, cl_resp_plane_loc);    
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -277,83 +277,99 @@ static void i_reclassify_on_sector_vertex_neighborhood(
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
                         double tolerance_coplanarity)
 {
+    struct csmhedge_t *mate_hedge_neighborhood;
     struct csmface_t *face;
     CYBOOL same_orientation;
     
     assert_no_null(hedge_neighborhood);
     assert_no_null(next_hedge_neighborhood);
     
-    face = csmopbas_face_from_hedge(hedge_neighborhood->hedge);
+    mate_hedge_neighborhood = csmopbas_mate(hedge_neighborhood->hedge);
+    face = csmopbas_face_from_hedge(mate_hedge_neighborhood);
     
     if (csmface_is_coplanar_to_plane(face, A, B, C, D, tolerance_coplanarity, &same_orientation) == CIERTO)
     {
-        switch (a_vs_b)
+        if (same_orientation == CIERTO)
         {
-            case CSMSETOP_A_VS_B:
+            switch (a_vs_b)
             {
-                switch (set_operation)
-                {
-                    case CSMSETOP_OPERATION_UNION:
+                case CSMSETOP_A_VS_B:
+                    
+                    switch (set_operation)
+                    {
+                        case CSMSETOP_OPERATION_UNION:
 
-                        if (same_orientation == CIERTO)
-                        {
                             hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
                             next_hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-                        }
-                        else
-                        {
+                            break;
+                            
+                        case CSMSETOP_OPERATION_INTERSECTION:
+                        case CSMSETOP_OPERATION_DIFFERENCE:
+                            
                             hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
                             next_hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-                        }
-                        break;
-                        
-                    case CSMSETOP_OPERATION_INTERSECTION:
-                    case CSMSETOP_OPERATION_DIFFERENCE:
-                        
-                        if (same_orientation == CIERTO)
-                        {
+                            break;
+                            
+                        default_error();
+                    }
+                    break;
+                    
+                case CSMSETOP_B_VS_A:
+                    
+                    switch (set_operation)
+                    {
+                        case CSMSETOP_OPERATION_UNION:
+
                             hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
                             next_hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-                        }
-                        else
-                        {
+                            break;
+                            
+                        case CSMSETOP_OPERATION_INTERSECTION:
+                        case CSMSETOP_OPERATION_DIFFERENCE:
+                            
                             hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
                             next_hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-                        }
-                        break;
-                        
-                    default_error();
-                }
-                break;
+                            break;
+                            
+                        default_error();
+                    }
+                    break;
+                    
+                default_error();
             }
-                
-            case CSMSETOP_B_VS_A:
+        }
+        else
+        {
+            switch (a_vs_b)
             {
-                switch (set_operation)
-                {
-                    case CSMSETOP_OPERATION_UNION:
+                case CSMSETOP_A_VS_B:
+                case CSMSETOP_B_VS_A:
+                    
+                    switch (set_operation)
+                    {
+                        case CSMSETOP_OPERATION_UNION:
 
-                        hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-                        next_hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-                        break;
-                        
-                    case CSMSETOP_OPERATION_INTERSECTION:
-                    case CSMSETOP_OPERATION_DIFFERENCE:
-                        
-                        hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-                        next_hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-                        break;
-                        
-                    default_error();
-                }
-                break;
+                            hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+                            next_hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+                            break;
+                            
+                        case CSMSETOP_OPERATION_INTERSECTION:
+                        case CSMSETOP_OPERATION_DIFFERENCE:
+                            
+                            hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+                            next_hedge_neighborhood->position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+                            break;
+                            
+                        default_error();
+                    }
+                    break;
+                    
+                default_error();
             }
-                
-            default_error();
         }
     }
 }
-    
+
 // ----------------------------------------------------------------------------------------------------
 
 static void i_reclassify_on_sectors_vertex_neighborhood(
@@ -576,7 +592,7 @@ static void i_mark_null_edge_on_face(
                         ArrEstructura(csmedge_t) *set_of_null_edges_other_solid)
 {
     struct csmloop_t *flout;
-    struct csmhedge_t *flout_fledge;
+    struct csmhedge_t *flout_fledge, *old_flout_fledge_prev, *old_flout_fledge_next;
     struct csmvertex_t *new_vertex;
     struct csmhedge_t *hedge_from_new_vertex, *hedge_to_new_vertex;
     struct csmhedge_t *he_on_new_ring;
@@ -584,13 +600,20 @@ static void i_mark_null_edge_on_face(
     
     flout = csmface_flout(face);
     flout_fledge = csmloop_ledge(flout);
+    old_flout_fledge_prev = csmhedge_prev(flout_fledge);
+    old_flout_fledge_next = csmhedge_next(flout_fledge);
+    assert(old_flout_fledge_prev != old_flout_fledge_next);
+    assert(flout_fledge != old_flout_fledge_prev);
+    assert(flout_fledge != old_flout_fledge_next);
     
     csmeuler_lmev(flout_fledge, flout_fledge, x_split, y_split, z_split, &new_vertex, NULL, &hedge_from_new_vertex, &hedge_to_new_vertex);
     csmvertex_set_mask_attrib(new_vertex, vertex_algorithm_mask);
     
-    csmeuler_lkemr(&hedge_from_new_vertex, &hedge_to_new_vertex, NULL, &he_on_new_ring);
+    csmeuler_lkemr(&hedge_to_new_vertex, &hedge_from_new_vertex, NULL, &he_on_new_ring);
     
     assert(csmhedge_loop(he_on_new_ring) != flout);
+    assert(old_flout_fledge_prev == csmhedge_prev(flout_fledge));
+    assert(old_flout_fledge_next == csmhedge_next(flout_fledge));
     
     null_edge = csmhedge_edge(he_on_new_ring);
     arr_AppendPunteroST(set_of_null_edges_other_solid, null_edge, csmedge_t);
@@ -629,7 +652,6 @@ static void i_process_vf_inters(
         unsigned long num_sectors;
         unsigned long idx;
         struct i_neighborhood_t *head_neighborhood;
-        double x_split, y_split, z_split;
         unsigned long num_iters;
         CYBOOL process_next_sequence;
 
@@ -637,11 +659,7 @@ static void i_process_vf_inters(
         assert(num_sectors > 0);
         
         idx = start_idx;
-        
-        head_neighborhood = arr_GetPunteroST(vertex_neighborhood, start_idx, i_neighborhood_t);
-        assert_no_null(head_neighborhood);
-        
-        csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
+        head_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         
         num_iters = 0;
         process_next_sequence = CIERTO;
@@ -649,9 +667,11 @@ static void i_process_vf_inters(
         while (process_next_sequence == CIERTO)
         {
             struct i_neighborhood_t *tail_neighborhood;
+            double x_split, y_split, z_split;
             struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
             
+            assert_no_null(head_neighborhood);
             assert(num_iters < 100000);
             num_iters++;
             
@@ -663,16 +683,23 @@ static void i_process_vf_inters(
                 idx = (idx + 1) % num_sectors;
             }
             
-            tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, idx, i_neighborhood_t);
+            tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
             assert_no_null(tail_neighborhood);
+            
+            csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
             
             if (csmdebug_debug_enabled() == CIERTO)
             {
+                char *description;
+                
                 csmdebug_print_debug_info(
                         "Inserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
                         x_split, y_split, z_split,
                         csmhedge_id(head_neighborhood->hedge),
                         csmhedge_id(tail_neighborhood->hedge));
+                
+                description = copiafor_codigo3("NE (%g, %g, %g)", x_split, y_split, z_split);
+                csmdebug_append_debug_point(x_split, y_split, z_split, &description);
             }
             
             csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
@@ -698,6 +725,8 @@ static void i_process_vf_inters(
                     break;
                 }
             }
+            
+            head_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         }
     }
     

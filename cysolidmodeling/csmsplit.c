@@ -633,7 +633,6 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
         unsigned long num_sectors;
         unsigned long idx;
         struct i_neighborhood_t *head_neighborhood;
-        double x_split, y_split, z_split;
         unsigned long num_iters;
         CYBOOL process_next_sequence;
 
@@ -641,11 +640,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
         assert(num_sectors > 0);
         
         idx = start_idx;
-        
-        head_neighborhood = arr_GetPunteroST(vertex_neighborhood, start_idx, i_neighborhood_t);
-        assert_no_null(head_neighborhood);
-        
-        csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
+        head_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         
         num_iters = 0;
         process_next_sequence = CIERTO;
@@ -653,9 +648,11 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
         while (process_next_sequence == CIERTO)
         {
             struct i_neighborhood_t *tail_neighborhood;
+            double x_split, y_split, z_split;
             struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
             
+            assert_no_null(head_neighborhood);
             assert(num_iters < 100000);
             num_iters++;
             
@@ -667,9 +664,11 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
                 idx = (idx + 1) % num_sectors;
             }
             
-            tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, idx, i_neighborhood_t);
+            tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
             assert_no_null(tail_neighborhood);
             
+            csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
+
             if (csmdebug_debug_enabled() == CIERTO)
             {
                 csmdebug_print_debug_info(
@@ -697,6 +696,8 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
                     break;
                 }
             }
+            
+            head_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         }
     }
     
