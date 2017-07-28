@@ -452,6 +452,38 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
     return i_create_inters_sectors(idx_nba, idx_nbb, s1a, s2a, s1b, s2b, intersect);
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+static void i_print_debug_info_vertex_neighborhood(const char *description, const struct csmvertex_t *vertex, ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
+{
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        double x, y, z;
+        unsigned long i, num_sectors;
+        
+        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g): \n", description, csmvertex_id(vertex), x, y, z);
+        
+        num_sectors = arr_NumElemsPunteroST(vertex_neighborhood, i_neighborhood_t);
+        
+        for (i = 0; i < num_sectors; i++)
+        {
+            struct i_neighborhood_t *hedge_neighborhood;
+            
+            hedge_neighborhood = arr_GetPunteroST(vertex_neighborhood, i, i_neighborhood_t);
+            assert_no_null(hedge_neighborhood);
+            
+            csmdebug_print_debug_info("He: %lu\n", csmhedge_id(hedge_neighborhood->he));
+            csmdebug_print_debug_info("U1:  %g, %g, %g\n", hedge_neighborhood->Ux1, hedge_neighborhood->Uy1, hedge_neighborhood->Uz1);
+            csmdebug_print_debug_info("U2:  %g, %g, %g\n", hedge_neighborhood->Ux2, hedge_neighborhood->Uy2, hedge_neighborhood->Uz2);
+            csmdebug_print_debug_info("U12: %g, %g, %g\n", hedge_neighborhood->Ux12, hedge_neighborhood->Uy12, hedge_neighborhood->Uz12);
+            csmdebug_print_debug_info("Face Normal: %g, %g, %g\n", hedge_neighborhood->A_face, hedge_neighborhood->B_face, hedge_neighborhood->C_face);
+        }
+        
+        csmdebug_print_debug_info("\n");
+    }
+}
+
 // ------------------------------------------------------------------------------------------
 
 static void i_generate_neighboorhoods(
@@ -471,6 +503,9 @@ static void i_generate_neighboorhoods(
     
     neighborhood_A_loc = i_preprocess_neighborhood(vertex_a);
     neighborhood_B_loc = i_preprocess_neighborhood(vertex_b);
+    
+    i_print_debug_info_vertex_neighborhood("nba", vertex_a, neighborhood_A_loc);
+    i_print_debug_info_vertex_neighborhood("nbb", vertex_b, neighborhood_B_loc);
     
     neighborhood_intersections_loc = arr_CreaPunteroST(0, i_inters_sectors_t);
     
@@ -1061,10 +1096,18 @@ static void i_separateEdgeSequence(
     
     split_vertex = csmhedge_vertex(from);
     csmvertex_get_coordenadas(split_vertex, &x, &y, &z);
+
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        char *description;
+        
+        description = copiafor_codigo4("NE %lu (%g, %g, %g)", csmvertex_id(split_vertex), x, y, z);
+        csmdebug_append_debug_point(x, y, z, &description);
+    }
     
-    csmeuler_lmev(from, to, x, y, z, NULL, NULL, NULL, NULL);
+    csmeuler_lmev(from, to, x, y, z, NULL, &null_edge, NULL, NULL);
+    assert_no_null(null_edge);
     
-    null_edge = csmhedge_edge(csmhedge_prev(from));
     arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
 }
 
@@ -1101,8 +1144,17 @@ static void i_separateInteriorHedge(
     split_vertex = csmhedge_vertex(he);
     csmvertex_get_coordenadas(split_vertex, &x, &y, &z);
     
-    csmeuler_lmev(he, he, x, y, z, NULL, NULL, NULL, NULL);
+    csmeuler_lmev(he, he, x, y, z, NULL, &null_edge, NULL, NULL);
+    assert_no_null(null_edge);
 
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        char *description;
+        
+        description = copiafor_codigo4("NE %lu (%g, %g, %g)", csmvertex_id(split_vertex), x, y, z);
+        csmdebug_append_debug_point(x, y, z, &description);
+    }
+    
     /* a piece of Black Art: reverse orientation of the null edge */
     if (orient == CIERTO)
     {
@@ -1117,7 +1169,6 @@ static void i_separateInteriorHedge(
         csmedge_set_edge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS, he2_edge_he_prv);
     }
     
-    null_edge = csmhedge_edge(csmhedge_prev(he));
     arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
 }
 
@@ -1132,12 +1183,6 @@ static void i_insert_null_edges(
     struct csmhedge_t *ha1, *ha2, *hb1, *hb2;
     unsigned long num_iters;
     unsigned long last_idx;
-    
-    ha1 = NULL;
-    ha2 = NULL;
-    
-    hb1 = NULL;
-    hb2 = NULL;
     
     num_iters = 0;
     last_idx = 0;
@@ -1158,6 +1203,12 @@ static void i_insert_null_edges(
         else
         {
             struct i_neighborhood_t *nba, *nbb;
+            
+            ha1 = NULL;
+            ha2 = NULL;
+            
+            hb1 = NULL;
+            hb2 = NULL;
             
             nba = arr_GetPunteroST(neighborhood_A, sector->idx_nba, i_neighborhood_t);
             assert_no_null(nba);
@@ -1191,14 +1242,34 @@ static void i_insert_null_edges(
                 assert_no_null(nbb);
                 
                 if (sector->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+                {
+                    assert(ha1 == NULL);
+                    assert(ha2 != NULL);
+                    
                     ha1 = nba->he;
+                }
                 else
+                {
+                    assert(ha1 != NULL);
+                    assert(ha2 == NULL);
+                    
                     ha2 = nba->he;
+                }
                 
                 if (sector->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
+                {
+                    assert(hb1 == NULL);
+                    assert(hb2 != NULL);
+                    
                     hb1 = nbb->he;
+                }
                 else
+                {
+                    assert(hb1 != NULL);
+                    assert(hb2 == NULL);
+                    
                     hb2 = nbb->he;
+                }
                 
                 last_idx++;
                 
@@ -1270,6 +1341,8 @@ static void i_print_neighborhood_intersections(
     {
         unsigned long i, no_inters;
         
+        csmdebug_print_debug_info("\n");
+        
         no_inters = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
         
         for (i = 0; i < no_inters; i++)
@@ -1324,15 +1397,12 @@ static void i_vtxvtx_append_null_edges(
         cypestr_destruye(&description);
     }
     
-    csmdebug_clear_debug_points();
-    
     i_generate_neighboorhoods(
                         vv_intersection->vertex_a, vv_intersection->vertex_b,
                         &neighborhood_A, &neighborhood_B,
                         &neighborhood_intersections);
     
     i_print_neighborhood_intersections(neighborhood_intersections, neighborhood_A, neighborhood_B);
-    csmdebug_show_viewer();
     
     i_reclassify_on_sectors(
                         set_operation,
@@ -1354,8 +1424,6 @@ static void i_vtxvtx_append_null_edges(
                         set_of_null_edges_A,
                         set_of_null_edges_B);
     
-    csmdebug_show_viewer();
-    
     csmdebug_end_context();
     
     arr_DestruyeEstructurasST(&neighborhood_A, i_free_neighborhood, i_neighborhood_t);
@@ -1375,6 +1443,8 @@ void csmsetop_vtxvtx_append_null_edges(
     
     num_intersections = arr_NumElemsPunteroST(vv_intersections, csmsetop_vtxvtx_inters_t);
     
+    csmdebug_clear_debug_points();
+    
     for (i = 0; i < num_intersections; i++)
     {
         const struct csmsetop_vtxvtx_inters_t *vv_intersection;
@@ -1382,6 +1452,8 @@ void csmsetop_vtxvtx_append_null_edges(
         vv_intersection = arr_GetPunteroConstST(vv_intersections, i, csmsetop_vtxvtx_inters_t);
         i_vtxvtx_append_null_edges(vv_intersection, set_operation, set_of_null_edges_A, set_of_null_edges_B);
     }
+    
+    csmdebug_show_viewer();    
 }
 
 

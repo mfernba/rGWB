@@ -608,15 +608,15 @@ static void i_mark_null_edge_on_face(
     
     csmeuler_lmev(flout_fledge, flout_fledge, x_split, y_split, z_split, &new_vertex, NULL, &hedge_from_new_vertex, &hedge_to_new_vertex);
     csmvertex_set_mask_attrib(new_vertex, vertex_algorithm_mask);
+
+    csmeuler_lmev(hedge_from_new_vertex, hedge_from_new_vertex, x_split, y_split, z_split, NULL, &null_edge, NULL, NULL);
+    arr_AppendPunteroST(set_of_null_edges_other_solid, null_edge, csmedge_t);
     
     csmeuler_lkemr(&hedge_to_new_vertex, &hedge_from_new_vertex, NULL, &he_on_new_ring);
     
     assert(csmhedge_loop(he_on_new_ring) != flout);
     assert(old_flout_fledge_prev == csmhedge_prev(flout_fledge));
     assert(old_flout_fledge_next == csmhedge_next(flout_fledge));
-    
-    null_edge = csmhedge_edge(he_on_new_ring);
-    arr_AppendPunteroST(set_of_null_edges_other_solid, null_edge, csmedge_t);
 }
 
 // ----------------------------------------------------------------------------------------------------

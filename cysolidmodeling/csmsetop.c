@@ -84,8 +84,8 @@ static CYBOOL i_can_join(
 // ----------------------------------------------------------------------------------------------------
 
 static void i_join_null_edges(
-                        ArrEstructura(csmedge_t) *set_of_null_edges_A,
-                        ArrEstructura(csmedge_t) *set_of_null_edges_B,
+                        struct csmsolid_t *solid_A, ArrEstructura(csmedge_t) *set_of_null_edges_A,
+                        struct csmsolid_t *solid_B, ArrEstructura(csmedge_t) *set_of_null_edges_B,
                         ArrEstructura(csmface_t) **set_of_null_faces_A,
                         ArrEstructura(csmface_t) **set_of_null_faces_B)
 {
@@ -182,10 +182,10 @@ static void i_join_null_edges(
         if (csmdebug_debug_enabled() == CIERTO)
         {
             csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
-            csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge_A), CIERTO);
+            csmsolid_print_debug(solid_A, CIERTO);
             
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
-            csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge_B), CIERTO);
+            csmsolid_print_debug(solid_B, CIERTO);
         }
     }
     
@@ -353,9 +353,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, set_of_null_edges_B, set_of_null_edges_A);
     csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, set_of_null_edges_A, set_of_null_edges_B);
     
-    i_join_null_edges(set_of_null_edges_A, set_of_null_edges_B, &set_of_null_faces_A, &set_of_null_faces_B);
-    assert(arr_NumElemsPunteroST(set_of_null_edges_A, csmedge_t) == 0);
-    assert(arr_NumElemsPunteroST(set_of_null_edges_B, csmedge_t) == 0);
+    i_join_null_edges(
+                    solid_A, set_of_null_edges_A,
+                    solid_B, set_of_null_edges_B,
+                    &set_of_null_faces_A, &set_of_null_faces_B);
     
     result = i_finish_set_operation(
                         set_operation,
