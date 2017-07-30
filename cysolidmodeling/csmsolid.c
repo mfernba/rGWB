@@ -57,14 +57,14 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsolid_crea_vacio(void)
+struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
 {
     unsigned long id_nuevo_elemento;
     struct csmhashtb(csmface_t) *sfaces;
     struct csmhashtb(csmedge_t) *sedges;
     struct csmhashtb(csmvertex_t) *svertexs;
     
-    id_nuevo_elemento = 0;
+    id_nuevo_elemento = start_id_of_new_element;
     
     sfaces = csmhashtb_create_empty(csmface_t);
     sedges = csmhashtb_create_empty(csmedge_t);

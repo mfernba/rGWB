@@ -320,7 +320,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
             if (csmdebug_debug_enabled() == CIERTO)
             {
                 csmdebug_print_debug_info("(SAME LOOP) joining edges (%lu, %lu) with LMEF, new face %lu.\n", csmhedge_id(he1), csmhedge_id(he2), csmface_id(new_face));
-                csmsolid_print_debug(csmface_fsolid(new_face), CIERTO);
+                //csmsolid_print_debug(csmface_fsolid(new_face), CIERTO);
             }
         }
         else
@@ -360,7 +360,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
         if (csmdebug_debug_enabled() == CIERTO)
         {
             csmdebug_print_debug_info("\tFace %lu created\n", csmface_id(second_new_face));
-            csmsolid_print_debug(csmface_fsolid(second_new_face), CIERTO);
+            //csmsolid_print_debug(csmface_fsolid(second_new_face), CIERTO);
         }
         
         old_face_floops = csmface_floops(old_face);
@@ -379,8 +379,9 @@ static bool i_is_same_edge_by_ptr(const struct csmedge_t *edge1, const struct cs
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_cut_he(
+static void i_cut_he(
                     struct csmhedge_t *hedge,
+                    CYBOOL do_lmekr_he1_he2,
                     ArrEstructura(csmedge_t) *set_of_null_edges,
                     ArrEstructura(csmface_t) *set_of_null_faces,
                     unsigned long *no_null_edges_deleted)
@@ -413,13 +414,16 @@ void csmsetopcom_cut_he(
         if (csmdebug_debug_enabled() == CIERTO)
         {
             csmdebug_print_debug_info("(CUTTING HE)  (%lu, %lu) with LKEMR\n", csmhedge_id(he1_edge), csmhedge_id(he2_edge));
-            csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CIERTO);
+            //csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CIERTO);
         }
         
-        csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL);
+        if (do_lmekr_he1_he2 == CIERTO)
+            csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL);
+        else
+            csmeuler_lkemr(&he2_edge, &he1_edge, NULL, NULL);
         
-        if (csmdebug_debug_enabled() == CIERTO)
-            csmsolid_print_debug(solid, CIERTO);
+        //if (csmdebug_debug_enabled() == CIERTO)
+            //csmsolid_print_debug(solid, CIERTO);
     }
     else
     {
@@ -428,9 +432,37 @@ void csmsetopcom_cut_he(
         
         csmeuler_lkef(&he1_edge, &he2_edge);
         
-        if (csmdebug_debug_enabled() == CIERTO)
-            csmsolid_print_debug(solid, CIERTO);
+        //if (csmdebug_debug_enabled() == CIERTO)
+            //csmsolid_print_debug(solid, CIERTO);
     }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_cut_he_split(
+                    struct csmhedge_t *hedge,
+                    ArrEstructura(csmedge_t) *set_of_null_edges,
+                    ArrEstructura(csmface_t) *set_of_null_faces,
+                    unsigned long *no_null_edges_deleted)
+{
+    CYBOOL do_lmekr_he1_he2;
+    
+    do_lmekr_he1_he2 = CIERTO;
+    i_cut_he(hedge, do_lmekr_he1_he2, set_of_null_edges, set_of_null_faces, no_null_edges_deleted);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_cut_he_setop(
+                    struct csmhedge_t *hedge,
+                    ArrEstructura(csmedge_t) *set_of_null_edges,
+                    ArrEstructura(csmface_t) *set_of_null_faces,
+                    unsigned long *no_null_edges_deleted)
+{
+    CYBOOL do_lmekr_he1_he2;
+    
+    do_lmekr_he1_he2 = FALSO;
+    i_cut_he(hedge, do_lmekr_he1_he2, set_of_null_edges, set_of_null_faces, no_null_edges_deleted);
 }
 
 // ----------------------------------------------------------------------------------------------------

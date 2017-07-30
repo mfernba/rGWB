@@ -2,7 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-CONSTRUCTOR(struct csmsolid_t *, csmsolid_crea_vacio, (void));
+CONSTRUCTOR(struct csmsolid_t *, csmsolid_crea_vacio, (unsigned long start_id_of_new_element));
 
 
 // General...

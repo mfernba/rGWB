@@ -810,7 +810,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
             csmsetopcom_join_hedges(matching_loose_end_he1, he1_next_edge);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(matching_loose_end_he1), loose_ends) == FALSO)
-                csmsetopcom_cut_he(matching_loose_end_he1, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
+                csmsetopcom_cut_he_split(matching_loose_end_he1, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         }
         else
         {
@@ -822,7 +822,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
             csmsetopcom_join_hedges(matching_loose_end_he2, he2_next_edge);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(matching_loose_end_he2), loose_ends) == FALSO)
-                csmsetopcom_cut_he(matching_loose_end_he2, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
+                csmsetopcom_cut_he_split(matching_loose_end_he2, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         }
         else
         {
@@ -830,7 +830,7 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
         }
         
         if (matching_loose_end_he1 != NULL && matching_loose_end_he2 != NULL)
-            csmsetopcom_cut_he(he1_next_edge, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
+            csmsetopcom_cut_he_split(he1_next_edge, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         
         if (csmdebug_debug_enabled() == CIERTO)
         {
@@ -876,8 +876,8 @@ static void i_finish_split(
     if (csmdebug_debug_enabled() == CIERTO)
         csmsolid_print_debug(work_solid, CIERTO);
     
-    solid_above_loc = csmsolid_crea_vacio();
-    solid_below_loc = csmsolid_crea_vacio();
+    solid_above_loc = csmsolid_crea_vacio(0);
+    solid_below_loc = csmsolid_crea_vacio(0);
     
     for (i = 0; i < no_null_faces; i++)
     {

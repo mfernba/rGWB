@@ -17,7 +17,7 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmeuler_mvfs(double x, double y, double z, struct csmhedge_t **hedge_opc)
+struct csmsolid_t *csmeuler_mvfs(double x, double y, double z, unsigned long start_id_of_new_element, struct csmhedge_t **hedge_opc)
 {
     struct csmsolid_t *solido;
     unsigned long *id_nuevo_elemento;
@@ -26,7 +26,7 @@ struct csmsolid_t *csmeuler_mvfs(double x, double y, double z, struct csmhedge_t
     struct csmloop_t *loop;
     struct csmhedge_t *hedge;
     
-    solido = csmsolid_crea_vacio();
+    solido = csmsolid_crea_vacio(start_id_of_new_element);
     
     csmsolid_append_new_face(solido, &face);
     

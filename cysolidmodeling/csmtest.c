@@ -40,7 +40,7 @@ static void i_test_crea_destruye_solido_vacio(void)
 {
     struct csmsolid_t *solido;
     
-    solido = csmeuler_mvfs(0., 0., 0., NULL);
+    solido = csmeuler_mvfs(0., 0., 0., 0, NULL);
     
     csmeuler_kvfs(solido);
     
@@ -55,7 +55,7 @@ static void i_test_basico_solido_una_arista(void)
     struct csmhedge_t *hedge;
     struct csmhedge_t *he1, *he2;
     
-    solido = csmeuler_mvfs(0., 0., 0., &hedge);
+    solido = csmeuler_mvfs(0., 0., 0., 0, &hedge);
     
     csmeuler_lmev(hedge, hedge, 1., 0., 0., NULL, NULL, &he1, &he2);
     
@@ -77,7 +77,7 @@ static void i_test_crea_lamina(void)
     struct csmhedge_t *he_pos, *he_neg;
     struct csmhedge_t *he1, *he2;
     
-    solido = csmeuler_mvfs(0., 0., 0., &initial_hedge);
+    solido = csmeuler_mvfs(0., 0., 0., 0, &initial_hedge);
     initial_face = csmopbas_face_from_hedge(initial_hedge);
     
     csmeuler_lmev_strut_edge(initial_hedge, 1., 0., 1., &hedge_from_vertex1);
@@ -132,7 +132,7 @@ static void i_test_crea_lamina_con_hueco(void)
     struct csmhedge_t *he_pos, *he_neg;
     struct csmhedge_t *he1, *he2;
     
-    solido = csmeuler_mvfs(0., 0., 0., &initial_hedge);
+    solido = csmeuler_mvfs(0., 0., 0., 0, &initial_hedge);
     
     csmeuler_lmev_strut_edge(initial_hedge, 10., 0., 0., &hedge_from_vertex1);
     csmeuler_lmev_strut_edge(hedge_from_vertex1, 10., 1.0, 0., &hedge_from_vertex2);
@@ -192,7 +192,7 @@ static void i_test_crea_hexaedro(void)
     
     id_nuevo_elemento = 0;
     
-    solido = csmeuler_mvfs(0., 0., 0., &hei);
+    solido = csmeuler_mvfs(0., 0., 0., 0, &hei);
     csmsolid_print_debug(solido, CIERTO);
     
     // Cara inferior...
@@ -255,7 +255,7 @@ static void i_test_crea_hexaedro_y_copia(void)
     
     id_nuevo_elemento = 0;
     
-    solido = csmeuler_mvfs(0., 0., 0., &hei);
+    solido = csmeuler_mvfs(0., 0., 0., 0, &hei);
     
     // Cara inferior...
     {
@@ -585,12 +585,12 @@ static void i_test_union_solidos(struct csmviewer_t *viewer)
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
-    //solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
-    //solid2 = csmsweep_create_solid_from_shape(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0.);
+    //solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    //solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
 
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
-    solid1 = csmsweep_create_solid_from_shape(shape2d, 0., -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0., -0.25, 0., 1., 0., 0., 0., 1., 0.);
-    solid2 = csmsweep_create_solid_from_shape(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0.);
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0., -0.25, 0., 1., 0., 0., 0., 1., 0., 0);
+    solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_union_A_and_B(solid1, solid2);
     csmsolid_print_debug(solid_res, CIERTO);

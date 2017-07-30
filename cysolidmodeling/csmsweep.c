@@ -142,6 +142,7 @@ static void i_append_loop_from_hedge(
 
 CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_face, (
                         const struct gccontorno_t *shape2d,
+                        unsigned long start_id_of_new_element,
                         unsigned long idx_outer_loop,
                         double Xo, double Yo, double Zo,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
@@ -165,7 +166,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_face, (
 						Ux, Uy, Uz, Vx, Vy, Vz,
                         &x, &y, &z);
     
-    solid = csmeuler_mvfs(x, y, z, &first_hedge);
+    solid = csmeuler_mvfs(x, y, z, start_id_of_new_element, &first_hedge);
     top_face_loc = csmopbas_face_from_hedge(first_hedge);
     
     i_append_loop_from_hedge(
@@ -383,6 +384,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
                         const struct gccontorno_t *shape2d_bot,
                         double Xo_bot, double Yo_bot, double Zo_bot,
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot,
+                        unsigned long start_id_of_new_element,
                         struct csmface_t **bottom_face, struct csmface_t **top_face))
 {
     struct csmsolid_t *solid;
@@ -393,6 +395,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
 
     solid = i_create_solid_from_face(
                         shape2d_bot,
+                        start_id_of_new_element,
                         idx_outer_loop,
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
@@ -429,6 +432,46 @@ struct csmsolid_t *csmsweep_create_solid_from_shape(
                         double Xo_bot, double Yo_bot, double Zo_bot,
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot)
 {
+    unsigned long start_id_of_new_element;
+    struct csmsolid_t *solid;
+    struct csmface_t *bottom_face, *top_face;
+    
+    start_id_of_new_element = 0;
+    
+    solid = i_create_solid_from_shape_without_holes(
+                        shape2d_top,
+                        Xo_top, Yo_top, Zo_top,
+                        Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
+                        shape2d_bot,
+                        Xo_bot, Yo_bot, Zo_bot,
+                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
+                        start_id_of_new_element,
+                        &bottom_face, &top_face);
+    
+    i_append_holes_to_solid_if_proceed(
+                        solid,
+                        top_face, bottom_face,
+                        shape2d_top,
+                        Xo_top, Yo_top, Zo_top,
+                        Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
+                        shape2d_bot,
+                        Xo_bot, Yo_bot, Zo_bot,
+                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
+
+    return solid;
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
+                        const struct gccontorno_t *shape2d_top,
+                        double Xo_top, double Yo_top, double Zo_top,
+                        double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
+                        const struct gccontorno_t *shape2d_bot,
+                        double Xo_bot, double Yo_bot, double Zo_bot,
+                        double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot,
+                        unsigned long start_id_of_new_element)
+{
     struct csmsolid_t *solid;
     struct csmface_t *bottom_face, *top_face;
     
@@ -439,6 +482,7 @@ struct csmsolid_t *csmsweep_create_solid_from_shape(
                         shape2d_bot,
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
+                        start_id_of_new_element,
                         &bottom_face, &top_face);
     
     i_append_holes_to_solid_if_proceed(
