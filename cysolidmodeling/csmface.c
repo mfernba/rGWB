@@ -189,8 +189,25 @@ unsigned long csmface_id(const struct csmface_t *face)
 
 void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
 {
+    register struct csmloop_t *iterator;
+    unsigned long num_iters;
+    
     assert_no_null(face);
+    
     face->id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
+    
+    iterator = face->floops;
+    num_iters = 0;
+    
+    do
+    {
+        assert(num_iters < 100000);
+        num_iters++;
+
+        csmloop_reassign_id(iterator, id_nuevo_elemento, new_id_opc);
+        iterator = csmloop_next(iterator);
+        
+    } while (iterator != NULL);
 }
 
 // ----------------------------------------------------------------------------------------------------

@@ -14,6 +14,8 @@ CONSTRUCTOR(struct csmhedge_t *, csmhedge_duplicate, (
 
 unsigned long csmhedge_id(const struct csmhedge_t *hedge);
 
+void csmhedge_reassign_id(struct csmhedge_t *hedge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
+
 CYBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2);
 
 

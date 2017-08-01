@@ -124,6 +124,14 @@ unsigned long csmhedge_id(const struct csmhedge_t *hedge)
 
 // --------------------------------------------------------------------------------------------------------------
 
+void csmhedge_reassign_id(struct csmhedge_t *hedge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
+{
+    assert_no_null(hedge);
+    hedge->clase_base.id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 CYBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2)
 {
     assert_no_null(hedge1);

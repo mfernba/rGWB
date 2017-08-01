@@ -107,11 +107,8 @@ static void i_append_new_vv_inters(
                         struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b,
                         ArrEstructura(csmsetop_vtxvtx_inters_t) *vv_intersections)
 {
-    if (csmvertex_has_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CIERTO)
-    {
-        assert(csmvertex_has_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CIERTO);
-    }
-    else
+    if (csmvertex_has_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == FALSO
+            || csmvertex_has_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == FALSO)
     {
         struct csmsetop_vtxvtx_inters_t *vv_inters;
         
@@ -691,7 +688,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         }
         csmdebug_end_context();
     
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
         
         csmdebug_begin_context("Intersections B vs A");
         {
@@ -706,7 +703,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         csmsolid_print_debug(solid_A, CIERTO);
         csmsolid_print_debug(solid_B, CIERTO);
         
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
     }
     csmdebug_end_context();
     

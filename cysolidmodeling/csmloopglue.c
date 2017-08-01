@@ -206,7 +206,7 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
     unsigned long num_iters;
     struct csmhedge_t *he_iterator_mate;
     
-    csmeuler_lmekr(common_hedge_face1, common_hedge_face2, &he_prev_common_edge_face2, &he_prev_common_edge_face1);
+    csmeuler_lmekr(common_hedge_face1, common_hedge_face2, &he_prev_common_edge_face1, &he_prev_common_edge_face2);
     csmeuler_lkev(&he_prev_common_edge_face1, &he_prev_common_edge_face2, NULL, &he1_next, NULL, &he2_next);
     assert(he1_next == common_hedge_face1);
     assert(he2_next == common_hedge_face2);
@@ -284,8 +284,8 @@ void csmloopglue_merge_face_loops(struct csmface_t *face)
     
     i_glue_loops_given_hedges(common_hedge_loop1, common_hedge_loop2);
 
-    assert(loop1 == csmface_floops(face));
-    assert(csmloop_next(loop1) == NULL);
+    //assert(loop1 == csmface_floops(face));
+    //assert(csmloop_next(loop1) == NULL);
 }
 
 

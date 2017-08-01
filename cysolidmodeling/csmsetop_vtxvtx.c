@@ -1121,7 +1121,7 @@ static void i_separateInteriorHedge(
     struct csmhedge_t *he_prv;
     struct csmvertex_t *split_vertex;
     double x, y, z;
-    struct csmedge_t *null_edge;
+    struct csmedge_t *null_edge1, *null_edge2;
     
     he_prv = csmhedge_prev(he);
 
@@ -1144,8 +1144,7 @@ static void i_separateInteriorHedge(
     split_vertex = csmhedge_vertex(he);
     csmvertex_get_coordenadas(split_vertex, &x, &y, &z);
     
-    csmeuler_lmev(he, he, x, y, z, NULL, &null_edge, NULL, NULL);
-    assert_no_null(null_edge);
+    csmeuler_lmev(he, he, x, y, z, NULL, &null_edge1, NULL, NULL);
 
     if (csmdebug_debug_enabled() == CIERTO)
     {
@@ -1161,6 +1160,7 @@ static void i_separateInteriorHedge(
         struct csmedge_t *he_prv_edge;
         struct csmhedge_t *he1_edge_he_prv, *he2_edge_he_prv;
         
+        he_prv = csmhedge_prev(he);
         he_prv_edge = csmhedge_edge(he_prv);
         he1_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS);
         he2_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_NEG);
@@ -1169,7 +1169,10 @@ static void i_separateInteriorHedge(
         csmedge_set_edge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS, he2_edge_he_prv);
     }
     
-    arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+    null_edge2 = csmhedge_edge(csmhedge_prev(he));
+    assert(null_edge1 == null_edge2);
+    
+    arr_AppendPunteroST(set_of_null_edges, null_edge2, csmedge_t);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1453,7 +1456,7 @@ void csmsetop_vtxvtx_append_null_edges(
         i_vtxvtx_append_null_edges(vv_intersection, set_operation, set_of_null_edges_A, set_of_null_edges_B);
     }
     
-    csmdebug_show_viewer();    
+    //csmdebug_show_viewer();
 }
 
 

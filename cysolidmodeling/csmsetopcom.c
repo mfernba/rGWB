@@ -298,17 +298,22 @@ void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *lo
 
 void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
 {
+    struct csmsolid_t *he1_solid;
     struct csmface_t *old_face, *new_face;
     struct csmhedge_t *he1_next, *he1_next_next;
     
     old_face = csmopbas_face_from_hedge(he1);
+    he1_solid = csmface_fsolid(old_face);
+    
+    csmdebug_print_debug_info("******\njoin_hedges (%lu, %lu). Solid before operation: \n", csmhedge_id(he1), csmhedge_id(he2));
+    csmsolid_print_debug(he1_solid, CIERTO);
     
     if (csmhedge_loop(he1) == csmhedge_loop(he2))
     {
         struct csmhedge_t *he1_prev, *he1_prev_prev;
         
         he1_prev = csmhedge_prev(he1);
-        he1_prev_prev = csmhedge_prev(he1);
+        he1_prev_prev = csmhedge_prev(he1_prev);
         
         if (he1_prev_prev != he2)
         {
@@ -320,7 +325,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
             if (csmdebug_debug_enabled() == CIERTO)
             {
                 csmdebug_print_debug_info("(SAME LOOP) joining edges (%lu, %lu) with LMEF, new face %lu.\n", csmhedge_id(he1), csmhedge_id(he2), csmface_id(new_face));
-                //csmsolid_print_debug(csmface_fsolid(new_face), CIERTO);
+                //csmsolid_print_debug(he1_solid, CIERTO);
             }
         }
         else
@@ -353,14 +358,17 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
         struct csmface_t *second_new_face;
 
         if (csmdebug_debug_enabled() == CIERTO)
+        {
             csmdebug_print_debug_info("Split(): joining edges (%lu, %lu) with LMEF between (%lu, %lu)\n", csmhedge_id(he1), csmhedge_id(he2), csmhedge_id(he2), csmhedge_id(he1_next));
+            csmsolid_print_debug(he1_solid, CIERTO);
+        }
         
         csmeuler_lmef(he2, he1_next, &second_new_face, NULL, NULL);
 
         if (csmdebug_debug_enabled() == CIERTO)
         {
             csmdebug_print_debug_info("\tFace %lu created\n", csmface_id(second_new_face));
-            //csmsolid_print_debug(csmface_fsolid(second_new_face), CIERTO);
+            csmsolid_print_debug(csmface_fsolid(second_new_face), CIERTO);
         }
         
         old_face_floops = csmface_floops(old_face);
@@ -417,10 +425,10 @@ static void i_cut_he(
             //csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CIERTO);
         }
         
-        if (do_lmekr_he1_he2 == CIERTO)
+        //if (do_lmekr_he1_he2 == CIERTO)
             csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL);
-        else
-            csmeuler_lkemr(&he2_edge, &he1_edge, NULL, NULL);
+        //else
+            //csmeuler_lkemr(&he2_edge, &he1_edge, NULL, NULL);
         
         //if (csmdebug_debug_enabled() == CIERTO)
             //csmsolid_print_debug(solid, CIERTO);
@@ -432,8 +440,8 @@ static void i_cut_he(
         
         csmeuler_lkef(&he1_edge, &he2_edge);
         
-        //if (csmdebug_debug_enabled() == CIERTO)
-            //csmsolid_print_debug(solid, CIERTO);
+        if (csmdebug_debug_enabled() == CIERTO)
+            csmsolid_print_debug(solid, CIERTO);
     }
 }
 
@@ -832,7 +840,7 @@ void csmsetopcom_cleanup_solid_setop(
     struct csmhashtb_iterator(csmface_t) *face_iterator;
     
     assert_no_null(destination_solid);
-
+    
     face_iterator = csmhashtb_create_iterator(destination_solid->sfaces, csmface_t);
     
     while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
@@ -867,22 +875,44 @@ void csmsetopcom_cleanup_solid_setop(
                 {
                     struct csmsolid_t *origin_solid;
                     
-                    if (csmsolid_contains_edge(origin_solid_A, edge) == CIERTO)
+                    if (csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS) == he_iterator)
                     {
-                        assert(csmsolid_contains_edge(origin_solid_B, edge) == FALSO);
-                        origin_solid = origin_solid_A;
+                        if (csmsolid_contains_edge(origin_solid_A, edge) == CIERTO)
+                        {
+                            assert(csmsolid_contains_edge(origin_solid_B, edge) == FALSO);
+                            origin_solid = origin_solid_A;
+                        }
+                        else
+                        {
+                            assert(csmsolid_contains_edge(origin_solid_B, edge) == CIERTO);
+                            origin_solid = origin_solid_B;
+                        }
+                    
+                        csmsolid_move_edge_to_solid(origin_solid, edge, destination_solid);
                     }
                     else
                     {
-                        assert(csmsolid_contains_edge(origin_solid_B, edge) == CIERTO);
-                        origin_solid = origin_solid_B;
+                        origin_solid = NULL;
                     }
                     
-                    if (csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS) == he_iterator)
-                        csmsolid_move_edge_to_solid(origin_solid, edge, destination_solid);
-                    
                     if (csmvertex_hedge(vertex) == he_iterator)
+                    {
+                        if (origin_solid == NULL)
+                        {
+                            if (csmsolid_contains_edge(origin_solid_A, edge) == CIERTO)
+                            {
+                                assert(csmsolid_contains_edge(origin_solid_B, edge) == FALSO);
+                                origin_solid = origin_solid_A;
+                            }
+                            else
+                            {
+                                assert(csmsolid_contains_edge(origin_solid_B, edge) == CIERTO);
+                                origin_solid = origin_solid_B;
+                            }
+                        }
+                        
                         csmsolid_move_vertex_to_solid(origin_solid, vertex, destination_solid);
+                    }
                 }
                 else
                 {

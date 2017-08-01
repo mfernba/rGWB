@@ -732,7 +732,7 @@ static void i_process_vf_inters(
     
     arr_DestruyeEstructurasST(&vertex_neighborhood, i_free_neighborhood, i_neighborhood_t);
     
-    csmdebug_show_viewer();
+    //csmdebug_show_viewer();
 }
 
 // ------------------------------------------------------------------------------------------

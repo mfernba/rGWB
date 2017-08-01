@@ -14,6 +14,8 @@ CONSTRUCTOR(struct csmloop_t *, csmloop_duplicate, (
 
 unsigned long csmloop_id(const struct csmloop_t *loop);
 
+void csmloop_reassign_id(struct csmloop_t *loop, unsigned long *id_new_element, unsigned long *new_id_opt);
+
 
 // Geometry...
 

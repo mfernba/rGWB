@@ -58,10 +58,9 @@ void csmeuler_lmekr(
     he1_and_he2_solid = csmface_fsolid(he1_and_he2_face);
     csmsolid_append_new_edge(he1_and_he2_solid, &new_edge);
 
-// Al contrario que Mäntylä, he1 lo pongo en el lado neg y he2 en el pos
     id_nuevo_elemento = csmsolid_id_new_element(he1_and_he2_solid);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &nhe1);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, &nhe2);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he1, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, &nhe1);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he2, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &nhe2);
 
     csmhedge_set_next(nhe1, he2);
     csmhedge_set_next(nhe2, he1);
@@ -75,7 +74,7 @@ void csmeuler_lmekr(
     csmloop_set_ledge(he2_loop, NULL);
     csmface_remove_loop(he1_and_he2_face, &he2_loop);
     
-    ASIGNA_OPC(hedge_lado_neg_opc, nhe1);
-    ASIGNA_OPC(hedge_lado_pos_opc, nhe2);
+    ASIGNA_OPC(hedge_lado_pos_opc, nhe1);
+    ASIGNA_OPC(hedge_lado_neg_opc, nhe2);
 }
 

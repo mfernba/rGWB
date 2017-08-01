@@ -145,6 +145,14 @@ unsigned long csmloop_id(const struct csmloop_t *loop)
 
 // --------------------------------------------------------------------------------------------------------------
 
+void csmloop_reassign_id(struct csmloop_t *loop, unsigned long *id_new_element, unsigned long *new_id_opt)
+{
+    assert_no_null(loop);
+    loop->clase_base.id = cypeid_nuevo_id(id_new_element, new_id_opt);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 void csmloop_face_equation(
                         const struct csmloop_t *loop,
                         double *A, double *B, double *C, double *D)

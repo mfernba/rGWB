@@ -114,7 +114,14 @@ unsigned long csmedge_id(const struct csmedge_t *edge)
 void csmedge_reassign_id(struct csmedge_t *edge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
 {
     assert_no_null(edge);
+    
     edge->id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
+    
+    if (edge->he1 != NULL)
+        csmhedge_reassign_id(edge->he1, id_nuevo_elemento, NULL);
+    
+    if (edge->he2 != NULL)
+        csmhedge_reassign_id(edge->he2, id_nuevo_elemento, NULL);
 }
 
 // --------------------------------------------------------------------------------------------------------------
