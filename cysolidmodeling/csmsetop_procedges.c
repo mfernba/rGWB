@@ -105,12 +105,21 @@ static void i_free_edge_intersection(struct i_edge_intersection_t **edge_interse
 
 static void i_append_new_vv_inters(
                         struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b,
-                        ArrEstructura(csmsetop_vtxvtx_inters_t) *vv_intersections)
+                        ArrEstructura(csmsetop_vtxvtx_inters_t) *vv_intersections,
+                        CYBOOL *did_add_intersection)
 {
-    if (csmvertex_has_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == FALSO
-            || csmvertex_has_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == FALSO)
+    assert_no_null(did_add_intersection);
+    
+    if (csmvertex_has_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CIERTO)
+    {
+        assert(csmvertex_has_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CIERTO);
+        *did_add_intersection = FALSO;
+    }
+    else
     {
         struct csmsetop_vtxvtx_inters_t *vv_inters;
+        
+        *did_add_intersection = CIERTO;
         
         csmvertex_set_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
         csmvertex_set_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
@@ -141,15 +150,21 @@ static void i_append_common_vertices_solid_A_on_solid_B(
         if (csmvertex_has_mask_attrib(vertex_A, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == FALSO
                 && csmsolid_contains_vertex_in_same_coordinates_as_given(solid_B, vertex_A, tolerance, &vertex_B) == CIERTO)
         {
-            char *description;
-            double x, y, z;
+            CYBOOL did_add_intersection;
             
-            csmvertex_get_coordenadas(vertex_A, &x, &y, &z);
-            description = copiafor_codigo5("EQ VV (%g, %g, %g) %lu %lu", x, y, z, csmvertex_id(vertex_A), csmvertex_id(vertex_B));
-            csmdebug_append_debug_point(x, y, z, &description);
+            i_append_new_vv_inters(vertex_A, vertex_B, vv_intersections, &did_add_intersection);
             
-            csmdebug_print_debug_info("-->Coincident vertices: (%lu, %lu)\n", csmvertex_id(vertex_A), csmvertex_id(vertex_B));
-            i_append_new_vv_inters(vertex_A, vertex_B, vv_intersections);
+            if (did_add_intersection == CIERTO)
+            {
+                char *description;
+                double x, y, z;
+                
+                csmvertex_get_coordenadas(vertex_A, &x, &y, &z);
+                description = copiafor_codigo5("EQ VV (%g, %g, %g) %lu %lu", x, y, z, csmvertex_id(vertex_A), csmvertex_id(vertex_B));
+                csmdebug_append_debug_point(x, y, z, &description);
+            
+                csmdebug_print_debug_info("-->Coincident vertices: (%lu, %lu)\n", csmvertex_id(vertex_A), csmvertex_id(vertex_B));
+            }
         }
     }
     
@@ -441,12 +456,13 @@ static void i_append_new_vf_inters(
 // ------------------------------------------------------------------------------------------
 
 static void i_process_edge_intersections(
-                        struct csmedge_t *edge,
+                        struct csmedge_t *original_edge,
                         const ArrEstructura(i_edge_intersection_t) *edge_intersecctions,
                         ArrEstructura(csmsetop_vtxvtx_inters_t) *vv_intersections,
                         ArrEstructura(csmsetop_vtxfacc_inters_t) *vertex_face_neighborhood)
 {
     unsigned long i, num_intersections;
+    struct csmedge_t *edge_to_split;
     
     num_intersections = arr_NumElemsPunteroST(edge_intersecctions, i_edge_intersection_t);
     assert(num_intersections > 0);
@@ -455,12 +471,14 @@ static void i_process_edge_intersections(
     {
         double x1, y1, z1, x2, y2, z2;
         
-        csmedge_vertex_coordinates(edge, &x1, &y1, &z1, &x2, &y2, &z2);
+        csmedge_vertex_coordinates(original_edge, &x1, &y1, &z1, &x2, &y2, &z2);
         csmdebug_print_debug_info("\n");
-        csmdebug_print_debug_info("Edge: %lu. (%lf, %lf, %lf) -> (%lf, %lf, %lf)\n", csmedge_id(edge), x1, y1, z1, x2, y2, z2);
+        csmdebug_print_debug_info("Edge: %lu. (%lf, %lf, %lf) -> (%lf, %lf, %lf)\n", csmedge_id(original_edge), x1, y1, z1, x2, y2, z2);
         csmdebug_print_debug_info("No. intersections: %lu\n", num_intersections);
     }
 
+    edge_to_split = original_edge;
+    
     for (i = 0; i < num_intersections; i++)
     {
         const struct i_edge_intersection_t *edge_intersection;
@@ -500,17 +518,18 @@ static void i_process_edge_intersections(
                 struct csmhedge_t *hedge_pos, *hedge_neg;
                 struct csmhedge_t *hedge_pos_next;
                 struct csmvertex_t *new_vertex;
+                struct csmedge_t *new_edge;
             
-                hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+                hedge_pos = csmedge_hedge_lado(edge_to_split, CSMEDGE_LADO_HEDGE_POS);
                 hedge_pos_next = csmhedge_next(hedge_pos);
         
-                hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+                hedge_neg = csmedge_hedge_lado(edge_to_split, CSMEDGE_LADO_HEDGE_NEG);
         
                 csmeuler_lmev(
                         hedge_neg, hedge_pos_next,
                         edge_intersection->x_edge_interior, edge_intersection->y_edge_interior, edge_intersection->z_edge_interior,
                         &new_vertex,
-                        NULL,
+                        &new_edge,
                         NULL, NULL);
         
                 if (csmdebug_debug_enabled() == CIERTO)
@@ -525,6 +544,7 @@ static void i_process_edge_intersections(
                 }
                 
                 edge_vertex_intersection = new_vertex;
+                edge_to_split = new_edge;
                 break;
             }
             
@@ -537,13 +557,15 @@ static void i_process_edge_intersections(
         {
             case i_TYPE_EDGE_INTERSECTION_VERTEX:
             {
-                if (csmdebug_debug_enabled() == CIERTO)
+                CYBOOL did_add_intersection;
+                
+                i_append_new_vv_inters(edge_vertex_intersection, edge_intersection->hit_vertex_at_face, vv_intersections, &did_add_intersection);
+                
+                if (did_add_intersection == CIERTO && csmdebug_debug_enabled() == CIERTO)
                 {
                     csmdebug_print_debug_info("Intersection at face vertex: %lu\n", csmvertex_id(edge_intersection->hit_vertex_at_face));
                     csmdebug_print_debug_info("Added VV intersection (%lu, %lu)\n", csmvertex_id(edge_vertex_intersection), csmvertex_id(edge_intersection->hit_vertex_at_face));
                 }
-                
-                i_append_new_vv_inters(edge_vertex_intersection, edge_intersection->hit_vertex_at_face, vv_intersections);
                 break;
             }
                 
@@ -551,6 +573,7 @@ static void i_process_edge_intersections(
             {
                 struct csmhedge_t *mate_hit_hedge, *mate_hit_hedge_next;
                 struct csmvertex_t *new_vertex_on_hit_hedge;
+                CYBOOL did_add_intersection;
                 
                 if (csmdebug_debug_enabled() == CIERTO)
                     csmdebug_print_debug_info("Intersection at face hedge: %lu\n", csmhedge_id(edge_intersection->hit_hedge_at_face));
@@ -576,7 +599,8 @@ static void i_process_edge_intersections(
                     csmdebug_append_debug_point(x_edge_intersection, y_edge_intersection, z_edge_intersection, &description);
                 }
                 
-                i_append_new_vv_inters(edge_vertex_intersection, new_vertex_on_hit_hedge, vv_intersections);
+                i_append_new_vv_inters(edge_vertex_intersection, new_vertex_on_hit_hedge, vv_intersections, &did_add_intersection);
+                assert(did_add_intersection == CIERTO);
                 break;
             }
                 
@@ -688,7 +712,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         }
         csmdebug_end_context();
     
-        //csmdebug_show_viewer();
+        csmdebug_show_viewer();
         
         csmdebug_begin_context("Intersections B vs A");
         {
@@ -703,7 +727,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         csmsolid_print_debug(solid_A, CIERTO);
         csmsolid_print_debug(solid_B, CIERTO);
         
-        //csmdebug_show_viewer();
+        csmdebug_show_viewer();
     }
     csmdebug_end_context();
     

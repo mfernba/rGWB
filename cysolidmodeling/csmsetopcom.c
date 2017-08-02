@@ -873,10 +873,10 @@ void csmsetopcom_cleanup_solid_setop(
                 
                 if (edge != NULL)
                 {
-                    struct csmsolid_t *origin_solid;
-                    
                     if (csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS) == he_iterator)
                     {
+                        struct csmsolid_t *origin_solid;
+                        
                         if (csmsolid_contains_edge(origin_solid_A, edge) == CIERTO)
                         {
                             assert(csmsolid_contains_edge(origin_solid_B, edge) == FALSO);
@@ -890,31 +890,9 @@ void csmsetopcom_cleanup_solid_setop(
                     
                         csmsolid_move_edge_to_solid(origin_solid, edge, destination_solid);
                     }
-                    else
-                    {
-                        origin_solid = NULL;
-                    }
-                    
-                    if (csmvertex_hedge(vertex) == he_iterator)
-                    {
-                        if (origin_solid == NULL)
-                        {
-                            if (csmsolid_contains_edge(origin_solid_A, edge) == CIERTO)
-                            {
-                                assert(csmsolid_contains_edge(origin_solid_B, edge) == FALSO);
-                                origin_solid = origin_solid_A;
-                            }
-                            else
-                            {
-                                assert(csmsolid_contains_edge(origin_solid_B, edge) == CIERTO);
-                                origin_solid = origin_solid_B;
-                            }
-                        }
-                        
-                        csmsolid_move_vertex_to_solid(origin_solid, vertex, destination_solid);
-                    }
                 }
-                else
+
+                if (csmvertex_hedge(vertex) == he_iterator)
                 {
                     struct csmsolid_t *origin_solid;
                     

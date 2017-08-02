@@ -41,7 +41,7 @@
 		5507A6EE1E7B40C1008B9F73 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5507A6ED1E7B40C1008B9F73 /* Foundation.framework */; };
 		5507A6EF1E7B42C8008B9F73 /* a_punter.h in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6E01E7B402D008B9F73 /* a_punter.h */; };
 		5507A6F21E7B450C008B9F73 /* csmhashtb.c in Sources */ = {isa = PBXBuildFile; fileRef = 5507A6F01E7B450C008B9F73 /* csmhashtb.c */; };
-		5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F11E7B450C008B9F73 /* csmhashtb.hxx */; };
+		5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F11E7B450C008B9F73 /* csmhashtb.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		5507A6F51E7B451E008B9F73 /* csmhashtb.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F41E7B451E008B9F73 /* csmhashtb.inl */; };
 		5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6FA1E7B47CB008B9F73 /* csmuthash.hxx */; };
 		55089F4E1E8996B500B9570B /* csmglue.c in Sources */ = {isa = PBXBuildFile; fileRef = 55089F4C1E8996B500B9570B /* csmglue.c */; };
@@ -64,7 +64,7 @@
 		5532DDC01E9001390047B9DF /* csmtolerance.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5532DDBE1E9001390047B9DF /* csmtolerance.inl */; };
 		5534BDD11F26A6B900A4565F /* copiafor.c in Sources */ = {isa = PBXBuildFile; fileRef = 5534BDCF1F26A6B900A4565F /* copiafor.c */; };
 		5534BDD21F26A6B900A4565F /* copiafor.h in Headers */ = {isa = PBXBuildFile; fileRef = 5534BDD01F26A6B900A4565F /* copiafor.h */; };
-		55354A441E9AE595007B0692 /* csmmath.tli in Headers */ = {isa = PBXBuildFile; fileRef = 55354A431E9AE595007B0692 /* csmmath.tli */; };
+		55354A441E9AE595007B0692 /* csmmath.tli in Headers */ = {isa = PBXBuildFile; fileRef = 55354A431E9AE595007B0692 /* csmmath.tli */; settings = {ATTRIBUTES = (Public, ); }; };
 		557012A01E8328E400DFC490 /* csmsweep.c in Sources */ = {isa = PBXBuildFile; fileRef = 5570129E1E8328E400DFC490 /* csmsweep.c */; };
 		557012A11E8328E400DFC490 /* csmsweep.h in Headers */ = {isa = PBXBuildFile; fileRef = 5570129F1E8328E400DFC490 /* csmsweep.h */; };
 		557012A31E832A2F00DFC490 /* cont2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 557012A21E832A2F00DFC490 /* cont2d.h */; };
@@ -80,7 +80,7 @@
 		5579546A1E5DB0A8000FC91E /* cypespy.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954661E5DB0A8000FC91E /* cypespy.c */; };
 		5579546F1E5DB24E000FC91E /* csmvertex.c in Sources */ = {isa = PBXBuildFile; fileRef = 5579546D1E5DB24E000FC91E /* csmvertex.c */; };
 		557954701E5DB24E000FC91E /* csmvertex.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5579546E1E5DB24E000FC91E /* csmvertex.inl */; };
-		557954721E5DB275000FC91E /* csmfwddecl.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 557954711E5DB275000FC91E /* csmfwddecl.hxx */; };
+		557954721E5DB275000FC91E /* csmfwddecl.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 557954711E5DB275000FC91E /* csmfwddecl.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		557954771E5E0694000FC91E /* cypeid.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954751E5E0694000FC91E /* cypeid.c */; };
 		557954781E5E0694000FC91E /* cypeid.h in Headers */ = {isa = PBXBuildFile; fileRef = 557954761E5E0694000FC91E /* cypeid.h */; };
 		5579547D1E5E1403000FC91E /* csmhedge.c in Sources */ = {isa = PBXBuildFile; fileRef = 5579547B1E5E1403000FC91E /* csmhedge.c */; };
@@ -117,7 +117,7 @@
 		5598D6691F24EE4000EA1876 /* cyscngraf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6641F24EE4000EA1876 /* cyscngraf.framework */; };
 		5598D66A1F24EE4000EA1876 /* SnapFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6651F24EE4000EA1876 /* SnapFramework.framework */; };
 		55E30FA91F24BAB300EDE74F /* csmdebug.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55E30FA71F24BAB300EDE74F /* csmdebug.mm */; };
-		55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55E30FA81F24BAB300EDE74F /* csmdebug.inl */; };
+		55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55E30FA81F24BAB300EDE74F /* csmdebug.inl */; settings = {ATTRIBUTES = (Public, ); }; };
 		55EA991A1ED389C0006C063C /* csmsetop_vtxfacc.c in Sources */ = {isa = PBXBuildFile; fileRef = 55EA99181ED389C0006C063C /* csmsetop_vtxfacc.c */; };
 		55EA991B1ED389C0006C063C /* csmsetop_vtxfacc.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55EA99191ED389C0006C063C /* csmsetop_vtxfacc.inl */; };
 		55EA991F1ED38E66006C063C /* csmsetop_vtxvtx.c in Sources */ = {isa = PBXBuildFile; fileRef = 55EA991D1ED38E66006C063C /* csmsetop_vtxvtx.c */; };
@@ -790,15 +790,19 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */,
 				5579545D1E5DB074000FC91E /* cysolidmodeling.h in Headers */,
 				5507A6811E7362EF008B9F73 /* csmeuler_lkfmrh.inl in Headers */,
-				55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */,
+				55354A441E9AE595007B0692 /* csmmath.tli in Headers */,
+				5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */,
+				557954721E5DB275000FC91E /* csmfwddecl.hxx in Headers */,
 				5507A62A1E700F7C008B9F73 /* csmeuler_lmef.inl in Headers */,
 				5507A6251E6B8714008B9F73 /* csmtest.h in Headers */,
 				55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */,
 				5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */,
 				557012C11E832F9600DFC490 /* csmmath.inl in Headers */,
 				55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */,
+				5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */,
 				557954881E5E2DCB000FC91E /* cypestr.h in Headers */,
 				557954921E5E446C000FC91E /* csmloop.inl in Headers */,
 				557012A11E8328E400DFC490 /* csmsweep.h in Headers */,
@@ -808,7 +812,6 @@
 				5507A5CB1E662758008B9F73 /* csmeuler_lmev.inl in Headers */,
 				5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */,
 				55244B251EA0255A006F546E /* csmtransform.inl in Headers */,
-				55354A441E9AE595007B0692 /* csmmath.tli in Headers */,
 				5532DDC01E9001390047B9DF /* csmtolerance.inl in Headers */,
 				5507A6891E736714008B9F73 /* csmeuler_lringmv.inl in Headers */,
 				5507A6851E736565008B9F73 /* csmeuler_lmfkrh.inl in Headers */,
@@ -829,20 +832,17 @@
 				55EA991B1ED389C0006C063C /* csmsetop_vtxfacc.inl in Headers */,
 				5507A6211E6B744A008B9F73 /* csmeuler_lkev.inl in Headers */,
 				557012A31E832A2F00DFC490 /* cont2d.h in Headers */,
+				5579549A1E5E4811000FC91E /* csmbbox.inl in Headers */,
 				5507A6E41E7B4077008B9F73 /* a_pto2d.h in Headers */,
 				5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */,
 				55244B271EA02AED006F546E /* csmsolid.h in Headers */,
 				551327781ECB9A6000F2B04D /* csmsetopcom.inl in Headers */,
 				55089F4F1E8996B500B9570B /* csmglue.h in Headers */,
-				5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */,
 				5579547E1E5E1403000FC91E /* csmhedge.inl in Headers */,
-				5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */,
 				557954701E5DB24E000FC91E /* csmvertex.inl in Headers */,
 				5507A6E21E7B405D008B9F73 /* a_pto3d.h in Headers */,
-				5579549A1E5E4811000FC91E /* csmbbox.inl in Headers */,
 				5507A6F51E7B451E008B9F73 /* csmhashtb.inl in Headers */,
 				5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */,
-				557954721E5DB275000FC91E /* csmfwddecl.hxx in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

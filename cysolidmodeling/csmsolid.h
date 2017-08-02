@@ -2,6 +2,10 @@
 
 #include "csmfwddecl.hxx"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 DLL_CYSOLIDMODELING CONSTRUCTOR(struct csmsolid_t *, csmsolid_duplicate, (const struct csmsolid_t *solid));
 
 DLL_CYSOLIDMODELING void csmsolid_free(struct csmsolid_t **solido);
@@ -26,3 +30,12 @@ DLL_CYSOLIDMODELING void csmsolid_general_transform(
 // Properties...
 
 DLL_CYSOLIDMODELING double csmsolid_volume(const struct csmsolid_t *solid);
+
+
+// Debug...
+
+DLL_CYSOLIDMODELING void csmsolid_draw(struct csmsolid_t *solido, struct bsgraphics2_t *graphics);
+
+#ifdef __cplusplus
+}
+#endif

@@ -66,5 +66,3 @@ CYBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
 // Debug...
 
 void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro);
-
-void csmsolid_draw(struct csmsolid_t *solido, struct bsgraphics2_t *graphics);

@@ -741,10 +741,10 @@ static void i_test_resta_solidos2(struct csmviewer_t *viewer)
     //solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
 
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
-    solid1 = csmsweep_create_solid_from_shape_debug(rshape2d, 0.5, -0.25, 0.75, 1., 0., 0., 0., 1., 0., rshape2d, 0.5, -0.25, 0., 1., 0., 0., 0., 1., 0., 0);
-    solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    solid2 = csmsweep_create_solid_from_shape_debug(rshape2d, 0.5, -0.25, 0.75, 1., 0., 0., 0., 1., 0., rshape2d, 0.5, -0.25, 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
     csmsolid_print_debug(solid_res, CIERTO);
 
     csmviewer_set_results(viewer, solid_res, NULL);
