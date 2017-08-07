@@ -422,12 +422,17 @@ static void i_reclassify_on_edge_vertex_neighborhood(
         {
             new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
         }
+        else if (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+        {
+            new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+        }
         else if (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
         {
             new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
         }
         else
         {
+            assert(prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT);
             new_position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
         }
         
@@ -612,6 +617,9 @@ static void i_mark_null_edge_on_face(
     csmeuler_lmev(hedge_from_new_vertex, hedge_from_new_vertex, x_split, y_split, z_split, NULL, &null_edge, NULL, NULL);
     arr_AppendPunteroST(set_of_null_edges_other_solid, null_edge, csmedge_t);
     
+    if (csmdebug_debug_enabled() == CIERTO)
+        csmdebug_print_debug_info("Companion edge %lu on other solid\n", csmedge_id(null_edge));
+    
     csmeuler_lkemr(&hedge_to_new_vertex, &hedge_from_new_vertex, NULL, &he_on_new_ring);
     
     assert(csmhedge_loop(he_on_new_ring) != flout);
@@ -661,6 +669,17 @@ static void i_process_vf_inters(
         idx = start_idx;
         head_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         
+        {
+            struct i_neighborhood_t *aux_neighborhood;
+            struct csmhedge_t *mate;
+            
+            aux_neighborhood = arr_GetPunteroST(vertex_neighborhood, idx, i_neighborhood_t);
+            assert_no_null(aux_neighborhood);
+            
+            mate = csmhedge_next(csmopbas_mate(aux_neighborhood->hedge));
+            assert(mate == head_neighborhood->hedge);
+        }
+        
         num_iters = 0;
         process_next_sequence = CIERTO;
         
@@ -670,6 +689,7 @@ static void i_process_vf_inters(
             double x_split, y_split, z_split;
             struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
+            CYBOOL invert_edge = FALSO;
             
             assert_no_null(head_neighborhood);
             assert(num_iters < 100000);
@@ -686,14 +706,40 @@ static void i_process_vf_inters(
             tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
             assert_no_null(tail_neighborhood);
             
+            {
+                struct i_neighborhood_t *aux_neighborhood;
+                struct csmhedge_t *mate;
+                
+                aux_neighborhood = arr_GetPunteroST(vertex_neighborhood, idx, i_neighborhood_t);
+                assert_no_null(aux_neighborhood);
+                
+                mate = csmhedge_next(csmopbas_mate(aux_neighborhood->hedge));
+                assert(mate == tail_neighborhood->hedge);
+            }
+            
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
+            
+            csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
+            arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+            
+            if (invert_edge == CIERTO)
+            {
+                struct csmhedge_t *he1_edge, *he2_edge;
+                
+                he1_edge = csmedge_hedge_lado(null_edge, CSMEDGE_LADO_HEDGE_POS);
+                he2_edge = csmedge_hedge_lado(null_edge, CSMEDGE_LADO_HEDGE_NEG);
+                
+                csmedge_set_edge_lado(null_edge, CSMEDGE_LADO_HEDGE_NEG, he1_edge);
+                csmedge_set_edge_lado(null_edge, CSMEDGE_LADO_HEDGE_POS, he2_edge);
+            }
             
             if (csmdebug_debug_enabled() == CIERTO)
             {
                 char *description;
                 
                 csmdebug_print_debug_info(
-                        "Inserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
+                        "Inserting null edge %lu at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
+                        csmedge_id(null_edge),
                         x_split, y_split, z_split,
                         csmhedge_id(head_neighborhood->hedge),
                         csmhedge_id(tail_neighborhood->hedge));
@@ -701,9 +747,6 @@ static void i_process_vf_inters(
                 description = copiafor_codigo3("NE (%g, %g, %g)", x_split, y_split, z_split);
                 csmdebug_append_debug_point(x_split, y_split, z_split, &description);
             }
-            
-            csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
-            arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
             
             csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             
