@@ -689,7 +689,6 @@ static void i_process_vf_inters(
             double x_split, y_split, z_split;
             struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
-            CYBOOL invert_edge = FALSO;
             
             assert_no_null(head_neighborhood);
             assert(num_iters < 100000);
@@ -721,17 +720,6 @@ static void i_process_vf_inters(
             
             csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
             arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
-            
-            if (invert_edge == CIERTO)
-            {
-                struct csmhedge_t *he1_edge, *he2_edge;
-                
-                he1_edge = csmedge_hedge_lado(null_edge, CSMEDGE_LADO_HEDGE_POS);
-                he2_edge = csmedge_hedge_lado(null_edge, CSMEDGE_LADO_HEDGE_NEG);
-                
-                csmedge_set_edge_lado(null_edge, CSMEDGE_LADO_HEDGE_NEG, he1_edge);
-                csmedge_set_edge_lado(null_edge, CSMEDGE_LADO_HEDGE_POS, he2_edge);
-            }
             
             if (csmdebug_debug_enabled() == CIERTO)
             {

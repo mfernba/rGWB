@@ -7,6 +7,7 @@
 #include "csmmath.tli"
 #include "csmnode.inl"
 #include "csmhedge.inl"
+#include "csmtolerance.inl"
 #include "csmvertex.inl"
 
 #include "cyassert.h"
@@ -291,7 +292,7 @@ double csmloop_max_distance_to_plane(
         
     } while (iterator != loop->ledge);
     
-    return max_distance_to_plane;
+    return MAX(max_distance_to_plane, csmtolerance_coplanarity());
 }
 
 // --------------------------------------------------------------------------------------------------------------

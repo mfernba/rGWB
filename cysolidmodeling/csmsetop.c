@@ -118,6 +118,7 @@ static void i_join_null_edges(
     no_null_edges_deleted_B = 0;
     
     csmsolid_print_debug(solid_A, CIERTO);
+    csmsolid_print_debug(solid_B, CIERTO);
 
     for (i = 0; i < no_null_edges; i++)
     {
@@ -193,7 +194,8 @@ static void i_join_null_edges(
         csmsolid_print_debug(solid_A, CIERTO);
     }
     
-    //csmsolid_print_debug(solid_A, CIERTO);
+    csmsolid_print_debug(solid_A, CIERTO);
+    csmsolid_print_debug(solid_B, CIERTO);
     //csmdebug_show_viewer();
     
     *set_of_null_faces_A = set_of_null_faces_A_loc;
@@ -339,6 +341,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     ArrEstructura(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
     ArrEstructura(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
     ArrEstructura(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
+    unsigned long no_null_edges;
     
     csmdebug_begin_context("SETOP");
 
@@ -372,15 +375,25 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     
     csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, set_of_null_edges_A, set_of_null_edges_B);
     
-    i_join_null_edges(
+    no_null_edges = arr_NumElemsPunteroST(set_of_null_edges_A, csmedge_t);
+    assert(no_null_edges == arr_NumElemsPunteroST(set_of_null_edges_B, csmedge_t));
+    
+    if (no_null_edges == 0)
+    {
+        result = csmsolid_crea_vacio(0);
+    }
+    else
+    {
+        i_join_null_edges(
                     solid_A, set_of_null_edges_A,
                     solid_B, set_of_null_edges_B,
                     &set_of_null_faces_A, &set_of_null_faces_B);
     
-    result = i_finish_set_operation(
+        result = i_finish_set_operation(
                         set_operation,
                         solid_A, set_of_null_faces_A,
                         solid_B, set_of_null_faces_B);
+    }
     
     csmdebug_set_viewer_results(result, NULL);
     csmdebug_end_context();
