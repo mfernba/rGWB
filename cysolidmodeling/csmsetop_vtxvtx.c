@@ -237,7 +237,7 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_preprocess_neighborhood,
             }
             
             csmmath_cross_product3D(Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, &Ux12_bisec, &Uy12_bisec, &Uz12_bisec);
-            neigborhood_bisec = i_create_neighborhood(he_iterator, Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, Ux12, Uy12, Uz12, A, B, C);
+            neigborhood_bisec = i_create_neighborhood(he_iterator, Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, Ux12_bisec, Uy12_bisec, Uz12_bisec, A, B, C);
             arr_AppendPunteroST(neighborhoods, neigborhood_bisec, i_neighborhood_t);
             
             neigborhood->Ux2 = Ux_bisec;
