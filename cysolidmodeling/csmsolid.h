@@ -34,7 +34,7 @@ DLL_CYSOLIDMODELING double csmsolid_volume(const struct csmsolid_t *solid);
 
 // Debug...
 
-DLL_CYSOLIDMODELING void csmsolid_draw(struct csmsolid_t *solido, struct bsgraphics2_t *graphics);
+DLL_CYSOLIDMODELING void csmsolid_draw(struct csmsolid_t *solido, CYBOOL draw_edge_info, struct bsgraphics2_t *graphics);
 
 #ifdef __cplusplus
 }

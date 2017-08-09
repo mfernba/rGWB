@@ -78,3 +78,5 @@ void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csm
 void csmface_remove_loop(struct csmface_t *face, struct csmloop_t **loop);
 
 CYBOOL csmface_has_holes(const struct csmface_t *face);
+
+void csmface_revert(struct csmface_t *face);

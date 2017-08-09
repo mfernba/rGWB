@@ -1,6 +1,7 @@
 // Loop...
 
 #include "csmfwddecl.hxx"
+#include "csmvertex.hxx"
 
 CONSTRUCTOR(struct csmloop_t *, csmloop_crea, (struct csmface_t *face, unsigned long *id_nuevo_elemento));
 
@@ -37,6 +38,8 @@ CYBOOL csmloop_is_point_inside_loop(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc);
 
+CYBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib);
+
 // Topology...
 
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop);
@@ -45,10 +48,7 @@ void csmloop_set_ledge(struct csmloop_t *loop, struct csmhedge_t *ledge);
 struct csmface_t *csmloop_lface(struct csmloop_t *loop);
 void csmloop_set_lface(struct csmloop_t *loop, struct csmface_t *face);
 
-
-// Lista...
-
 struct csmloop_t *csmloop_next(struct csmloop_t *loop);
-
 struct csmloop_t *csmloop_prev(struct csmloop_t *loop);
 
+void csmloop_revert_loop_orientation(struct csmloop_t *loop);

@@ -697,6 +697,22 @@ CYBOOL csmface_has_holes(const struct csmface_t *face)
         return FALSO;
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_revert(struct csmface_t *face)
+{
+    struct csmloop_t *loop_iterator;
+    
+    assert_no_null(face);
+        
+    loop_iterator = face->floops;
+    
+    while (loop_iterator != NULL)
+    {
+        csmloop_revert_loop_orientation(loop_iterator);
+        loop_iterator = csmloop_next(loop_iterator);
+    }
+}
 
 
 

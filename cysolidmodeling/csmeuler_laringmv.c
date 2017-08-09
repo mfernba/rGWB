@@ -18,11 +18,9 @@
 
 void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
 {
-    struct csmloop_t *flout_face1;
     register struct csmloop_t *iterator_face1;
     unsigned long num_iteraciones;
     
-    flout_face1 = csmface_flout(face1);
     iterator_face1 = csmface_floops(face1);
     num_iteraciones = 0;
     

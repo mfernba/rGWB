@@ -7,7 +7,10 @@
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmeuler_lkfmrh.inl"
+#include "csmface.inl"
+#include "csmloop.inl"
 #include "csmloopglue.inl"
+#include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmsetopcom.inl"
 #include "csmsetop_procedges.inl"
@@ -15,6 +18,7 @@
 #include "csmsetop_vtxvtx.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
+#include "csmvertex.tli"
 
 #include "a_punter.h"
 #include "cyassert.h"
@@ -117,6 +121,7 @@ static void i_join_null_edges(
     no_null_edges_deleted_A = 0;
     no_null_edges_deleted_B = 0;
     
+    csmsolid_redo_geometric_generated_data(solid_A);
     csmsolid_print_debug(solid_A, CIERTO);
     csmsolid_print_debug(solid_B, CIERTO);
 
@@ -191,12 +196,12 @@ static void i_join_null_edges(
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
         }
         
-        csmsolid_print_debug(solid_A, CIERTO);
+        csmsolid_print_debug(solid_B, CIERTO);
     }
     
-    csmsolid_print_debug(solid_A, CIERTO);
+    //csmsolid_print_debug(solid_A, CIERTO);
     csmsolid_print_debug(solid_B, CIERTO);
-    //csmdebug_show_viewer();
+    csmdebug_show_viewer();
     
     *set_of_null_faces_A = set_of_null_faces_A_loc;
     *set_of_null_faces_B = set_of_null_faces_B_loc;
@@ -207,6 +212,76 @@ static void i_join_null_edges(
     assert(arr_NumElemsPunteroST(loose_ends_B, csmhedge_t) == 0);
     arr_DestruyeEstructurasST(&loose_ends_A, NULL, csmhedge_t);
     arr_DestruyeEstructurasST(&loose_ends_B, NULL, csmhedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_exchange_loops_of_null_faces_if_needed(ArrEstructura(csmface_t) *set_of_null_faces)
+{
+    unsigned long i, num_null_faces;
+    
+    num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    
+    for (i = 0; i < num_null_faces; i++)
+    {
+        struct csmface_t *null_face;
+        struct csmloop_t *loop1, *loop2;
+        
+        null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+        
+        loop1 = csmface_floops(null_face);
+        assert_no_null(loop1);
+        
+        loop2 = csmloop_next(loop1);
+        assert_no_null(loop2);
+        
+        assert(csmloop_next(loop2) == NULL);
+        
+        if (csmloop_is_bounded_by_vertex_with_mask_attrib(loop1, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == CIERTO)
+        {
+            struct csmloop_t *old_flout, *new_flout;
+            
+            assert(csmloop_is_bounded_by_vertex_with_mask_attrib(loop2, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == CIERTO);
+            
+            old_flout = csmface_flout(null_face);
+            new_flout = (old_flout == loop1) ? loop2: loop1;
+            
+            csmnode_set_ptr_next(CSMNODE(loop1), NULL);
+            csmnode_set_ptr_prev(CSMNODE(loop1), NULL);
+            
+            csmnode_set_ptr_next(CSMNODE(loop2), NULL);
+            csmnode_set_ptr_prev(CSMNODE(loop2), NULL);
+
+            csmnode_set_ptr_next(CSMNODE(loop2), CSMNODE(loop1));
+            csmnode_set_ptr_prev(CSMNODE(loop1), CSMNODE(loop2));
+            
+            csmface_set_floops(null_face, loop2);
+            csmface_set_flout(null_face, new_flout);
+            
+            {
+                struct csmhedge_t *ledge_old_flout;
+                struct csmface_t *other_face;
+                struct csmloop_t *other_face_floops;
+                
+                ledge_old_flout = csmloop_ledge(old_flout);
+                other_face = csmopbas_face_from_hedge(csmopbas_mate(ledge_old_flout));
+                
+                other_face_floops = csmface_floops(other_face);
+                assert(csmloop_next(other_face_floops) == NULL);
+                
+                csmface_add_loop_while_removing_from_old(null_face, other_face_floops);
+                csmface_add_loop_while_removing_from_old(other_face, old_flout);
+                
+                //csmface_revert(other_face);
+            }
+            
+            //csmface_revert(null_face);
+        }
+        else
+        {
+            assert(csmloop_is_bounded_by_vertex_with_mask_attrib(loop2, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == FALSO);
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -248,6 +323,22 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));
     assert(no_null_faces > 0);
     
+    switch (set_operation)
+    {
+        case CSMSETOP_OPERATION_UNION:
+        case CSMSETOP_OPERATION_DIFFERENCE:
+            break;
+            
+        case CSMSETOP_OPERATION_INTERSECTION:
+
+            csmsolid_print_debug(solid_B, FALSO);
+            i_exchange_loops_of_null_faces_if_needed(set_of_null_faces_B);
+            csmsolid_print_debug(solid_B, FALSO);
+            break;
+            
+        default_error();
+    }
+    
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_A);
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_B);
     no_null_faces = arr_NumElemsPunteroST(set_of_null_faces_A, csmface_t);
@@ -280,7 +371,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
             face_desp_a = 0;
             face_desp_b = half_no_null_faces;
 
-            csmsetopcom_revert_solid(solid_B);
+            csmsolid_revert(solid_B);
             break;
             
         case CSMSETOP_OPERATION_INTERSECTION:
@@ -293,6 +384,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     }
     
     csmsolid_print_debug(solid_A, FALSO);
+    csmsolid_print_debug(solid_B, FALSO);
 
     result = csmsolid_crea_vacio(0);
     
@@ -309,8 +401,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     
     csmsetopcom_cleanup_solid_setop(solid_A, solid_B, result);
     csmsolid_print_debug(result, FALSO);
-    csmsolid_print_debug(solid_A, FALSO);
-    csmsolid_print_debug(solid_B, FALSO);
+    //csmsolid_print_debug(solid_A, FALSO);
+    //csmsolid_print_debug(solid_B, FALSO);
 
     for (i = 0; i < half_no_null_faces; i++)
     {
@@ -385,9 +477,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     else
     {
         i_join_null_edges(
-                    solid_A, set_of_null_edges_A,
-                    solid_B, set_of_null_edges_B,
-                    &set_of_null_faces_A, &set_of_null_faces_B);
+                        solid_A, set_of_null_edges_A,
+                        solid_B, set_of_null_edges_B,
+                        &set_of_null_faces_A, &set_of_null_faces_B);
     
         result = i_finish_set_operation(
                         set_operation,

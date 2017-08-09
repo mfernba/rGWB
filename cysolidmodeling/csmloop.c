@@ -479,6 +479,37 @@ CYBOOL csmloop_is_point_inside_loop(
 
 // --------------------------------------------------------------------------------------------------------------
 
+CYBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib)
+{
+    register struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    
+    assert_no_null(loop);
+    
+    iterator = loop->ledge;
+    num_iteraciones = 0;
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        vertex = csmhedge_vertex(iterator);
+        
+        if (csmvertex_has_mask_attrib(vertex, mask_attrib) == FALSO)
+            return FALSO;
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != loop->ledge);
+    
+    return CIERTO;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop)
 {
     assert_no_null(loop);
@@ -527,4 +558,56 @@ struct csmloop_t *csmloop_prev(struct csmloop_t *loop)
 {
     assert_no_null(loop);
     return csmnode_downcast(csmnode_prev(CSMNODE(loop)), csmloop_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmloop_revert_loop_orientation(struct csmloop_t *loop)
+{
+    register struct csmhedge_t *he_iterator;
+    struct csmvertex_t *prev_vertex;
+    unsigned long no_iters;
+    
+    assert_no_null(loop);
+    
+    he_iterator = loop->ledge;
+    no_iters = 0;
+            
+    do
+    {
+        struct csmhedge_t *he_iter_prv, *he_iter_nxt;
+        
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        he_iter_prv = csmhedge_prev(he_iterator);
+        he_iter_nxt = csmhedge_next(he_iterator);
+        
+        csmhedge_set_next(he_iterator, he_iter_prv);
+        csmhedge_set_prev(he_iterator, he_iter_nxt);
+        
+        he_iterator = he_iter_nxt;
+    }
+    while (he_iterator != loop->ledge);
+    
+    prev_vertex = csmhedge_vertex(csmhedge_prev(he_iterator));
+    no_iters = 0;
+    
+    do
+    {
+        struct csmvertex_t *vertex_aux;
+        
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        vertex_aux = csmhedge_vertex(he_iterator);
+        
+        csmhedge_set_vertex(he_iterator, prev_vertex);
+        csmvertex_set_hedge(prev_vertex, he_iterator);
+        
+        prev_vertex = vertex_aux;
+        
+        he_iterator = csmhedge_next(he_iterator);
+    }
+    while (he_iterator != loop->ledge);
 }

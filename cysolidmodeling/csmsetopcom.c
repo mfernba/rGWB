@@ -398,6 +398,7 @@ static void i_cut_he(
     struct csmsolid_t *solid;
     struct csmedge_t *edge;
     struct csmhedge_t *he1_edge, *he2_edge;
+    struct csmloop_t *he1_loop, *he2_loop;
     
     assert_no_null(no_null_edges_deleted);
     
@@ -412,7 +413,10 @@ static void i_cut_he(
     arr_BorrarEstructuraST(set_of_null_edges, idx, NULL, csmedge_t);
     (*no_null_edges_deleted)++;
     
-    if (csmhedge_loop(he1_edge) == csmhedge_loop(he2_edge))
+    he1_loop = csmhedge_loop(he1_edge);
+    he2_loop = csmhedge_loop(he2_edge);
+    
+    if (he1_loop == he2_loop)
     {
         struct csmface_t *null_face;
         
@@ -425,7 +429,7 @@ static void i_cut_he(
             //csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CIERTO);
         }
         
-        //if (do_lmekr_he1_he2 == CIERTO)
+        //if (do_lmekr_he1_he2 == CIERTO || csmloop_is_bounded_by_vertex_with_mask_attrib(he1_loop, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == FALSO)
             csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL);
         //else
             //csmeuler_lkemr(&he2_edge, &he1_edge, NULL, NULL);
@@ -691,81 +695,6 @@ enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(
             
         default_error();
     }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static void i_revert_loop_orientation(struct csmloop_t *loop)
-{
-    register struct csmhedge_t *loop_ledge, *he_iterator;
-    struct csmvertex_t *prev_vertex;
-    unsigned long no_iters;
-        
-    loop_ledge = csmloop_ledge(loop);
-    he_iterator = loop_ledge;
-    no_iters = 0;
-            
-    do
-    {
-        struct csmhedge_t *he_iter_prv, *he_iter_nxt;
-        
-        assert(no_iters < 10000);
-        no_iters++;
-        
-        he_iter_prv = csmhedge_prev(he_iterator);
-        he_iter_nxt = csmhedge_next(he_iterator);
-        
-        csmhedge_set_next(he_iterator, he_iter_prv);
-        csmhedge_set_prev(he_iterator, he_iter_nxt);
-        
-        he_iterator = he_iter_nxt;
-    }
-    while (he_iterator != loop_ledge);
-    
-    prev_vertex = csmhedge_vertex(csmhedge_prev(he_iterator));
-    
-    do
-    {
-        struct csmvertex_t *vertex_aux;
-        
-        vertex_aux = csmhedge_vertex(he_iterator);
-        
-        csmhedge_set_vertex(he_iterator, prev_vertex);
-        csmvertex_set_hedge(prev_vertex, he_iterator);
-        
-        prev_vertex = vertex_aux;
-        
-        he_iterator = csmhedge_next(he_iterator);
-    }
-    while (he_iterator != loop_ledge);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsetopcom_revert_solid(struct csmsolid_t *solid)
-{
-    struct csmhashtb_iterator(csmface_t) *face_iterator;
-    
-    assert_no_null(solid);
-
-    face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
-    
-    while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
-    {
-        struct csmface_t *face;
-        struct csmloop_t *loop_iterator;
-        
-        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
-        loop_iterator = csmface_floops(face);
-        
-        while (loop_iterator != NULL)
-        {
-            i_revert_loop_orientation(loop_iterator);
-            loop_iterator = csmloop_next(loop_iterator);
-        }
-    }
-    
-    csmhashtb_free_iterator(&face_iterator, csmface_t);
 }
 
 // ----------------------------------------------------------------------------------------------------

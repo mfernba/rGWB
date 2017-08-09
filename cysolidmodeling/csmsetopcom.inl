@@ -60,8 +60,6 @@ enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(
 
 // Finish algorithm...
 
-void csmsetopcom_revert_solid(struct csmsolid_t *solid);
-
 void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_t *destination_solid);
 
 void csmsetopcom_cleanup_solid_setop(

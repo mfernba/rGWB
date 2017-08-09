@@ -598,7 +598,7 @@ static void i_mark_null_edge_on_face(
 {
     struct csmloop_t *flout;
     struct csmhedge_t *flout_fledge, *old_flout_fledge_prev, *old_flout_fledge_next;
-    struct csmvertex_t *new_vertex;
+    struct csmvertex_t *new_vertex, *splitted_vertex;
     struct csmhedge_t *hedge_from_new_vertex, *hedge_to_new_vertex;
     struct csmhedge_t *he_on_new_ring;
     struct csmedge_t *null_edge;
@@ -614,7 +614,9 @@ static void i_mark_null_edge_on_face(
     csmeuler_lmev(flout_fledge, flout_fledge, x_split, y_split, z_split, &new_vertex, NULL, &hedge_from_new_vertex, &hedge_to_new_vertex);
     csmvertex_set_mask_attrib(new_vertex, vertex_algorithm_mask);
 
-    csmeuler_lmev(hedge_from_new_vertex, hedge_from_new_vertex, x_split, y_split, z_split, NULL, &null_edge, NULL, NULL);
+    csmeuler_lmev(hedge_from_new_vertex, hedge_from_new_vertex, x_split, y_split, z_split, &splitted_vertex, &null_edge, NULL, NULL);
+    csmvertex_set_mask_attrib(splitted_vertex, vertex_algorithm_mask);
+    
     arr_AppendPunteroST(set_of_null_edges_other_solid, null_edge, csmedge_t);
     
     if (csmdebug_debug_enabled() == CIERTO)
@@ -644,6 +646,7 @@ static void i_process_vf_inters(
     csmface_face_equation(vf_inters->face, &A, &B, &C, &D);
     csmdebug_set_plane(A, B, C, D);
     
+    csmvertex_set_mask_attrib(vf_inters->vertex, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS);
     vertex_algorithm_mask = csmvertex_get_mask_attrib(vf_inters->vertex);
     
     vertex_neighborhood = i_initial_vertex_neighborhood(vf_inters->vertex, A, B, C, D);
@@ -719,6 +722,7 @@ static void i_process_vf_inters(
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
             
             csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
+            csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
             
             if (csmdebug_debug_enabled() == CIERTO)
@@ -735,8 +739,6 @@ static void i_process_vf_inters(
                 description = copiafor_codigo3("NE (%g, %g, %g)", x_split, y_split, z_split);
                 csmdebug_append_debug_point(x_split, y_split, z_split, &description);
             }
-            
-            csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             
             i_mark_null_edge_on_face(
                         vf_inters->face,

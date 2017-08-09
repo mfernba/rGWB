@@ -17,6 +17,8 @@ void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid);
 
 void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to_merge);
 
+void csmsolid_revert(struct csmsolid_t *solid);
+
 
 // Faces...
 

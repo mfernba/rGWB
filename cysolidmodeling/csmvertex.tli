@@ -3,5 +3,6 @@
 #include "csmvertex.hxx"
 
 #define CSMVERTEX_NULL_MASK                     ((csmvertex_mask_t)0)
-#define CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP      ((csmvertex_mask_t)1 << 0)
-#define CSMVERTEX_MASK_SETOP_COMMON_VERTEX      ((csmvertex_mask_t)1 << 1)
+#define CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP      ((csmvertex_mask_t)1 << 1)
+#define CSMVERTEX_MASK_SETOP_COMMON_VERTEX      ((csmvertex_mask_t)1 << 2)
+#define CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS      ((csmvertex_mask_t)1 << 3)
