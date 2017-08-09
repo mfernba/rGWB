@@ -613,9 +613,11 @@ static void i_mark_null_edge_on_face(
     
     csmeuler_lmev(flout_fledge, flout_fledge, x_split, y_split, z_split, &new_vertex, NULL, &hedge_from_new_vertex, &hedge_to_new_vertex);
     csmvertex_set_mask_attrib(new_vertex, vertex_algorithm_mask);
+    csmvertex_set_mask_attrib(new_vertex, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS);
 
     csmeuler_lmev(hedge_from_new_vertex, hedge_from_new_vertex, x_split, y_split, z_split, &splitted_vertex, &null_edge, NULL, NULL);
     csmvertex_set_mask_attrib(splitted_vertex, vertex_algorithm_mask);
+    csmvertex_set_mask_attrib(splitted_vertex, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS);
     
     arr_AppendPunteroST(set_of_null_edges_other_solid, null_edge, csmedge_t);
     
@@ -646,7 +648,6 @@ static void i_process_vf_inters(
     csmface_face_equation(vf_inters->face, &A, &B, &C, &D);
     csmdebug_set_plane(A, B, C, D);
     
-    csmvertex_set_mask_attrib(vf_inters->vertex, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS);
     vertex_algorithm_mask = csmvertex_get_mask_attrib(vf_inters->vertex);
     
     vertex_neighborhood = i_initial_vertex_neighborhood(vf_inters->vertex, A, B, C, D);

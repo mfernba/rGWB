@@ -931,12 +931,22 @@ static void i_test_resta_solidos3(struct csmviewer_t *viewer)
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
-    solid2 = csmsweep_create_solid_from_shape_debug(
-                        cshape2d, 0.5, -0.25, 0., -1., 0., 0., 0., 0., 1.,
-                        cshape2d, 0.5, 2., 0., -1., 0., 0., 0., 0., 1.,
+    
+    /*
+     solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, 0.5,  2.,     0., -1., 0., 1., 1., 1., 0.,
+                        cshape2d, 0.5, -0.25,   0., -1., 0., 1., 1., 1., 0.,
+                        1000);
+     */
+
+     solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, 0.5,  2.,     0., 0., 0., 1., 1., 0., 0.,
+                        cshape2d, 0.5, -0.25,   0., 0., 0., 1., 1., 0., 0.,
                         1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+    //solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+    //solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+    solid_res = csmsetop_union_A_and_B(solid2, solid1);
     csmsolid_print_debug(solid_res, CIERTO);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -986,7 +996,7 @@ void csmtest_test(void)
     //i_test_interseccion_solidos2(viewer);
     //i_test_interseccion_solidos3(viewer);
     //i_test_interseccion_solidos4(viewer);
-    //i_test_interseccion_solidos5(viewer);  // Devuelve B - A en lugar de la intersección
+    //i_test_interseccion_solidos5(viewer);
     //i_test_interseccion_solidos7(viewer);
     //i_test_resta_solidos1(viewer);
     //i_test_resta_solidos2(viewer);

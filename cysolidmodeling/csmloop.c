@@ -217,8 +217,18 @@ void csmloop_face_equation(
     
     assert(num_vertexs >= 3);
     
-    csmmath_make_unit_vector3D(&A_loc, &B_loc, &C_loc);
-    D_loc = -csmmath_dot_product3D(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs;
+    if (csmmath_is_null_vector(A_loc, B_loc, C_loc, csmtolerance_null_vector()) == CIERTO)
+    {
+        A_loc = 0.;
+        B_loc = 0.;
+        C_loc = 1.;
+        D_loc = 0.;
+    }
+    else
+    {
+        csmmath_make_unit_vector3D(&A_loc, &B_loc, &C_loc);
+        D_loc = -csmmath_dot_product3D(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs;
+    }
     
     *A = A_loc;
     *B = B_loc;
@@ -374,6 +384,31 @@ static CYBOOL i_is_point_on_loop_boundary(
 
 // --------------------------------------------------------------------------------------------------------------
 
+static CYBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *he1, struct csmhedge_t *he2)
+{
+    struct csmvertex_t *vertex0, *vertex1, *vertex2;
+    double x_vertex0, y_vertex0, z_vertex0, x_vertex1, y_vertex1, z_vertex1, x_vertex2, y_vertex2, z_vertex2;
+    double Wx, Wy, Wz;
+    
+    vertex0 = csmhedge_vertex(he0);
+    csmvertex_get_coordenadas(vertex0, &x_vertex0, &y_vertex0, &z_vertex0);
+
+    vertex1 = csmhedge_vertex(he1);
+    csmvertex_get_coordenadas(vertex1, &x_vertex1, &y_vertex1, &z_vertex1);
+
+    vertex2 = csmhedge_vertex(he2);
+    csmvertex_get_coordenadas(vertex2, &x_vertex2, &y_vertex2, &z_vertex2);
+
+    csmmath_cross_product3D(
+                        x_vertex0 - x_vertex1, y_vertex0 - y_vertex1, z_vertex0 - z_vertex1,
+                        x_vertex2 - x_vertex1, y_vertex2 - y_vertex1, z_vertex2 - z_vertex1,
+                        &Wx, &Wy, &Wz);
+            
+    return csmmath_is_null_vector(Wx, Wy, Wz, csmtolerance_null_vector());
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 CYBOOL csmloop_is_point_inside_loop(
                         const struct csmloop_t *loop, CYBOOL is_outer_loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
@@ -406,67 +441,115 @@ CYBOOL csmloop_is_point_inside_loop(
     }
     else
     {
-        double x_not_dropped, y_not_dropped;
         register struct csmhedge_t *ray_hedge;
+        struct csmhedge_t *start_hedge;
         unsigned long num_iteraciones;
-        int count;
-        
-        // According to "Geometric tools for computer graphics", Page 701 (different from Mäntyllä)
-    
-        csmmath_select_not_dropped_coords(x, y, z, dropped_coord, &x_not_dropped, &y_not_dropped);
-        
-        ray_hedge = loop->ledge;
-        num_iteraciones = 0;
         
         is_point_inside_loop = FALSO;
         type_of_containment_loc = CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR;
         hit_vertex_loc = NULL;
         hit_hedge_loc = NULL;
         
-        count = 0;
-        
+        ray_hedge = loop->ledge;
+        start_hedge = NULL;
+        num_iteraciones = 0;
+
         do
         {
-            struct csmhedge_t *next_ray_hedge;
-            struct csmvertex_t *vertex1, *vertex2;
-            double x_vertex1, y_vertex1, x_vertex2, y_vertex2;
+            struct csmhedge_t *prev_ray_hedge, *next_ray_hedge;
             
             assert(num_iteraciones < 100000);
             num_iteraciones++;
             
+            prev_ray_hedge = csmhedge_prev(ray_hedge);
             next_ray_hedge = csmhedge_next(ray_hedge);
             
-            vertex1 = csmhedge_vertex(ray_hedge);
-            csmvertex_get_coords_not_dropped(vertex1, dropped_coord, &x_vertex1, &y_vertex1);
-            
-            vertex2 = csmhedge_vertex(next_ray_hedge);
-            csmvertex_get_coords_not_dropped(vertex2, dropped_coord, &x_vertex2, &y_vertex2);
-            
-            if ((y_vertex1 - tolerance < y_not_dropped && y_not_dropped < y_vertex2)
-                    || (y_vertex2 - tolerance < y_not_dropped && y_not_dropped < y_vertex1))
+            if (i_are_hedges_collinear(prev_ray_hedge, ray_hedge, next_ray_hedge) == FALSO)
             {
-                double x = x_vertex1 + ((y_not_dropped - y_vertex1) * (x_vertex2 - x_vertex1) / (y_vertex2 - y_vertex1));
-                
-                if (is_outer_loop == CIERTO)
-                {
-                    if (x < x_not_dropped)
-                        count++;
-                }
-                else
-                {
-                    if (x > x_not_dropped)
-                        count++;
-                }
+                start_hedge = ray_hedge;
+                break;
             }
             
             ray_hedge = next_ray_hedge;
             
         } while (ray_hedge != loop->ledge);
         
-        if (count % 2 == 0)
-            is_point_inside_loop = FALSO;
-        else
-            is_point_inside_loop = CIERTO;
+        if (start_hedge != NULL)
+        {
+            double x_not_dropped, y_not_dropped;
+            int count;
+            
+            // According to "Geometric tools for computer graphics", Page 701 (different from Mäntyllä)
+            csmmath_select_not_dropped_coords(x, y, z, dropped_coord, &x_not_dropped, &y_not_dropped);
+        
+            ray_hedge = start_hedge;
+            num_iteraciones = 0;
+        
+            count = 0;
+            
+            do
+            {
+                struct csmhedge_t *next_ray_hedge;
+                CYBOOL hedges_collinear;
+                struct csmvertex_t *vertex1, *vertex2;
+                double x_vertex1, y_vertex1, x_vertex2, y_vertex2;
+                
+                assert(num_iteraciones < 100000);
+                num_iteraciones++;
+                
+                next_ray_hedge = csmhedge_next(ray_hedge);
+                hedges_collinear = FALSO;
+                
+                do
+                {
+                    struct csmhedge_t *next_next_ray_hedge;
+                    
+                    next_next_ray_hedge = csmhedge_next(next_ray_hedge);
+                    
+                    if (i_are_hedges_collinear(ray_hedge, next_ray_hedge, next_next_ray_hedge) == CIERTO)
+                    {
+                        hedges_collinear = CIERTO;
+                        next_ray_hedge = next_next_ray_hedge;
+                    }
+                    else
+                    {
+                        hedges_collinear = FALSO;
+                    }
+                    
+                } while (hedges_collinear == CIERTO);
+                
+                vertex1 = csmhedge_vertex(ray_hedge);
+                csmvertex_get_coords_not_dropped(vertex1, dropped_coord, &x_vertex1, &y_vertex1);
+                
+                vertex2 = csmhedge_vertex(next_ray_hedge);
+                csmvertex_get_coords_not_dropped(vertex2, dropped_coord, &x_vertex2, &y_vertex2);
+            
+                if ((y_vertex1 - tolerance < y_not_dropped && y_not_dropped < y_vertex2)
+                        || (y_vertex2 - tolerance < y_not_dropped && y_not_dropped < y_vertex1))
+                {
+                    double x = x_vertex1 + ((y_not_dropped - y_vertex1) * (x_vertex2 - x_vertex1) / (y_vertex2 - y_vertex1));
+                    
+                    if (is_outer_loop == CIERTO)
+                    {
+                        if (x < x_not_dropped)
+                            count++;
+                    }
+                    else
+                    {
+                        if (x > x_not_dropped)
+                            count++;
+                    }
+                }
+                
+                ray_hedge = next_ray_hedge;
+                
+            } while (ray_hedge != start_hedge);
+            
+            if (count % 2 == 0)
+                is_point_inside_loop = FALSO;
+            else
+                is_point_inside_loop = CIERTO;
+        }
     }
     
     
