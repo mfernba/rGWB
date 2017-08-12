@@ -944,8 +944,8 @@ static void i_test_resta_solidos3(struct csmviewer_t *viewer)
                         cshape2d, 0.5, -0.25,   0., 0., 0., 1., 1., 0., 0.,
                         1000);
     
-    //solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
-    //solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+    solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
     solid_res = csmsetop_union_A_and_B(solid2, solid1);
     csmsolid_print_debug(solid_res, CIERTO);
 
@@ -988,22 +988,30 @@ void csmtest_test(void)
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
     i_test_divide_solido_rectangular_hueco_por_plano_superior2();
     */
-    //i_test_union_solidos1(viewer);
-    //i_test_union_solidos2(viewer);
-    //i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
-    //i_test_interseccion_solidos1(viewer);
+    i_test_union_solidos1(viewer);
+    i_test_union_solidos2(viewer);
+    i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
+    i_test_interseccion_solidos1(viewer);
     
-    //i_test_interseccion_solidos2(viewer);
-    //i_test_interseccion_solidos3(viewer);
-    //i_test_interseccion_solidos4(viewer);
-    //i_test_interseccion_solidos5(viewer);
-    //i_test_interseccion_solidos7(viewer);
-    //i_test_resta_solidos1(viewer);
-    //i_test_resta_solidos2(viewer);
-    i_test_resta_solidos3(viewer);
+    i_test_interseccion_solidos2(viewer);
+    i_test_interseccion_solidos3(viewer);
+    i_test_interseccion_solidos4(viewer);
+    i_test_interseccion_solidos5(viewer);
+    i_test_interseccion_solidos7(viewer);
+    i_test_resta_solidos1(viewer);
+    i_test_resta_solidos2(viewer);
+    i_test_resta_solidos3(viewer);   // <-- Corregir este caso, revisar generación de arista nula.
     
     csmviewer_free(&viewer);
 }
+
+
+
+
+
+
+
+
 
 
 
