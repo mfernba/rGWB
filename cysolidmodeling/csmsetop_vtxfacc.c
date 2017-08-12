@@ -407,7 +407,7 @@ static void i_reclassify_on_sectors_vertex_neighborhood(
 
 static void i_reclassify_on_edge_vertex_neighborhood(
                         struct i_neighborhood_t *hedge_neighborhood,
-                        enum csmsetop_operation_t set_operation,
+                        enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
                         struct i_neighborhood_t *prev_hedge_neighborhood,
                         struct i_neighborhood_t *next_hedge_neighborhood)
 {
@@ -425,11 +425,17 @@ static void i_reclassify_on_edge_vertex_neighborhood(
         }
         else if (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
         {
-            new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            if (a_vs_b == CSMSETOP_A_VS_B)
+                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            else
+                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
         }
         else if (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
         {
-            new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            if (a_vs_b == CSMSETOP_A_VS_B)
+                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            else
+                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
         }
         else
         {
@@ -444,8 +450,8 @@ static void i_reclassify_on_edge_vertex_neighborhood(
 // ----------------------------------------------------------------------------------------------------
 
 static void i_reclassify_on_edges_vertex_neighborhood(
-                        enum csmsetop_operation_t set_operation,
                         double A, double B, double C, double D,
+                        enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
                         ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
@@ -472,7 +478,7 @@ static void i_reclassify_on_edges_vertex_neighborhood(
         
         i_reclassify_on_edge_vertex_neighborhood(
                         hedge_neighborhood,
-                        set_operation,
+                        set_operation, a_vs_b,
                         prev_hedge_neighborhood,
                         next_hedge_neighborhood);
     }
@@ -659,7 +665,7 @@ static void i_process_vf_inters(
     i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Sectors", vf_inters->vertex, vertex_neighborhood);
     
-    i_reclassify_on_edges_vertex_neighborhood(set_operation, A, B, C, D, vertex_neighborhood);
+    i_reclassify_on_edges_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Edges", vf_inters->vertex, vertex_neighborhood);
     
     if (i_could_locate_begin_sequence(vertex_neighborhood, &start_idx) == CIERTO)
