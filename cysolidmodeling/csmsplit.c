@@ -155,60 +155,6 @@ static void i_classify_hedge_respect_to_plane(
 
 // ----------------------------------------------------------------------------------------------------
 
-static enum i_position_t i_classify_hedge_bisector_respect_to_plane(
-                        struct csmhedge_t *hedge,
-                        double A, double B, double C, double D)
-{
-    enum i_position_t cl_resp_plane;
-    double tolerance;
-    struct csmvertex_t *vertex;
-    double x, y, z;
-    struct csmhedge_t *hedge_prv, *hedge_next;
-    struct csmvertex_t *vertex_prv, *vertex_next;
-    double x_prv, y_prv, z_prv;
-    double x_nxt, y_nxt, z_nxt;
-    double Ux_to_prv, Uy_to_prv, Uz_to_prv;
-    double Ux_to_nxt, Uy_to_nxt, Uz_to_nxt;
-    double Ux_bisector, Uy_bisector, Uz_bisector;
-    double x_bisector, y_bisector, z_bisector;
-    
-    tolerance = i_classification_tolerance(hedge);
-
-    vertex = csmhedge_vertex(hedge);
-    csmvertex_get_coordenadas(vertex, &x, &y, &z);
-    
-    hedge_prv = csmhedge_prev(hedge);
-    vertex_prv = csmhedge_vertex(hedge_prv);
-    csmvertex_get_coordenadas(vertex_prv, &x_prv, &y_prv, &z_prv);
-    
-    hedge_next = csmhedge_next(hedge);
-    vertex_next = csmhedge_vertex(hedge_next);
-    csmvertex_get_coordenadas(vertex_next, &x_nxt, &y_nxt, &z_nxt);
-    
-    csmmath_vector_between_two_3D_points(x, y, z, x_prv, y_prv, z_prv, &Ux_to_prv, &Uy_to_prv, &Uz_to_prv);
-    csmmath_vector_between_two_3D_points(x, y, z, x_nxt, y_nxt, z_nxt, &Ux_to_nxt, &Uy_to_nxt, &Uz_to_nxt);
-    
-    Ux_bisector = .5 * (Ux_to_prv + Ux_to_nxt);
-    Uy_bisector = .5 * (Uy_to_prv + Uy_to_nxt);
-    Uz_bisector = .5 * (Uz_to_prv + Uz_to_nxt);
-    
-    csmmath_make_unit_vector3D(&Ux_bisector, &Uy_bisector, &Uz_bisector);
-    
-    x_bisector = x + 10. * Ux_bisector;
-    y_bisector = y + 10. * Uy_bisector;
-    z_bisector = z + 10. * Uz_bisector;
-    
-    i_classify_point_respect_to_plane(
-                        x_bisector, y_bisector, z_bisector,
-                        A, B, C, D,
-                        tolerance,
-                        NULL, &cl_resp_plane);
-
-    return cl_resp_plane;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
                         struct csmsolid_t *work_solid,
                         double A, double B, double C, double D))
@@ -339,6 +285,7 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_initial_vertex_neighborh
         struct csmhedge_t *hedge_next;
         enum i_position_t cl_resp_plane;
         struct i_neighborhood_t *hedge_neighborhood;
+        double Ux_bisec, Uy_bisec, Uz_bisec;
         
         assert(num_iters < 10000);
         num_iters++;
@@ -349,10 +296,17 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_initial_vertex_neighborh
         hedge_neighborhood = i_create_neighborhod(hedge_iterator, cl_resp_plane);
         arr_AppendPunteroST(vertex_neighborhood, hedge_neighborhood, i_neighborhood_t);
         
-        if (csmopbas_is_convex_hedge(hedge_iterator) == FALSO)
+        if (csmopbas_is_wide_hedge(hedge_iterator, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CIERTO)
         {
-            cl_resp_plane = i_classify_hedge_bisector_respect_to_plane(hedge_iterator, A, B, C, D);
-            hedge_neighborhood = i_create_neighborhod(hedge_iterator, cl_resp_plane);
+            struct i_neighborhood_t *hedge_neighborhood_wide;
+            double tolerance;
+            
+            hedge_neighborhood_wide = i_create_neighborhod(hedge_iterator, hedge_neighborhood->position);
+            arr_AppendPunteroST(vertex_neighborhood, hedge_neighborhood_wide, i_neighborhood_t);
+            
+            tolerance = i_classification_tolerance(hedge_iterator);
+            i_classify_point_respect_to_plane(Ux_bisec, Uy_bisec, Uz_bisec, A, B, C, D, tolerance, NULL, &cl_resp_plane);
+            hedge_neighborhood->position = cl_resp_plane;
         }
         
         hedge_iterator = csmhedge_next(csmopbas_mate(hedge_iterator));

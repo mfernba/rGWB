@@ -199,8 +199,10 @@ static void i_join_null_edges(
         csmsolid_print_debug(solid_B, CIERTO);
     }
     
-    //csmsolid_print_debug(solid_A, CIERTO);
-    //csmsolid_print_debug(solid_B, CIERTO);
+    csmdebug_print_debug_info("*** AFTER JOINING NULL EDGES\n");
+    
+    csmsolid_print_debug(solid_A, CIERTO);
+    csmsolid_print_debug(solid_B, CIERTO);
     //csmdebug_show_viewer();
     
     *set_of_null_faces_A = set_of_null_faces_A_loc;
@@ -215,7 +217,7 @@ static void i_join_null_edges(
 }
 
 // ----------------------------------------------------------------------------------------------------
-
+/*
 static void i_exchange_loops_of_null_faces_if_needed(ArrEstructura(csmface_t) *set_of_null_faces, CYBOOL is_setop_union)
 {
     unsigned long i, num_null_faces;
@@ -284,6 +286,7 @@ static void i_exchange_loops_of_null_faces_if_needed(ArrEstructura(csmface_t) *s
         }
     }
 }
+*/
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -324,6 +327,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));
     assert(no_null_faces > 0);
     
+    /*
     csmsolid_print_debug(solid_B, FALSO);
     switch (set_operation)
     {
@@ -341,6 +345,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         default_error();
     }
     csmsolid_print_debug(solid_B, FALSO);
+    */
     
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_A);
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_B);
@@ -439,7 +444,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     unsigned long no_null_edges;
     
     csmdebug_begin_context("SETOP");
-
+    csmsolid_set_name(solid_A, "Solid A");
+    csmsolid_set_name(solid_B, "Solid B");
+    
     csmdebug_set_viewer_results(NULL, NULL);
     csmdebug_set_viewer_parameters(solid_A, solid_B);
     csmdebug_show_viewer();
@@ -489,6 +496,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
                         set_operation,
                         solid_A, set_of_null_faces_A,
                         solid_B, set_of_null_faces_B);
+        
+        csmsolid_set_name(result, "Result");
     }
     
     csmdebug_set_viewer_results(result, NULL);

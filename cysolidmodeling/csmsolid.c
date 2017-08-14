@@ -667,7 +667,7 @@ static void i_print_debug_info_edges(struct csmhashtb(csmedge_t) *sedges, CYBOOL
         (*num_edges)++;
     }
     
-    csmdebug_print_debug_info("\tNo. of egdes: %lu\n", *num_edges);
+    csmdebug_print_debug_info("\tNo. of edges: %lu\n", *num_edges);
     
     assert(*num_edges == csmhashtb_count(sedges, csmedge_t));
     csmhashtb_free_iterator(&iterator, csmedge_t);
@@ -729,7 +729,7 @@ static void i_print_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, 
         (*num_vertexs)++;
     }
     
-    csmdebug_print_debug_info("\tNo. of vertexs: %lu\n", *num_vertexs);
+    csmdebug_print_debug_info("\tNo. of vertex: %lu\n", *num_vertexs);
     
     assert(*num_vertexs == csmhashtb_count(svertexs, csmvertex_t));
     csmhashtb_free_iterator(&iterator, csmvertex_t);

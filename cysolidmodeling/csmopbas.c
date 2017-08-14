@@ -10,6 +10,7 @@
 #include "csmmath.inl"
 #include "csmnode.inl"
 #include "csmsolid.inl"
+#include "csmtolerance.inl"
 #include "csmvertex.inl"
 
 #include "cyassert.h"
@@ -161,12 +162,74 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
 
 // ------------------------------------------------------------------------------------------
 
-CYBOOL csmopbas_is_convex_hedge(struct csmhedge_t *hedge)
+CYBOOL csmopbas_is_wide_hedge(
+                        struct csmhedge_t *hedge,
+                        double *Ux_bisec_opt, double *Uy_bisec_opt, double *Uz_bisec_opt)
 {
+    CYBOOL is_wide;
+    double Ux_bisec_loc, Uy_bisec_loc, Uz_bisec_loc;
+    struct csmhedge_t *hedge_prev, *hedge_next;
+    const struct csmvertex_t *vertex_prev, *vertex, *vertex_next;
+    double Ux_to_prev, Uy_to_prev, Uz_to_prev;
+    double Ux_to_next, Uy_to_next, Uz_to_next;
+    double Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next;
     struct csmface_t *face;
+    double A, B, C, D;
 
+    vertex = csmhedge_vertex(hedge);
+    
+    hedge_prev = csmhedge_prev(hedge);
+    vertex_prev = csmhedge_vertex(hedge_prev);
+    csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_prev, &Ux_to_prev, &Uy_to_prev, &Uz_to_prev);
+    
+    hedge_next = csmhedge_next(hedge);
+    vertex_next = csmhedge_vertex(hedge_next);
+    csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_next, &Ux_to_next, &Uy_to_next, &Uz_to_next);
+
+    csmmath_cross_product3D(
+                        Ux_to_prev, Uy_to_prev, Uz_to_prev, Ux_to_next, Uy_to_next, Uz_to_next,
+                        &Ux_cross_prev_next, &Uy_cross_prev_next, &Uz_cross_prev_next);
+    
     face = csmopbas_face_from_hedge(hedge);
-    return csmface_is_convex_hedge(face, hedge);
+    csmface_face_equation(face, &A, &B, &C, &D);
+    
+    if (csmmath_is_null_vector(
+                        Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next,
+                        csmtolerance_null_vector()) == CIERTO)
+    {
+        is_wide = CIERTO;
+        csmmath_cross_product3D(A, B, C, Ux_to_next, Uy_to_next, Uz_to_next, &Ux_bisec_loc, &Uy_bisec_loc, &Uz_bisec_loc);
+    }
+    else
+    {
+        double dot_product;
+
+        dot_product = csmmath_dot_product3D(Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next, A, B, C);
+        is_wide = ES_CIERTO(dot_product > 0.);
+        
+        if (dot_product > 0.)
+        {
+            is_wide = CIERTO;
+            
+            Ux_bisec_loc = -(Ux_to_prev + Ux_to_next);
+            Uy_bisec_loc = -(Uy_to_prev + Uy_to_next);
+            Uz_bisec_loc = -(Uz_to_prev + Uz_to_next);
+        }
+        else
+        {
+            is_wide = FALSO;
+            
+            Ux_bisec_loc = 0.;
+            Uy_bisec_loc = 0.;
+            Uz_bisec_loc = 0.;
+        }
+    }
+    
+    ASIGNA_OPC(Ux_bisec_opt, Ux_bisec_loc);
+    ASIGNA_OPC(Uy_bisec_opt, Uy_bisec_loc);
+    ASIGNA_OPC(Uz_bisec_opt, Uz_bisec_loc);
+    
+    return is_wide;
 }
 
 

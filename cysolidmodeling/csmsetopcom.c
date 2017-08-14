@@ -433,6 +433,7 @@ static void i_cut_he(
         }
         
         //if (do_lmekr_he1_he2 == CIERTO || csmloop_is_bounded_by_vertex_with_mask_attrib(he1_loop, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == FALSO)
+        //if (do_lmekr_he1_he2 == CIERTO)
             csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL);
         //else
             //csmeuler_lkemr(&he2_edge, &he1_edge, NULL, NULL);

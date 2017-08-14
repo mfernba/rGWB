@@ -647,6 +647,8 @@ static void i_test_union_solidos1(struct csmviewer_t *viewer)
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
+    i_set_output_debug_file("union_solidos1.txt");
+    
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
@@ -679,6 +681,8 @@ static void i_test_union_solidos2(struct csmviewer_t *viewer)
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
+    i_set_output_debug_file("union_solidos2.txt");
+    
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
@@ -695,8 +699,7 @@ static void i_test_union_solidos2(struct csmviewer_t *viewer)
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid_res, CIERTO);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -1240,11 +1243,11 @@ void csmtest_test(void)
     
     //i_test_divide_solido_rectangular_hueco_por_plano_medio();
     //i_test_divide_solido_rectangular_hueco_por_plano_medio2();
-    i_test_divide_solido_rectangular_hueco_por_plano_superior();
+    //i_test_divide_solido_rectangular_hueco_por_plano_superior();
     //i_test_divide_solido_rectangular_hueco_por_plano_superior2();
 
     //i_test_union_solidos1(viewer);
-    //i_test_union_solidos2(viewer);
+    i_test_union_solidos2(viewer);
     //i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
     //i_test_interseccion_solidos1(viewer);
     

@@ -14,7 +14,6 @@
 #include <string.h>
 
 static const int i_MEMORY_CREATION_MARK = 0xAB;
-static const int i_MEMORY_DELETION_MARK = 0xCB;
 
 // ---------------------------------------------------------------------------------
 

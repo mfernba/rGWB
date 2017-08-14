@@ -45,8 +45,6 @@ CYBOOL csmface_exists_intersection_between_line_and_face_plane(
 
 CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_t *loop);
 
-CYBOOL csmface_is_convex_hedge(struct csmface_t *face, struct csmhedge_t *hedge);
-
 double csmface_tolerace(const struct csmface_t *face);
 
 CYBOOL csmface_is_coplanar_to_plane(
