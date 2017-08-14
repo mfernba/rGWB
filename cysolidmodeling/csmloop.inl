@@ -52,3 +52,13 @@ struct csmloop_t *csmloop_next(struct csmloop_t *loop);
 struct csmloop_t *csmloop_prev(struct csmloop_t *loop);
 
 void csmloop_revert_loop_orientation(struct csmloop_t *loop);
+
+
+// Debug...
+
+void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBOOL assert_si_no_es_integro);
+
+
+
+
+

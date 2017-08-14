@@ -57,6 +57,8 @@ static i_FPtr_show_viewer g_func_show_viewer = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
+static FILE *g_output_file = NULL;
+
 // --------------------------------------------------------------------------------
 
 CYBOOL csmdebug_debug_enabled(void)
@@ -98,6 +100,7 @@ static void i_init(void)
         va_end(argptr);\
         \
         fprintf(stdout, "%s", buffer);\
+        if (g_output_file != NULL) fprintf(g_output_file, "%s", buffer);\
     }\
 )
 
@@ -110,7 +113,12 @@ static void i_print_tab_level(unsigned long no_tabs)
     bsassert(no_tabs > 0);
     
     for (i = 0; i< no_tabs - 1; i++)
+    {
         fprintf(stdout, "  ");
+        
+        if (g_output_file != NULL)
+            fprintf(g_output_file, "  ");
+    }
 }
 
 // --------------------------------------------------------------------------------
@@ -157,6 +165,30 @@ void csmdebug_print_debug_info(const char *format, ...)
         i_print_tab_level(i_NO_STACKED_CONTEXTS);
         i_print_format(format);
         fflush(stdout);
+        
+        if (g_output_file != NULL)
+            fflush(g_output_file);
+    }
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_set_ouput_file(const char *file_path)
+{
+    g_output_file = fopen(file_path, "wt");
+    bsassert_not_null(g_output_file);
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_close_output_file(void)
+{
+    if (g_output_file != NULL)
+    {
+        fflush(g_output_file);
+        fclose(g_output_file);
+        
+        g_output_file = NULL;
     }
 }
 

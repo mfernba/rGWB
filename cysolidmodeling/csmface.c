@@ -3,6 +3,7 @@
 #include "csmface.inl"
 
 #include "csmbbox.inl"
+#include "csmdebug.inl"
 #include "csmloop.inl"
 #include "csmhedge.inl"
 #include "csmmath.inl"
@@ -714,6 +715,46 @@ void csmface_revert(struct csmface_t *face)
     }
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_integro, unsigned long *num_holes_opc)
+{
+    unsigned long num_holes_loc;
+    struct csmloop_t *loop_iterator;
+    double A, B, C, D;
+    
+    csmface_face_equation(face, &A, &B, &C, &D);
+    csmdebug_print_debug_info("\tFace %lu (%g, %g, %g, %g)\n", face->id, A, B, C, D);
+    
+    loop_iterator = csmface_floops(face);
+    num_holes_loc = 0;
+    
+    while (loop_iterator != NULL)
+    {
+        struct csmloop_t *next_loop;
+        CYBOOL is_outer_loop;
+        
+        is_outer_loop = ES_CIERTO(csmface_flout(face) == loop_iterator);
+        csmloop_print_info_debug(loop_iterator, is_outer_loop, assert_si_no_es_integro);
+        
+        if (is_outer_loop == FALSO)
+            num_holes_loc++;
+        
+        next_loop = csmloop_next(loop_iterator);
+        
+        if (assert_si_no_es_integro == CIERTO)
+        {
+            assert(csmloop_lface(loop_iterator) == face);
+            
+            if (next_loop != NULL)
+                assert(csmloop_prev(next_loop) == loop_iterator);
+        }
+        
+        loop_iterator = next_loop;
+    }
+    
+    ASIGNA_OPC(num_holes_opc, num_holes_loc);
+}
 
 
 

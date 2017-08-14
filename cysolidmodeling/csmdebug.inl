@@ -22,8 +22,15 @@ void csmdebug_end_context(void);
 void csmdebug_print_debug_info(const char *format, ...);
 
 
-// Graphical debug...
+// Textual debug...
+
+void csmdebug_set_ouput_file(const char *file_path);
     
+void csmdebug_close_output_file(void);
+    
+
+// Graphical debug...
+
 void csmdebug_set_viewer(
                     struct csmviewer_t *viewer,
                     void (*func_show_viewer)(struct csmviewer_t *),
@@ -43,6 +50,7 @@ void csmdebug_append_debug_point(double x, double y, double z, char **descriptio
 void csmdebug_set_plane(double A, double B, double C, double D);
 
 void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics);
+
 
     
 #ifdef __cplusplus

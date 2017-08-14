@@ -46,7 +46,7 @@ void csmsetopcom_cut_he_setop(
 
 // Faces...
 
-CONSTRUCTOR(ArrEstructura(csmface_t) *, csmsetopcom_convert_inner_loops_of_null_faces_to_faces_solid_below, (ArrEstructura(csmface_t) *set_of_null_faces));
+CONSTRUCTOR(ArrEstructura(csmface_t) *, csmsetopcom_convert_inner_loops_of_null_faces_to_faces, (ArrEstructura(csmface_t) *set_of_null_faces));
 
 void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_t) *set_of_null_faces);
 
@@ -57,6 +57,7 @@ void csmsetopcom_move_face_to_solid(
 
 enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(double value, double tolerance);
 
+struct csmface_t *csmsetopcom_face_for_hedge_sector(struct csmhedge_t *hedge, struct csmhedge_t *hedge_next);
 
 // Finish algorithm...
 

@@ -216,7 +216,7 @@ static void i_join_null_edges(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_exchange_loops_of_null_faces_if_needed(ArrEstructura(csmface_t) *set_of_null_faces)
+static void i_exchange_loops_of_null_faces_if_needed(ArrEstructura(csmface_t) *set_of_null_faces, CYBOOL is_setop_union)
 {
     unsigned long i, num_null_faces;
     
@@ -234,48 +234,49 @@ static void i_exchange_loops_of_null_faces_if_needed(ArrEstructura(csmface_t) *s
         
         loop2 = csmloop_next(loop1);
         assert_no_null(loop2);
-        
         assert(csmloop_next(loop2) == NULL);
         
         if (csmloop_is_bounded_by_vertex_with_mask_attrib(loop1, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == CIERTO)
         {
-            struct csmloop_t *old_flout, *new_flout;
-            
             assert(csmloop_is_bounded_by_vertex_with_mask_attrib(loop2, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == CIERTO);
             
-            old_flout = csmface_flout(null_face);
-            new_flout = (old_flout == loop1) ? loop2: loop1;
-            
-            csmnode_set_ptr_next(CSMNODE(loop1), NULL);
-            csmnode_set_ptr_prev(CSMNODE(loop1), NULL);
-            
-            csmnode_set_ptr_next(CSMNODE(loop2), NULL);
-            csmnode_set_ptr_prev(CSMNODE(loop2), NULL);
-
-            csmnode_set_ptr_next(CSMNODE(loop2), CSMNODE(loop1));
-            csmnode_set_ptr_prev(CSMNODE(loop1), CSMNODE(loop2));
-            
-            csmface_set_floops(null_face, loop2);
-            csmface_set_flout(null_face, new_flout);
-            
+            if (is_setop_union == CIERTO)
             {
-                struct csmhedge_t *ledge_old_flout;
-                struct csmface_t *other_face;
-                struct csmloop_t *other_face_floops;
-                
-                ledge_old_flout = csmloop_ledge(old_flout);
-                other_face = csmopbas_face_from_hedge(csmopbas_mate(ledge_old_flout));
-                
-                other_face_floops = csmface_floops(other_face);
-                assert(csmloop_next(other_face_floops) == NULL);
-                
-                csmface_add_loop_while_removing_from_old(null_face, other_face_floops);
-                csmface_add_loop_while_removing_from_old(other_face, old_flout);
-                
-                //csmface_revert(other_face);
             }
+            else
+            {
+                struct csmloop_t *old_flout, *new_flout;
+                
+                old_flout = csmface_flout(null_face);
+                new_flout = (old_flout == loop1) ? loop2: loop1;
             
-            //csmface_revert(null_face);
+                csmnode_set_ptr_next(CSMNODE(loop1), NULL);
+                csmnode_set_ptr_prev(CSMNODE(loop1), NULL);
+            
+                csmnode_set_ptr_next(CSMNODE(loop2), NULL);
+                csmnode_set_ptr_prev(CSMNODE(loop2), NULL);
+
+                csmnode_set_ptr_next(CSMNODE(loop2), CSMNODE(loop1));
+                csmnode_set_ptr_prev(CSMNODE(loop1), CSMNODE(loop2));
+            
+                csmface_set_floops(null_face, loop2);
+                csmface_set_flout(null_face, new_flout);
+            
+                {
+                    struct csmhedge_t *ledge_old_flout;
+                    struct csmface_t *other_face;
+                    struct csmloop_t *other_face_floops;
+                
+                    ledge_old_flout = csmloop_ledge(old_flout);
+                    other_face = csmopbas_face_from_hedge(csmopbas_mate(ledge_old_flout));
+                
+                    other_face_floops = csmface_floops(other_face);
+                    assert(csmloop_next(other_face_floops) == NULL);
+                
+                    csmface_add_loop_while_removing_from_old(null_face, other_face_floops);
+                    csmface_add_loop_while_removing_from_old(other_face, old_flout);
+                }
+            }
         }
         else
         {
@@ -294,7 +295,7 @@ static void i_convert_inner_loops_of_null_faces_to_faces(ArrEstructura(csmface_t
     no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
     assert(no_null_faces > 0);
     
-    inner_loops_as_faces = csmsetopcom_convert_inner_loops_of_null_faces_to_faces_solid_below(set_of_null_faces);
+    inner_loops_as_faces = csmsetopcom_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces);
     assert(no_null_faces == arr_NumElemsPunteroST(inner_loops_as_faces, csmface_t));
 
     for (i = 0; i < no_null_faces; i++)
@@ -323,21 +324,23 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));
     assert(no_null_faces > 0);
     
+    csmsolid_print_debug(solid_B, FALSO);
     switch (set_operation)
     {
         case CSMSETOP_OPERATION_UNION:
-        case CSMSETOP_OPERATION_DIFFERENCE:
+            
+            i_exchange_loops_of_null_faces_if_needed(set_of_null_faces_B, CIERTO);
             break;
             
+        case CSMSETOP_OPERATION_DIFFERENCE:
         case CSMSETOP_OPERATION_INTERSECTION:
 
-            csmsolid_print_debug(solid_B, FALSO);
-            i_exchange_loops_of_null_faces_if_needed(set_of_null_faces_B);
-            csmsolid_print_debug(solid_B, FALSO);
+            i_exchange_loops_of_null_faces_if_needed(set_of_null_faces_B, FALSO);
             break;
             
         default_error();
     }
+    csmsolid_print_debug(solid_B, FALSO);
     
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_A);
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_B);

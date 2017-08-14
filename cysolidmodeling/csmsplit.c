@@ -218,6 +218,8 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
     
     assert_no_null(work_solid);
 
+    csmdebug_begin_context("Split edges by plane");
+
     edge_iterator = csmhashtb_create_iterator(work_solid->sedges, csmedge_t);
     set_of_on_vertices = arr_CreaPunteroST(0, csmvertex_t);
     
@@ -310,6 +312,8 @@ CONSTRUCTOR(static ArrEstructura(csmvertex_t) *, i_split_edges_by_plane, (
     
     csmhashtb_free_iterator(&edge_iterator, csmedge_t);
     
+    csmdebug_end_context();
+    
     return set_of_on_vertices;
 }
 
@@ -366,15 +370,15 @@ static void i_reclassify_on_sector_vertex_neighborhood(
                         double A, double B, double C, double D,
                         double tolerance_coplanarity)
 {
-    struct csmface_t *face;
+    struct csmface_t *common_face;
     CYBOOL same_orientation;
     
     assert_no_null(hedge_neighborhood);
     assert_no_null(next_hedge_neighborhood);
     
-    face = csmopbas_face_from_hedge(hedge_neighborhood->hedge);
+    common_face = csmsetopcom_face_for_hedge_sector(hedge_neighborhood->hedge, next_hedge_neighborhood->hedge);
     
-    if (csmface_is_coplanar_to_plane(face, A, B, C, D, tolerance_coplanarity, &same_orientation) == CIERTO)
+    if (csmface_is_coplanar_to_plane(common_face, A, B, C, D, tolerance_coplanarity, &same_orientation) == CIERTO)
     {
         if (same_orientation == CIERTO)
         {
@@ -580,7 +584,23 @@ static CYBOOL i_is_above_below_sequence_at_index(const ArrEstructura(i_neighborh
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_print_debug_info_vertex_neighborhood(const char *description, const struct csmvertex_t *vertex, ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
+static const char *i_cl_plane_to_string(enum i_position_t position)
+{
+    switch (position)
+    {
+        case i_POSITION_ON:     return "ON";
+        case i_POSITION_ABOVE:  return "ABOVE";
+        case i_POSITION_BELOW:  return "BELOW";
+        default_error();
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_print_debug_info_vertex_neighborhood(
+                        const char *description,
+                        const struct csmvertex_t *vertex,
+                        ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
 {
     if (csmdebug_debug_enabled() == CIERTO)
     {
@@ -588,7 +608,7 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
         unsigned long i, num_sectors;
         
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
-        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g): ", description, csmvertex_id(vertex), x, y, z);
+        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g):\n", description, csmvertex_id(vertex), x, y, z);
         
         num_sectors = arr_NumElemsPunteroST(vertex_neighborhood, i_neighborhood_t);
         
@@ -599,7 +619,10 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
             hedge_neighborhood = arr_GetPunteroST(vertex_neighborhood, i, i_neighborhood_t);
             assert_no_null(hedge_neighborhood);
             
-            csmdebug_print_debug_info("(hedge = %lu, classification: %d): ", csmhedge_id(hedge_neighborhood->hedge), hedge_neighborhood->position);
+            csmdebug_print_debug_info(
+                        "\t(hedge = %5lu\tclassification: %5s)\n ",
+                        csmhedge_id(hedge_neighborhood->hedge),
+                        i_cl_plane_to_string(hedge_neighborhood->position));
         }
         
         csmdebug_print_debug_info("\n");
@@ -616,6 +639,8 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
     ArrEstructura(i_neighborhood_t) *vertex_neighborhood;
     unsigned long start_idx;
     csmvertex_mask_t vertex_algorithm_mask;
+    
+    csmdebug_print_debug_info("Vertex: %lu\n", csmvertex_id(vertex));
     
     vertex_algorithm_mask = csmvertex_get_mask_attrib(vertex);
     
@@ -648,6 +673,8 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
         while (process_next_sequence == CIERTO)
         {
             struct i_neighborhood_t *tail_neighborhood;
+            struct csmhedge_t *head_next;
+            enum i_position_t cl_head_next_resp_plane;
             double x_split, y_split, z_split;
             struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
@@ -669,17 +696,30 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
             
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
 
-            if (csmdebug_debug_enabled() == CIERTO)
-            {
-                csmdebug_print_debug_info(
+            csmdebug_print_debug_info(
                         "Inserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
                         x_split, y_split, z_split,
                         csmhedge_id(head_neighborhood->hedge),
                         csmhedge_id(tail_neighborhood->hedge));
+            
+            head_next = csmhedge_next(head_neighborhood->hedge);
+            i_classify_hedge_respect_to_plane(head_next, A, B, C, D, NULL, NULL, &cl_head_next_resp_plane);
+            
+            // Null edge oriented from vertex below SP to above. tail is the below hedge.
+            if (cl_head_next_resp_plane == i_POSITION_ABOVE || cl_head_next_resp_plane == i_POSITION_ON)
+            {
+                csmeuler_lmev(tail_neighborhood->hedge, head_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
+            }
+            else
+            {
+                assert(cl_head_next_resp_plane == i_POSITION_BELOW);
+                csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
             }
             
-            csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
             arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+            
+            if (csmdebug_debug_enabled() == CIERTO)
+                csmedge_print_debug_info(null_edge, CIERTO);
             
             csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             
@@ -713,6 +753,8 @@ CONSTRUCTOR(static ArrEstructura(csmedge_t) *, i_insert_nulledges_to_split_solid
     ArrEstructura(csmedge_t) *set_of_null_edges;
     unsigned long i, num_vertices;
     
+    csmdebug_begin_context("Insert null edges");
+
     num_vertices = arr_NumElemsPunteroST(set_of_on_vertices, csmvertex_t);
     
     set_of_null_edges = arr_CreaPunteroST(0, csmedge_t);
@@ -724,6 +766,8 @@ CONSTRUCTOR(static ArrEstructura(csmedge_t) *, i_insert_nulledges_to_split_solid
         vertex = arr_GetPunteroST(set_of_on_vertices, i, csmvertex_t);
         i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(vertex, A, B, C, D, set_of_null_edges);
     }
+    
+    csmdebug_end_context();
     
     return set_of_null_edges;
 }
@@ -778,6 +822,8 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
     ArrEstructura(csmhedge_t) *loose_ends;
     unsigned long i, no_null_edges;
     unsigned long no_null_edges_deleted;
+    
+    csmdebug_begin_context("****JOIN NULL EDGES\n");
     
     csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges);
     no_null_edges = arr_NumElemsPunteroST(set_of_null_edges, csmedge_t);
@@ -835,9 +881,11 @@ static void i_join_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges, ArrEs
         if (csmdebug_debug_enabled() == CIERTO)
         {
             csmsetopcom_print_debug_info_loose_ends(loose_ends);
-            csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge), CIERTO);
+            //csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge), CIERTO);
         }
     }
+    
+    csmdebug_end_context();
     
     *set_of_null_faces = set_of_null_faces_loc;
     
@@ -855,15 +903,19 @@ static void i_finish_split(
 {
     unsigned long i, no_null_faces;
     struct csmsolid_t *solid_above_loc, *solid_below_loc;
+    ArrEstructura(csmface_t) *set_of_null_faces_above;
     ArrEstructura(csmface_t) *set_of_null_faces_below;
 
     assert_no_null(solid_above);
     assert_no_null(solid_below);
+    
+    csmdebug_begin_context("********FINISH SPLIT");
 
     if (csmdebug_debug_enabled() == CIERTO)
         csmsolid_print_debug(work_solid, CIERTO);
 
-    set_of_null_faces_below = csmsetopcom_convert_inner_loops_of_null_faces_to_faces_solid_below(set_of_null_faces);
+    set_of_null_faces_above = csmsetopcom_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces);
+    set_of_null_faces_below = set_of_null_faces;
     
     csmsolid_redo_geometric_generated_data(work_solid);
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces);
@@ -884,7 +936,7 @@ static void i_finish_split(
         struct csmface_t *face_to_solid_above;
         struct csmface_t *face_to_solid_below;
         
-        face_to_solid_above = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+        face_to_solid_above = arr_GetPunteroST(set_of_null_faces_above, i, csmface_t);
         csmsetopcom_move_face_to_solid(0, face_to_solid_above, work_solid, solid_above_loc);
         
         face_to_solid_below = arr_GetPunteroST(set_of_null_faces_below, i, csmface_t);
@@ -900,11 +952,13 @@ static void i_finish_split(
         csmsolid_print_debug(solid_above_loc, CIERTO);
         csmsolid_print_debug(solid_below_loc, CIERTO);
     }
+ 
+    csmdebug_end_context();
     
     *solid_above = solid_above_loc;
     *solid_below = solid_below_loc;
     
-    arr_DestruyeEstructurasST(&set_of_null_faces_below, NULL, csmface_t);
+    arr_DestruyeEstructurasST(&set_of_null_faces_above, NULL, csmface_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -923,12 +977,28 @@ CYBOOL csmsplit_does_plane_split_solid(
     assert_no_null(solid_above);
     assert_no_null(solid_below);
     
+    csmdebug_begin_context("Split");
+    
     work_solid = csmsolid_duplicate(solid);
     csmsolid_redo_geometric_generated_data(work_solid);
     csmsolid_clear_algorithm_vertex_mask(work_solid);
     
+    csmdebug_set_viewer_results(NULL, NULL);
+    csmdebug_set_viewer_parameters(work_solid, NULL);
+    csmdebug_set_plane(A, B, C, D);
+    csmdebug_show_viewer();
+    
     set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D);
+    
+    csmdebug_print_debug_info("---->WORK SOLID BEFORE INSERTING NULL EDGES\n");
+    csmsolid_print_debug(work_solid, CIERTO);
+    csmdebug_print_debug_info("<----WORK SOLID BEFORE INSERTING NULL EDGES\n");
+
     set_of_null_edges = i_insert_nulledges_to_split_solid(A, B, C, D, set_of_on_vertices);
+
+    csmdebug_print_debug_info("---->WORK SOLID AFTER INSERTING NULL EDGES\n");
+    csmsolid_print_debug(work_solid, CIERTO);
+    csmdebug_print_debug_info("<----WORK SOLID AFTER INSERTING NULL EDGES\n");
     
     if (arr_NumElemsPunteroST(set_of_null_edges, csmedge_t) == 0)
     {
@@ -940,8 +1010,7 @@ CYBOOL csmsplit_does_plane_split_solid(
     else
     {
         ArrEstructura(csmface_t) *set_of_null_faces;
-        
-        does_plane_split_solid = CIERTO;
+        double volume_above, volume_below;
         
         i_join_null_edges(set_of_null_edges, &set_of_null_faces);
         i_finish_split(set_of_null_faces, work_solid, &solid_above_loc, &solid_below_loc);
@@ -950,6 +1019,24 @@ CYBOOL csmsplit_does_plane_split_solid(
         csmsolid_clear_algorithm_vertex_mask(solid_below_loc);
         
         assert(csmsolid_is_empty(work_solid) == CIERTO);
+        
+        csmsolid_redo_geometric_generated_data(solid_above_loc);
+        volume_above = csmsolid_volume(solid_above_loc);
+        
+        csmsolid_redo_geometric_generated_data(solid_below_loc);
+        volume_below = csmsolid_volume(solid_below_loc);
+        
+        if (volume_above > 1.e-3 && volume_below > 1.e-3)
+        {
+            does_plane_split_solid = CIERTO;
+        }
+        else
+        {
+            does_plane_split_solid = FALSO;
+            
+            csmsolid_free(&solid_above_loc);
+            csmsolid_free(&solid_below_loc);
+        }
 
         arr_DestruyeEstructurasST(&set_of_null_faces, NULL, csmface_t);
     }
@@ -960,6 +1047,8 @@ CYBOOL csmsplit_does_plane_split_solid(
     csmsolid_free(&work_solid);
     arr_DestruyeEstructurasST(&set_of_on_vertices, NULL, csmvertex_t);
     arr_DestruyeEstructurasST(&set_of_null_edges, NULL, csmedge_t);
+    
+    csmdebug_end_context();
     
     return does_plane_split_solid;
 }

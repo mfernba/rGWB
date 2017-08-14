@@ -80,3 +80,9 @@ void csmface_remove_loop(struct csmface_t *face, struct csmloop_t **loop);
 CYBOOL csmface_has_holes(const struct csmface_t *face);
 
 void csmface_revert(struct csmface_t *face);
+
+
+// Debug...
+
+void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_integro, unsigned long *num_holes_opc);
+

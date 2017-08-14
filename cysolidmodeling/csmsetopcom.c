@@ -425,6 +425,9 @@ static void i_cut_he(
         
         if (csmdebug_debug_enabled() == CIERTO)
         {
+            csmdebug_print_debug_info("NULL FACE\n");
+            csmface_print_info_debug(null_face, CIERTO, NULL);
+            
             csmdebug_print_debug_info("(CUTTING HE)  (%lu, %lu) with LKEMR\n", csmhedge_id(he1_edge), csmhedge_id(he2_edge));
             //csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CIERTO);
         }
@@ -479,7 +482,7 @@ void csmsetopcom_cut_he_setop(
 
 // ----------------------------------------------------------------------------------------------------
 
-ArrEstructura(csmface_t) *csmsetopcom_convert_inner_loops_of_null_faces_to_faces_solid_below(ArrEstructura(csmface_t) *set_of_null_faces)
+ArrEstructura(csmface_t) *csmsetopcom_convert_inner_loops_of_null_faces_to_faces(ArrEstructura(csmface_t) *set_of_null_faces)
 {
     ArrEstructura(csmface_t) *set_of_null_faces_below;
     unsigned long i, no_null_faces;
@@ -695,6 +698,55 @@ enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(
             
         default_error();
     }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmface_t *csmsetopcom_face_for_hedge_sector(struct csmhedge_t *hedge, struct csmhedge_t *hedge_next)
+{
+    struct csmface_t *common_face;
+    struct csmface_t *hedge_face, *hedge_next_face;
+    
+    hedge_face = csmopbas_face_from_hedge(hedge);
+    hedge_next_face = csmopbas_face_from_hedge(hedge_next);
+    
+    if (hedge_face == hedge_next_face)
+    {
+        common_face = hedge_face;
+    }
+    else
+    {
+        struct csmhedge_t *mate_next_hedge;
+        struct csmface_t *mate_next_hedge_face;
+        
+        mate_next_hedge = csmopbas_mate(hedge_next);
+        mate_next_hedge_face = csmopbas_face_from_hedge(mate_next_hedge);
+        
+        if (hedge_face == mate_next_hedge_face)
+        {
+            common_face = hedge_face;
+        }
+        else
+        {
+            struct csmhedge_t *mate_he;
+            struct csmface_t *mate_he_face;
+        
+            mate_he = csmopbas_mate(hedge);
+            mate_he_face = csmopbas_face_from_hedge(mate_he);
+            
+            if (mate_he_face == hedge_next_face)
+            {
+                common_face = mate_he_face;
+            }
+            else
+            {
+                assert(mate_he_face == mate_next_hedge_face);
+                common_face = mate_he_face;
+            }
+        }
+    }
+    
+    return common_face;
 }
 
 // ----------------------------------------------------------------------------------------------------

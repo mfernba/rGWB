@@ -33,3 +33,7 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
 void csmedge_vertex_coordinates(
                         const struct csmedge_t *edge,
                         double *x1, double *y1, double *z1, double *x2, double *y2, double *z2);
+
+// Debug...
+
+void csmedge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_es_integro);

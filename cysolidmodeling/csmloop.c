@@ -6,6 +6,8 @@
 #include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmnode.inl"
+#include "csmedge.inl"
+#include "csmedge.tli"
 #include "csmhedge.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
@@ -693,4 +695,91 @@ void csmloop_revert_loop_orientation(struct csmloop_t *loop)
         he_iterator = csmhedge_next(he_iterator);
     }
     while (he_iterator != loop->ledge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBOOL assert_si_no_es_integro)
+{
+    struct csmhedge_t *ledge;
+    struct csmhedge_t *iterator;
+    unsigned long num_iters;
+    
+    ledge = csmloop_ledge(loop);
+    iterator = ledge;
+    csmdebug_print_debug_info("\tLoop %4lu: Outer = %d\n", csmnode_id(CSMNODE(loop)), is_outer_loop);
+    
+    num_iters = 0;
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x, y, z;
+        struct csmedge_t *edge;
+        struct csmhedge_t *next_edge;
+        
+        assert(num_iters < 10000);
+        num_iters++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        
+        edge = csmhedge_edge(iterator);
+        
+        if (edge == NULL)
+        {
+            csmdebug_print_debug_info(
+                "\t\t(He %4lu [edge (null)], %4lu, %6.3f, %6.3f, %6.3f, %d)\n",
+                csmnode_id(CSMNODE(iterator)),
+                csmnode_id(CSMNODE(vertex)),
+                x, y, z,
+                ES_CIERTO(csmhedge_loop(iterator) == loop));
+        }
+        else
+        {
+            const char *he_position;
+            struct csmhedge_t *he1, *he2;
+            struct csmhedge_t *he_mate;
+            
+            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+            he_mate = (iterator == he1) ? he2: he1;
+            he_position = (iterator == he1) ? "HE1": "HE2";
+            
+            if (he_mate != NULL)
+            {
+                csmdebug_print_debug_info(
+                    "\t\t(%3s %4lu [edge %6lu. Mate: %4lu], %4lu, %6.3f, %6.3f, %6.3f, %d)\n",
+                    he_position,
+                    csmnode_id(CSMNODE(iterator)),
+                    csmnode_id(CSMNODE(edge)),
+                    csmnode_id(CSMNODE(he_mate)),
+                    csmnode_id(CSMNODE(vertex)),
+                    x, y, z,
+                    ES_CIERTO(csmhedge_loop(iterator) == loop));
+            }
+            else
+            {
+                csmdebug_print_debug_info(
+                    "\t\t(%3s %4lu [edge %6lu. Mate: ----], %4lu, %6.3f, %6.3f, %6.3f, %d)\n",
+                    he_position,
+                    csmnode_id(CSMNODE(iterator)),
+                    csmnode_id(CSMNODE(edge)),
+                    csmnode_id(CSMNODE(vertex)),
+                    x, y, z,
+                    ES_CIERTO(csmhedge_loop(iterator) == loop));
+            }
+        }
+        
+        if (assert_si_no_es_integro == CIERTO)
+            assert(csmhedge_loop(iterator) == loop);
+        
+        next_edge = csmhedge_next(iterator);
+        
+        if (assert_si_no_es_integro == CIERTO)
+            assert(csmhedge_prev(next_edge) == iterator);
+                    
+        iterator = next_edge;
+    }
+    while (iterator != ledge);
 }
