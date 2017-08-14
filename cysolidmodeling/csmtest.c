@@ -867,10 +867,14 @@ static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
     struct gccontorno_t *shape2d, *circular_shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    circular_shape2d = gcelem2d_contorno_circular(0.25, 32);
+    i_set_output_debug_file("inters_solidos3.txt");
+
+    
+    circular_shape2d = gcelem2d_contorno_circular(0.25, 4);
     //circular_shape2d = gcelem2d_contorno_rectangular_con_pto_inflexion(0.25, 0.25);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
+    //solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.16, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.16, 0.0, 1., 0., 1., 0., 1., 0., 0);
     solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.16, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.16, 0.01, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
@@ -1247,11 +1251,11 @@ void csmtest_test(void)
     //i_test_divide_solido_rectangular_hueco_por_plano_superior2();
 
     //i_test_union_solidos1(viewer);
-    i_test_union_solidos2(viewer);
+    //i_test_union_solidos2(viewer);
     //i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
     //i_test_interseccion_solidos1(viewer);
     
-    //i_test_interseccion_solidos2(viewer);
+    i_test_interseccion_solidos2(viewer);
     //i_test_interseccion_solidos3(viewer);
     //i_test_interseccion_solidos4(viewer);
     //i_test_interseccion_solidos5(viewer);

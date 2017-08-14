@@ -211,6 +211,19 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmedge_reverse_orientation(struct csmedge_t *edge)
+{
+    struct csmhedge_t *he_aux;
+    
+    assert_no_null(edge);
+    
+    he_aux = edge->he1;
+    edge->he1 = edge->he2;
+    edge->he2 = he_aux;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmedge_vertex_coordinates(
                         const struct csmedge_t *edge,
                         double *x1, double *y1, double *z1, double *x2, double *y2, double *z2)

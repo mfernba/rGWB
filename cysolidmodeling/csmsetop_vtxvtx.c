@@ -1158,15 +1158,10 @@ static void i_separateInteriorHedge(
     if (orient == CIERTO)
     {
         struct csmedge_t *he_prv_edge;
-        struct csmhedge_t *he1_edge_he_prv, *he2_edge_he_prv;
         
         he_prv = csmhedge_prev(he);
         he_prv_edge = csmhedge_edge(he_prv);
-        he1_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS);
-        he2_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_NEG);
-        
-        csmedge_set_edge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_NEG, he1_edge_he_prv);
-        csmedge_set_edge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS, he2_edge_he_prv);
+        csmedge_reverse_orientation(he_prv_edge);
     }
     
     null_edge2 = csmhedge_edge(csmhedge_prev(he));

@@ -471,8 +471,13 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     set_of_null_edges_A = arr_CreaPunteroST(0, csmedge_t);
     set_of_null_edges_B = arr_CreaPunteroST(0, csmedge_t);
     
+    csmdebug_print_debug_info("***vf_intersections_A [BEGIN]\n");
     csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, set_of_null_edges_A, set_of_null_edges_B);
+    csmdebug_print_debug_info("***vf_intersections_A [END]\n");
+    
+    csmdebug_print_debug_info("***vf_intersections_B [BEGIN]\n");
     csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, set_of_null_edges_B, set_of_null_edges_A);
+    csmdebug_print_debug_info("***vf_intersections_B [END]\n");
     
     csmsolid_print_debug(solid_A, CIERTO);
     

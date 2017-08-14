@@ -27,6 +27,8 @@ void csmedge_remove_hedge(struct csmedge_t *edge, struct csmhedge_t *hedge);
 
 struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t *hedge);
 
+void csmedge_reverse_orientation(struct csmedge_t *edge);
+
 
 // Geometry...
 
