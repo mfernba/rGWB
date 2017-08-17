@@ -377,24 +377,21 @@ static void i_reclassify_on_edge_vertex_neighborhood(
         }
         else if (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
         {
-            /*
-            if (a_vs_b == CSMSETOP_A_VS_B)
+             if (a_vs_b == CSMSETOP_A_VS_B)
                 new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
             else
                 new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-             */
-            new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            
+            //new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
         }
         else if (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
         {
-            /*
             if (a_vs_b == CSMSETOP_A_VS_B)
                 new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
             else
                 new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-             */
             
-            new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            //new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
         }
         else
         {
@@ -429,10 +426,12 @@ static void i_reclassify_on_edges_vertex_neighborhood(
         
         hedge_neighborhood = arr_GetPunteroST(vertex_neighborhood, i, i_neighborhood_t);
         
-        prev_idx = (num_sectors + i - 1) % num_sectors;
+        prev_idx = (i == 0) ? num_sectors - 1 : i - 1;
+        assert(prev_idx == (num_sectors + i - 1) % num_sectors);
         prev_hedge_neighborhood = arr_GetPunteroST(vertex_neighborhood, prev_idx, i_neighborhood_t);
         
-        next_idx = (i + 1) % num_sectors;
+        next_idx = (i == num_sectors - 1) ? 0: i + 1;
+        assert(next_idx == (i + 1) % num_sectors);
         next_hedge_neighborhood = arr_GetPunteroST(vertex_neighborhood, next_idx, i_neighborhood_t);
         
         i_reclassify_on_edge_vertex_neighborhood(
@@ -659,8 +658,7 @@ static void i_process_vf_inters(
         idx = start_idx;
         head_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         
-        /*
-        {
+        /*{
             struct i_neighborhood_t *aux_neighborhood;
             struct csmhedge_t *mate;
             
@@ -697,8 +695,7 @@ static void i_process_vf_inters(
             tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
             assert_no_null(tail_neighborhood);
             
-            /*
-            {
+            /*{
                 struct i_neighborhood_t *aux_neighborhood;
                 struct csmhedge_t *mate;
                 
@@ -707,8 +704,7 @@ static void i_process_vf_inters(
                 
                 mate = csmhedge_next(csmopbas_mate(aux_neighborhood->hedge));
                 assert(mate == tail_neighborhood->hedge);
-            }
-            */
+            }*/
             
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
             i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, NULL, NULL, &cl_head_resp_plane);

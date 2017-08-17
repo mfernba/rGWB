@@ -331,6 +331,57 @@ CYBOOL csmface_contains_point(
 
 // ------------------------------------------------------------------------------------------
 
+CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x, double y, double z)
+{
+    CYBOOL is_interior_to_face;
+    enum csmmath_contaiment_point_loop_t type_of_containment;
+    
+    assert_no_null(face);
+    
+    if (csmloop_is_point_inside_loop(
+                        face->flout, CIERTO,
+                        x, y, z, face->dropped_coord,
+                        face->fuzzy_epsilon,
+                        &type_of_containment, NULL, NULL) == FALSO)
+    {
+        is_interior_to_face = FALSO;
+    }
+    else if (type_of_containment != CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+    {
+        is_interior_to_face = CIERTO;
+    }
+    else
+    {
+        struct csmloop_t *loop_iterator;
+        
+        loop_iterator = face->floops;
+        is_interior_to_face = CIERTO;
+        
+        while (loop_iterator != NULL)
+        {
+            if (csmloop_is_point_inside_loop(
+                        loop_iterator, CIERTO,
+                        x, y, z, face->dropped_coord,
+                        face->fuzzy_epsilon,
+                        &type_of_containment, NULL, NULL) == CIERTO)
+            {
+                if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+                    is_interior_to_face = FALSO;
+                else
+                    is_interior_to_face = CIERTO;
+                
+                break;
+            }
+        
+            loop_iterator = csmloop_next(loop_iterator);
+        }
+    }
+    
+    return is_interior_to_face;
+}
+
+// ------------------------------------------------------------------------------------------
+
 enum csmmath_double_relation_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex)
 {
     double x, y, z;
@@ -417,46 +468,42 @@ CYBOOL csmface_exists_intersection_between_line_and_face_plane(
 
 CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_t *loop)
 {
+    register struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    CYBOOL is_outer_loop;
+    
     assert_no_null(face);
+    assert(face->flout != loop);
     
-    if (face->flout == loop)
+    iterator = csmloop_ledge(loop);
+    num_iteraciones = 0;
+    is_outer_loop = CIERTO;
+    
+    do
     {
-        return CIERTO;
-    }
-    else
-    {
-        register struct csmhedge_t *iterator;
-        unsigned long num_iteraciones;
-        CYBOOL is_outer_loop;
+        struct csmvertex_t *vertex;
+        double x, y, z;
         
-        iterator = csmloop_ledge(loop);
-        num_iteraciones = 0;
-        is_outer_loop = CIERTO;
+        assert(num_iteraciones < 100000);
+        num_iteraciones++;
         
-        do
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+
+        if (csmloop_is_point_inside_loop(
+                    face->flout, is_outer_loop,
+                    x, y, z, face->dropped_coord,
+                    face->fuzzy_epsilon,
+                    NULL, NULL, NULL) == FALSO)
         {
-            struct csmvertex_t *vertex;
-            double x, y, z;
-            
-            assert(num_iteraciones < 100000);
-            num_iteraciones++;
-            
-            vertex = csmhedge_vertex(iterator);
-            csmvertex_get_coordenadas(vertex, &x, &y, &z);
-    
-            if (csmloop_is_point_inside_loop(
-                        face->flout, is_outer_loop,
-                        x, y, z, face->dropped_coord,
-                        face->fuzzy_epsilon,
-                        NULL, NULL, NULL) == FALSO)
-            {
-                return FALSO;
-            }
-            
-        } while (iterator != csmloop_ledge(loop));
+            return FALSO;
+        }
         
-        return CIERTO;
-    }
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != csmloop_ledge(loop));
+    
+    return CIERTO;
 }
 
 // ------------------------------------------------------------------------------------------

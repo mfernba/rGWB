@@ -4,8 +4,10 @@
 #include "csmsetop.tli"
 
 #include "csmdebug.inl"
+#include "csmhedge.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
+#include "csmeuler_lmfkrh.inl"
 #include "csmeuler_lkfmrh.inl"
 #include "csmface.inl"
 #include "csmloop.inl"
@@ -217,8 +219,98 @@ static void i_join_null_edges(
 }
 
 // ----------------------------------------------------------------------------------------------------
-/*
-static void i_exchange_loops_of_null_faces_if_needed(ArrEstructura(csmface_t) *set_of_null_faces, CYBOOL is_setop_union)
+
+static struct csmloop_t *i_get_in_component_of_null_face(struct csmface_t *null_face)
+{
+    struct csmloop_t *loop1, *loop2;
+    struct csmloop_t *flout;
+
+    loop1 = csmface_floops(null_face);
+    assert_no_null(loop1);
+    
+    loop2 = csmloop_next(loop1);
+    assert_no_null(loop2);
+    assert(csmloop_next(loop2) == NULL);
+    
+    flout = csmface_flout(null_face);
+    
+    if (flout == loop1)
+    {
+        return loop2;
+    }
+    else
+    {
+        assert(flout == loop2);
+        return loop1;
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static CYBOOL i_is_in_component_of_null_face_attached_to_hole(struct csmface_t *null_face, struct csmloop_t **hole_loop_attached_to_in_component_opt)
+{
+    CYBOOL is_in_component_connected_to_hole;
+    CYBOOL initialized;
+    struct csmloop_t *in_component;
+    struct csmhedge_t *ledge, *he_iterator;
+    unsigned long no_iterations;
+    struct csmloop_t *hole_loop_attached_to_in_component_loc;
+    
+    in_component = i_get_in_component_of_null_face(null_face);
+    
+    ledge = csmloop_ledge(in_component);
+    he_iterator = csmloop_ledge(in_component);
+    no_iterations = 0;
+    
+    initialized = FALSO;
+    is_in_component_connected_to_hole = CIERTO;
+    hole_loop_attached_to_in_component_loc = NULL;
+    
+    do
+    {
+        struct csmhedge_t *hedge_iterator_mate;
+        struct csmloop_t *hedge_iterator_mate_loop;
+        struct csmface_t *hedge_iterator_mate_face;
+        CYBOOL is_hedge_mate_connected_to_hole;
+        
+        assert(no_iterations < 10000);
+        no_iterations++;
+        
+        hedge_iterator_mate = csmopbas_mate(he_iterator);
+        hedge_iterator_mate_loop = csmhedge_loop(hedge_iterator_mate);
+        hedge_iterator_mate_face = csmloop_lface(hedge_iterator_mate_loop);
+        
+        if (hedge_iterator_mate_loop != csmface_flout(hedge_iterator_mate_face))
+            is_hedge_mate_connected_to_hole = CIERTO;
+        else
+            is_hedge_mate_connected_to_hole = FALSO;
+        
+        if (initialized == FALSO)
+        {
+            is_in_component_connected_to_hole = is_hedge_mate_connected_to_hole;
+            hole_loop_attached_to_in_component_loc = hedge_iterator_mate_loop;
+        }
+        else
+        {
+            assert(is_in_component_connected_to_hole == is_hedge_mate_connected_to_hole);
+            
+            if (is_in_component_connected_to_hole == CIERTO)
+                assert(hole_loop_attached_to_in_component_loc == hedge_iterator_mate_loop);
+        }
+        
+        initialized = CIERTO;
+        he_iterator = csmhedge_next(he_iterator);
+        
+    } while (he_iterator != ledge);
+    
+    ASIGNA_OPC(hole_loop_attached_to_in_component_opt, hole_loop_attached_to_in_component_loc);
+            
+    return is_in_component_connected_to_hole;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_convert_holes_attached_to_in_component_of_null_faces_in_faces(ArrEstructura(csmface_t) *set_of_null_faces)
 {
     unsigned long i, num_null_faces;
     
@@ -227,66 +319,14 @@ static void i_exchange_loops_of_null_faces_if_needed(ArrEstructura(csmface_t) *s
     for (i = 0; i < num_null_faces; i++)
     {
         struct csmface_t *null_face;
-        struct csmloop_t *loop1, *loop2;
+        struct csmloop_t *hole_loop_attached_to_in_component;
         
         null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
-        
-        loop1 = csmface_floops(null_face);
-        assert_no_null(loop1);
-        
-        loop2 = csmloop_next(loop1);
-        assert_no_null(loop2);
-        assert(csmloop_next(loop2) == NULL);
-        
-        if (csmloop_is_bounded_by_vertex_with_mask_attrib(loop1, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == CIERTO)
-        {
-            assert(csmloop_is_bounded_by_vertex_with_mask_attrib(loop2, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == CIERTO);
-            
-            if (is_setop_union == CIERTO)
-            {
-            }
-            else
-            {
-                struct csmloop_t *old_flout, *new_flout;
-                
-                old_flout = csmface_flout(null_face);
-                new_flout = (old_flout == loop1) ? loop2: loop1;
-            
-                csmnode_set_ptr_next(CSMNODE(loop1), NULL);
-                csmnode_set_ptr_prev(CSMNODE(loop1), NULL);
-            
-                csmnode_set_ptr_next(CSMNODE(loop2), NULL);
-                csmnode_set_ptr_prev(CSMNODE(loop2), NULL);
 
-                csmnode_set_ptr_next(CSMNODE(loop2), CSMNODE(loop1));
-                csmnode_set_ptr_prev(CSMNODE(loop1), CSMNODE(loop2));
-            
-                csmface_set_floops(null_face, loop2);
-                csmface_set_flout(null_face, new_flout);
-            
-                {
-                    struct csmhedge_t *ledge_old_flout;
-                    struct csmface_t *other_face;
-                    struct csmloop_t *other_face_floops;
-                
-                    ledge_old_flout = csmloop_ledge(old_flout);
-                    other_face = csmopbas_face_from_hedge(csmopbas_mate(ledge_old_flout));
-                
-                    other_face_floops = csmface_floops(other_face);
-                    assert(csmloop_next(other_face_floops) == NULL);
-                
-                    csmface_add_loop_while_removing_from_old(null_face, other_face_floops);
-                    csmface_add_loop_while_removing_from_old(other_face, old_flout);
-                }
-            }
-        }
-        else
-        {
-            assert(csmloop_is_bounded_by_vertex_with_mask_attrib(loop2, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS) == FALSO);
-        }
+        if (i_is_in_component_of_null_face_attached_to_hole(null_face, &hole_loop_attached_to_in_component) == CIERTO)
+            csmeuler_lmfkrh(hole_loop_attached_to_in_component, NULL);
     }
 }
-*/
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -327,25 +367,12 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));
     assert(no_null_faces > 0);
     
-    /*
     csmsolid_print_debug(solid_B, FALSO);
-    switch (set_operation)
-    {
-        case CSMSETOP_OPERATION_UNION:
-            
-            i_exchange_loops_of_null_faces_if_needed(set_of_null_faces_B, CIERTO);
-            break;
-            
-        case CSMSETOP_OPERATION_DIFFERENCE:
-        case CSMSETOP_OPERATION_INTERSECTION:
 
-            i_exchange_loops_of_null_faces_if_needed(set_of_null_faces_B, FALSO);
-            break;
-            
-        default_error();
-    }
+    i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_A);
+    i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_B);
+    
     csmsolid_print_debug(solid_B, FALSO);
-    */
     
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_A);
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_B);

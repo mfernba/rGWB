@@ -84,7 +84,9 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
 void csmsolid_set_name(struct csmsolid_t *solid, const char *name)
 {
     assert_no_null(solid);
-    assert(solid->name == NULL);
+    
+    if (solid->name != NULL)
+        cypestr_destruye(&solid->name);
     
     solid->name = cad_copia_cadena(name);
 }

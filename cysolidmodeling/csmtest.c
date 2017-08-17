@@ -751,6 +751,9 @@ static void i_test_interseccion_solidos2(struct csmviewer_t *viewer)
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
     csmsolid_print_debug(solid_res, CIERTO);
 
+    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+    csmsolid_print_debug(solid_res, CIERTO);
+    
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
@@ -878,9 +881,16 @@ static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.16, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.16, 0.01, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
+    csmdebug_print_debug_info("******* Solid 1 intersect solid 2 [begin]");
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
     csmsolid_print_debug(solid_res, CIERTO);
+    csmdebug_print_debug_info("******* Solid 1 intersect solid 2 [end]");
 
+    csmdebug_print_debug_info("******* Solid 2 intersect solid 1 [begin]");
+    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+    csmsolid_print_debug(solid_res, CIERTO);
+    csmdebug_print_debug_info("******* Solid 2 intersect solid 2 [end]");
+    
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
@@ -1059,11 +1069,24 @@ static void i_test_multiple_solidos2(struct csmviewer_t *viewer)
                         cshape2d, 0.5, -0.25,   0., 0., 0., 1., 1., 0., 0.,
                         1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
-    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
-    solid_res = csmsetop_union_A_and_B(solid2, solid1);
+    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+    csmsolid_print_debug(solid_res, CIERTO);
+    
+    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+    csmsolid_print_debug(solid_res, CIERTO);
+    
+    solid_res = csmsetop_union_A_and_B(solid1, solid2);
     csmsolid_print_debug(solid_res, CIERTO);
 
+    solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+    csmsolid_print_debug(solid_res, CIERTO);
+    
+    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+    csmsolid_print_debug(solid_res, CIERTO);
+    
+    solid_res = csmsetop_union_A_and_B(solid2, solid1);
+    csmsolid_print_debug(solid_res, CIERTO);
+    
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
@@ -1145,13 +1168,27 @@ static void i_test_cilindro1(struct csmviewer_t *viewer)
                         cshape2d, 1., -2.,   0.5, 0., 0., 1., 1., 0., 0.,
                         1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    {
+        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+    }
 
-    csmviewer_set_results(viewer, solid_res, NULL);
-    //csmviewer_show(viewer);
+    {
+        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+    }
     
     csmsolid_print_debug(solid1, CIERTO);
     csmsolid_print_debug(solid2, CIERTO);
@@ -1170,6 +1207,8 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
     struct gccontorno_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
+    i_set_output_debug_file("inters_cilindro2.txt");
+
     cshape2d = gcelem2d_contorno_circular(0.40, 16);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
@@ -1255,7 +1294,7 @@ void csmtest_test(void)
     //i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
     //i_test_interseccion_solidos1(viewer);
     
-    i_test_interseccion_solidos2(viewer);
+    //i_test_interseccion_solidos2(viewer);
     //i_test_interseccion_solidos3(viewer);
     //i_test_interseccion_solidos4(viewer);
     //i_test_interseccion_solidos5(viewer);
@@ -1265,12 +1304,9 @@ void csmtest_test(void)
     //i_test_multiple_solidos1(viewer);
     //i_test_multiple_solidos2(viewer);
     
-    //i_test_multiple_solidos2(viewer);
     //i_test_multiple_solidos3(viewer);
 
-    //i_test_cilindro1(viewer); // <-- Revisar diferencia y unión,
-                              // revisar clasificación de on-edges en vtxfacc, ver cómo usar la ecuación del
-                              // plano.
+    i_test_cilindro1(viewer); // <-- Revisar unión, laringmv
     
     //i_test_cilindro2(viewer);
     

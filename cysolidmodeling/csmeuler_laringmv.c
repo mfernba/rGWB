@@ -11,6 +11,7 @@
 #include "csmloop.inl"
 #include "csmface.inl"
 #include "csmhedge.inl"
+#include "csmvertex.inl"
 
 #include "cyassert.h"
 
@@ -33,9 +34,20 @@ void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
         
         next_loop = csmloop_next(iterator_face1);
         
-        if (csmface_is_loop_contained_in_face(face1, iterator_face1) == FALSO)
-            csmface_add_loop_while_removing_from_old(face2, iterator_face1);
+        if (iterator_face1 != csmface_flout(face1))
+        {
+            struct csmhedge_t *ledge;
+            struct csmvertex_t *vtx;
+            double x, y, z;
             
+            ledge = csmloop_ledge(iterator_face1);
+            vtx = csmhedge_vertex(ledge);
+            csmvertex_get_coordenadas(vtx, &x, &y, &z);
+            
+            if (csmface_is_point_interior_to_face(face1, x, y, z) == FALSO)
+                csmface_add_loop_while_removing_from_old(face2, iterator_face1);
+        }
+        
         iterator_face1 = next_loop;
         
     } while (iterator_face1 != NULL);

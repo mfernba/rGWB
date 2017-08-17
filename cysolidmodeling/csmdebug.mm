@@ -160,9 +160,9 @@ void csmdebug_print_debug_info(const char *format, ...)
 {
     if (i_DEBUG == 1)
     {
-        bsassert(i_NO_STACKED_CONTEXTS > 0);
+        if (i_NO_STACKED_CONTEXTS > 0)
+            i_print_tab_level(i_NO_STACKED_CONTEXTS);
         
-        i_print_tab_level(i_NO_STACKED_CONTEXTS);
         i_print_format(format);
         fflush(stdout);
         
