@@ -4,6 +4,7 @@
 #include "csmsetop.tli"
 
 #include "csmdebug.inl"
+#include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -310,6 +311,68 @@ static CYBOOL i_is_in_component_of_null_face_attached_to_hole(struct csmface_t *
 
 // ----------------------------------------------------------------------------------------------------
 
+static CYBOOL i_is_out_component_of_null_face_attached_to_itself(struct csmface_t *null_face, struct csmloop_t **loop_attached_to_out_component_opt)
+{
+    CYBOOL is_out_component_connected_to_itself;
+    struct csmloop_t *out_component;
+    struct csmhedge_t *ledge, *ledge_mate, *iterator_mate;
+    unsigned long no_iterations;
+    struct csmloop_t *loop_attached_to_out_component_loc;
+    
+    out_component = csmface_flout(null_face);
+    
+    is_out_component_connected_to_itself = CIERTO;
+    ledge = csmloop_ledge(out_component);
+    ledge_mate = csmopbas_mate(ledge);
+    iterator_mate = ledge_mate;
+    no_iterations = 0;
+    
+    do
+    {
+        struct csmhedge_t *iterator_mate_mate;
+        struct csmloop_t *iterator_mate_mate_loop;
+        
+        assert(no_iterations < 10000);
+        no_iterations++;
+        
+        iterator_mate_mate = csmopbas_mate(iterator_mate);
+        iterator_mate_mate_loop = csmhedge_loop(iterator_mate_mate);
+        
+        if (iterator_mate_mate_loop != out_component)
+        {
+            is_out_component_connected_to_itself = FALSO;
+            break;
+        }
+        
+        iterator_mate = csmhedge_next(iterator_mate);
+    }
+    while (iterator_mate != ledge_mate);
+    
+    if (is_out_component_connected_to_itself == CIERTO)
+    {
+        struct csmface_t *loop_face;
+        
+        loop_face = csmopbas_face_from_hedge(ledge_mate);
+        loop_attached_to_out_component_loc = csmhedge_loop(ledge_mate);
+        
+        if (csmface_flout(loop_face) != loop_attached_to_out_component_loc)
+        {
+            is_out_component_connected_to_itself = FALSO;
+            loop_attached_to_out_component_loc = NULL;
+        }
+    }
+    else
+    {
+        loop_attached_to_out_component_loc = NULL;
+    }
+    
+    ASIGNA_OPC(loop_attached_to_out_component_opt, loop_attached_to_out_component_loc);
+            
+    return is_out_component_connected_to_itself;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_convert_holes_attached_to_in_component_of_null_faces_in_faces(ArrEstructura(csmface_t) *set_of_null_faces)
 {
     unsigned long i, num_null_faces;
@@ -325,6 +388,75 @@ static void i_convert_holes_attached_to_in_component_of_null_faces_in_faces(ArrE
 
         if (i_is_in_component_of_null_face_attached_to_hole(null_face, &hole_loop_attached_to_in_component) == CIERTO)
             csmeuler_lmfkrh(hole_loop_attached_to_in_component, NULL);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static bool i_is_same_face_ptr(const struct csmface_t *face1, const struct csmface_t *face2)
+{
+    if (face1 == face2)
+        return CIERTO;
+    else
+        return FALSO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(
+                        struct csmsolid_t *solid,
+                        ArrEstructura(csmface_t) *set_of_null_faces)
+{
+    unsigned long i, num_null_faces;
+    
+    num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    
+    for (i = 0; i < num_null_faces; i++)
+    {
+        struct csmface_t *null_face;
+        struct csmloop_t *loop_attached_to_out_component;
+        
+        null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+
+        if (i_is_out_component_of_null_face_attached_to_itself(null_face, &loop_attached_to_out_component) == CIERTO)
+        {
+            struct csmhashtb_iterator(csmface_t) *face_iterator;
+            struct csmface_t *loop_attached_to_out_component_face;
+            CYBOOL has_been_converted_in_hole;
+            
+            assert(csmloop_next(loop_attached_to_out_component) == NULL);
+            assert(csmloop_prev(loop_attached_to_out_component) == NULL);
+            
+            face_iterator = csmsolid_face_iterator(solid);
+            
+            loop_attached_to_out_component_face = csmloop_lface(loop_attached_to_out_component);
+            csmface_redo_geometric_generated_data(loop_attached_to_out_component_face);
+            
+            has_been_converted_in_hole = FALSO;
+            
+            while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO && has_been_converted_in_hole == FALSO)
+            {
+                struct csmface_t *face;
+                
+                csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+                
+                if (face != loop_attached_to_out_component_face
+                        && arr_ExisteEstructuraST(set_of_null_faces, csmface_t, face, struct csmface_t, i_is_same_face_ptr, NULL) == FALSO)
+                {
+                    csmface_redo_geometric_generated_data(face);
+                    
+                    if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face) == CIERTO
+                            && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component) == CIERTO)
+                    {
+                        csmeuler_lkfmrh(face, &loop_attached_to_out_component_face);
+                        has_been_converted_in_hole = CIERTO;
+                    }
+                }
+            }
+            
+            
+            csmhashtb_free_iterator(&face_iterator, csmface_t);
+        }
     }
 }
 
@@ -370,9 +502,14 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     csmsolid_print_debug(solid_B, FALSO);
 
     i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_A);
+    i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_A, set_of_null_faces_A);
+    
     i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_B);
+    i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_B, set_of_null_faces_B);
     
     csmsolid_print_debug(solid_B, FALSO);
+
+    //csmdebug_show_viewer();
     
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_A);
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_B);

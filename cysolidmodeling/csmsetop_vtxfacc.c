@@ -649,6 +649,7 @@ static void i_process_vf_inters(
         unsigned long num_sectors;
         unsigned long idx;
         struct i_neighborhood_t *head_neighborhood;
+        //struct i_neighborhood_t fake_head_neighborhood;
         unsigned long num_iters;
         CYBOOL process_next_sequence;
 
@@ -666,7 +667,14 @@ static void i_process_vf_inters(
             assert_no_null(aux_neighborhood);
             
             mate = csmhedge_next(csmopbas_mate(aux_neighborhood->hedge));
-            assert(mate == head_neighborhood->hedge);
+            
+            if (mate != head_neighborhood->hedge)
+            {
+                fake_head_neighborhood.hedge = mate;
+                fake_head_neighborhood.position = head_neighborhood->position;
+                
+                head_neighborhood = &fake_head_neighborhood;
+            }
         }*/
         
         num_iters = 0;
@@ -675,6 +683,7 @@ static void i_process_vf_inters(
         while (process_next_sequence == CIERTO)
         {
             struct i_neighborhood_t *tail_neighborhood;
+            //struct i_neighborhood_t fake_tail_neighborhood;
             double x_split, y_split, z_split;
             struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
@@ -703,7 +712,13 @@ static void i_process_vf_inters(
                 assert_no_null(aux_neighborhood);
                 
                 mate = csmhedge_next(csmopbas_mate(aux_neighborhood->hedge));
-                assert(mate == tail_neighborhood->hedge);
+                if (mate == tail_neighborhood->hedge)
+                {
+                    fake_tail_neighborhood.hedge = mate;
+                    fake_tail_neighborhood.position = tail_neighborhood->position;
+                    
+                    tail_neighborhood = &fake_tail_neighborhood;
+                }
             }*/
             
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);

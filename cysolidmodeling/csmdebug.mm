@@ -28,8 +28,6 @@ extern "C"
 #define i_MAX_NUM_CONTEXTS 100
 #define i_MAX_LENGTH_CONTEXT_NAME 256
 
-static int i_DEBUG = 1;
-
 static char i_CONTEXT_STACK[i_MAX_NUM_CONTEXTS][i_MAX_LENGTH_CONTEXT_NAME];
 static unsigned long i_NO_STACKED_CONTEXTS = 0;
 static int g_INITIALIZED = 0;
@@ -57,13 +55,16 @@ static i_FPtr_show_viewer g_func_show_viewer = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
+static int i_DEBUG_SCREEN = 0;
+static int i_DEBUG_VISUAL = 1;
+static int i_DEBUG_FILE = 0;
 static FILE *g_output_file = NULL;
 
 // --------------------------------------------------------------------------------
 
 CYBOOL csmdebug_debug_enabled(void)
 {
-    return ES_CIERTO(i_DEBUG == 1);
+    return ES_CIERTO(i_DEBUG_SCREEN == 1 || g_output_file != NULL);
 }
 
 // --------------------------------------------------------------------------------
@@ -99,7 +100,7 @@ static void i_init(void)
         buffer[sizeof(buffer) - 1] = '\0';\
         va_end(argptr);\
         \
-        fprintf(stdout, "%s", buffer);\
+        if (i_DEBUG_SCREEN == CIERTO) fprintf(stdout, "%s", buffer);\
         if (g_output_file != NULL) fprintf(g_output_file, "%s", buffer);\
     }\
 )
@@ -125,7 +126,7 @@ static void i_print_tab_level(unsigned long no_tabs)
 
 void csmdebug_begin_context(const char *context)
 {
-    if (i_DEBUG == 1)
+    if (csmdebug_debug_enabled() == CIERTO)
     {
         bsassert(i_NO_STACKED_CONTEXTS < i_MAX_NUM_CONTEXTS);
     
@@ -144,7 +145,7 @@ void csmdebug_begin_context(const char *context)
 
 void csmdebug_end_context(void)
 {
-    if (i_DEBUG == 1)
+    if (csmdebug_debug_enabled() == CIERTO)
     {
         bsassert(i_NO_STACKED_CONTEXTS > 0);
         csmdebug_print_debug_info("END CONTEXT\n", NULL);
@@ -158,7 +159,7 @@ void csmdebug_end_context(void)
 
 void csmdebug_print_debug_info(const char *format, ...)
 {
-    if (i_DEBUG == 1)
+    if (csmdebug_debug_enabled() == CIERTO)
     {
         if (i_NO_STACKED_CONTEXTS > 0)
             i_print_tab_level(i_NO_STACKED_CONTEXTS);
@@ -175,8 +176,11 @@ void csmdebug_print_debug_info(const char *format, ...)
 
 void csmdebug_set_ouput_file(const char *file_path)
 {
-    g_output_file = fopen(file_path, "wt");
-    bsassert_not_null(g_output_file);
+    if (i_DEBUG_FILE == 1)
+    {
+        g_output_file = fopen(file_path, "wt");
+        bsassert_not_null(g_output_file);
+    }
 }
 
 // --------------------------------------------------------------------------------
@@ -226,7 +230,7 @@ void csmdebug_set_viewer_results(struct csmsolid_t *solid1, struct csmsolid_t *s
 
 void csmdebug_show_viewer(void)
 {
-    if (g_func_show_viewer != NULL)
+    if (i_DEBUG_VISUAL == CIERTO && g_func_show_viewer != NULL)
     {
         bsassert(g_Viewer != NULL);
         g_func_show_viewer(g_Viewer);
@@ -247,7 +251,7 @@ void csmdebug_append_debug_point(double x, double y, double z, char **descriptio
 {
     bsassert_not_null(description);
     
-    if (i_DEBUG == 1)
+    if (i_DEBUG_VISUAL == 1)
     {
         bsassert(g_no_debug_points < i_MAX_NUM_POINTS);
         

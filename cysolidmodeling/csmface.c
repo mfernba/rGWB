@@ -556,6 +556,47 @@ CYBOOL csmface_is_coplanar_to_plane(
 
 // ------------------------------------------------------------------------------------------
 
+CYBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2)
+{
+    double Xo1, Yo1, Zo1, Ux1, Uy1, Uz1, Vx1, Vy1, Vz1;
+    double Xo2, Yo2, Zo2, Ux2, Uy2, Uz2, Vx2, Vy2, Vz2;
+    double d1, d2;
+    
+    assert_no_null(face1);
+    assert_no_null(face2);
+    
+    csmmath_plane_axis_from_implicit_plane_equation(
+						face1->A, face1->B, face1->C, face1->D,
+                        &Xo1, &Yo1, &Zo1,
+                        &Ux1, &Uy1, &Uz1, &Vx1, &Vy1, &Vz1);
+    
+    csmmath_plane_axis_from_implicit_plane_equation(
+						face2->A, face2->B, face2->C, face2->D,
+                        &Xo2, &Yo2, &Zo2,
+                        &Ux2, &Uy2, &Uz2, &Vx2, &Vy2, &Vz2);
+    
+    d1 = csmmath_signed_distance_point_to_plane(Xo1, Yo1, Zo1, face2->A, face2->B, face2->C, face2->D);
+    d2 = csmmath_signed_distance_point_to_plane(Xo2, Yo2, Zo2, face1->A, face1->B, face1->C, face1->D);
+    
+    if (fabs(d1) > face2->fuzzy_epsilon || fabs(d2) > face1->fuzzy_epsilon)
+    {
+        return FALSO;
+    }
+    else
+    {
+        double dot;
+        
+        dot = csmmath_dot_product3D(face1->A, face1->B, face1->C, face2->A, face2->B, face2->C);
+        
+        if (fabs(1. - fabs(dot)) > 1.e-5)
+            return FALSO;
+        else
+            return CIERTO;
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 CYBOOL csmface_is_oriented_in_direction(const struct csmface_t *face, double Wx, double Wy, double Wz)
 {
     double dot_product;

@@ -780,30 +780,33 @@ static void i_print_info_debug_faces(
 
 void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro)
 {
-    unsigned long num_faces, num_vertexs, num_edges, num_holes;
-    
-    assert_no_null(solido);
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        unsigned long num_faces, num_vertexs, num_edges, num_holes;
+        
+        assert_no_null(solido);
 
-    csmdebug_begin_context("SOLID DESCRIPTION");
-    
-    if (solido->name != NULL)
-        csmdebug_print_debug_info("Solid Address: %s (%p)\n", solido->name, solido);
-    else
-        csmdebug_print_debug_info("Solid Address: %p\n", solido);
-    
-    csmdebug_print_debug_info("Face table\n");
-    i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
-    csmdebug_print_debug_info("\n");
-    
-    csmdebug_print_debug_info("Edge table\n");
-    i_print_debug_info_edges(solido->sedges, assert_si_no_es_integro, &num_edges);
-    csmdebug_print_debug_info("\n");
-    
-    csmdebug_print_debug_info("Vertex table\n");
-    i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, &num_vertexs);
-    csmdebug_print_debug_info("\n");
-    
-    csmdebug_end_context();
+        csmdebug_begin_context("SOLID DESCRIPTION");
+        
+        if (solido->name != NULL)
+            csmdebug_print_debug_info("Solid Address: %s (%p)\n", solido->name, solido);
+        else
+            csmdebug_print_debug_info("Solid Address: %p\n", solido);
+        
+        csmdebug_print_debug_info("Face table\n");
+        i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
+        csmdebug_print_debug_info("\n");
+        
+        csmdebug_print_debug_info("Edge table\n");
+        i_print_debug_info_edges(solido->sedges, assert_si_no_es_integro, &num_edges);
+        csmdebug_print_debug_info("\n");
+        
+        csmdebug_print_debug_info("Vertex table\n");
+        i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, &num_vertexs);
+        csmdebug_print_debug_info("\n");
+        
+        csmdebug_end_context();
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
