@@ -870,35 +870,58 @@ void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_int
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmface_draw_solid(struct csmface_t *face, struct bsgraphics2_t *graphics)
+#include <basicGraphics/bsgraphics2.h>
+
+void csmface_draw_solid(
+                    struct csmface_t *face,
+                    CYBOOL draw_solid_face,
+                    CYBOOL draw_face_normal,
+                    const struct bsmaterial_t *face_material,
+                    const struct bsmaterial_t *normal_material,
+                    struct bsgraphics2_t *graphics)
 {
-    double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
-    struct csmloop_t *loop_iterator;
-    struct gccontorno_t *shape;
-    
     assert_no_null(face);
     
-    csmmath_plane_axis_from_implicit_plane_equation(
+    if (draw_solid_face == CIERTO)
+    {
+        double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
+        struct csmloop_t *loop_iterator;
+        struct gccontorno_t *shape;
+    
+        csmmath_plane_axis_from_implicit_plane_equation(
 						face->A, face->B, face->C, face->D,
                         &Xo, &Yo, &Zo,
                         &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
     
-    loop_iterator = csmface_floops(face);
-    shape = gccontorno_crea_vacio();
-    
-    while (loop_iterator != NULL)
-    {
-        csmloop_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, shape);
-        loop_iterator = csmloop_next(loop_iterator);
+        loop_iterator = csmface_floops(face);
+        shape = gccontorno_crea_vacio();
+        
+        while (loop_iterator != NULL)
+        {
+            csmloop_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, shape);
+            loop_iterator = csmloop_next(loop_iterator);
+        }
+        
+        bsgraphics2_escr_color(graphics, face_material);
+        gccontorno_dibuja_3d_ex(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, FALSO, graphics);
+        
+        gccontorno_destruye(&shape);
     }
+
+    if (draw_face_normal == CIERTO)
+    {
+        double x_geometric_center, y_geometric_center, z_geometric_center;
+        double disp;
+        
+        bsgraphics2_escr_color(graphics, normal_material);
+        csmloop_geometric_center_3d(face->flout, &x_geometric_center, &y_geometric_center, &z_geometric_center);
     
-    gccontorno_dibuja_3d_ex(
-                        shape,
-                        Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz,
-                        FALSO,
-                        graphics);
-    
-    gccontorno_destruye(&shape);
+        disp = 0.1;
+        bsgraphics2_escr_linea3D(
+                        graphics,
+                        x_geometric_center, y_geometric_center, z_geometric_center,
+                        x_geometric_center + disp * face->A, y_geometric_center + disp * face->B, z_geometric_center + disp * face->C);
+    }
 }
 
 

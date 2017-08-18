@@ -908,7 +908,13 @@ void csmsolid_draw_debug_info(struct csmsolid_t *solido, CYBOOL draw_edge_info, 
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_solid_faces(struct csmhashtb(csmface_t) *sfaces, struct bsgraphics2_t *graphics)
+static void i_draw_solid_faces(
+                        struct csmhashtb(csmface_t) *sfaces,
+                        CYBOOL draw_solid_face,
+                        CYBOOL draw_face_normal,
+                        const struct bsmaterial_t *face_material,
+                        const struct bsmaterial_t *normal_material,
+                        struct bsgraphics2_t *graphics)
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
     
@@ -919,7 +925,7 @@ static void i_draw_solid_faces(struct csmhashtb(csmface_t) *sfaces, struct bsgra
         struct csmface_t *face;
         
         csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
-        csmface_draw_solid(face, graphics);
+        csmface_draw_solid(face, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
@@ -980,16 +986,20 @@ static void i_draw_border_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgr
 
 void csmsolid_draw(
                 struct csmsolid_t *solido,
-                struct bsmaterial_t *border_edges_color,
+                CYBOOL draw_solid_face,
+                CYBOOL draw_face_normal,
+                const struct bsmaterial_t *face_material,
+                const struct bsmaterial_t *normal_material,
+                const struct bsmaterial_t *border_edges_material,
                 struct bsgraphics2_t *graphics)
 {
     assert_no_null(solido);
     
     csmsolid_redo_geometric_generated_data(solido);
     
-    i_draw_solid_faces(solido->sfaces, graphics);
+    i_draw_solid_faces(solido->sfaces, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
     
-    bsgraphics2_escr_color(graphics, border_edges_color);
+    bsgraphics2_escr_color(graphics, border_edges_material);
     i_draw_border_edges(solido->sedges, graphics);
 }
 

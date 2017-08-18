@@ -64,6 +64,7 @@ void csmloop_append_loop_to_shape(
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         struct gccontorno_t *shape);
 
+void csmloop_geometric_center_3d(struct csmloop_t *loop, double *x, double *y, double *z);
 
 
 

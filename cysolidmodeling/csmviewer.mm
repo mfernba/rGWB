@@ -92,22 +92,27 @@ static void i_draw_solid_with_material(
     
     if (solid != NULL)
     {
-        bsgraphics2_escr_color(graphics, *material);
-        bsmaterial_destruye(material);
-        
         if (draw_debug_info == CIERTO)
         {
+            bsgraphics2_escr_color(graphics, *material);
             csmsolid_draw_debug_info(solid, draw_edge_info, graphics);
         }
         else
         {
+            CYBOOL draw_solid_face;
+            CYBOOL draw_face_normal;
             struct bsmaterial_t *border_edges_color;
             
+            draw_solid_face = CIERTO;
+            draw_face_normal = FALSO;
             border_edges_color = bsmaterial_crea_rgb(0., 0., 0.);
-            csmsolid_draw(solid, border_edges_color, graphics);
+            
+            csmsolid_draw(solid, draw_solid_face, draw_face_normal, *material, border_edges_color, border_edges_color, graphics);
             
             bsmaterial_destruye(&border_edges_color);
         }
+        
+        bsmaterial_destruye(material);
     }
 }
 

@@ -448,7 +448,9 @@ static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_
                     if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face) == CIERTO
                             && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component) == CIERTO)
                     {
+                        csmloop_revert_loop_orientation(loop_attached_to_out_component);
                         csmeuler_lkfmrh(face, &loop_attached_to_out_component_face);
+                        
                         has_been_converted_in_hole = CIERTO;
                     }
                 }
@@ -559,6 +561,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     csmsolid_print_debug(solid_B, FALSO);
 
     result = csmsolid_crea_vacio(0);
+    csmsolid_set_name(result, "Result");
     
     for (i = 0; i < half_no_null_faces; i++)
     {
@@ -587,8 +590,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         csmloopglue_merge_face_loops(face_from_solid_A);
     }
     
+    csmdebug_clear_debug_points();
+    csmsolid_print_debug(result, CIERTO);
     csmdebug_set_viewer_results(result, NULL);
-    //csmsolid_print_debug(result, CIERTO);
     csmdebug_show_viewer();
     
     return result;
@@ -653,6 +657,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     if (no_null_edges == 0)
     {
         result = csmsolid_crea_vacio(0);
+        
+        csmdebug_clear_debug_points();
+        csmdebug_set_viewer_results(result, NULL);
     }
     else
     {
@@ -665,11 +672,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
                         set_operation,
                         solid_A, set_of_null_faces_A,
                         solid_B, set_of_null_faces_B);
-        
-        csmsolid_set_name(result, "Result");
     }
     
-    csmdebug_set_viewer_results(result, NULL);
     csmdebug_end_context();
     
     arr_DestruyeEstructurasST(&vv_intersections, csmsetop_vtxvtx_free_inters, csmsetop_vtxvtx_inters_t);

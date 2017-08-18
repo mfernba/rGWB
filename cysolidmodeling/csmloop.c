@@ -834,8 +834,54 @@ void csmloop_append_loop_to_shape(
     gccontorno_append_array_puntos(shape, &points);
 }
 
+// ----------------------------------------------------------------------------------------------------
 
-
+void csmloop_geometric_center_3d(struct csmloop_t *loop, double *x, double *y, double *z)
+{
+    struct csmhedge_t *iterator;
+    unsigned long no_iters;
+    unsigned long no_vertex;
+    
+    assert_no_null(loop);
+    assert_no_null(x);
+    assert_no_null(y);
+    assert_no_null(z);
+    
+    *x = 0.;
+    *y = 0.;
+    *z = 0.;
+    no_vertex = 0;
+    
+    iterator = loop->ledge;
+    no_iters = 0;
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x_3d, y_3d, z_3d;
+        
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
+        
+        *x += x_3d;
+        *y += y_3d;
+        *z += z_3d;
+        
+        no_vertex++;
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != loop->ledge);
+    
+    assert(no_vertex > 0);
+    
+    *x /= no_vertex;
+    *y /= no_vertex;
+    *z /= no_vertex;
+}
 
 
 

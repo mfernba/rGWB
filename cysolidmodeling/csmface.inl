@@ -90,4 +90,10 @@ void csmface_revert(struct csmface_t *face);
 
 void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_integro, unsigned long *num_holes_opc);
 
-void csmface_draw_solid(struct csmface_t *face, struct bsgraphics2_t *graphics);
+void csmface_draw_solid(
+                    struct csmface_t *face,
+                    CYBOOL draw_solid_face,
+                    CYBOOL draw_face_normal,
+                    const struct bsmaterial_t *face_material,
+                    const struct bsmaterial_t *normal_material,
+                    struct bsgraphics2_t *graphics);

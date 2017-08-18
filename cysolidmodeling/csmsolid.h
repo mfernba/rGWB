@@ -38,7 +38,11 @@ DLL_CYSOLIDMODELING void csmsolid_draw_debug_info(struct csmsolid_t *solido, CYB
 
 DLL_CYSOLIDMODELING void csmsolid_draw(
                             struct csmsolid_t *solido,
-                            struct bsmaterial_t *border_edges_color,
+                            CYBOOL draw_solid_face,
+                            CYBOOL draw_face_normal,
+                            const struct bsmaterial_t *face_material,
+                            const struct bsmaterial_t *normal_material,
+                            const struct bsmaterial_t *border_edges_material,
                             struct bsgraphics2_t *graphics);
     
 #ifdef __cplusplus
