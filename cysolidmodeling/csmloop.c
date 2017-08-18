@@ -3,6 +3,7 @@
 #include "csmloop.inl"
 
 #include "csmbbox.inl"
+#include "csmgeom.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmnode.inl"
@@ -12,6 +13,8 @@
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 
+#include "a_pto2d.h"
+#include "cont2d.h"
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
@@ -783,3 +786,58 @@ void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBO
     }
     while (iterator != ledge);
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmloop_append_loop_to_shape(
+                        struct csmloop_t *loop,
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        struct gccontorno_t *shape)
+{
+    struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    ArrPunto2D *points;
+    
+    assert_no_null(loop);
+    
+    iterator = loop->ledge;
+    num_iteraciones = 0;
+    
+    points = arr_CreaPunto2D(0);
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x_3d, y_3d, z_3d;
+        double x_2d, y_2d;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
+        
+        csmgeom_project_coords_3d_to_2d(
+                        Xo, Yo, Zo,
+                        Ux, Uy, Uz, Vx, Vy, Vz,
+                        x_3d, y_3d, z_3d,
+                        &x_2d, &y_2d);
+        
+        arr_AppendPunto2D(points, x_2d, y_2d);
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != loop->ledge);
+    
+    arr_InvertirPunto2D(points);
+    gccontorno_append_array_puntos(shape, &points);
+}
+
+
+
+
+
+
+
+

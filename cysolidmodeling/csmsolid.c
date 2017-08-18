@@ -897,13 +897,100 @@ static void i_draw_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, s
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_draw(struct csmsolid_t *solido, CYBOOL draw_edge_info, struct bsgraphics2_t *graphics)
+void csmsolid_draw_debug_info(struct csmsolid_t *solido, CYBOOL draw_edge_info, struct bsgraphics2_t *graphics)
 {
     assert_no_null(solido);
     
     csmsolid_redo_geometric_generated_data(solido);
     i_draw_debug_info_vertexs(solido->svertexs, graphics);
     i_draw_debug_info_edges(solido->sedges, draw_edge_info, graphics);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_draw_solid_faces(struct csmhashtb(csmface_t) *sfaces, struct bsgraphics2_t *graphics)
+{
+    struct csmhashtb_iterator(csmface_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        csmface_draw_solid(face, graphics);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
+{
+    struct csmloop_t *loop;
+    
+    loop = csmhedge_loop(hedge);
+    return csmloop_lface(loop);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_draw_border_edge(struct csmedge_t *edge, struct bsgraphics2_t *graphics)
+{
+    struct csmhedge_t *he1, *he2;
+    struct csmface_t *face_he1, *face_he2;
+
+    he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+    face_he1 = i_face_from_hedge(he1);
+    
+    he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+    face_he2 = i_face_from_hedge(he2);
+    
+    if (csmface_faces_define_border_edge(face_he1, face_he2) == CIERTO)
+    {
+        double x1, y1, z1, x2, y2, z2;
+    
+        csmedge_vertex_coordinates(edge, &x1, &y1, &z1, &x2, &y2, &z2);
+        bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_draw_border_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgraphics2_t *graphics)
+{
+    struct csmhashtb_iterator(csmedge_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    
+    while (csmhashtb_has_next(iterator, csmedge_t) == CIERTO)
+    {
+        struct csmedge_t *edge;
+        
+        csmhashtb_next_pair(iterator, NULL, &edge, csmedge_t);
+        i_draw_border_edge(edge, graphics);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_draw(
+                struct csmsolid_t *solido,
+                struct bsmaterial_t *border_edges_color,
+                struct bsgraphics2_t *graphics)
+{
+    assert_no_null(solido);
+    
+    csmsolid_redo_geometric_generated_data(solido);
+    
+    i_draw_solid_faces(solido->sfaces, graphics);
+    
+    bsgraphics2_escr_color(graphics, border_edges_color);
+    i_draw_border_edges(solido->sedges, graphics);
 }
 
 // ----------------------------------------------------------------------------------------------------

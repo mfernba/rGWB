@@ -82,7 +82,8 @@ struct csmhashtb(csmhedge_t);
 
 
 struct gccontorno_t;
-
+struct bsmaterial_t;
+    
 #include "csmmath.tli"
 
 #ifdef __cplusplus

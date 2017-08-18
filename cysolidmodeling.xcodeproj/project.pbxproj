@@ -407,9 +407,9 @@
 		5579548A1E5E41C1000FC91E /* csmedge.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmedge.c; sourceTree = "<group>"; };
 		5579548B1E5E41C1000FC91E /* csmedge.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmedge.inl; sourceTree = "<group>"; };
 		5579548E1E5E42BB000FC91E /* csmedge.tli */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmedge.tli; sourceTree = "<group>"; };
-		5579548F1E5E446C000FC91E /* csmloop.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmloop.c; sourceTree = "<group>"; };
+		5579548F1E5E446C000FC91E /* csmloop.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmloop.c; sourceTree = "<group>"; };
 		557954901E5E446C000FC91E /* csmloop.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmloop.inl; sourceTree = "<group>"; };
-		557954931E5E4742000FC91E /* csmface.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmface.c; sourceTree = "<group>"; };
+		557954931E5E4742000FC91E /* csmface.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmface.c; sourceTree = "<group>"; };
 		557954941E5E4742000FC91E /* csmface.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmface.inl; sourceTree = "<group>"; };
 		557954971E5E4811000FC91E /* csmbbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmbbox.c; sourceTree = "<group>"; };
 		557954981E5E4811000FC91E /* csmbbox.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmbbox.inl; sourceTree = "<group>"; };

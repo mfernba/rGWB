@@ -58,6 +58,11 @@ void csmloop_revert_loop_orientation(struct csmloop_t *loop);
 
 void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBOOL assert_si_no_es_integro);
 
+void csmloop_append_loop_to_shape(
+                        struct csmloop_t *loop,
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        struct gccontorno_t *shape);
 
 
 

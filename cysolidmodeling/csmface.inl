@@ -57,6 +57,8 @@ CYBOOL csmface_is_coplanar_to_plane(
 
 CYBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2);
 
+CYBOOL csmface_faces_define_border_edge(struct csmface_t *face1, const struct csmface_t *face2);
+
 CYBOOL csmface_is_oriented_in_direction(const struct csmface_t *face, double Wx, double Wy, double Wz);
 
 void csmface_face_equation(
@@ -88,3 +90,4 @@ void csmface_revert(struct csmface_t *face);
 
 void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_integro, unsigned long *num_holes_opc);
 
+void csmface_draw_solid(struct csmface_t *face, struct bsgraphics2_t *graphics);

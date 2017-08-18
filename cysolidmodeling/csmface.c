@@ -11,6 +11,7 @@
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 
+#include "cont2d.h"
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
@@ -31,6 +32,8 @@ struct csmface_t
     enum csmmath_dropped_coord_t dropped_coord;
     struct csmbbox_t *bbox;
 };
+
+static const double i_COS_15_DEGREES = 0.9659358;
 
 // ------------------------------------------------------------------------------------------
 
@@ -263,7 +266,7 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
         
     } while (iterator != NULL);
     
-    return MAX(1.01 * max_distance_to_plane, 1.e-4);
+    return MAX(1.01 * max_distance_to_plane, 1.e-3);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -286,6 +289,23 @@ void csmface_redo_geometric_generated_data(struct csmface_t *face)
 
 // ------------------------------------------------------------------------------------------
 
+static CYBOOL i_is_point_on_face_plane(
+                        double x, double y, double z,
+                        double A, double B, double C, double D,
+                        double fuzzy_epsilon)
+{
+    double distance;
+    
+    distance = csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D);
+    
+    if (fabs(distance) < fuzzy_epsilon)
+        return CIERTO;
+    else
+        return FALSO;
+}
+
+// ------------------------------------------------------------------------------------------
+
 CYBOOL csmface_contains_vertex(
                         const struct csmface_t *face,
                         const struct csmvertex_t *vertex,
@@ -294,18 +314,29 @@ CYBOOL csmface_contains_vertex(
                         struct csmhedge_t **hit_hedge_opc)
 {
     double x, y, z;
-    CYBOOL is_outer_loop;
     
     assert_no_null(face);
     
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
-    is_outer_loop = CIERTO;
     
-    return csmloop_is_point_inside_loop(
+    if (i_is_point_on_face_plane(
+                        x, y, z,
+                        face->A, face->B, face->C, face->D,
+                        face->fuzzy_epsilon) == FALSO)
+    {
+        return FALSO;
+    }
+    else
+    {
+        CYBOOL is_outer_loop;
+        
+        is_outer_loop = CIERTO;
+        return csmloop_is_point_inside_loop(
                         face->flout, is_outer_loop,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
+    }
 }
 
 // ------------------------------------------------------------------------------------------
@@ -317,16 +348,26 @@ CYBOOL csmface_contains_point(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc)
 {
-    CYBOOL is_outer_loop;
-    
     assert_no_null(face);
     
-    is_outer_loop = CIERTO;
-    return csmloop_is_point_inside_loop(
+    if (i_is_point_on_face_plane(
+                        x, y, z,
+                        face->A, face->B, face->C, face->D,
+                        face->fuzzy_epsilon) == FALSO)
+    {
+        return FALSO;
+    }
+    else
+    {
+        CYBOOL is_outer_loop;
+        
+        is_outer_loop = CIERTO;
+        return csmloop_is_point_inside_loop(
                         face->flout, is_outer_loop,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
+    }
 }
 
 // ------------------------------------------------------------------------------------------
@@ -334,46 +375,57 @@ CYBOOL csmface_contains_point(
 CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x, double y, double z)
 {
     CYBOOL is_interior_to_face;
-    enum csmmath_contaiment_point_loop_t type_of_containment;
     
     assert_no_null(face);
     
-    if (csmloop_is_point_inside_loop(
+    if (i_is_point_on_face_plane(
+                        x, y, z,
+                        face->A, face->B, face->C, face->D,
+                        face->fuzzy_epsilon) == FALSO)
+    {
+        return FALSO;
+    }
+    else
+    {
+        enum csmmath_contaiment_point_loop_t type_of_containment;
+    
+        if (csmloop_is_point_inside_loop(
                         face->flout, CIERTO,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         &type_of_containment, NULL, NULL) == FALSO)
-    {
-        is_interior_to_face = FALSO;
-    }
-    else if (type_of_containment != CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
-    {
-        is_interior_to_face = CIERTO;
-    }
-    else
-    {
-        struct csmloop_t *loop_iterator;
-        
-        loop_iterator = face->floops;
-        is_interior_to_face = CIERTO;
-        
-        while (loop_iterator != NULL)
         {
-            if (csmloop_is_point_inside_loop(
+            is_interior_to_face = FALSO;
+        }
+        else if (type_of_containment != CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+        {
+            is_interior_to_face = CIERTO;
+        }
+        else
+        {
+            struct csmloop_t *loop_iterator;
+            
+            loop_iterator = face->floops;
+            is_interior_to_face = CIERTO;
+            
+            while (loop_iterator != NULL)
+            {
+                if (csmloop_is_point_inside_loop(
                         loop_iterator, CIERTO,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         &type_of_containment, NULL, NULL) == CIERTO)
-            {
-                if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
-                    is_interior_to_face = FALSO;
-                else
-                    is_interior_to_face = CIERTO;
-                
-                break;
+                {
+                    if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+                        is_interior_to_face = FALSO;
+                    else
+                        is_interior_to_face = CIERTO;
+                    
+                    break;
+                }
+            
+                loop_iterator = csmloop_next(loop_iterator);
             }
-        
-            loop_iterator = csmloop_next(loop_iterator);
         }
     }
     
@@ -597,6 +649,23 @@ CYBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_
 
 // ------------------------------------------------------------------------------------------
 
+CYBOOL csmface_faces_define_border_edge(struct csmface_t *face1, const struct csmface_t *face2)
+{
+    double dot;
+    
+    assert_no_null(face1);
+    assert_no_null(face2);
+    
+    dot = csmmath_dot_product3D(face1->A, face1->B, face1->C, face2->A, face2->B, face2->C);
+    
+    if (fabs(dot) > i_COS_15_DEGREES)
+        return FALSO;
+    else
+        return CIERTO;
+}
+
+// ------------------------------------------------------------------------------------------
+
 CYBOOL csmface_is_oriented_in_direction(const struct csmface_t *face, double Wx, double Wy, double Wz)
 {
     double dot_product;
@@ -799,7 +868,38 @@ void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_int
     ASIGNA_OPC(num_holes_opc, num_holes_loc);
 }
 
+// ----------------------------------------------------------------------------------------------------
 
+void csmface_draw_solid(struct csmface_t *face, struct bsgraphics2_t *graphics)
+{
+    double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
+    struct csmloop_t *loop_iterator;
+    struct gccontorno_t *shape;
+    
+    assert_no_null(face);
+    
+    csmmath_plane_axis_from_implicit_plane_equation(
+						face->A, face->B, face->C, face->D,
+                        &Xo, &Yo, &Zo,
+                        &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
+    
+    loop_iterator = csmface_floops(face);
+    shape = gccontorno_crea_vacio();
+    
+    while (loop_iterator != NULL)
+    {
+        csmloop_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, shape);
+        loop_iterator = csmloop_next(loop_iterator);
+    }
+    
+    gccontorno_dibuja_3d_ex(
+                        shape,
+                        Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz,
+                        FALSO,
+                        graphics);
+    
+    gccontorno_destruye(&shape);
+}
 
 
 

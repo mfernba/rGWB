@@ -82,7 +82,11 @@ void csmviewer_free(struct csmviewer_t **viewer)
 
 // ------------------------------------------------------------------------------------------
 
-static void i_draw_solid_with_material(struct csmsolid_t *solid, struct bsmaterial_t **material, struct bsgraphics2_t *graphics)
+static void i_draw_solid_with_material(
+                        struct csmsolid_t *solid,
+                        CYBOOL draw_debug_info, CYBOOL draw_edge_info,
+                        struct bsmaterial_t **material,
+                        struct bsgraphics2_t *graphics)
 {
     bsassert_not_null(material);
     
@@ -90,8 +94,20 @@ static void i_draw_solid_with_material(struct csmsolid_t *solid, struct bsmateri
     {
         bsgraphics2_escr_color(graphics, *material);
         bsmaterial_destruye(material);
-                
-        csmsolid_draw(solid, graphics);
+        
+        if (draw_debug_info == CIERTO)
+        {
+            csmsolid_draw_debug_info(solid, draw_edge_info, graphics);
+        }
+        else
+        {
+            struct bsmaterial_t *border_edges_color;
+            
+            border_edges_color = bsmaterial_crea_rgb(0., 0., 0.);
+            csmsolid_draw(solid, border_edges_color, graphics);
+            
+            bsmaterial_destruye(&border_edges_color);
+        }
     }
 }
 
@@ -105,24 +121,24 @@ static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graph
     {
         struct bsmaterial_t *material;
             
-        material = bsmaterial_crea_rgb(0., 1., 0.);
-        i_draw_solid_with_material(viewer->solid_res1, &material, graphics);
+        material = bsmaterial_crea_rgba(0., 1., 0., 0.5);
+        i_draw_solid_with_material(viewer->solid_res1, FALSO, FALSO, &material, graphics);
 
-        material = bsmaterial_crea_rgb(0., 0., 1.);
-        i_draw_solid_with_material(viewer->solid_res2, &material, graphics);
+        material = bsmaterial_crea_rgba(0., 0., 1., 0.5);
+        i_draw_solid_with_material(viewer->solid_res2, FALSO, FALSO, &material, graphics);
     }
     else
     {
         struct bsmaterial_t *material;
             
         material = bsmaterial_crea_rgb(0., 1., 0.);
-        i_draw_solid_with_material(viewer->solid1, &material, graphics);
+        i_draw_solid_with_material(viewer->solid1, CIERTO, CIERTO, &material, graphics);
 
         material = bsmaterial_crea_rgb(0., 0., 1.);
-        i_draw_solid_with_material(viewer->solid2, &material, graphics);
-        
-        csmdebug_draw_debug_info(graphics);
+        i_draw_solid_with_material(viewer->solid2, CIERTO, CIERTO, &material, graphics);
     }
+    
+    csmdebug_draw_debug_info(graphics);
 }
 
 // ------------------------------------------------------------------------------------------
