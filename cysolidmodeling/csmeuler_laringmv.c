@@ -23,6 +23,8 @@ void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
     register struct csmloop_t *iterator_face1;
     unsigned long num_iteraciones;
     
+    csmface_redo_geometric_generated_data(face1);
+    
     iterator_face1 = csmface_floops(face1);
     num_iteraciones = 0;
     

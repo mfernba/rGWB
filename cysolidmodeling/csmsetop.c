@@ -476,44 +476,43 @@ static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_
 
         if (i_is_out_component_of_null_face_attached_to_itself(null_face, &loop_attached_to_out_component) == CIERTO)
         {
-            struct csmhashtb_iterator(csmface_t) *face_iterator;
-            struct csmface_t *loop_attached_to_out_component_face;
-            CYBOOL has_been_converted_in_hole;
-            
-            assert(csmloop_next(loop_attached_to_out_component) == NULL);
-            assert(csmloop_prev(loop_attached_to_out_component) == NULL);
-            
-            face_iterator = csmsolid_face_iterator(solid);
-            
-            loop_attached_to_out_component_face = csmloop_lface(loop_attached_to_out_component);
-            csmface_redo_geometric_generated_data(loop_attached_to_out_component_face);
-            
-            has_been_converted_in_hole = FALSO;
-            
-            while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO && has_been_converted_in_hole == FALSO)
+            if (csmloop_next(loop_attached_to_out_component) == NULL
+                    && csmloop_prev(loop_attached_to_out_component) == NULL)
             {
-                struct csmface_t *face;
+                struct csmhashtb_iterator(csmface_t) *face_iterator;
+                struct csmface_t *loop_attached_to_out_component_face;
+                CYBOOL has_been_converted_in_hole;
                 
-                csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+                face_iterator = csmsolid_face_iterator(solid);
                 
-                if (face != loop_attached_to_out_component_face
-                        && arr_ExisteEstructuraST(set_of_null_faces, csmface_t, face, struct csmface_t, i_is_same_face_ptr, NULL) == FALSO)
+                loop_attached_to_out_component_face = csmloop_lface(loop_attached_to_out_component);
+                csmface_redo_geometric_generated_data(loop_attached_to_out_component_face);
+                
+                has_been_converted_in_hole = FALSO;
+                
+                while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO && has_been_converted_in_hole == FALSO)
                 {
-                    csmface_redo_geometric_generated_data(face);
+                    struct csmface_t *face;
                     
-                    if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face) == CIERTO
-                            && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component) == CIERTO)
+                    csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+                    
+                    if (face != loop_attached_to_out_component_face
+                            && arr_ExisteEstructuraST(set_of_null_faces, csmface_t, face, struct csmface_t, i_is_same_face_ptr, NULL) == FALSO)
                     {
-                        //csmloop_revert_loop_orientation(loop_attached_to_out_component);
-                        csmeuler_lkfmrh(face, &loop_attached_to_out_component_face);
+                        csmface_redo_geometric_generated_data(face);
                         
-                        has_been_converted_in_hole = CIERTO;
+                        if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face) == CIERTO
+                                && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component) == CIERTO)
+                        {
+                            csmeuler_lkfmrh(face, &loop_attached_to_out_component_face);
+                            has_been_converted_in_hole = CIERTO;
+                        }
                     }
                 }
+                
+                
+                csmhashtb_free_iterator(&face_iterator, csmface_t);
             }
-            
-            
-            csmhashtb_free_iterator(&face_iterator, csmface_t);
         }
     }
 }

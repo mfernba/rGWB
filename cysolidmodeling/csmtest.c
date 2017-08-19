@@ -1235,8 +1235,8 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
         cshape2d = gcelem2d_contorno_circular(0.10, 16);
         
         solid3 = csmsweep_create_solid_from_shape_debug(
-                        cshape2d, -1., 0., .25, 0., 1., 0., 0., 0., 1.,
                         cshape2d,  2., 0., .25, 0., 1., 0., 0., 0., 1.,
+                        cshape2d, -1., 0., .25, 0., 1., 0., 0., 0., 1.,
                         2000);
         
         solid_res2 = csmsetop_difference_A_minus_B(solid_res, solid3);
@@ -1295,7 +1295,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
-static void i_test_cilindro2(struct csmviewer_t *viewer)
+static void i_test_cilindro4(struct csmviewer_t *viewer)
 {
     struct gccontorno_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid3, *solid_res;
@@ -1304,7 +1304,7 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
     csmdebug_set_enabled_by_code(FALSO);
 
     //cshape2d = gcelem2d_contorno_rectangular(0.80, 0.80);
-    cshape2d = gcelem2d_contorno_circular(0.40, 8);
+    cshape2d = gcelem2d_contorno_circular(0.40, 32);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
@@ -1349,7 +1349,17 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
                         cshape2d,    0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         20000);
          
+        solid4 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        cshape2d,    -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        20000);
+        solid4 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d,     0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        cshape2d,    -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        20000);
+
          */
+        
         solid4 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         cshape2d,    -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
@@ -1357,6 +1367,22 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
         
         solid_res = csmsetop_difference_A_minus_B(solid_res, solid4);
         
+        {
+            struct csmsolid_t *solid5, *solid_res5;
+            
+            cshape2d = gcelem2d_contorno_circular(0.25, 32);
+            
+            solid5 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        cshape2d,    -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        20000);
+            
+            solid_res5 = csmsetop_difference_A_minus_B(solid1, solid5);
+
+            csmsolid_move(solid_res5, -0.5, 0., 0.);
+            //solid_res = csmsetop_difference_A_minus_B(solid_res5, solid_res);
+            solid_res = csmsetop_intersection_A_and_B(solid_res5, solid_res);
+        }
         
         {
             CYBOOL does_split;
@@ -1364,9 +1390,10 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
             double desp;
             double A, B, C, D;
             
-            A = 1.;
-            B = C = 0.;
-            D = -1.05;
+            A = 0.;
+            B = 0;
+            C = 1.;
+            D = -0.75;
             
             does_split = csmsplit_does_plane_split_solid(solid_res, A, B, C, D, &solid_above, &solid_below);
             assert(does_split == CIERTO);
@@ -1452,7 +1479,9 @@ void csmtest_test(void)
     i_test_cilindro1(viewer);
     */
      
-    i_test_cilindro2(viewer);
+    //i_test_cilindro1(viewer);
+    //i_test_cilindro3(viewer);  //--> Revisar orientación de las caras del verde, una no es correcta
+    i_test_cilindro4(viewer);
     
     csmviewer_free(&viewer);
 }

@@ -328,11 +328,8 @@ CYBOOL csmface_contains_vertex(
     }
     else
     {
-        CYBOOL is_outer_loop;
-        
-        is_outer_loop = CIERTO;
         return csmloop_is_point_inside_loop(
-                        face->flout, is_outer_loop,
+                        face->flout,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
@@ -359,11 +356,8 @@ CYBOOL csmface_contains_point(
     }
     else
     {
-        CYBOOL is_outer_loop;
-        
-        is_outer_loop = CIERTO;
         return csmloop_is_point_inside_loop(
-                        face->flout, is_outer_loop,
+                        face->flout,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
@@ -390,7 +384,7 @@ CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x,
         enum csmmath_contaiment_point_loop_t type_of_containment;
     
         if (csmloop_is_point_inside_loop(
-                        face->flout, CIERTO,
+                        face->flout,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
                         &type_of_containment, NULL, NULL) == FALSO)
@@ -413,7 +407,7 @@ CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x,
                 if (loop_iterator != face->flout && csmloop_has_only_a_null_edge(loop_iterator) == FALSO)
                 {
                     if (csmloop_is_point_inside_loop(
-                            loop_iterator, CIERTO,
+                            loop_iterator,
                             x, y, z, face->dropped_coord,
                             face->fuzzy_epsilon,
                             &type_of_containment, NULL, NULL) == CIERTO)
@@ -525,14 +519,12 @@ CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_
 {
     register struct csmhedge_t *iterator;
     unsigned long num_iteraciones;
-    CYBOOL is_outer_loop;
     
     assert_no_null(face);
     assert(face->flout != loop);
     
     iterator = csmloop_ledge(loop);
     num_iteraciones = 0;
-    is_outer_loop = CIERTO;
     
     do
     {
@@ -546,7 +538,7 @@ CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
 
         if (csmloop_is_point_inside_loop(
-                    face->flout, is_outer_loop,
+                    face->flout,
                     x, y, z, face->dropped_coord,
                     face->fuzzy_epsilon,
                     NULL, NULL, NULL) == FALSO)

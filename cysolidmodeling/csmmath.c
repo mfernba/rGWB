@@ -514,6 +514,7 @@ CYBOOL csmmath_exists_intersection_between_two_segments3D(
 
 double csmmath_signed_distance_point_to_plane(double x, double y, double z, double A, double B, double C, double D)
 {
+    assert(fabs(A) > 0. || fabs(B) > 0. || fabs(C) > 0.);
 	return A * x + B * y + C * z + D;
 }
 

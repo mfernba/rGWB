@@ -415,7 +415,7 @@ static CYBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *
 // --------------------------------------------------------------------------------------------------------------
 
 CYBOOL csmloop_is_point_inside_loop(
-                        const struct csmloop_t *loop, CYBOOL is_outer_loop,
+                        const struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         double tolerance,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
@@ -496,8 +496,8 @@ CYBOOL csmloop_is_point_inside_loop(
             {
                 struct csmhedge_t *next_ray_hedge;
                 CYBOOL hedges_collinear;
-                struct csmvertex_t *vertex1, *vertex2;
-                double x_vertex1, y_vertex1, x_vertex2, y_vertex2;
+                struct csmvertex_t *vertex_i, *vertex_j;
+                double x_vertex_i, y_vertex_i, x_vertex_j, y_vertex_j;
                 
                 assert(num_iteraciones < 100000);
                 num_iteraciones++;
@@ -523,29 +523,47 @@ CYBOOL csmloop_is_point_inside_loop(
                     
                 } while (hedges_collinear == CIERTO);
                 
-                vertex1 = csmhedge_vertex(ray_hedge);
-                csmvertex_get_coords_not_dropped(vertex1, dropped_coord, &x_vertex1, &y_vertex1);
+                vertex_i = csmhedge_vertex(next_ray_hedge);
+                csmvertex_get_coords_not_dropped(vertex_i, dropped_coord, &x_vertex_i, &y_vertex_i);
                 
-                vertex2 = csmhedge_vertex(next_ray_hedge);
-                csmvertex_get_coords_not_dropped(vertex2, dropped_coord, &x_vertex2, &y_vertex2);
-            
-                if ((y_vertex1 < y_not_dropped && y_not_dropped < y_vertex2)
-                        || (y_vertex2 < y_not_dropped && y_not_dropped < y_vertex1))
+                vertex_j = csmhedge_vertex(ray_hedge);
+                csmvertex_get_coords_not_dropped(vertex_j, dropped_coord, &x_vertex_j, &y_vertex_j);
+                
+                if (y_vertex_i > y_not_dropped != y_vertex_j > y_not_dropped)
                 {
-                    double x = x_vertex1 + ((y_not_dropped - y_vertex1) * (x_vertex2 - x_vertex1) / (y_vertex2 - y_vertex1));
+                    double term;
                     
-                    if (is_outer_loop == CIERTO)
+                    term = (x_vertex_j - x_vertex_i) * (y_not_dropped - y_vertex_i) / (y_vertex_j - y_vertex_i) + x_vertex_i;
+                    
+                    if (x_not_dropped < term)
+                        count++;
+                }
+                
+                /*
+                if (y_not_dropped < y_vertex1)
+                {
+                    if (y_vertex0 <= y_not_dropped)
                     {
-                        if (x < x_not_dropped)
-                            count++;
-                    }
-                    else
-                    {
-                        if (x > x_not_dropped)
+                        double term1, term2;
+                        
+                        term1 = (y_not_dropped - y_vertex0) * (x_vertex1 - x_vertex0);
+                        term2 = (x_not_dropped - x_vertex0) * (y_vertex1 - y_vertex0);
+                        
+                        if (term1 > term2)
                             count++;
                     }
                 }
-                
+                else if (y_not_dropped < y_vertex1)
+                {
+                    double term1, term2;
+                    
+                    term1 = (y_not_dropped - y_vertex0) * (x_vertex1 - x_vertex0);
+                    term2 = (x_not_dropped - x_vertex0) * (y_vertex1 - y_vertex0);
+                    
+                    if (term1 < term2)
+                        count++;
+                }*/
+            
                 ray_hedge = next_ray_hedge;
                 
             } while (ray_hedge != start_hedge);

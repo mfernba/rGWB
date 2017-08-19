@@ -19,6 +19,7 @@ void cyassert_dontuse_assertion_failed(CYBOOL condition, const char *file, int l
 {
     if (condition == FALSO)
     {
+        csmdebug_print_debug_info("Solid modeler assertion failed: (%s)\nFILE: %s\nLINE: %d\n", assertion, file, line);
         csmdebug_close_output_file();
         
         fprintf(stderr, "Solid modeler assertion failed: (%s)\nFILE: %s\nLINE: %d\n", assertion, file, line);
