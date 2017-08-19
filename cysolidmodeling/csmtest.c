@@ -877,7 +877,7 @@ static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     //solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.16, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.16, 0.0, 1., 0., 1., 0., 1., 0., 0);
-    solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.16, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.16, 0.01, 1., 0., 0., 0., 1., 0., 0);
+    solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.16, 0.75, 1., 0., 1., 0., 1., 0., circular_shape2d, 0.5, -0.16, 0.01, 1., 0., 1., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     csmdebug_print_debug_info("******* Solid 1 intersect solid 2 [begin]");
@@ -1301,9 +1301,10 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
     struct csmsolid_t *solid1, *solid2, *solid3, *solid_res;
     
     i_set_output_debug_file("inters_cilindro2.txt");
+    csmdebug_set_enabled_by_code(FALSO);
 
-    cshape2d = gcelem2d_contorno_rectangular(0.80, 0.80);
-    //cshape2d = gcelem2d_contorno_circular(0.40, 16);
+    //cshape2d = gcelem2d_contorno_rectangular(0.80, 0.80);
+    cshape2d = gcelem2d_contorno_circular(0.40, 16);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
@@ -1313,7 +1314,7 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
                         cshape2d, 1.,  2.,     0.5, -1., 0., 0., 0., 0., 1.,
                         cshape2d, 1., -2.,   0.5, -1., 0., 0., 0., 0., 1.,
                         //cshape2d, 1., -0.25,   0.5, -1., 0., 0., 0., 0., 1.,
-                        1000);
+                        5000);
     
     solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
     
@@ -1323,16 +1324,25 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
         solid3 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,  1., 0., 1.05, 1., 0., 0., 0., 1., 0.,
                         cshape2d,  1., 0., 0.0,  1., 0., 0., 0., 1., 0.,
-                        2000);
+                        10000);
         
         solid_res = csmsetop_difference_A_minus_B(solid_res, solid3);
         
-        //cshape2d = gcelem2d_contorno_rectangular(0.25, 0.25);
+        
+        csmdebug_set_enabled_by_code(CIERTO);
+        
+        cshape2d = gcelem2d_contorno_rectangular(0.25, 0.25);
 
+        /*
         solid4 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,   2., 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         cshape2d,  -2., 0., 0.5,  0., 1., 0., 0., 0., 1.,
-                        5000);
+                        20000);
+         */
+        solid4 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d,   1.5, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        cshape2d,   -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        20000);
         
         solid_res = csmsetop_difference_A_minus_B(solid_res, solid4);
         
@@ -1345,7 +1355,7 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
             
             A = 1.;
             B = C = 0.;
-            D = -1.;
+            D = -1.05;
             
             does_split = csmsplit_does_plane_split_solid(solid_res, A, B, C, D, &solid_above, &solid_below);
             assert(does_split == CIERTO);
@@ -1411,8 +1421,7 @@ void csmtest_test(void)
     //i_test_divide_solido_rectangular_hueco_por_plano_superior();
     //i_test_divide_solido_rectangular_hueco_por_plano_superior2();
 
-    /*
-     i_test_union_solidos1(viewer);
+    i_test_union_solidos1(viewer);
     i_test_union_solidos2(viewer);
     i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
     i_test_interseccion_solidos1(viewer);
@@ -1427,11 +1436,10 @@ void csmtest_test(void)
     i_test_multiple_solidos1(viewer);
     i_test_multiple_solidos2(viewer);
     i_test_multiple_solidos3(viewer);
-     */
 
-    //i_test_cilindro1(viewer); // <-- Revisar unión, laringmv
-    
-    i_test_cilindro2(viewer);
+    i_test_cilindro1(viewer);
+     
+    //i_test_cilindro2(viewer);
     
     csmviewer_free(&viewer);
 }

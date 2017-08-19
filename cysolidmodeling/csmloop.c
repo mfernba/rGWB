@@ -529,8 +529,8 @@ CYBOOL csmloop_is_point_inside_loop(
                 vertex2 = csmhedge_vertex(next_ray_hedge);
                 csmvertex_get_coords_not_dropped(vertex2, dropped_coord, &x_vertex2, &y_vertex2);
             
-                if ((y_vertex1 - tolerance < y_not_dropped && y_not_dropped < y_vertex2)
-                        || (y_vertex2 - tolerance < y_not_dropped && y_not_dropped < y_vertex1))
+                if ((y_vertex1 < y_not_dropped && y_not_dropped < y_vertex2)
+                        || (y_vertex2 < y_not_dropped && y_not_dropped < y_vertex1))
                 {
                     double x = x_vertex1 + ((y_not_dropped - y_vertex1) * (x_vertex2 - x_vertex1) / (y_vertex2 - y_vertex1));
                     
@@ -830,8 +830,15 @@ void csmloop_append_loop_to_shape(
         
     } while (iterator != loop->ledge);
     
-    arr_InvertirPunto2D(points);
-    gccontorno_append_array_puntos(shape, &points);
+    if (arr_NumElemsPunto2D(points) >= 3)
+    {
+        arr_InvertirPunto2D(points);
+        gccontorno_append_array_puntos(shape, &points);
+    }
+    else
+    {
+        arr_DestruyePunto2D(&points);
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------

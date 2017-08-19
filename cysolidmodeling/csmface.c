@@ -902,8 +902,11 @@ void csmface_draw_solid(
             loop_iterator = csmloop_next(loop_iterator);
         }
         
-        bsgraphics2_escr_color(graphics, face_material);
-        gccontorno_dibuja_3d_ex(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, FALSO, graphics);
+        if (gccontorno_num_poligonos(shape) > 0)
+        {
+            bsgraphics2_escr_color(graphics, face_material);
+            gccontorno_dibuja_3d_ex(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, FALSO, graphics);
+        }
         
         gccontorno_destruye(&shape);
     }

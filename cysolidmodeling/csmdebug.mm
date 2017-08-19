@@ -55,6 +55,7 @@ static i_FPtr_show_viewer g_func_show_viewer = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
+static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
 static int i_DEBUG_SCREEN = 1;
 static int i_DEBUG_VISUAL = 1;
 static int i_DEBUG_FILE = 1;
@@ -62,9 +63,22 @@ static FILE *g_output_file = NULL;
 
 // --------------------------------------------------------------------------------
 
+void csmdebug_set_enabled_by_code(CYBOOL enabled)
+{
+    if (enabled == CIERTO)
+        i_DEBUG_IS_DISABLED_BY_CODE = 0;
+    else
+        i_DEBUG_IS_DISABLED_BY_CODE = 1;
+}
+
+// --------------------------------------------------------------------------------
+
 CYBOOL csmdebug_debug_enabled(void)
 {
-    return ES_CIERTO(i_DEBUG_SCREEN == 1 || g_output_file != NULL);
+    if (i_DEBUG_IS_DISABLED_BY_CODE == 1)
+        return FALSO;
+    else
+        return ES_CIERTO(i_DEBUG_SCREEN == 1 || g_output_file != NULL);
 }
 
 // --------------------------------------------------------------------------------
@@ -230,7 +244,7 @@ void csmdebug_set_viewer_results(struct csmsolid_t *solid1, struct csmsolid_t *s
 
 void csmdebug_show_viewer(void)
 {
-    if (i_DEBUG_VISUAL == CIERTO && g_func_show_viewer != NULL)
+    if (i_DEBUG_IS_DISABLED_BY_CODE == FALSO && i_DEBUG_VISUAL == CIERTO && g_func_show_viewer != NULL)
     {
         bsassert(g_Viewer != NULL);
         g_func_show_viewer(g_Viewer);

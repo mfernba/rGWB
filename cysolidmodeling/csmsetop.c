@@ -90,6 +90,40 @@ static CYBOOL i_can_join(
 
 // ----------------------------------------------------------------------------------------------------
 
+static CYBOOL i_there_are_only_null_edges_that_can_be_matched(ArrEstructura(csmedge_t) *set_of_null_edges)
+{
+    unsigned long i, no_null_edges;
+    
+    no_null_edges = arr_NumElemsPunteroST(set_of_null_edges, csmedge_t);
+    
+    for (i = 0; i < no_null_edges; i++)
+    {
+        unsigned long j;
+        struct csmedge_t *edge_i;
+        struct csmhedge_t *he1;
+        
+        edge_i = arr_GetPunteroST(set_of_null_edges, i, csmedge_t);
+        he1 = csmedge_hedge_lado(edge_i, CSMEDGE_LADO_HEDGE_POS);
+        
+        for (j = 0; j < no_null_edges; j++)
+        {
+            struct csmedge_t *edge_j;
+            struct csmhedge_t *he2;
+            
+            edge_j = arr_GetPunteroST(set_of_null_edges, j, csmedge_t);
+            he2 = csmedge_hedge_lado(edge_i, CSMEDGE_LADO_HEDGE_NEG);
+            
+            if (csmsetopcom_hedges_are_neighbors(he1, he2) == CIERTO)
+                return CIERTO;
+        }
+    }
+    
+    
+    return FALSO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_join_null_edges(
                         struct csmsolid_t *solid_A, ArrEstructura(csmedge_t) *set_of_null_edges_A,
                         struct csmsolid_t *solid_B, ArrEstructura(csmedge_t) *set_of_null_edges_B,
@@ -100,6 +134,7 @@ static void i_join_null_edges(
     ArrEstructura(csmhedge_t) *loose_ends_A, *loose_ends_B;
     unsigned long i, no_null_edges;
     unsigned long no_null_edges_deleted_A, no_null_edges_deleted_B;
+    unsigned long no_null_edges_pendant;
     
     csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_A);
     csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_B);
@@ -198,12 +233,9 @@ static void i_join_null_edges(
             csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
         }
-        
-        csmsolid_print_debug(solid_B, CIERTO);
     }
     
     csmdebug_print_debug_info("*** AFTER JOINING NULL EDGES\n");
-    
     csmsolid_print_debug(solid_A, CIERTO);
     csmsolid_print_debug(solid_B, CIERTO);
     //csmdebug_show_viewer();
@@ -211,10 +243,34 @@ static void i_join_null_edges(
     *set_of_null_faces_A = set_of_null_faces_A_loc;
     *set_of_null_faces_B = set_of_null_faces_B_loc;
     
-    assert(arr_NumElemsPunteroST(set_of_null_edges_A, csmedge_t) == 0);
-    assert(arr_NumElemsPunteroST(set_of_null_edges_B, csmedge_t) == 0);
-    assert(arr_NumElemsPunteroST(loose_ends_A, csmhedge_t) == 0);
-    assert(arr_NumElemsPunteroST(loose_ends_B, csmhedge_t) == 0);
+    no_null_edges_pendant = arr_NumElemsPunteroST(set_of_null_edges_A, csmedge_t);
+    assert(no_null_edges_pendant == arr_NumElemsPunteroST(set_of_null_edges_B, csmedge_t));
+    
+    if (no_null_edges_pendant == 0)
+    {
+        assert(arr_NumElemsPunteroST(loose_ends_A, csmhedge_t) == 0);
+        assert(arr_NumElemsPunteroST(loose_ends_B, csmhedge_t) == 0);
+    }
+    else
+    {
+        if (csmdebug_debug_enabled() == CIERTO)
+        {
+            csmdebug_print_debug_info("*****Pendant null edges!!!! Maybe the only ones in its faces");
+        
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_A);
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_B);
+            
+            csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
+            csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
+        }
+        
+        /*
+         Some null edges are the only ones in its faces, so nothing can be done with them.
+         */
+        assert(i_there_are_only_null_edges_that_can_be_matched(set_of_null_edges_A) == CIERTO);
+        assert(i_there_are_only_null_edges_that_can_be_matched(set_of_null_edges_B) == CIERTO);
+    }
+    
     arr_DestruyeEstructurasST(&loose_ends_A, NULL, csmhedge_t);
     arr_DestruyeEstructurasST(&loose_ends_B, NULL, csmhedge_t);
 }
@@ -448,7 +504,7 @@ static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_
                     if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face) == CIERTO
                             && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component) == CIERTO)
                     {
-                        csmloop_revert_loop_orientation(loop_attached_to_out_component);
+                        //csmloop_revert_loop_orientation(loop_attached_to_out_component);
                         csmeuler_lkfmrh(face, &loop_attached_to_out_component_face);
                         
                         has_been_converted_in_hole = CIERTO;

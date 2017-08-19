@@ -683,9 +683,6 @@ static void i_generate_intersections_edge_with_solid_faces(
     {
         arr_QSortPunteroST(edge_intersecctions, i_compara_edge_intersection, i_edge_intersection_t);
         i_process_edge_intersections(edge_A, edge_intersecctions, vv_intersections, vertex_face_neighborhood);
-        
-        //if (csmedge_id(edge_A) == 587)
-            //csmsolid_print_debug(solid_B, CIERTO);
     }
     
     csmhashtb_free_iterator(&face_iterator_B, csmface_t);
@@ -751,7 +748,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
             i_generate_edge_intersections_solid_A_with_solid_B(solid_B, solid_A, vv_intersections_loc, vf_intersections_B_loc);
             csmsolid_print_debug(solid_A, CIERTO);
         }
-        //csmdebug_end_context();
+        csmdebug_end_context();
 
         i_append_common_vertices_solid_A_and_B_not_previously_found(solid_A, solid_B, vv_intersections_loc);
         

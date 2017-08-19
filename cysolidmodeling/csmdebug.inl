@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+void csmdebug_set_enabled_by_code(CYBOOL enabled);
+    
 CYBOOL csmdebug_debug_enabled(void);
 
     
