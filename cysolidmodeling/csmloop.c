@@ -598,6 +598,22 @@ CYBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loo
 
 // --------------------------------------------------------------------------------------------------------------
 
+CYBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop)
+{
+    struct csmhedge_t *hedge_next;
+    
+    assert_no_null(loop);
+    
+    hedge_next = csmhedge_next(loop->ledge);
+    
+    if (hedge_next == loop->ledge)
+        return CIERTO;
+    else
+        return FALSO;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop)
 {
     assert_no_null(loop);

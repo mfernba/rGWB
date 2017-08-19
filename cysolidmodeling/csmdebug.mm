@@ -56,9 +56,9 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 1;
+static int i_DEBUG_SCREEN = 0;
 static int i_DEBUG_VISUAL = 1;
-static int i_DEBUG_FILE = 1;
+static int i_DEBUG_FILE = 0;
 static FILE *g_output_file = NULL;
 
 // --------------------------------------------------------------------------------

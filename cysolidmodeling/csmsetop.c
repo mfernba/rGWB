@@ -255,7 +255,7 @@ static void i_join_null_edges(
     {
         if (csmdebug_debug_enabled() == CIERTO)
         {
-            csmdebug_print_debug_info("*****Pendant null edges!!!! Maybe the only ones in its faces");
+            csmdebug_print_debug_info("*****Pendant null edges!!!! Maybe the only ones in its faces\n");
         
             csmsetopcom_print_set_of_null_edges(set_of_null_edges_A);
             csmsetopcom_print_set_of_null_edges(set_of_null_edges_B);

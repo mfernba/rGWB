@@ -1304,7 +1304,7 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
     csmdebug_set_enabled_by_code(FALSO);
 
     //cshape2d = gcelem2d_contorno_rectangular(0.80, 0.80);
-    cshape2d = gcelem2d_contorno_circular(0.40, 16);
+    cshape2d = gcelem2d_contorno_circular(0.40, 8);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
@@ -1331,17 +1331,28 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
         
         csmdebug_set_enabled_by_code(CIERTO);
         
-        cshape2d = gcelem2d_contorno_rectangular(0.25, 0.25);
+        //cshape2d = gcelem2d_contorno_rectangular(0.75, 0.75);
 
         /*
         solid4 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,   2., 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         cshape2d,  -2., 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         20000);
+         
+        solid4 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d,     0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        cshape2d,    -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        20000);
+
+        solid4 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        cshape2d,    0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        20000);
+         
          */
         solid4 = csmsweep_create_solid_from_shape_debug(
-                        cshape2d,   1.5, 0., 0.5,  0., 1., 0., 0., 0., 1.,
-                        cshape2d,   -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
+                        cshape2d,    -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         20000);
         
         solid_res = csmsetop_difference_A_minus_B(solid_res, solid4);
@@ -1421,6 +1432,7 @@ void csmtest_test(void)
     //i_test_divide_solido_rectangular_hueco_por_plano_superior();
     //i_test_divide_solido_rectangular_hueco_por_plano_superior2();
 
+    /*
     i_test_union_solidos1(viewer);
     i_test_union_solidos2(viewer);
     i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
@@ -1438,8 +1450,9 @@ void csmtest_test(void)
     i_test_multiple_solidos3(viewer);
 
     i_test_cilindro1(viewer);
+    */
      
-    //i_test_cilindro2(viewer);
+    i_test_cilindro2(viewer);
     
     csmviewer_free(&viewer);
 }

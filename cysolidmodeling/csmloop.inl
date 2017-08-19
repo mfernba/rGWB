@@ -40,6 +40,9 @@ CYBOOL csmloop_is_point_inside_loop(
 
 CYBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib);
 
+CYBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop);
+
+
 // Topology...
 
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop);

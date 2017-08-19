@@ -8,6 +8,7 @@
 
 #include "csmeuler_laringmv.inl"
 
+#include "csmdebug.inl"
 #include "csmloop.inl"
 #include "csmface.inl"
 #include "csmhedge.inl"
@@ -45,7 +46,10 @@ void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
             csmvertex_get_coordenadas(vtx, &x, &y, &z);
             
             if (csmface_is_point_interior_to_face(face1, x, y, z) == FALSO)
+            {
+                csmdebug_print_debug_info("\t***laringmv loop %lu to face %lu\n", csmloop_id(iterator_face1), csmface_id(face2));
                 csmface_add_loop_while_removing_from_old(face2, iterator_face1);
+            }
         }
         
         iterator_face1 = next_loop;

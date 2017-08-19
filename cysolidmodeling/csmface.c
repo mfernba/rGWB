@@ -410,18 +410,21 @@ CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x,
             
             while (loop_iterator != NULL)
             {
-                if (csmloop_is_point_inside_loop(
-                        loop_iterator, CIERTO,
-                        x, y, z, face->dropped_coord,
-                        face->fuzzy_epsilon,
-                        &type_of_containment, NULL, NULL) == CIERTO)
+                if (loop_iterator != face->flout && csmloop_has_only_a_null_edge(loop_iterator) == FALSO)
                 {
-                    if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
-                        is_interior_to_face = FALSO;
-                    else
-                        is_interior_to_face = CIERTO;
-                    
-                    break;
+                    if (csmloop_is_point_inside_loop(
+                            loop_iterator, CIERTO,
+                            x, y, z, face->dropped_coord,
+                            face->fuzzy_epsilon,
+                            &type_of_containment, NULL, NULL) == CIERTO)
+                    {
+                        if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+                            is_interior_to_face = FALSO;
+                        else
+                            is_interior_to_face = CIERTO;
+                        
+                        break;
+                    }
                 }
             
                 loop_iterator = csmloop_next(loop_iterator);

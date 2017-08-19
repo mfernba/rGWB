@@ -583,7 +583,7 @@ static void i_process_edge_intersections(
                 
             case i_TYPE_EDGE_INTERSECTION_INTERIOR_EDGE:
             {
-                struct csmhedge_t *hit_hedge_at_face_next, *mate_hit_hedge, *mate_hit_hedge_next;
+                struct csmhedge_t *hit_hedge_at_face_next, *mate_hit_hedge;
                 struct csmvertex_t *new_vertex_on_hit_hedge;
                 struct csmedge_t *new_edge_other_solid;
                 CYBOOL did_add_intersection;
