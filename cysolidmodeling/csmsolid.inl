@@ -21,6 +21,10 @@ void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to
 
 void csmsolid_revert(struct csmsolid_t *solid);
 
+void csmsolid_prepare_for_cleanup(struct csmsolid_t *solid);
+
+void csmsolid_finish_cleanup(struct csmsolid_t *solid);
+
 
 // Faces...
 

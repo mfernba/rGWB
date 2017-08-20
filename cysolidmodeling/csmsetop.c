@@ -615,6 +615,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     csmsolid_print_debug(solid_A, FALSO);
     csmsolid_print_debug(solid_B, FALSO);
 
+    csmsolid_prepare_for_cleanup(solid_A);
+    csmsolid_prepare_for_cleanup(solid_B);
+    
     result = csmsolid_crea_vacio(0);
     csmsolid_set_name(result, "Result");
     
@@ -630,6 +633,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     }
     
     csmsetopcom_cleanup_solid_setop(solid_A, solid_B, result);
+    csmsolid_finish_cleanup(solid_A);
+    csmsolid_finish_cleanup(solid_B);
+    csmsolid_finish_cleanup(result);    
+    
     csmsolid_print_debug(result, FALSO);
     //csmsolid_print_debug(solid_A, FALSO);
     //csmsolid_print_debug(solid_B, FALSO);

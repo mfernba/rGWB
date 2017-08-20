@@ -844,56 +844,33 @@ void csmsetopcom_cleanup_solid_setop(
             
             do
             {
+                struct csmsolid_t *origin_solid;
                 struct csmedge_t *edge;
                 struct csmvertex_t *vertex;
                 
                 assert(no_iters < 10000);
                 no_iters++;
                 
+                origin_solid = csmopbas_solid_aux_from_hedge(he_iterator);
+                
                 edge = csmhedge_edge(he_iterator);
                 vertex = csmhedge_vertex(he_iterator);
+                
+                if (csmvertex_hedge(vertex) == he_iterator)
+                {
+                    assert(origin_solid == origin_solid_A || origin_solid == origin_solid_B);
+                    csmsolid_move_vertex_to_solid(origin_solid, vertex, destination_solid);
+                }
                 
                 if (edge != NULL)
                 {
                     if (csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS) == he_iterator)
                     {
-                        struct csmsolid_t *origin_solid;
-                        
-                        if (csmsolid_contains_edge(origin_solid_A, edge) == CIERTO)
-                        {
-                            assert(csmsolid_contains_edge(origin_solid_B, edge) == FALSO);
-                            origin_solid = origin_solid_A;
-                        }
-                        else
-                        {
-                            assert(csmsolid_contains_edge(origin_solid_B, edge) == CIERTO);
-                            origin_solid = origin_solid_B;
-                        }
-                    
+                        assert(origin_solid == origin_solid_A || origin_solid == origin_solid_B);
                         csmsolid_move_edge_to_solid(origin_solid, edge, destination_solid);
                     }
                 }
 
-                if (csmvertex_hedge(vertex) == he_iterator)
-                {
-                    struct csmsolid_t *origin_solid;
-                    
-                    assert(csmvertex_hedge(vertex) == he_iterator);
-                    
-                    if (csmsolid_contains_vertex(origin_solid_A, vertex) == CIERTO)
-                    {
-                        assert(csmsolid_contains_vertex(origin_solid_B, vertex) == FALSO);
-                        origin_solid = origin_solid_A;
-                    }
-                    else
-                    {
-                        assert(csmsolid_contains_vertex(origin_solid_B, vertex) == CIERTO);
-                        origin_solid = origin_solid_B;
-                    }
-                    
-                    csmsolid_move_vertex_to_solid(origin_solid, vertex, destination_solid);
-                }
-                
                 he_iterator = csmhedge_next(he_iterator);
             }
             while (he_iterator != loop_ledge);

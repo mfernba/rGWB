@@ -71,6 +71,9 @@ void csmface_face_equation(
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face);
 void csmface_set_fsolid(struct csmface_t *face, struct csmsolid_t *solid);
 
+struct csmsolid_t *csmface_fsolid_aux(struct csmface_t *face);
+void csmface_set_fsolid_aux(struct csmface_t *face, struct csmsolid_t *solid);
+
 struct csmloop_t *csmface_flout(struct csmface_t *face);
 void csmface_set_flout(struct csmface_t *face, struct csmloop_t *loop);
 

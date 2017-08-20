@@ -440,6 +440,48 @@ void csmsolid_revert(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_prepare_for_cleanup(struct csmsolid_t *solid)
+{
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    assert_no_null(solid);
+
+    face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        csmface_set_fsolid_aux(face, solid);
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_finish_cleanup(struct csmsolid_t *solid)
+{
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    assert_no_null(solid);
+
+    face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        csmface_set_fsolid_aux(face, NULL);
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_append_new_face(struct csmsolid_t *solido, struct csmface_t **face)
 {
     struct csmface_t *face_loc;
@@ -529,6 +571,7 @@ void csmsolid_move_edge_to_solid(struct csmsolid_t *edge_solid, struct csmedge_t
 {
     assert_no_null(edge_solid);
     assert_no_null(destination_solid);
+    assert(edge_solid != destination_solid);
     
     csmhashtb_remove_item(edge_solid->sedges, csmedge_id(edge), csmedge_t);
     
@@ -584,6 +627,7 @@ void csmsolid_move_vertex_to_solid(struct csmsolid_t *vertex_solid, struct csmve
 {
     assert_no_null(vertex_solid);
     assert_no_null(destination_solid);
+    assert(vertex_solid != destination_solid);
     
     csmhashtb_remove_item(vertex_solid->svertexs, csmvertex_id(vertex), csmvertex_t);
     

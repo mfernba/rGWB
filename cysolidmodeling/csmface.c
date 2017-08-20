@@ -23,6 +23,7 @@ struct csmface_t
     unsigned long id;
 
     struct csmsolid_t *fsolid;
+    struct csmsolid_t *fsolid_aux;
     
     struct csmloop_t *flout;
     struct csmloop_t *floops;
@@ -39,7 +40,7 @@ static const double i_COS_15_DEGREES = 0.9659358;
 
 CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         unsigned long id,
-                        struct csmsolid_t *fsolid,
+                        struct csmsolid_t *fsolid, struct csmsolid_t *fsolid_aux,
                         struct csmloop_t *flout,
                         struct csmloop_t *floops,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
@@ -52,6 +53,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     face->id = id;
     
     face->fsolid = fsolid;
+    face->fsolid_aux = fsolid_aux;
     
     face->flout = flout;
     face->floops = floops;
@@ -73,7 +75,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
 struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
-    struct csmsolid_t *fsolid;
+    struct csmsolid_t *fsolid, *fsolid_aux;
     struct csmloop_t *flout;
     struct csmloop_t *floops;
     double A, B, C, D, fuzzy_epsilon;
@@ -83,6 +85,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
 
     fsolid = solido;
+    fsolid_aux = NULL;
     flout = NULL;
     floops = NULL;
     
@@ -95,7 +98,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     
     bbox = csmbbox_create_empty_box();
     
-    return i_crea(id, fsolid, flout, floops, A, B, C, D, fuzzy_epsilon, dropped_coord, &bbox);
+    return i_crea(id, fsolid, fsolid_aux, flout, floops, A, B, C, D, fuzzy_epsilon, dropped_coord, &bbox);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -114,7 +117,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     floops = NULL;
     bbox = csmbbox_create_empty_box();
     
-    return i_crea(id, fsolid, flout, floops, A, B, C, D, fuzzy_epsilon, dropped_coord, &bbox);
+    return i_crea(id, fsolid, NULL, flout, floops, A, B, C, D, fuzzy_epsilon, dropped_coord, &bbox);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -703,6 +706,22 @@ void csmface_set_fsolid(struct csmface_t *face, struct csmsolid_t *solid)
 {
     assert_no_null(face);
     face->fsolid = solid;
+}
+
+// ------------------------------------------------------------------------------------------
+
+struct csmsolid_t *csmface_fsolid_aux(struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->fsolid_aux;
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmface_set_fsolid_aux(struct csmface_t *face, struct csmsolid_t *solid)
+{
+    assert_no_null(face);
+    face->fsolid_aux = solid;
 }
 
 // ------------------------------------------------------------------------------------------

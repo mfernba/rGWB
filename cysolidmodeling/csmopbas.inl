@@ -12,6 +12,8 @@ struct csmsolid_t *csmopbas_solid_from_hedge(struct csmhedge_t *hedge);
 
 struct csmsolid_t *csmopbas_solid_from_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2);
 
+struct csmsolid_t *csmopbas_solid_aux_from_hedge(struct csmhedge_t *hedge);
+
 
 void csmopbas_addhe(
                 struct csmedge_t *edge,

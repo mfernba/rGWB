@@ -740,7 +740,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         }
         csmdebug_end_context();
     
-        //csmdebug_show_viewer();
+        csmdebug_show_viewer();
         
         csmdebug_begin_context("Intersections B vs A");
         {
@@ -755,7 +755,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         csmsolid_print_debug(solid_A, CIERTO);
         csmsolid_print_debug(solid_B, CIERTO);
         
-        //csmdebug_show_viewer();
+        csmdebug_show_viewer();
     }
     csmdebug_end_context();
     
