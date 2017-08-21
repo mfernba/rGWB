@@ -1209,7 +1209,7 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
     
     i_set_output_debug_file("test_cilindro1.txt");
 
-    cshape2d = gcelem2d_contorno_circular(0.5, 4);
+    cshape2d = gcelem2d_contorno_circular(0.55, 4);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     shape2d2 = gcelem2d_contorno_rectangular(1.5, 0.75);
     
@@ -1263,6 +1263,69 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
     csmsolid_free(&solid2);
 }
 
+// ------------------------------------------------------------------------------------------
+
+static void i_test_cilindro5(struct csmviewer_t *viewer)
+{
+    struct gccontorno_t *shape2d, *cshape2d, *shape2d2;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    
+    i_set_output_debug_file("test_cilindro5.txt");
+
+    //cshape2d = gcelem2d_contorno_circular(0.50, 4);
+    cshape2d = gcelem2d_contorno_circular(0.25, 4);
+    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d2 = gcelem2d_contorno_rectangular(1.5, 0.75);
+    
+    // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1.25, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, .75,  0.25,   1., -1., 0., 0., 0., 0., 1.,
+                        cshape2d, .75, -2., 1., -1., 0., 0., 0., 0., 1.,
+                        1000);
+     /*
+      solid2 = csmsweep_create_solid_from_shape_debug(
+                        shape2d2, 1.,  2., 1.5, 0., 0., 1., 1., 0., 0.,
+                        shape2d2, 1., -2., .5, 0., 0., 1., 1., 0., 0.,
+                        1000);
+      */
+    
+    {
+        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+    }
+
+    {
+        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
+    }
+    
+    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid2, CIERTO);
+    
+    gccontorno_destruye(&cshape2d);
+    gccontorno_destruye(&shape2d);
+    gccontorno_destruye(&shape2d2);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+}
 
 // ------------------------------------------------------------------------------------------
 
@@ -1444,10 +1507,11 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             solid_res5 = csmsetop_difference_A_minus_B(solid1, solid5);
 
             csmsolid_move(solid_res5, -0.5, 0., 0.);
-            //solid_res = csmsetop_difference_A_minus_B(solid_res5, solid_res);
-            solid_res = csmsetop_intersection_A_and_B(solid_res5, solid_res);
+            solid_res = csmsetop_difference_A_minus_B(solid_res5, solid_res);
+            //solid_res = csmsetop_intersection_A_and_B(solid_res5, solid_res);
         }
         
+        /*
         {
             CYBOOL does_split;
             struct csmsolid_t *solid_above, *solid_below;
@@ -1457,7 +1521,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             A = 0.;
             B = 0;
             C = 1.;
-            D = -0.75;
+            D = -0.55; // Falla split a -0.75
             
             does_split = csmsplit_does_plane_split_solid(solid_res, A, B, C, D, &solid_above, &solid_below);
             assert(does_split == CIERTO);
@@ -1473,6 +1537,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             csmsolid_free(&solid_above);
             csmsolid_free(&solid_below);
         }
+         */
         
         csmsolid_free(&solid3);
     }
@@ -1541,13 +1606,14 @@ void csmtest_test(void)
     i_test_multiple_solidos3(viewer);
 
     i_test_cilindro1(viewer);
+    
+    i_test_cilindro1(viewer);
+    i_test_cilindro2(viewer);
+    i_test_cilindro3(viewer);  //--> Revisar orientación de las caras del verde, una no es correcta
+    i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75
     */
     
-    //i_test_cilindro2(viewer); << -- corregir
-
-    //i_test_cilindro1(viewer);
-    i_test_cilindro3(viewer);  //--> Revisar orientación de las caras del verde, una no es correcta
-    //i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco
+    i_test_cilindro5(viewer); //<< -- corregir
     
     csmviewer_free(&viewer);
 }

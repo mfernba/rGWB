@@ -1044,7 +1044,7 @@ static void i_separateEdgeSequence(
     
     from_prv = csmhedge_prev(from);
     
-    /* recover from null edges already inserted */
+    // recover from null edges already inserted
     if(i_is_null_edge(from_prv) == CIERTO && i_is_strutnulledge(from_prv) == CIERTO)
     {
         struct csmedge_t *from_prv_edge;
@@ -1053,7 +1053,7 @@ static void i_separateEdgeSequence(
         from_prv_edge = csmhedge_edge(from_prv);
         from_prv_edge_he2 = csmedge_hedge_lado(from_prv_edge, CSMEDGE_LADO_HEDGE_NEG);
         
-        /* look at orientation */
+        // look at orientation
         if (from_prv == from_prv_edge_he2)
             from = csmhedge_prev(from_prv);
     }
@@ -1068,7 +1068,7 @@ static void i_separateEdgeSequence(
         to_prv_edge = csmhedge_edge(to_prv);
         to_prv_edge_he1 = csmedge_hedge_lado(to_prv_edge, CSMEDGE_LADO_HEDGE_POS);
         
-        /* look at orientation */
+        // look at orientation
         if (to_prv == to_prv_edge_he1)
             to = csmhedge_prev(to_prv);
     }
@@ -1106,9 +1106,13 @@ static void i_separateEdgeSequence(
     }
     
     csmeuler_lmev(from, to, x, y, z, NULL, &null_edge, NULL, NULL);
-    assert_no_null(null_edge);
-    
     arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+    
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        csmdebug_print_debug_info("Edge sequence. Null edge from he %lu to he %lu", csmhedge_id(from), csmhedge_id(to));
+        csmedge_print_debug_info(null_edge, CIERTO);
+    }
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1150,6 +1154,9 @@ static void i_separateInteriorHedge(
     {
         char *description;
         
+        csmdebug_print_debug_info("Interior Edge. Null edge from he %lu to he %lu", csmhedge_id(he), csmhedge_id(he));
+        csmedge_print_debug_info(null_edge1, CIERTO);
+        
         description = copiafor_codigo4("NE %lu (%g, %g, %g)", csmvertex_id(split_vertex), x, y, z);
         csmdebug_append_debug_point(x, y, z, &description);
     }
@@ -1162,11 +1169,13 @@ static void i_separateInteriorHedge(
         he_prv = csmhedge_prev(he);
         he_prv_edge = csmhedge_edge(he_prv);
         csmedge_reverse_orientation(he_prv_edge);
+        
+        csmdebug_print_debug_info("Interior Edge reversed: ");
+        csmedge_print_debug_info(he_prv_edge, CIERTO);
     }
     
     null_edge2 = csmhedge_edge(csmhedge_prev(he));
     assert(null_edge1 == null_edge2);
-    
     arr_AppendPunteroST(set_of_null_edges, null_edge2, csmedge_t);
 }
 
@@ -1282,6 +1291,31 @@ static void i_insert_null_edges(
                     
                     orient = i_get_orient(ha1, hb1, hb2);
                     i_separateInteriorHedge(ha1, orient, set_of_null_edges_A);
+                }
+                else
+                {
+                    i_separateEdgeSequence(ha2, ha1, set_of_null_edges_A);
+                }
+                
+                if (hb1 == hb2)
+                {
+                    CYBOOL orient;
+                    
+                    orient = i_get_orient(hb1, ha2, ha1);
+                    i_separateInteriorHedge(hb1, orient, set_of_null_edges_B);
+                }
+                else
+                {
+                    i_separateEdgeSequence(hb1, hb2, set_of_null_edges_B);
+                }
+                
+                /*
+                if (ha1 == ha2)
+                {
+                    CYBOOL orient;
+                    
+                    orient = i_get_orient(ha1, hb1, hb2);
+                    i_separateInteriorHedge(ha1, orient, set_of_null_edges_A);
                     
                     i_separateEdgeSequence(hb1, hb2, set_of_null_edges_B);
                 }
@@ -1298,7 +1332,7 @@ static void i_insert_null_edges(
                 {
                     i_separateEdgeSequence(ha2, ha1, set_of_null_edges_A);
                     i_separateEdgeSequence(hb1, hb2, set_of_null_edges_B);
-                }
+                }*/
             }
         }
     }

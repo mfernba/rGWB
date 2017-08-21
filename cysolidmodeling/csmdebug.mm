@@ -56,9 +56,9 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 1;
+static int i_DEBUG_SCREEN = 0;
 static int i_DEBUG_VISUAL = 1;
-static int i_DEBUG_FILE = 1;
+static int i_DEBUG_FILE = 0;
 static FILE *g_output_file = NULL;
 
 // --------------------------------------------------------------------------------
@@ -295,21 +295,29 @@ void csmdebug_set_plane(double A, double B, double C, double D)
 
 void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
 {
+    struct bsmaterial_t *debug_point_material;
     unsigned long i;
+    
+    debug_point_material = bsmaterial_crea_rgb(1., 0., 0.);
     
     for (i = 0; i < g_no_debug_points; i++)
     {
+        enum bsgraphics2_justificacion_t justificacion;
+        
+        bsgraphics2_escr_color(graphics, debug_point_material);
         bsgraphics2_escr_punto3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
         
         bsgraphics2_append_desplazamiento_3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
         bsgraphics2_append_ejes_plano_pantalla(graphics);
+        
+        (i % 2 == 0) ? justificacion = BSGRAPHICS2_JUSTIFICACION_SUP_CEN: justificacion = BSGRAPHICS2_JUSTIFICACION_INF_CEN;
 
         bsgraphics2_escr_texto_mts(
                     graphics,
                     g_Debug_points[i].text, 0., 0., 1., 0.,
-                    BSGRAPHICS2_JUSTIFICACION_CEN_CEN,
+                    justificacion,
                     BSGRAPHICS2_ESTILO_NORMAL,
-                    0.05);
+                    0.02);
         
         bsgraphics2_desapila_transformacion(graphics);
         bsgraphics2_desapila_transformacion(graphics);        
@@ -350,6 +358,8 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
         
         bsmaterial_destruye(&material);
     }
+    
+    bsmaterial_destruye(&debug_point_material);
 }
 
 

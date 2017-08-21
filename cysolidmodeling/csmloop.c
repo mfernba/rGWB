@@ -392,27 +392,37 @@ static CYBOOL i_is_point_on_loop_boundary(
 static CYBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *he1, struct csmhedge_t *he2)
 {
     struct csmvertex_t *vertex0, *vertex1, *vertex2;
-    double x_vertex0, y_vertex0, z_vertex0, x_vertex1, y_vertex1, z_vertex1, x_vertex2, y_vertex2, z_vertex2;
+    double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
     double Wx, Wy, Wz;
     
     vertex0 = csmhedge_vertex(he0);
-    csmvertex_get_coordenadas(vertex0, &x_vertex0, &y_vertex0, &z_vertex0);
-
     vertex1 = csmhedge_vertex(he1);
-    csmvertex_get_coordenadas(vertex1, &x_vertex1, &y_vertex1, &z_vertex1);
-
     vertex2 = csmhedge_vertex(he2);
-    csmvertex_get_coordenadas(vertex2, &x_vertex2, &y_vertex2, &z_vertex2);
+    
+    csmvertex_vector_from_vertex1_to_vertex2(vertex0, vertex1, &Ux1, &Uy1, &Uz1);
+    csmvertex_vector_from_vertex1_to_vertex2(vertex1, vertex2, &Ux2, &Uy2, &Uz2);
 
-    csmmath_cross_product3D(
-                        x_vertex0 - x_vertex1, y_vertex0 - y_vertex1, z_vertex0 - z_vertex1,
-                        x_vertex2 - x_vertex1, y_vertex2 - y_vertex1, z_vertex2 - z_vertex1,
-                        &Wx, &Wy, &Wz);
+    csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Wx, &Wy, &Wz);
             
-    return csmmath_is_null_vector(Wx, Wy, Wz, csmtolerance_null_vector());
+    if (csmmath_is_null_vector(Wx, Wy, Wz, csmtolerance_null_vector()) == FALSO)
+    {
+        return FALSO;
+    }
+    else
+    {
+        double dot_product;
+        
+        dot_product = csmmath_dot_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
+        
+        if (dot_product < -1.e-6)
+            return CIERTO;
+        else
+            return FALSO;
+    }
 }
 
 // --------------------------------------------------------------------------------------------------------------
+static unsigned long i_niter = 0;
 
 CYBOOL csmloop_is_point_inside_loop(
                         const struct csmloop_t *loop,
@@ -428,6 +438,7 @@ CYBOOL csmloop_is_point_inside_loop(
     struct csmhedge_t *hit_hedge_loc;
 
     assert_no_null(loop);
+    i_niter++;
     
     if (i_is_point_on_loop_boundary(loop->ledge, x, y, z, tolerance, &hit_vertex_loc, &hit_hedge_loc) == CIERTO)
     {
@@ -539,31 +550,6 @@ CYBOOL csmloop_is_point_inside_loop(
                         count++;
                 }
                 
-                /*
-                if (y_not_dropped < y_vertex1)
-                {
-                    if (y_vertex0 <= y_not_dropped)
-                    {
-                        double term1, term2;
-                        
-                        term1 = (y_not_dropped - y_vertex0) * (x_vertex1 - x_vertex0);
-                        term2 = (x_not_dropped - x_vertex0) * (y_vertex1 - y_vertex0);
-                        
-                        if (term1 > term2)
-                            count++;
-                    }
-                }
-                else if (y_not_dropped < y_vertex1)
-                {
-                    double term1, term2;
-                    
-                    term1 = (y_not_dropped - y_vertex0) * (x_vertex1 - x_vertex0);
-                    term2 = (x_not_dropped - x_vertex0) * (y_vertex1 - y_vertex0);
-                    
-                    if (term1 < term2)
-                        count++;
-                }*/
-            
                 ray_hedge = next_ray_hedge;
                 
             } while (ray_hedge != start_hedge);

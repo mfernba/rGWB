@@ -137,10 +137,10 @@ static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graph
         struct bsmaterial_t *material;
             
         material = bsmaterial_crea_rgb(0., 1., 0.);
-        i_draw_solid_with_material(viewer->solid1, CIERTO, FALSO, &material, graphics);
+        i_draw_solid_with_material(viewer->solid1, CIERTO, CIERTO, &material, graphics);
 
         material = bsmaterial_crea_rgb(0., 0., 1.);
-        i_draw_solid_with_material(viewer->solid2, CIERTO, FALSO, &material, graphics);
+        i_draw_solid_with_material(viewer->solid2, CIERTO, CIERTO, &material, graphics);
     }
     
     csmdebug_draw_debug_info(graphics);
@@ -157,6 +157,7 @@ static void i_show_viewer(struct csmviewer_t *viewer)
     bsassert_not_null(viewer);
     
     viewer_widget = wf3Visor_crea_csgrenderer(500, 500, WF3VISTA_GESTION_DIBUJO_SIN_BDD);
+    wf3Visor_set_vista_predeterminada(viewer_widget, WF3VISTA_VISTA_ISOMETRICA);
     
     delegado = wf3Vista_crea_delegado_dibujo(viewer, i_draw_scene, csmviewer_t);
     wf3Visor_set_delegado_dibujo(viewer_widget, &delegado);

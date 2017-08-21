@@ -868,52 +868,143 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_edge_debug_info(struct csmedge_t *edge, CYBOOL draw_edge_info, struct bsgraphics2_t *graphics)
+static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
 {
-    double x1, y1, z1, x2, y2, z2;
+    struct csmloop_t *loop;
     
-    csmedge_vertex_coordinates(edge, &x1, &y1, &z1, &x2, &y2, &z2);
-    bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
+    loop = csmhedge_loop(hedge);
+    return csmloop_lface(loop);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_draw_debug_info_hedge(
+                        struct csmhedge_t *he, struct csmhedge_t *he_next,
+                        double A, double B, double C,
+                        CYBOOL is_ledge,
+                        CYBOOL draw_edge_info,
+                        struct bsgraphics2_t *graphics)
+{
+    struct csmedge_t *edge;
+    double x1, y1, z1, x2, y2, z2;
+    CYBOOL is_he_pos;
+    
+    csmvertex_get_coordenadas(csmhedge_vertex(he), &x1, &y1, &z1);
+    csmvertex_get_coordenadas(csmhedge_vertex(he_next), &x2, &y2, &z2);
+    
+    edge = csmhedge_edge(he);
+    
+    if (csmedge_hedge_lado_const(edge, CSMEDGE_LADO_HEDGE_POS) == he)
+    {
+        bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
+        is_he_pos = CIERTO;
+    }
+    else
+    {
+        is_he_pos = FALSO;
+    }
     
     if (draw_edge_info == CIERTO)
     {
-        bsgraphics2_append_desplazamiento_3D(graphics, .5 * (x1 + x2), .5 * (y1 + y2), .5 * (z1 + z2));
-        bsgraphics2_append_ejes_plano_pantalla(graphics);
-        {
-            struct csmhedge_t *he1, *he2;
-            char *description;
-            
-            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+        double length;
+        double Ux, Uy, Uz;
+        char *description;
         
-            description = copiafor_codigo2("+%lu,-%lu", csmhedge_id(he1), csmhedge_id(he2));
-            bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_CEN_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.05);
+        length = csmmath_distance_3D(x1, y1, z1, x2, y2, z2);
+        csmmath_vector_between_two_3D_points(x1, y1, z1, x2, y2, z2, &Ux, &Uy, &Uz);
+            
+        if (length > 0.)
+            csmmath_make_unit_vector3D(&Ux, &Uy, &Uz);
+        
+        {
+            const char *txt_edge_pos;
+            double Vx, Vy, Vz;
+            
+            csmmath_cross_product3D(A, B, C, Ux, Uy, Uz, &Vx, &Vy, &Vz);
+
+            if (length > 0.)
+            {
+                bsgraphics2_append_ejes_2D(graphics, x1, y1, z1, Ux, Uy, Uz, Vx, Vy, Vz);
+                bsgraphics2_escr_texto_mts(graphics, "***", 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.02);
+                bsgraphics2_desapila_transformacion(graphics);
+            }
+           
+            
+            if (is_he_pos == CIERTO)
+                txt_edge_pos = "+";
+            else
+                txt_edge_pos = "-";
+            
+            if (is_ledge == CIERTO)
+                description = copiafor_codigo3("%s%lu->%lu", txt_edge_pos, csmhedge_id(he), csmhedge_id(he_next));
+            else
+                description = copiafor_codigo2("%s%lu", txt_edge_pos, csmhedge_id(he));
+
+            bsgraphics2_append_desplazamiento_3D(graphics, .5 * (x1 + x2), .5 * (y1 + y2), .5 * (z1 + z2));
+            {
+                if (length > 0.)
+                    bsgraphics2_append_ejes_2D(graphics, 0., 0., 0., Ux, Uy, Uz, Vx, Vy, Vz);
+                else
+                    bsgraphics2_append_ejes_plano_pantalla(graphics);
+                
+                bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.025);
+                
+                bsgraphics2_desapila_transformacion(graphics);
+            }
+            bsgraphics2_desapila_transformacion(graphics);
             
             cypestr_destruye(&description);
         }
-        bsgraphics2_desapila_transformacion(graphics);
-        bsgraphics2_desapila_transformacion(graphics);
     }
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_debug_info_edges(struct csmhashtb(csmedge_t) *sedges, CYBOOL draw_edge_info, struct bsgraphics2_t *graphics)
+static void i_draw_debug_info_faces(struct csmhashtb(csmface_t) *sfaces, CYBOOL draw_edge_info, struct bsgraphics2_t *graphics)
 {
-    struct csmhashtb_iterator(csmedge_t) *iterator;
+    struct csmhashtb_iterator(csmface_t) *iterator;
     
-    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
     
-    while (csmhashtb_has_next(iterator, csmedge_t) == CIERTO)
+    while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
     {
-        struct csmedge_t *edge;
+        struct csmface_t *face;
+        double A, B, C, D;
+        struct csmloop_t *floops;
         
-        csmhashtb_next_pair(iterator, NULL, &edge, csmedge_t);
-        i_draw_edge_debug_info(edge, draw_edge_info, graphics);
+        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        csmface_face_equation(face, &A, &B, &C, &D);
+        
+        floops = csmface_floops(face);
+        
+        while (floops != NULL)
+        {
+            struct csmhedge_t *he;
+            CYBOOL is_ledge;
+            
+            he = csmloop_ledge(floops);
+            is_ledge = CIERTO;
+            
+            do
+            {
+                struct csmhedge_t *he_next;
+                
+                he_next = csmhedge_next(he);
+                
+                i_draw_debug_info_hedge(he, he_next, A, B, C, is_ledge, draw_edge_info, graphics);
+                
+                he = he_next;
+                is_ledge = FALSO;
+                
+            } while (he != csmloop_ledge(floops));
+            
+            floops = csmloop_next(floops);
+        }
     }
     
-    csmhashtb_free_iterator(&iterator, csmedge_t);
+    csmhashtb_free_iterator(&iterator, csmface_t);
 }
+
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -947,7 +1038,7 @@ void csmsolid_draw_debug_info(struct csmsolid_t *solido, CYBOOL draw_edge_info, 
     
     csmsolid_redo_geometric_generated_data(solido);
     i_draw_debug_info_vertexs(solido->svertexs, graphics);
-    i_draw_debug_info_edges(solido->sedges, draw_edge_info, graphics);
+    i_draw_debug_info_faces(solido->sfaces, draw_edge_info, graphics);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -973,16 +1064,6 @@ static void i_draw_solid_faces(
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
-{
-    struct csmloop_t *loop;
-    
-    loop = csmhedge_loop(hedge);
-    return csmloop_lface(loop);
 }
 
 // ----------------------------------------------------------------------------------------------------

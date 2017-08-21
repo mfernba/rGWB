@@ -735,27 +735,29 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         csmdebug_begin_context("Intersections A vs B");
         {
             csmdebug_clear_debug_points();
+            
             i_generate_edge_intersections_solid_A_with_solid_B(solid_A, solid_B, vv_intersections_loc, vf_intersections_A_loc);
+            
+            csmsolid_print_debug(solid_A, CIERTO);
             csmsolid_print_debug(solid_B, CIERTO);
         }
         csmdebug_end_context();
     
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
         
         csmdebug_begin_context("Intersections B vs A");
         {
             csmdebug_clear_debug_points();
             i_generate_edge_intersections_solid_A_with_solid_B(solid_B, solid_A, vv_intersections_loc, vf_intersections_B_loc);
+            
             csmsolid_print_debug(solid_A, CIERTO);
+            csmsolid_print_debug(solid_B, CIERTO);
         }
         csmdebug_end_context();
 
+        //csmdebug_show_viewer();
+        
         i_append_common_vertices_solid_A_and_B_not_previously_found(solid_A, solid_B, vv_intersections_loc);
-        
-        csmsolid_print_debug(solid_A, CIERTO);
-        csmsolid_print_debug(solid_B, CIERTO);
-        
-        csmdebug_show_viewer();
     }
     csmdebug_end_context();
     
