@@ -50,6 +50,14 @@ struct i_inters_sectors_t
     CYBOOL intersect;
 };
 
+enum i_nonmanifold_intersect_sequence_t
+{
+    i_NONMANIFOLD_INTERSECT_SEQUENCE_IN_ON,
+    i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_IN,
+    i_NONMANIFOLD_INTERSECT_SEQUENCE_OUT_ON,
+    i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_OUT
+};
+
 // ------------------------------------------------------------------------------------------
 
 struct csmsetop_vtxvtx_inters_t *csmsetop_vtxvtx_create_inters(struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b)
@@ -542,6 +550,177 @@ static void i_generate_neighboorhoods(
 
 // ------------------------------------------------------------------------------------------
 
+static CYBOOL i_must_look_for_non_manifold_intersection(
+                        enum csmsetop_classify_resp_solid_t s1, enum csmsetop_classify_resp_solid_t s2,
+                        enum i_nonmanifold_intersect_sequence_t *nonmanifold_intersection_sequence)
+{
+    CYBOOL must_look_for;
+    enum i_nonmanifold_intersect_sequence_t nonmanifold_intersection_sequence_loc;
+    
+    assert_no_null(nonmanifold_intersection_sequence);
+    
+    if (s1 == CSMSETOP_CLASSIFY_RESP_SOLID_ON && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
+    {
+        must_look_for = CIERTO;
+        nonmanifold_intersection_sequence_loc = i_NONMANIFOLD_INTERSECT_SEQUENCE_IN_ON;
+    }
+    else if (s1 == CSMSETOP_CLASSIFY_RESP_SOLID_IN && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+    {
+        must_look_for = CIERTO;
+        nonmanifold_intersection_sequence_loc = i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_IN;
+    }
+    else if (s1 == CSMSETOP_CLASSIFY_RESP_SOLID_ON && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+    {
+        must_look_for = FALSO;
+        nonmanifold_intersection_sequence_loc = i_NONMANIFOLD_INTERSECT_SEQUENCE_OUT_ON;
+    }
+    else if (s1 == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+    {
+        must_look_for = FALSO;
+        nonmanifold_intersection_sequence_loc = i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_OUT;
+    }
+    else
+    {
+        must_look_for = FALSO;
+        nonmanifold_intersection_sequence_loc = (enum i_nonmanifold_intersect_sequence_t)USHRT_MAX;
+    }
+    
+    *nonmanifold_intersection_sequence = nonmanifold_intersection_sequence_loc;
+    
+    return must_look_for;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CYBOOL i_match_non_manifold_intersection(
+                        enum i_nonmanifold_intersect_sequence_t nonmanifold_intersection_sequence,
+                        enum csmsetop_classify_resp_solid_t s1, enum csmsetop_classify_resp_solid_t s2)
+{
+    switch (nonmanifold_intersection_sequence)
+    {
+        case i_NONMANIFOLD_INTERSECT_SEQUENCE_IN_ON:
+            
+            return ES_CIERTO(s1 == CSMSETOP_CLASSIFY_RESP_SOLID_IN && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
+            
+        case i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_IN:
+            
+            return ES_CIERTO(s1 == CSMSETOP_CLASSIFY_RESP_SOLID_ON && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_IN);
+            
+        case i_NONMANIFOLD_INTERSECT_SEQUENCE_OUT_ON:
+            
+            return ES_CIERTO(s1 == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
+            
+        case i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_OUT:
+            
+            return ES_CIERTO(s1 == CSMSETOP_CLASSIFY_RESP_SOLID_ON && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_OUT);
+            
+        default_error();
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_discard_non_manifold_intersections(
+                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
+                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+{
+    unsigned long i, num_sectors;
+    
+    num_sectors = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+    
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_inters_sectors_t *sector_i;
+        struct i_neighborhood_t *nba_i, *nbb_i;
+        enum i_nonmanifold_intersect_sequence_t nonmanifold_intersection_sequence;
+
+        sector_i = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+        assert_no_null(sector_i);
+        
+        nba_i = arr_GetPunteroST(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+        assert_no_null(nba_i);
+        
+        nbb_i = arr_GetPunteroST(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+        assert_no_null(nbb_i);
+            
+        if (sector_i->intersect == CIERTO
+                && csmopbas_is_wide_hedge(nba_i->he, NULL, NULL, NULL) == CIERTO
+                && (sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON || sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                && i_must_look_for_non_manifold_intersection(sector_i->s1b, sector_i->s2b, &nonmanifold_intersection_sequence) == CIERTO)
+        {
+            struct csmhedge_t *mate_he_nbb_i;
+            unsigned long j;
+            CYBOOL modified_mate_neighborhood;
+            
+            mate_he_nbb_i = csmhedge_next(csmopbas_mate(nbb_i->he));
+            
+            modified_mate_neighborhood = FALSO;
+            
+            for (j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                struct i_neighborhood_t *nbb_j;
+                
+                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                nbb_j = arr_GetPunteroST(neighborhood_B, sector_j->idx_nbb, i_neighborhood_t);
+                assert_no_null(nbb_j);
+                
+                if (sector_j->idx_nba == sector_i->idx_nba
+                        && nbb_j->he == mate_he_nbb_i
+                        && i_match_non_manifold_intersection(nonmanifold_intersection_sequence, sector_j->s1b, sector_j->s2b) == CIERTO)
+                {
+                    assert(modified_mate_neighborhood == FALSO);
+                    modified_mate_neighborhood = CIERTO;
+                    
+                    sector_i->intersect = FALSO;
+                    sector_j->intersect = FALSO;
+                }
+            }
+        }
+        
+        if (sector_i->intersect == CIERTO
+                && csmopbas_is_wide_hedge(nbb_i->he, NULL, NULL, NULL) == CIERTO
+                && (sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON || sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                && i_must_look_for_non_manifold_intersection(sector_i->s1a, sector_i->s2a, &nonmanifold_intersection_sequence) == CIERTO)
+        {
+            struct csmhedge_t *mate_he_nba_i;
+            unsigned long j;
+            CYBOOL modified_mate_neighborhood;
+            
+            mate_he_nba_i = csmhedge_next(csmopbas_mate(nba_i->he));
+            
+            modified_mate_neighborhood = FALSO;
+            
+            for (j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                struct i_neighborhood_t *nba_j;
+                
+                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                nba_j = arr_GetPunteroST(neighborhood_A, sector_j->idx_nba, i_neighborhood_t);
+                assert_no_null(nba_j);
+                
+                if (sector_j->idx_nbb == sector_i->idx_nbb
+                        && nba_j->he == mate_he_nba_i
+                        && i_match_non_manifold_intersection(nonmanifold_intersection_sequence, sector_j->s1a, sector_j->s2a) == CIERTO)
+                {
+                    assert(modified_mate_neighborhood == FALSO);
+                    modified_mate_neighborhood = CIERTO;
+                    
+                    sector_i->intersect = FALSO;
+                    sector_j->intersect = FALSO;
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_reclassify_on_sectors(
                         enum csmsetop_operation_t set_operation,
                         ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
@@ -845,6 +1024,76 @@ static void i_reclasssify_single_on_edges(
 
 // ------------------------------------------------------------------------------------------
 
+static const char *i_debug_text_for_classification(enum csmsetop_classify_resp_solid_t cl)
+{
+    switch (cl)
+    {
+        case CSMSETOP_CLASSIFY_RESP_SOLID_IN:  return " IN";
+        case CSMSETOP_CLASSIFY_RESP_SOLID_OUT: return "OUT";
+        case CSMSETOP_CLASSIFY_RESP_SOLID_ON:  return " ON";
+        default_error();
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static char *, i_debug_text_for_sector_classification, (enum csmsetop_classify_resp_solid_t s1, enum csmsetop_classify_resp_solid_t s2))
+{
+    const char *text_s1, *text_s2;
+    
+    text_s1 = i_debug_text_for_classification(s1);
+    text_s2 = i_debug_text_for_classification(s2);
+
+    return copiafor_codigo2("(%s - %s)", text_s1, text_s2);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_print_neighborhood_intersections(
+                        const ArrEstructura(i_inters_sectors_t) *neighborhood_intersections,
+                        const ArrEstructura(i_neighborhood_t) *neighborhood_A, const ArrEstructura(i_neighborhood_t) *neighborhood_B)
+{
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        unsigned long i, no_inters;
+        
+        csmdebug_print_debug_info("\n");
+        
+        no_inters = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+        
+        for (i = 0; i < no_inters; i++)
+        {
+            const struct i_inters_sectors_t *inters_sectors;
+            const struct i_neighborhood_t *nba, *nbb;
+            char *text_cla, *text_clb;
+            
+            inters_sectors = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+            assert_no_null(inters_sectors);
+            
+            nba = arr_GetPunteroST(neighborhood_A, inters_sectors->idx_nba, i_neighborhood_t);
+            assert_no_null(nba);
+
+            nbb = arr_GetPunteroST(neighborhood_B, inters_sectors->idx_nbb, i_neighborhood_t);
+            assert_no_null(nbb);
+            
+            text_cla = i_debug_text_for_sector_classification(inters_sectors->s1a, inters_sectors->s2a);
+            text_clb = i_debug_text_for_sector_classification(inters_sectors->s1b, inters_sectors->s2b);
+            
+            csmdebug_print_debug_info(
+                        "(hea %lu) (heb %lu) %s %s Intersect: %lu\n",
+                        csmhedge_id(nba->he),
+                        csmhedge_id(nbb->he),
+                        text_cla, text_clb,
+                        inters_sectors->intersect);
+        
+            cypestr_destruye(&text_cla);
+            cypestr_destruye(&text_clb);
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_reclasssify_on_edges(
                         enum csmsetop_operation_t set_operation,
                         ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
@@ -854,6 +1103,9 @@ static void i_reclasssify_on_edges(
                         set_operation,
                         neighborhood_A, neighborhood_B,
                         neighborhood_intersections);
+    
+    csmdebug_print_debug_info("After reclassify double on-edges\n");
+    i_print_neighborhood_intersections(neighborhood_intersections, neighborhood_A, neighborhood_B);
     
     i_reclasssify_single_on_edges(
                         set_operation,
@@ -1289,30 +1541,7 @@ static void i_insert_null_edges(
                 {
                     CYBOOL orient;
                     
-                    orient = i_get_orient(ha1, hb1, hb2);
-                    i_separateInteriorHedge(ha1, orient, set_of_null_edges_A);
-                }
-                else
-                {
-                    i_separateEdgeSequence(ha2, ha1, set_of_null_edges_A);
-                }
-                
-                if (hb1 == hb2)
-                {
-                    CYBOOL orient;
-                    
-                    orient = i_get_orient(hb1, ha2, ha1);
-                    i_separateInteriorHedge(hb1, orient, set_of_null_edges_B);
-                }
-                else
-                {
-                    i_separateEdgeSequence(hb1, hb2, set_of_null_edges_B);
-                }
-                
-                /*
-                if (ha1 == ha2)
-                {
-                    CYBOOL orient;
+                    assert(hb1 != hb2);
                     
                     orient = i_get_orient(ha1, hb1, hb2);
                     i_separateInteriorHedge(ha1, orient, set_of_null_edges_A);
@@ -1323,6 +1552,8 @@ static void i_insert_null_edges(
                 {
                     CYBOOL orient;
                     
+                    assert(ha2 != ha1);
+                    
                     orient = i_get_orient(hb1, ha2, ha1);
                     i_separateInteriorHedge(hb1, orient, set_of_null_edges_B);
                     
@@ -1332,78 +1563,8 @@ static void i_insert_null_edges(
                 {
                     i_separateEdgeSequence(ha2, ha1, set_of_null_edges_A);
                     i_separateEdgeSequence(hb1, hb2, set_of_null_edges_B);
-                }*/
+                }
             }
-        }
-    }
-}
-
-// ------------------------------------------------------------------------------------------
-
-static const char *i_debug_text_for_classification(enum csmsetop_classify_resp_solid_t cl)
-{
-    switch (cl)
-    {
-        case CSMSETOP_CLASSIFY_RESP_SOLID_IN:  return " IN";
-        case CSMSETOP_CLASSIFY_RESP_SOLID_OUT: return "OUT";
-        case CSMSETOP_CLASSIFY_RESP_SOLID_ON:  return " ON";
-        default_error();
-    }
-}
-
-// ------------------------------------------------------------------------------------------
-
-CONSTRUCTOR(static char *, i_debug_text_for_sector_classification, (enum csmsetop_classify_resp_solid_t s1, enum csmsetop_classify_resp_solid_t s2))
-{
-    const char *text_s1, *text_s2;
-    
-    text_s1 = i_debug_text_for_classification(s1);
-    text_s2 = i_debug_text_for_classification(s2);
-
-    return copiafor_codigo2("(%s - %s)", text_s1, text_s2);
-}
-
-// ------------------------------------------------------------------------------------------
-
-static void i_print_neighborhood_intersections(
-                        const ArrEstructura(i_inters_sectors_t) *neighborhood_intersections,
-                        const ArrEstructura(i_neighborhood_t) *neighborhood_A, const ArrEstructura(i_neighborhood_t) *neighborhood_B)
-{
-    if (csmdebug_debug_enabled() == CIERTO)
-    {
-        unsigned long i, no_inters;
-        
-        csmdebug_print_debug_info("\n");
-        
-        no_inters = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
-        
-        for (i = 0; i < no_inters; i++)
-        {
-            const struct i_inters_sectors_t *inters_sectors;
-            const struct i_neighborhood_t *nba, *nbb;
-            char *text_cla, *text_clb;
-            
-            inters_sectors = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
-            assert_no_null(inters_sectors);
-            
-            nba = arr_GetPunteroST(neighborhood_A, inters_sectors->idx_nba, i_neighborhood_t);
-            assert_no_null(nba);
-
-            nbb = arr_GetPunteroST(neighborhood_B, inters_sectors->idx_nbb, i_neighborhood_t);
-            assert_no_null(nbb);
-            
-            text_cla = i_debug_text_for_sector_classification(inters_sectors->s1a, inters_sectors->s2a);
-            text_clb = i_debug_text_for_sector_classification(inters_sectors->s1b, inters_sectors->s2b);
-            
-            csmdebug_print_debug_info(
-                        "(hea %lu) (heb %lu) %s %s Intersect: %lu\n",
-                        csmhedge_id(nba->he),
-                        csmhedge_id(nbb->he),
-                        text_cla, text_clb,
-                        inters_sectors->intersect);
-        
-            cypestr_destruye(&text_cla);
-            cypestr_destruye(&text_clb);
         }
     }
 }
@@ -1434,6 +1595,14 @@ static void i_vtxvtx_append_null_edges(
                         &neighborhood_A, &neighborhood_B,
                         &neighborhood_intersections);
     
+    csmdebug_print_debug_info("Original neighborhoods\n");
+    i_print_neighborhood_intersections(neighborhood_intersections, neighborhood_A, neighborhood_B);
+    
+    i_discard_non_manifold_intersections(
+                        neighborhood_A, neighborhood_B,
+                        neighborhood_intersections);
+
+    csmdebug_print_debug_info("After discarding non-manifold intersections\n");
     i_print_neighborhood_intersections(neighborhood_intersections, neighborhood_A, neighborhood_B);
     
     i_reclassify_on_sectors(
@@ -1441,6 +1610,7 @@ static void i_vtxvtx_append_null_edges(
                         neighborhood_A, neighborhood_B,
                         neighborhood_intersections);
     
+    csmdebug_print_debug_info("After reclassify on-sectors\n");
     i_print_neighborhood_intersections(neighborhood_intersections, neighborhood_A, neighborhood_B);
     
     i_reclasssify_on_edges(
@@ -1448,8 +1618,9 @@ static void i_vtxvtx_append_null_edges(
                         neighborhood_A, neighborhood_B,
                         neighborhood_intersections);
     
+    csmdebug_print_debug_info("After reclassify single on-edges\n");
     i_print_neighborhood_intersections(neighborhood_intersections, neighborhood_A, neighborhood_B);
-
+    
     i_insert_null_edges(
                         neighborhood_A, neighborhood_B,
                         neighborhood_intersections,

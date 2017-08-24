@@ -28,6 +28,7 @@
 
 #include "copiafor.h"
 #include "cyassert.h"
+#include "a_pto2d.h"
 #include "a_pto3d.h"
 #include <geomcomp/gccontorno.h>
 #include <geomcomp/gcelem2d.h>
@@ -1272,7 +1273,6 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
     
     i_set_output_debug_file("test_cilindro5.txt");
 
-    //cshape2d = gcelem2d_contorno_circular(0.50, 4);
     cshape2d = gcelem2d_contorno_circular(0.25, 4);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     shape2d2 = gcelem2d_contorno_rectangular(1.5, 0.75);
@@ -1282,14 +1282,64 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
     
     solid2 = csmsweep_create_solid_from_shape_debug(
                         cshape2d, .75,  0.25,   1., -1., 0., 0., 0., 0., 1.,
-                        cshape2d, .75, -2., 1., -1., 0., 0., 0., 0., 1.,
+                        cshape2d, .75, -2.,     1., -1., 0., 0., 0., 0., 1.,
                         1000);
-     /*
-      solid2 = csmsweep_create_solid_from_shape_debug(
-                        shape2d2, 1.,  2., 1.5, 0., 0., 1., 1., 0., 0.,
-                        shape2d2, 1., -2., .5, 0., 0., 1., 1., 0., 0.,
+    {
+        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+    }
+
+    {
+        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
+    }
+    
+    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid2, CIERTO);
+    
+    gccontorno_destruye(&cshape2d);
+    gccontorno_destruye(&shape2d);
+    gccontorno_destruye(&shape2d2);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_cilindro6(struct csmviewer_t *viewer)
+{
+    struct gccontorno_t *shape2d, *cshape2d, *shape2d2;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    
+    i_set_output_debug_file("test_cilindro6.txt");
+
+    cshape2d = gcelem2d_contorno_circular(0.50, 4);
+    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d2 = gcelem2d_contorno_rectangular(1.5, 0.75);
+    
+    // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1.25, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, 1.,  2., 1., 0., 0., 1., 1., 0., 0.,
+                        cshape2d, 1., -2., 1., 0., 0., 1., 1., 0., 0.,
                         1000);
-      */
     
     {
         solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
@@ -1323,6 +1373,73 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
     gccontorno_destruye(&shape2d2);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_cilindro7(struct csmviewer_t *viewer)
+{
+    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    
+    i_set_output_debug_file("test_cilindro7.txt");
+
+    {
+        double ax, ay;
+        ArrPunto2D *points;
+        
+        ax = 0.5;
+        ay = 0.5;
+        
+        points = arr_CreaPunto2D(0);
+        arr_AppendPunto2D(points, -0.5 * ax, -0.5 * ay);
+        arr_AppendPunto2D(points,  0.5 * ax, -0.5 * ay);
+        arr_AppendPunto2D(points,  0., 0.5 * ay);
+        
+        cshape2d = gccontorno_crea_vacio();
+        gccontorno_append_array_puntos(cshape2d, &points);
+    }
+    
+    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    
+    // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, 1.,  2., 0.75, -1., 0., 0., 0., 0., 1.,
+                        cshape2d, 1., -2., 0.75, -1., 0., 0., 0., 0., 1.,
+                        1000);
+    
+        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+    
+        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+     
+
+        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
+
+    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid2, CIERTO);
+    
+    gccontorno_destruye(&cshape2d);
+    gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
 }
@@ -1561,6 +1678,141 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_cilindro8(struct csmviewer_t *viewer)
+{
+    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    
+    i_set_output_debug_file("test_cilindro7.txt");
+
+    {
+        double ax, ay;
+        ArrPunto2D *points;
+        
+        ax = 0.5;
+        ay = 0.5;
+        
+        points = arr_CreaPunto2D(0);
+        arr_AppendPunto2D(points, -0.5 * ax, -0.5 * ay);
+        arr_AppendPunto2D(points,  0.5 * ax, -0.5 * ay);
+        arr_AppendPunto2D(points,  0.01 * ax, 0.5 * ay);
+        arr_AppendPunto2D(points,  -0.01 * ax, 0.5 * ay);
+        
+        cshape2d = gccontorno_crea_vacio();
+        gccontorno_append_array_puntos(cshape2d, &points);
+    }
+    
+    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    
+    // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, 1.,  2., 0.75, -1., 0., 0., 0., 0., 1.,
+                        cshape2d, 1., -2., 0.75, -1., 0., 0., 0., 0., 1.,
+                        1000);
+    
+        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+    
+        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+     
+
+        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
+
+    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid2, CIERTO);
+    
+    gccontorno_destruye(&cshape2d);
+    gccontorno_destruye(&shape2d);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_cilindro9(struct csmviewer_t *viewer)
+{
+    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    
+    i_set_output_debug_file("test_cilindro7.txt");
+
+    {
+        double ax, ay;
+        ArrPunto2D *points;
+        
+        ax = 0.5;
+        ay = 0.5;
+        
+        points = arr_CreaPunto2D(0);
+        arr_AppendPunto2D(points, -0.5 * ax, -0.5 * ay);
+        arr_AppendPunto2D(points,  0.5 * ax, -0.5 * ay);
+        arr_AppendPunto2D(points,  0., 0.5 * ay);
+        
+        cshape2d = gccontorno_crea_vacio();
+        gccontorno_append_array_puntos(cshape2d, &points);
+    }
+    
+    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    
+    // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, 1.,  2., 1.25, 1., 0., 0., 0., 0., -1.,
+                        cshape2d, 1., -2., 1.25, 1., 0., 0., 0., 0., -1.,
+                        1000);
+    
+        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+    
+        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
+     
+
+        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
+        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
+
+    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid2, CIERTO);
+    
+    gccontorno_destruye(&cshape2d);
+    gccontorno_destruye(&shape2d);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -1592,8 +1844,8 @@ void csmtest_test(void)
     i_test_union_solidos1(viewer);
     i_test_union_solidos2(viewer);
     i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
-    i_test_interseccion_solidos1(viewer);
     
+    i_test_interseccion_solidos1(viewer);
     i_test_interseccion_solidos2(viewer);
     i_test_interseccion_solidos3(viewer);
     i_test_interseccion_solidos4(viewer);
@@ -1611,9 +1863,17 @@ void csmtest_test(void)
     i_test_cilindro2(viewer);
     i_test_cilindro3(viewer);  //--> Revisar orientación de las caras del verde, una no es correcta
     i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75
-    */
+    i_test_cilindro5(viewer); // --> Intersecciones non-manifold. Corregir sólido 2 unión sólido 1.
     
-    i_test_cilindro5(viewer); //<< -- corregir
+    i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
+    i_test_cilindro5(viewer); // -- Intersecciones non-manifold. Corregir sólido 2 unión sólido 1.
+    i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
+    i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
+     */
+    
+    i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
+                              // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
+                              // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
     
     csmviewer_free(&viewer);
 }

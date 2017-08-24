@@ -163,6 +163,8 @@ static void i_join_null_edges(
     csmsolid_print_debug(solid_A, CIERTO);
     csmsolid_print_debug(solid_B, CIERTO);
 
+    //csmdebug_show_viewer();
+
     for (i = 0; i < no_null_edges; i++)
     {
         struct csmedge_t *next_edge_A, *next_edge_B;
