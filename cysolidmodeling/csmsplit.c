@@ -872,7 +872,7 @@ static void i_finish_split(
     set_of_null_faces_below = set_of_null_faces;
     
     csmsolid_redo_geometric_generated_data(work_solid);
-    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces);
+    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_above);
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_below);
 
     no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);

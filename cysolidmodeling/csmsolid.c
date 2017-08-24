@@ -723,30 +723,25 @@ static void i_print_debug_info_edges(struct csmhashtb(csmedge_t) *sedges, CYBOOL
 
 static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CYBOOL assert_si_no_es_integro)
 {
-    struct csmnode_t *vertex_node;
-    double x, y, z;
     struct csmhedge_t *hedge;
     
-    assert_no_null(vertex);
-    
-    vertex_node = CSMNODE(vertex);
-    csmvertex_get_coordenadas(vertex, &x, &y, &z);
-    
-    csmdebug_print_debug_info("\tVertex %6lu\t%6.3lf\t%6.3lf\t%6.3lf ", csmnode_id(vertex_node), x, y, z);
+    csmvertex_print_debug_info(vertex);
     
     hedge = csmvertex_hedge(vertex);
     
     if (hedge != NULL)
     {
-        csmdebug_print_debug_info("He %6lu\n", csmnode_id(CSMNODE(hedge)));
+        csmdebug_print_debug_info("He %6lu", csmnode_id(CSMNODE(hedge)));
         
         if (assert_si_no_es_integro == CIERTO)
             assert(csmhedge_vertex(hedge) == vertex);
     }
     else
     {
-        csmdebug_print_debug_info("He (null)\n");
+        csmdebug_print_debug_info("He (null)");
     }
+    
+    csmdebug_print_debug_info("\n");
 }
 
 // ----------------------------------------------------------------------------------------------------

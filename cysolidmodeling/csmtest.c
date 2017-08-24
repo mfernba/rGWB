@@ -1450,10 +1450,13 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
 {
     struct gccontorno_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
+    unsigned long no_sides_circle;
     
     i_set_output_debug_file("inters_cilindro2.txt");
 
-    cshape2d = gcelem2d_contorno_circular(0.40, 16);
+    no_sides_circle = 32;
+    
+    cshape2d = gcelem2d_contorno_circular(0.40, no_sides_circle);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
@@ -1476,7 +1479,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
         struct csmsolid_t *solid3;
         struct csmsolid_t *solid_res2;
         
-        cshape2d = gcelem2d_contorno_circular(0.10, 16);
+        cshape2d = gcelem2d_contorno_circular(0.40, no_sides_circle);
         
         solid3 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,  2., 0., .25, 0., 1., 0., 0., 0., 1.,
@@ -1858,20 +1861,18 @@ void csmtest_test(void)
     i_test_multiple_solidos3(viewer);
 
     i_test_cilindro1(viewer);
-    
-    i_test_cilindro1(viewer);
     i_test_cilindro2(viewer);
     i_test_cilindro3(viewer);  //--> Revisar orientación de las caras del verde, una no es correcta
     i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75
-    i_test_cilindro5(viewer); // --> Intersecciones non-manifold. Corregir sólido 2 unión sólido 1.
-    
+    i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
     i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
-    i_test_cilindro5(viewer); // -- Intersecciones non-manifold. Corregir sólido 2 unión sólido 1.
     i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
      */
+
+    i_test_cilindro3(viewer);  //--> Revisar orientación de las caras del verde, una no es correcta
     
-    i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
+    //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                               // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
     

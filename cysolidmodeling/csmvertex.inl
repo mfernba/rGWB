@@ -59,3 +59,8 @@ CYBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct cs
 
 
 void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtransform_t *transform);
+
+
+// Debug...
+
+void csmvertex_print_debug_info(struct csmvertex_t *vertex);
