@@ -307,7 +307,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
         bsgraphics2_escr_color(graphics, debug_point_material);
         bsgraphics2_escr_punto3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
         
-        bsgraphics2_append_desplazamiento_3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
+        /*bsgraphics2_append_desplazamiento_3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
         bsgraphics2_append_ejes_plano_pantalla(graphics);
         
         (i % 2 == 0) ? justificacion = BSGRAPHICS2_JUSTIFICACION_SUP_CEN: justificacion = BSGRAPHICS2_JUSTIFICACION_INF_CEN;
@@ -321,6 +321,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
         
         bsgraphics2_desapila_transformacion(graphics);
         bsgraphics2_desapila_transformacion(graphics);        
+         */
     }
     
     if (g_Draw_plane == CIERTO)

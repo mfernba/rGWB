@@ -1546,12 +1546,15 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
 {
     struct gccontorno_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid3, *solid_res;
+    unsigned long no_points_circle;
     
     i_set_output_debug_file("inters_cilindro2.txt");
     csmdebug_set_enabled_by_code(FALSO);
 
+    no_points_circle = 32;
+    
     //cshape2d = gcelem2d_contorno_rectangular(0.80, 0.80);
-    cshape2d = gcelem2d_contorno_circular(0.40, 32);
+    cshape2d = gcelem2d_contorno_circular(0.40, no_points_circle);
     shape2d = gcelem2d_contorno_rectangular(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
@@ -1615,19 +1618,19 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
         solid_res = csmsetop_difference_A_minus_B(solid_res, solid4);
         
         {
-            struct csmsolid_t *solid5, *solid_res5;
+            struct csmsolid_t *solid5;
             
-            cshape2d = gcelem2d_contorno_circular(0.25, 32);
+            cshape2d = gcelem2d_contorno_circular(0.45, no_points_circle); // Revisar resta con num_puntos_circulo = 8
             
             solid5 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         cshape2d,    -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         20000);
             
-            solid_res5 = csmsetop_difference_A_minus_B(solid1, solid5);
-
-            csmsolid_move(solid_res5, -0.5, 0., 0.);
-            solid_res = csmsetop_difference_A_minus_B(solid_res5, solid_res);
+            csmsolid_move(solid1, -0.5, 0., 0.);
+            //solid_res = csmsetop_difference_A_minus_B(solid1, solid_res);
+            solid_res = csmsetop_difference_A_minus_B(solid_res, solid5);
+            //solid_res = csmsetop_intersection_A_and_B(solid_res, solid5);
             //solid_res = csmsetop_intersection_A_and_B(solid_res5, solid_res);
         }
         
@@ -1816,6 +1819,97 @@ static void i_test_cilindro9(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+CONSTRUCTOR(static struct csmsolid_t *, i_make_ring_part, (
+                        double Zo,
+                        double height,
+                        double outer_radius, double inner_radius, unsigned long no_points_circle))
+{
+    struct csmsolid_t *ring_part;
+    struct gccontorno_t *ring_shape;
+    
+    ring_shape = gcelem2d_contorno_circular_hueco(outer_radius, inner_radius, no_points_circle);
+    
+    ring_part = csmsweep_create_solid_from_shape_debug(
+                        ring_shape,
+                        0., 0., Zo + height, 1., 0., 0., 0., 1., 0.,
+                        ring_shape,
+                        0., 0., Zo, 1., 0., 0., 0., 1., 0.,
+                        1000);
+    
+    gccontorno_destruye(&ring_shape);
+    
+    return ring_part;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_mechanical_part1(void)
+{
+    struct csmsolid_t *basic_part;
+    struct csmsolid_t *main_part;
+    double ax, ay, main_part_length;
+    struct gccontorno_t *main_part_shape;
+    
+    i_set_output_debug_file("mechanical1.txt");
+
+    
+    ax = 0.1;
+    ay = 0.1;
+    main_part_length = 1.;
+    
+    main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
+    //main_part_shape = gcelem2d_contorno_circular(ax, 32);
+    
+    basic_part = csmsweep_create_solid_from_shape_debug(
+                        main_part_shape,
+                        0., 0., main_part_length, 1., 0., 0., 0., 1., 0.,
+                        main_part_shape,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    main_part = csmsolid_duplicate(basic_part);
+    
+    {
+        unsigned long i, no_divisions;
+        double ring_part_height;
+        struct csmsolid_t *ring_part;
+        double incr_z;
+     
+        no_divisions = 20;
+        ring_part_height = main_part_length / no_divisions;
+        ring_part = i_make_ring_part(0., ring_part_height, 1.2 * ax, 0.4 * ax, 16);
+        
+        incr_z = ring_part_height;
+        
+        for (i = 0; i < no_divisions - 1; i++)
+        {
+            if (i % 2 == 1)
+            {
+                struct csmsolid_t *main_part_loc;
+            
+                //main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
+                main_part_loc = csmsetop_intersection_A_and_B(main_part, ring_part);
+                csmsolid_free(&main_part);
+                main_part = main_part_loc;
+                break;
+            }
+            
+            csmsolid_move(ring_part, 0., 0., incr_z);
+        }
+     
+        csmsolid_free(&ring_part);
+     }
+    
+    csmsolid_move(basic_part, 0.25 * ax, 0., 0.05 * main_part_length);
+    //main_part = csmsetop_difference_A_minus_B(main_part, basic_part);
+    
+    gccontorno_destruye(&main_part_shape);
+    csmsolid_free(&main_part);
+    csmsolid_free(&basic_part);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -1836,12 +1930,12 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
     
-    //i_test_divide_solido_rectangular_por_plano_medio();
-    
-    //i_test_divide_solido_rectangular_hueco_por_plano_medio();
-    //i_test_divide_solido_rectangular_hueco_por_plano_medio2();
-    //i_test_divide_solido_rectangular_hueco_por_plano_superior();
-    //i_test_divide_solido_rectangular_hueco_por_plano_superior2();
+    /*
+    i_test_divide_solido_rectangular_hueco_por_plano_medio();
+    i_test_divide_solido_rectangular_hueco_por_plano_medio2();
+    i_test_divide_solido_rectangular_hueco_por_plano_superior();
+    i_test_divide_solido_rectangular_hueco_por_plano_superior2();
+    */
 
     /*
     i_test_union_solidos1(viewer);
@@ -1859,22 +1953,23 @@ void csmtest_test(void)
     i_test_multiple_solidos1(viewer);
     i_test_multiple_solidos2(viewer);
     i_test_multiple_solidos3(viewer);
-
+    */
+    
     i_test_cilindro1(viewer);
     i_test_cilindro2(viewer);
-    i_test_cilindro3(viewer);  //--> Revisar orientación de las caras del verde, una no es correcta
-    i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75
+    i_test_cilindro3(viewer);
+    //i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75
     i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
     i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
-     */
-
-    i_test_cilindro3(viewer);  //--> Revisar orientación de las caras del verde, una no es correcta
     
     //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                               // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
+
+    i_test_mechanical_part1();
+
     
     csmviewer_free(&viewer);
 }

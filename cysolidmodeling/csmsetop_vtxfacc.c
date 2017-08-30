@@ -543,7 +543,11 @@ static const char *i_position_to_string(enum csmsetop_classify_resp_solid_t cl)
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_print_debug_info_vertex_neighborhood(const char *description, const struct csmvertex_t *vertex, ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
+static void i_print_debug_info_vertex_neighborhood(
+                        const char *description,
+                        const struct csmvertex_t *vertex,
+                        double A, double B, double C, double D,
+                        ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
 {
     if (csmdebug_debug_enabled() == CIERTO)
     {
@@ -551,7 +555,7 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
         unsigned long i, num_sectors;
         
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
-        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g):\n", description, csmvertex_id(vertex), x, y, z);
+        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g) Pl. (%g, %g, %g):\n", description, csmvertex_id(vertex), x, y, z, A, B, C);
         
         num_sectors = arr_NumElemsPunteroST(vertex_neighborhood, i_neighborhood_t);
         
@@ -634,13 +638,13 @@ static void i_process_vf_inters(
     vertex_algorithm_mask = csmvertex_get_mask_attrib(vf_inters->vertex);
     
     vertex_neighborhood = i_initial_vertex_neighborhood(vf_inters->vertex, A, B, C, D);
-    i_print_debug_info_vertex_neighborhood("Initial", vf_inters->vertex, vertex_neighborhood);
+    i_print_debug_info_vertex_neighborhood("Initial", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
     i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, vertex_neighborhood);
-    i_print_debug_info_vertex_neighborhood("After Reclassify On Sectors", vf_inters->vertex, vertex_neighborhood);
+    i_print_debug_info_vertex_neighborhood("After Reclassify On Sectors", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
     i_reclassify_on_edges_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, vertex_neighborhood);
-    i_print_debug_info_vertex_neighborhood("After Reclassify On Edges", vf_inters->vertex, vertex_neighborhood);
+    i_print_debug_info_vertex_neighborhood("After Reclassify On Edges", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
     //csmdebug_show_viewer();
     
@@ -649,7 +653,6 @@ static void i_process_vf_inters(
         unsigned long num_sectors;
         unsigned long idx;
         struct i_neighborhood_t *head_neighborhood;
-        //struct i_neighborhood_t fake_head_neighborhood;
         unsigned long num_iters;
         CYBOOL process_next_sequence;
 
@@ -659,31 +662,12 @@ static void i_process_vf_inters(
         idx = start_idx;
         head_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         
-        /*{
-            struct i_neighborhood_t *aux_neighborhood;
-            struct csmhedge_t *mate;
-            
-            aux_neighborhood = arr_GetPunteroST(vertex_neighborhood, idx, i_neighborhood_t);
-            assert_no_null(aux_neighborhood);
-            
-            mate = csmhedge_next(csmopbas_mate(aux_neighborhood->hedge));
-            
-            if (mate != head_neighborhood->hedge)
-            {
-                fake_head_neighborhood.hedge = mate;
-                fake_head_neighborhood.position = head_neighborhood->position;
-                
-                head_neighborhood = &fake_head_neighborhood;
-            }
-        }*/
-        
         num_iters = 0;
         process_next_sequence = CIERTO;
         
         while (process_next_sequence == CIERTO)
         {
             struct i_neighborhood_t *tail_neighborhood;
-            //struct i_neighborhood_t fake_tail_neighborhood;
             double x_split, y_split, z_split;
             struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
@@ -704,23 +688,6 @@ static void i_process_vf_inters(
             tail_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
             assert_no_null(tail_neighborhood);
             
-            /*{
-                struct i_neighborhood_t *aux_neighborhood;
-                struct csmhedge_t *mate;
-                
-                aux_neighborhood = arr_GetPunteroST(vertex_neighborhood, idx, i_neighborhood_t);
-                assert_no_null(aux_neighborhood);
-                
-                mate = csmhedge_next(csmopbas_mate(aux_neighborhood->hedge));
-                if (mate == tail_neighborhood->hedge)
-                {
-                    fake_tail_neighborhood.hedge = mate;
-                    fake_tail_neighborhood.position = tail_neighborhood->position;
-                    
-                    tail_neighborhood = &fake_tail_neighborhood;
-                }
-            }*/
-            
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
             i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, NULL, NULL, &cl_head_resp_plane);
             assert(cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_OUT || cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
@@ -730,16 +697,15 @@ static void i_process_vf_inters(
                 char *description;
                 
                 csmdebug_print_debug_info(
-                        "Inserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",
+                        "Inserting null edge at (%g, %g, %g) from out hedge %lu to in hedge %lu.\n",
                         x_split, y_split, z_split,
-                        csmhedge_id(tail_neighborhood->hedge),
-                        csmhedge_id(head_neighborhood->hedge));
+                        csmhedge_id(head_neighborhood->hedge),
+                        csmhedge_id(tail_neighborhood->hedge));
                 
                 description = copiafor_codigo3("NE (%g, %g, %g)", x_split, y_split, z_split);
                 csmdebug_append_debug_point(x_split, y_split, z_split, &description);
             }
             
-            //csmeuler_lmev(tail_neighborhood->hedge, head_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
             csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
             arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
             

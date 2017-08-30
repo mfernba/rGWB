@@ -27,6 +27,8 @@ struct csmloop_t
     
     struct csmhedge_t *ledge;
     struct csmface_t *lface;
+    
+    CYBOOL setop_convert_loop_in_face;
 };
 
 // --------------------------------------------------------------------------------------------------------------
@@ -47,7 +49,8 @@ static void i_csmloop_destruye(struct csmloop_t **loop)
 CONSTRUCTOR(static struct csmloop_t *, i_crea, (
                         unsigned long id,
                         struct csmhedge_t *ledge,
-                        struct csmface_t *lface))
+                        struct csmface_t *lface,
+                        CYBOOL setop_convert_loop_in_face))
 {
     struct csmloop_t *loop;
     
@@ -57,6 +60,8 @@ CONSTRUCTOR(static struct csmloop_t *, i_crea, (
     
     loop->ledge = ledge;
     loop->lface = lface;
+    
+    loop->setop_convert_loop_in_face = setop_convert_loop_in_face;
     
     return loop;
 }
@@ -68,13 +73,16 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
     unsigned long id;
     struct csmhedge_t *ledge;
     struct csmface_t *lface;
+    CYBOOL setop_convert_loop_in_face;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
     
     ledge = NULL;
     lface = face;
     
-    return i_crea(id, ledge, lface);
+    setop_convert_loop_in_face = FALSO;
+    
+    return i_crea(id, ledge, lface, setop_convert_loop_in_face);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -83,12 +91,13 @@ CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lfac
 {
     unsigned long id;
     struct csmhedge_t *ledge;
+    CYBOOL setop_convert_loop_in_face;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
-    
     ledge = NULL;
+    setop_convert_loop_in_face = FALSO;
     
-    return i_crea(id, ledge, lface);
+    return i_crea(id, ledge, lface, setop_convert_loop_in_face);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -220,7 +229,7 @@ void csmloop_face_equation(
         
     } while (iterator != loop->ledge);
     
-    assert(num_vertexs >= 3);
+    //assert(num_vertexs >= 3);
     
     if (csmmath_is_null_vector(A_loc, B_loc, C_loc, csmtolerance_null_vector()) == CIERTO)
     {
@@ -718,6 +727,22 @@ void csmloop_revert_loop_orientation(struct csmloop_t *loop)
         he_iterator = csmhedge_next(he_iterator);
     }
     while (he_iterator != loop->ledge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmloop_setop_convert_loop_in_face(const struct csmloop_t *loop)
+{
+    assert_no_null(loop);
+    return loop->setop_convert_loop_in_face;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CYBOOL setop_convert_loop_in_face)
+{
+    assert_no_null(loop);
+    loop->setop_convert_loop_in_face = setop_convert_loop_in_face;
 }
 
 // ----------------------------------------------------------------------------------------------------

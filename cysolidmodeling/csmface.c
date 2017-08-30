@@ -348,6 +348,11 @@ CYBOOL csmface_contains_point(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc)
 {
+    CYBOOL containts_point;
+    enum csmmath_contaiment_point_loop_t type_of_containment_loc;
+    struct csmvertex_t *hit_vertex_loc;
+    struct csmhedge_t *hit_hedge_loc;
+    
     assert_no_null(face);
     
     if (i_is_point_on_face_plane(
@@ -355,16 +360,76 @@ CYBOOL csmface_contains_point(
                         face->A, face->B, face->C, face->D,
                         face->fuzzy_epsilon) == FALSO)
     {
-        return FALSO;
+        containts_point = FALSO;
+        
+        type_of_containment_loc = (enum csmmath_contaiment_point_loop_t)USHRT_MAX;
+        hit_vertex_loc = NULL;
+        hit_hedge_loc = NULL;
     }
     else
     {
-        return csmloop_is_point_inside_loop(
+        if (csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
                         face->fuzzy_epsilon,
-                        type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
+                        &type_of_containment_loc, &hit_vertex_loc, &hit_hedge_loc) == FALSO)
+        {
+            containts_point = FALSO;
+        }
+        else
+        {
+            if (type_of_containment_loc != CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+            {
+                containts_point = CIERTO;
+            }
+            else
+            {
+                struct csmloop_t *loop_iterator;
+            
+                loop_iterator = face->floops;
+                containts_point = CIERTO;
+            
+                while (loop_iterator != NULL)
+                {
+                    if (loop_iterator != face->flout && csmloop_has_only_a_null_edge(loop_iterator) == FALSO)
+                    {
+                        enum csmmath_contaiment_point_loop_t type_of_containment_hole;
+                        struct csmvertex_t *hit_vertex_hole;
+                        struct csmhedge_t *hit_hedge_hole;
+                        
+                        if (csmloop_is_point_inside_loop(
+                                loop_iterator,
+                                x, y, z, face->dropped_coord,
+                                face->fuzzy_epsilon,
+                                &type_of_containment_hole, &hit_vertex_hole, &hit_hedge_hole) == CIERTO)
+                        {
+                            if (type_of_containment_hole == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+                            {
+                                containts_point = FALSO;
+                            }
+                            else
+                            {
+                                containts_point = CIERTO;
+                                
+                                type_of_containment_loc = type_of_containment_hole;
+                                hit_vertex_loc = hit_vertex_hole;
+                                hit_hedge_loc = hit_hedge_hole;
+                            }
+                            break;
+                        }
+                    }
+                
+                    loop_iterator = csmloop_next(loop_iterator);
+                }
+            }
+        }
     }
+
+    ASIGNA_OPC(type_of_containment_opc, type_of_containment_loc);
+    ASIGNA_OPC(hit_vertex_opc, hit_vertex_loc);
+    ASIGNA_OPC(hit_hedge_opc, hit_hedge_loc);
+    
+    return containts_point;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -685,6 +750,25 @@ void csmface_face_equation(
     assert_no_null(B);
     assert_no_null(C);
     assert_no_null(D);
+    assert(fabs(face->A) > 0. || fabs(face->B) > 0. || fabs(face->C) > 0.);
+    
+    *A = face->A;
+    *B = face->B;
+    *C = face->C;
+    *D = face->D;
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmface_face_equation_info(
+                        const struct csmface_t *face,
+                        double *A, double *B, double *C, double *D)
+{
+    assert_no_null(face);
+    assert_no_null(A);
+    assert_no_null(B);
+    assert_no_null(C);
+    assert_no_null(D);
     
     *A = face->A;
     *B = face->B;
@@ -849,7 +933,7 @@ void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_int
     struct csmloop_t *loop_iterator;
     double A, B, C, D;
     
-    csmface_face_equation(face, &A, &B, &C, &D);
+    csmface_face_equation_info(face, &A, &B, &C, &D);
     csmdebug_print_debug_info("\tFace %lu (%g, %g, %g, %g)\n", face->id, A, B, C, D);
     
     loop_iterator = csmface_floops(face);
@@ -933,7 +1017,7 @@ void csmface_draw_solid(
         bsgraphics2_escr_color(graphics, normal_material);
         csmloop_geometric_center_3d(face->flout, &x_geometric_center, &y_geometric_center, &z_geometric_center);
     
-        disp = 0.1;
+        disp = 0.01;
         bsgraphics2_escr_linea3D(
                         graphics,
                         x_geometric_center, y_geometric_center, z_geometric_center,
@@ -941,7 +1025,23 @@ void csmface_draw_solid(
     }
 }
 
+// ----------------------------------------------------------------------------------------------------
 
+void csmface_draw_normal(struct csmface_t *face, struct bsgraphics2_t *graphics)
+{
+    double x_geometric_center, y_geometric_center, z_geometric_center;
+    double disp;
+
+    assert_no_null(face);
+    
+    csmloop_geometric_center_3d(face->flout, &x_geometric_center, &y_geometric_center, &z_geometric_center);
+    
+    disp = 0.01;
+    bsgraphics2_escr_linea3D(
+                        graphics,
+                        x_geometric_center, y_geometric_center, z_geometric_center,
+                        x_geometric_center + disp * face->A, y_geometric_center + disp * face->B, z_geometric_center + disp * face->C);
+}
 
 
 

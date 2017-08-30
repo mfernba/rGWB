@@ -384,7 +384,7 @@
 		557012BA1E832F0300DFC490 /* csmgeom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmgeom.c; sourceTree = "<group>"; };
 		557012BB1E832F0300DFC490 /* csmgeom.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmgeom.inl; sourceTree = "<group>"; };
 		557012BE1E832F9600DFC490 /* csmmath.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmmath.c; sourceTree = "<group>"; };
-		557012BF1E832F9600DFC490 /* csmmath.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmmath.inl; sourceTree = "<group>"; };
+		557012BF1E832F9600DFC490 /* csmmath.inl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = csmmath.inl; sourceTree = "<group>"; };
 		557954581E5DB074000FC91E /* cysolidmodeling.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = cysolidmodeling.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5579545B1E5DB074000FC91E /* cysolidmodeling.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cysolidmodeling.h; sourceTree = "<group>"; };
 		5579545C1E5DB074000FC91E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -475,6 +475,7 @@
 			children = (
 				5507A6231E6B8714008B9F73 /* csmtest.h */,
 				5507A6221E6B8714008B9F73 /* csmtest.c */,
+				557954591E5DB074000FC91E /* Products */,
 			);
 			name = Test;
 			sourceTree = "<group>";
@@ -570,7 +571,6 @@
 			children = (
 				5598D66B1F24F3C700EA1876 /* Dependencies */,
 				5579545A1E5DB074000FC91E /* cysolidmodeling */,
-				557954591E5DB074000FC91E /* Products */,
 				5507A6441E701EC5008B9F73 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -581,6 +581,7 @@
 				557954581E5DB074000FC91E /* cysolidmodeling.framework */,
 			);
 			name = Products;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		5579545A1E5DB074000FC91E /* cysolidmodeling */ = {

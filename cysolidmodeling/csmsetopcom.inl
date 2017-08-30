@@ -24,13 +24,15 @@ CYBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge_
 
 void csmsetopcom_sort_edges_lexicographically_by_xyz(ArrEstructura(csmedge_t) *set_of_null_edges);
 
-void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_null_edges);
+void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_null_edges, ArrEstructura(csmhedge_t) *loose_ends);
 
 CYBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends);
 
 void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose_ends);
 
-void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2);
+void csmsetopcom_join_hedges(
+                    struct csmhedge_t *he1, struct csmhedge_t *he2,
+                    ArrEstructura(csmedge_t) *set_of_null_edges);
 
 void csmsetopcom_cut_he_split(
                     struct csmhedge_t *hedge,
@@ -42,7 +44,10 @@ void csmsetopcom_cut_he_setop(
                     struct csmhedge_t *hedge,
                     ArrEstructura(csmedge_t) *set_of_null_edges,
                     ArrEstructura(csmface_t) *set_of_null_faces,
-                    unsigned long *no_null_edges_deleted);
+                    unsigned long *no_null_edges_deleted,
+                    CYBOOL *null_face_created_opt);
+
+void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid);
 
 // Faces...
 
@@ -58,6 +63,7 @@ void csmsetopcom_move_face_to_solid(
 enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(double value, double tolerance);
 
 struct csmface_t *csmsetopcom_face_for_hedge_sector(struct csmhedge_t *hedge, struct csmhedge_t *hedge_next);
+
 
 // Finish algorithm...
 

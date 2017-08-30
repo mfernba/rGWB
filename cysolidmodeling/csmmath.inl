@@ -47,6 +47,11 @@ CYBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance)
 
 // Lines...
 
+enum csmmath_comparac_t csmmath_compare_coords_xyz(
+                        double x1, double y1, double z1,
+                        double x2, double y2, double z2,
+                        double tolerance);
+
 double csmmath_distance_from_point_to_line3D(
 						double x, double y, double z,
                         double Xo_recta, double Yo_recta, double Zo_recta, double Ux_recta, double Uy_recta, double Uz_recta);

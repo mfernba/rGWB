@@ -13,6 +13,7 @@
 #include "csmface.inl"
 #include "csmloop.inl"
 #include "csmloopglue.inl"
+#include "csmmath.inl"
 #include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmsetopcom.inl"
@@ -21,6 +22,8 @@
 #include "csmsetop_vtxvtx.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
+#include "csmtolerance.inl"
+#include "csmvertex.inl"
 #include "csmvertex.tli"
 
 #include "a_punter.h"
@@ -80,6 +83,9 @@ static CYBOOL i_can_join(
         
         arr_AppendPunteroST(loose_ends_A, hea, csmhedge_t);
         arr_AppendPunteroST(loose_ends_B, heb, csmhedge_t);
+        
+        if (csmdebug_debug_enabled() == CIERTO)
+            csmdebug_print_debug_info("Pushed loose end pair: (%lu, %lu)\n", csmhedge_id(hea), csmhedge_id(heb));
     }
     
     *matching_loose_end_hea = matching_loose_end_hea_loc;
@@ -124,6 +130,25 @@ static CYBOOL i_there_are_only_null_edges_that_cannot_be_matched(ArrEstructura(c
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_print_null_faces(const struct csmsolid_t *solid, const ArrEstructura(csmface_t) *set_of_null_faces)
+{
+    unsigned long i, no_null_faces;
+    
+    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    
+    csmdebug_print_debug_info("***Null faces solid: %s\n", csmsolid_get_name(solid));
+                              
+    for (i = 0; i < no_null_faces; i++)
+    {
+        const struct csmface_t *null_face;
+        
+        null_face = arr_GetPunteroConstST(set_of_null_faces, i, csmface_t);
+        csmdebug_print_debug_info("Null face: %lu\n", csmface_id(null_face));
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_join_null_edges(
                         struct csmsolid_t *solid_A, ArrEstructura(csmedge_t) *set_of_null_edges_A,
                         struct csmsolid_t *solid_B, ArrEstructura(csmedge_t) *set_of_null_edges_B,
@@ -144,32 +169,48 @@ static void i_join_null_edges(
     assert_no_null(set_of_null_faces_A);
     assert_no_null(set_of_null_faces_B);
     
-    if (csmdebug_debug_enabled() == CIERTO)
-    {
-        csmsetopcom_print_set_of_null_edges(set_of_null_edges_A);
-        csmsetopcom_print_set_of_null_edges(set_of_null_edges_B);
-    }
-    
     set_of_null_faces_A_loc = arr_CreaPunteroST(0, csmface_t);
     set_of_null_faces_B_loc = arr_CreaPunteroST(0, csmface_t);
     
     loose_ends_A = arr_CreaPunteroST(0, csmhedge_t);
     loose_ends_B = arr_CreaPunteroST(0, csmhedge_t);
     
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        csmsolid_redo_geometric_generated_data(solid_A);
+        csmsolid_print_debug(solid_A, CIERTO);
+        
+        csmsolid_redo_geometric_generated_data(solid_B);
+        csmsolid_print_debug(solid_B, CIERTO);
+    }
+    
     no_null_edges_deleted_A = 0;
     no_null_edges_deleted_B = 0;
-    
-    csmsolid_redo_geometric_generated_data(solid_A);
-    csmsolid_print_debug(solid_A, CIERTO);
-    csmsolid_print_debug(solid_B, CIERTO);
-
-    //csmdebug_show_viewer();
 
     for (i = 0; i < no_null_edges; i++)
     {
+        CYBOOL null_face_created_h1a, null_face_created_h2b;
+        CYBOOL null_face_created_h2a, null_face_created_h1b;
+        CYBOOL null_face_created_h12a, null_face_created_h12b;
         struct csmedge_t *next_edge_A, *next_edge_B;
         struct csmhedge_t *he1_next_edge_A, *he2_next_edge_A, *he1_next_edge_B, *he2_next_edge_B;
         struct csmhedge_t *h1a, *h2a, *h1b, *h2b;
+        
+        if (csmdebug_debug_enabled() == CIERTO)
+        {
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_A, loose_ends_A);
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_B, loose_ends_B);
+            
+            csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
+            csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
+        }
+
+        null_face_created_h1a = FALSO;
+        null_face_created_h2b = FALSO;
+        null_face_created_h2a = FALSO;
+        null_face_created_h1b = FALSO;
+        null_face_created_h12a = FALSO;
+        null_face_created_h12b = FALSO;
         
         next_edge_A = arr_GetPunteroST(set_of_null_edges_A, i - no_null_edges_deleted_A, csmedge_t);
         next_edge_B = arr_GetPunteroST(set_of_null_edges_B, i - no_null_edges_deleted_B, csmedge_t);
@@ -179,15 +220,17 @@ static void i_join_null_edges(
      
         if (i_can_join(he1_next_edge_A, he2_next_edge_B, loose_ends_A, loose_ends_B, &h1a, &h2b) == CIERTO)
         {
-            csmsetopcom_join_hedges(h1a, he1_next_edge_A);
+            csmdebug_print_debug_info("Can join1\n");
+            
+            csmsetopcom_join_hedges(h1a, he1_next_edge_A, set_of_null_edges_A);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1a), loose_ends_A) == FALSO)
-                csmsetopcom_cut_he_setop(h1a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A);
+                csmsetopcom_cut_he_setop(h1a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h1a);
             
-            csmsetopcom_join_hedges(h2b, he2_next_edge_B);
+            csmsetopcom_join_hedges(h2b, he2_next_edge_B, set_of_null_edges_B);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2b), loose_ends_B) == FALSO)
-                csmsetopcom_cut_he_setop(h2b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B);
+                csmsetopcom_cut_he_setop(h2b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h2b);
             
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
@@ -202,15 +245,17 @@ static void i_join_null_edges(
      
         if (i_can_join(he2_next_edge_A, he1_next_edge_B, loose_ends_A, loose_ends_B, &h2a, &h1b) == CIERTO)
         {
-            csmsetopcom_join_hedges(h2a, he2_next_edge_A);
+            csmdebug_print_debug_info("Can join2\n");
+            
+            csmsetopcom_join_hedges(h2a, he2_next_edge_A, set_of_null_edges_A);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2a), loose_ends_A) == FALSO)
-                csmsetopcom_cut_he_setop(h2a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A);
+                csmsetopcom_cut_he_setop(h2a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h2a);
 
-            csmsetopcom_join_hedges(h1b, he1_next_edge_B);
+            csmsetopcom_join_hedges(h1b, he1_next_edge_B, set_of_null_edges_B);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1b), loose_ends_B) == FALSO)
-                csmsetopcom_cut_he_setop(h1b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B);
+                csmsetopcom_cut_he_setop(h1b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h1b);
             
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
@@ -222,20 +267,28 @@ static void i_join_null_edges(
         
         if (h1a != NULL && h2a != NULL && h1b != NULL && h2b != NULL)
         {
-            csmsetopcom_cut_he_setop(he1_next_edge_A, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A);
-            csmsetopcom_cut_he_setop(he1_next_edge_B, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B);
+            csmsetopcom_cut_he_setop(he1_next_edge_A, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h12a);
+            csmsetopcom_cut_he_setop(he1_next_edge_B, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h12b);
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
         
-        if (csmdebug_debug_enabled() == CIERTO)
+        if (null_face_created_h1a == CIERTO || null_face_created_h1b || null_face_created_h12a == CIERTO
+                || null_face_created_h1b == CIERTO || null_face_created_h2b == CIERTO || null_face_created_h12b == CIERTO)
         {
-            csmsetopcom_print_set_of_null_edges(set_of_null_edges_A);
-            csmsetopcom_print_set_of_null_edges(set_of_null_edges_B);
-            
-            csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
-            csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
+            csmdebug_print_debug_info("*** AFTER NULL FACES\n");
+            csmsolid_print_debug(solid_A, CIERTO);
+            csmsolid_print_debug(solid_B, CIERTO);
         }
     }
+    
+    if (csmdebug_debug_enabled() == CIERTO)
+    {
+        i_print_null_faces(solid_A, set_of_null_faces_A_loc);
+        i_print_null_faces(solid_B, set_of_null_faces_B_loc);
+    }
+    
+    csmsetopcom_postprocess_join_edges(solid_A);
+    csmsetopcom_postprocess_join_edges(solid_B);
     
     csmdebug_print_debug_info("*** AFTER JOINING NULL EDGES\n");
     csmsolid_print_debug(solid_A, CIERTO);
@@ -261,8 +314,8 @@ static void i_join_null_edges(
         {
             csmdebug_print_debug_info("*****Pendant null edges!!!! Maybe the only ones in its faces\n");
         
-            csmsetopcom_print_set_of_null_edges(set_of_null_edges_A);
-            csmsetopcom_print_set_of_null_edges(set_of_null_edges_B);
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_A, loose_ends_A);
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_B, loose_ends_B);
             
             csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
@@ -312,14 +365,11 @@ static struct csmloop_t *i_get_in_component_of_null_face(struct csmface_t *null_
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_is_in_component_of_null_face_attached_to_hole(struct csmface_t *null_face, struct csmloop_t **hole_loop_attached_to_in_component_opt)
+static void i_convert_holes_attached_to_in_componente_in_faces(struct csmface_t *null_face)
 {
-    CYBOOL is_in_component_connected_to_hole;
-    CYBOOL initialized;
     struct csmloop_t *in_component;
     struct csmhedge_t *ledge, *he_iterator;
     unsigned long no_iterations;
-    struct csmloop_t *hole_loop_attached_to_in_component_loc;
     
     in_component = i_get_in_component_of_null_face(null_face);
     
@@ -327,50 +377,46 @@ static CYBOOL i_is_in_component_of_null_face_attached_to_hole(struct csmface_t *
     he_iterator = csmloop_ledge(in_component);
     no_iterations = 0;
     
-    initialized = FALSO;
-    is_in_component_connected_to_hole = CIERTO;
-    hole_loop_attached_to_in_component_loc = NULL;
-    
     do
     {
         struct csmhedge_t *hedge_iterator_mate;
         struct csmloop_t *hedge_iterator_mate_loop;
         struct csmface_t *hedge_iterator_mate_face;
-        CYBOOL is_hedge_mate_connected_to_hole;
         
         assert(no_iterations < 10000);
         no_iterations++;
         
         hedge_iterator_mate = csmopbas_mate(he_iterator);
+        
         hedge_iterator_mate_loop = csmhedge_loop(hedge_iterator_mate);
         hedge_iterator_mate_face = csmloop_lface(hedge_iterator_mate_loop);
         
         if (hedge_iterator_mate_loop != csmface_flout(hedge_iterator_mate_face))
-            is_hedge_mate_connected_to_hole = CIERTO;
-        else
-            is_hedge_mate_connected_to_hole = FALSO;
-        
-        if (initialized == FALSO)
         {
-            is_in_component_connected_to_hole = is_hedge_mate_connected_to_hole;
-            hole_loop_attached_to_in_component_loc = hedge_iterator_mate_loop;
-        }
-        else
-        {
-            assert(is_in_component_connected_to_hole == is_hedge_mate_connected_to_hole);
-            
-            if (is_in_component_connected_to_hole == CIERTO)
-                assert(hole_loop_attached_to_in_component_loc == hedge_iterator_mate_loop);
+            csmdebug_print_debug_info("in_component...(): Null face %lu, converting loop %lu to face.\n", csmface_id(null_face), csmloop_id(hedge_iterator_mate_loop));
+            csmeuler_lmfkrh(hedge_iterator_mate_loop, NULL);
         }
         
-        initialized = CIERTO;
         he_iterator = csmhedge_next(he_iterator);
         
     } while (he_iterator != ledge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_convert_holes_attached_to_in_component_of_null_faces_in_faces(ArrEstructura(csmface_t) *set_of_null_faces)
+{
+    unsigned long i, num_null_faces;
     
-    ASIGNA_OPC(hole_loop_attached_to_in_component_opt, hole_loop_attached_to_in_component_loc);
-            
-    return is_in_component_connected_to_hole;
+    num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    
+    for (i = 0; i < num_null_faces; i++)
+    {
+        struct csmface_t *null_face;
+        
+        null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+        i_convert_holes_attached_to_in_componente_in_faces(null_face);
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -433,26 +479,6 @@ static CYBOOL i_is_out_component_of_null_face_attached_to_itself(struct csmface_
     ASIGNA_OPC(loop_attached_to_out_component_opt, loop_attached_to_out_component_loc);
             
     return is_out_component_connected_to_itself;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static void i_convert_holes_attached_to_in_component_of_null_faces_in_faces(ArrEstructura(csmface_t) *set_of_null_faces)
-{
-    unsigned long i, num_null_faces;
-    
-    num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
-    
-    for (i = 0; i < num_null_faces; i++)
-    {
-        struct csmface_t *null_face;
-        struct csmloop_t *hole_loop_attached_to_in_component;
-        
-        null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
-
-        if (i_is_in_component_of_null_face_attached_to_hole(null_face, &hole_loop_attached_to_in_component) == CIERTO)
-            csmeuler_lmfkrh(hole_loop_attached_to_in_component, NULL);
-    }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -564,15 +590,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));
     assert(no_null_faces > 0);
     
-    csmsolid_print_debug(solid_B, FALSO);
-
     i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_A);
     i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_A, set_of_null_faces_A);
     
     i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_B);
     i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_B, set_of_null_faces_B);
-    
-    csmsolid_print_debug(solid_B, FALSO);
 
     //csmdebug_show_viewer();
     

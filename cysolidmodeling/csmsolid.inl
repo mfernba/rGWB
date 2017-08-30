@@ -6,6 +6,8 @@ CONSTRUCTOR(struct csmsolid_t *, csmsolid_crea_vacio, (unsigned long start_id_of
 
 void csmsolid_set_name(struct csmsolid_t *solido, const char *name);
 
+const char *csmsolid_get_name(const struct csmsolid_t *solido);
+
 
 // General...
 

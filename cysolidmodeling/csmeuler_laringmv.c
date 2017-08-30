@@ -58,3 +58,4 @@ void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
         
     } while (iterator_face1 != NULL);
 }
+

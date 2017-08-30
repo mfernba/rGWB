@@ -227,6 +227,50 @@ CYBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance)
         return FALSO;
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+static enum csmmath_comparac_t i_compare_coords(double coord1, double coord2, double tolerance)
+{
+    switch (csmmath_compare_doubles(coord1, coord2, tolerance))
+    {
+        case CSMMATH_VALUE1_LESS_THAN_VALUE2:
+            
+            return CSMMATH_COMPARAC_PRIMERO_MENOR;
+            
+        case CSMMATH_EQUAL_VALUES:
+            
+            return CSMMATH_COMPARAC_IGUALES;
+            
+        case CSMMATH_VALUE1_GREATER_THAN_VALUE2:
+            
+            return CSMMATH_COMPARAC_PRIMERO_MAYOR;
+            
+        default_error();
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+enum csmmath_comparac_t csmmath_compare_coords_xyz(
+                        double x1, double y1, double z1,
+                        double x2, double y2, double z2,
+                        double tolerance)
+{
+    enum csmmath_comparac_t comparacion;
+    
+    comparacion = i_compare_coords(x1, x2, tolerance);
+    
+    if (comparacion == CSMMATH_COMPARAC_IGUALES)
+    {
+        comparacion = i_compare_coords(y1, y2, tolerance);
+        
+        if (comparacion == CSMMATH_COMPARAC_IGUALES)
+            comparacion = i_compare_coords(z1, z2, tolerance);
+    }
+    
+    return comparacion;
+}
+
 //-------------------------------------------------------------------------------------------
 
 double csmmath_distance_from_point_to_line3D(

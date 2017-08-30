@@ -65,6 +65,9 @@ void csmface_face_equation(
                         const struct csmface_t *face,
                         double *A, double *B, double *C, double *D);
 
+void csmface_face_equation_info(
+                        const struct csmface_t *face,
+                        double *A, double *B, double *C, double *D);
 
 // Topology...
 
@@ -100,3 +103,6 @@ void csmface_draw_solid(
                     const struct bsmaterial_t *face_material,
                     const struct bsmaterial_t *normal_material,
                     struct bsgraphics2_t *graphics);
+
+void csmface_draw_normal(struct csmface_t *face, struct bsgraphics2_t *graphics);
+

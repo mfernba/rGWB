@@ -93,6 +93,14 @@ void csmsolid_set_name(struct csmsolid_t *solid, const char *name)
 
 // ----------------------------------------------------------------------------------------------------
 
+const char *csmsolid_get_name(const struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    return solid->name;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (const char *name, unsigned long id_nuevo_elemento))
 {
     char *name_copy;
@@ -824,7 +832,7 @@ void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_inte
         unsigned long num_faces, num_vertexs, num_edges, num_holes;
         
         assert_no_null(solido);
-
+        
         csmdebug_begin_context("SOLID DESCRIPTION");
         
         if (solido->name != NULL)
@@ -920,7 +928,7 @@ static void i_draw_debug_info_hedge(
             if (length > 0.)
             {
                 bsgraphics2_append_ejes_2D(graphics, x1, y1, z1, Ux, Uy, Uz, Vx, Vy, Vz);
-                bsgraphics2_escr_texto_mts(graphics, "***", 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.02);
+                bsgraphics2_escr_texto_mts(graphics, "***", 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.002);
                 bsgraphics2_desapila_transformacion(graphics);
             }
            
@@ -942,7 +950,7 @@ static void i_draw_debug_info_hedge(
                 else
                     bsgraphics2_append_ejes_plano_pantalla(graphics);
                 
-                bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.025);
+                bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.0025);
                 
                 bsgraphics2_desapila_transformacion(graphics);
             }
@@ -968,7 +976,7 @@ static void i_draw_debug_info_faces(struct csmhashtb(csmface_t) *sfaces, CYBOOL 
         struct csmloop_t *floops;
         
         csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
-        csmface_face_equation(face, &A, &B, &C, &D);
+        csmface_face_equation_info(face, &A, &B, &C, &D);
         
         floops = csmface_floops(face);
         
@@ -995,6 +1003,8 @@ static void i_draw_debug_info_faces(struct csmhashtb(csmface_t) *sfaces, CYBOOL 
             
             floops = csmloop_next(floops);
         }
+        
+        csmface_draw_normal(face, graphics);
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
