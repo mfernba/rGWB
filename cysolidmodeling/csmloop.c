@@ -3,6 +3,7 @@
 #include "csmloop.inl"
 
 #include "csmbbox.inl"
+#include "csmdebug.inl"
 #include "csmgeom.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"

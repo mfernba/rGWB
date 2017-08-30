@@ -32,13 +32,7 @@ void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *lo
 
 void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2);
 
-void csmsetopcom_cut_he_split(
-                    struct csmhedge_t *hedge,
-                    ArrEstructura(csmedge_t) *set_of_null_edges,
-                    ArrEstructura(csmface_t) *set_of_null_faces,
-                    unsigned long *no_null_edges_deleted);
-
-void csmsetopcom_cut_he_setop(
+void csmsetopcom_cut_he(
                     struct csmhedge_t *hedge,
                     ArrEstructura(csmedge_t) *set_of_null_edges,
                     ArrEstructura(csmface_t) *set_of_null_faces,

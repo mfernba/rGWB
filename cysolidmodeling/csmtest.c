@@ -1888,7 +1888,8 @@ static void i_test_mechanical_part1(void)
                 struct csmsolid_t *main_part_loc;
             
                 //main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
-                main_part_loc = csmsetop_intersection_A_and_B(main_part, ring_part);
+                //main_part_loc = csmsetop_intersection_A_and_B(main_part, ring_part);
+                main_part_loc = csmsetop_union_A_and_B(main_part, ring_part);
                 csmsolid_free(&main_part);
                 main_part = main_part_loc;
                 break;
@@ -1955,14 +1956,16 @@ void csmtest_test(void)
     i_test_multiple_solidos3(viewer);
     */
     
+    /*
     i_test_cilindro1(viewer);
     i_test_cilindro2(viewer);
     i_test_cilindro3(viewer);
-    //i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75
+    i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75
     i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
     i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
+    */
     
     //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
