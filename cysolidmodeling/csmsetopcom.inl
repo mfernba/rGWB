@@ -30,9 +30,7 @@ CYBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge
 
 void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose_ends);
 
-void csmsetopcom_join_hedges(
-                    struct csmhedge_t *he1, struct csmhedge_t *he2,
-                    ArrEstructura(csmedge_t) *set_of_null_edges);
+void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2);
 
 void csmsetopcom_cut_he_split(
                     struct csmhedge_t *hedge,

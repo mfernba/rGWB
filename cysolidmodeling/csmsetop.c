@@ -222,12 +222,12 @@ static void i_join_null_edges(
         {
             csmdebug_print_debug_info("Can join1\n");
             
-            csmsetopcom_join_hedges(h1a, he1_next_edge_A, set_of_null_edges_A);
+            csmsetopcom_join_hedges(h1a, he1_next_edge_A);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1a), loose_ends_A) == FALSO)
                 csmsetopcom_cut_he_setop(h1a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h1a);
             
-            csmsetopcom_join_hedges(h2b, he2_next_edge_B, set_of_null_edges_B);
+            csmsetopcom_join_hedges(h2b, he2_next_edge_B);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2b), loose_ends_B) == FALSO)
                 csmsetopcom_cut_he_setop(h2b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h2b);
@@ -247,12 +247,12 @@ static void i_join_null_edges(
         {
             csmdebug_print_debug_info("Can join2\n");
             
-            csmsetopcom_join_hedges(h2a, he2_next_edge_A, set_of_null_edges_A);
+            csmsetopcom_join_hedges(h2a, he2_next_edge_A);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2a), loose_ends_A) == FALSO)
                 csmsetopcom_cut_he_setop(h2a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h2a);
 
-            csmsetopcom_join_hedges(h1b, he1_next_edge_B, set_of_null_edges_B);
+            csmsetopcom_join_hedges(h1b, he1_next_edge_B);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1b), loose_ends_B) == FALSO)
                 csmsetopcom_cut_he_setop(h1b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h1b);
