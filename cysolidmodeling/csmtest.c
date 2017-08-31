@@ -1878,14 +1878,17 @@ static void i_test_mechanical_part1(void)
     {
         unsigned long i, no_divisions;
         double ring_part_height;
-        struct csmsolid_t *ring_part;
+        struct csmsolid_t *ring_part, *ring_part2;
         double incr_z;
-     
+        unsigned long no_operations;
+        
         no_divisions = 20;
         ring_part_height = main_part_length / no_divisions;
         ring_part = i_make_ring_part(0., ring_part_height, 1.2 * ax, 0.4 * ax, 16);
+        ring_part2 = i_make_ring_part(0., ring_part_height, 1.2 * ax, 0.4 * ax, 4);
         
         incr_z = ring_part_height;
+        no_operations = 0;
         
         for (i = 0; i < no_divisions - 1; i++)
         {
@@ -1898,15 +1901,23 @@ static void i_test_mechanical_part1(void)
                 csmdebug_show_viewer();
                 csmdebug_set_enabled_by_code(FALSO);
                 
-                main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
+                if (no_operations % 2 == 0)
+                    main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
+                else
+                    main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part2);
+                
                 csmsolid_free(&main_part);
                 main_part = main_part_loc;
+                
+                no_operations++;
             }
             
             csmsolid_move(ring_part, 0., 0., incr_z);
+            csmsolid_move(ring_part2, 0., 0., incr_z);
         }
      
         csmsolid_free(&ring_part);
+        csmsolid_free(&ring_part2);
      }
     
     csmdebug_set_enabled_by_code(CIERTO);

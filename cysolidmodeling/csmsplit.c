@@ -935,7 +935,7 @@ CYBOOL csmsplit_does_plane_split_solid(
     
     work_solid = csmsolid_duplicate(solid);
     csmsolid_redo_geometric_generated_data(work_solid);
-    csmsolid_clear_algorithm_vertex_mask(work_solid);
+    csmsolid_clear_algorithm_data(work_solid);
     
     csmdebug_set_viewer_results(NULL, NULL);
     csmdebug_set_viewer_parameters(work_solid, NULL);
@@ -969,8 +969,8 @@ CYBOOL csmsplit_does_plane_split_solid(
         i_join_null_edges(set_of_null_edges, &set_of_null_faces);
         i_finish_split(set_of_null_faces, work_solid, &solid_above_loc, &solid_below_loc);
 
-        csmsolid_clear_algorithm_vertex_mask(solid_above_loc);
-        csmsolid_clear_algorithm_vertex_mask(solid_below_loc);
+        csmsolid_clear_algorithm_data(solid_above_loc);
+        csmsolid_clear_algorithm_data(solid_below_loc);
         
         assert(csmsolid_is_empty(work_solid) == CIERTO);
         

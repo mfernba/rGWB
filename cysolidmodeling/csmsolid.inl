@@ -15,7 +15,7 @@ unsigned long *csmsolid_id_new_element(struct csmsolid_t *solido);
 
 CYBOOL csmsolid_is_empty(const struct csmsolid_t *solido);
 
-void csmsolid_clear_algorithm_vertex_mask(struct csmsolid_t *solid);
+void csmsolid_clear_algorithm_data(struct csmsolid_t *solid);
 
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid);
 

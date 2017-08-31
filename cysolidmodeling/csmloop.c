@@ -771,6 +771,16 @@ void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CYBOOL setop_loop
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmloop_clear_algorithm_mask(struct csmloop_t *loop)
+{
+    assert_no_null(loop);
+    
+    loop->setop_convert_loop_in_face = FALSO;
+    loop->setop_loop_was_a_hole = FALSO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBOOL assert_si_no_es_integro)
 {
     struct csmhedge_t *ledge;

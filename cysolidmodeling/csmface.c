@@ -927,6 +927,23 @@ void csmface_revert(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmface_clear_algorithm_mask(struct csmface_t *face)
+{
+    struct csmloop_t *loop_iterator;
+    
+    assert_no_null(face);
+        
+    loop_iterator = face->floops;
+    
+    while (loop_iterator != NULL)
+    {
+        csmloop_clear_algorithm_mask(loop_iterator);
+        loop_iterator = csmloop_next(loop_iterator);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_integro, unsigned long *num_holes_opc)
 {
     unsigned long num_holes_loc;

@@ -91,6 +91,8 @@ CYBOOL csmface_has_holes(const struct csmface_t *face);
 
 void csmface_revert(struct csmface_t *face);
 
+void csmface_clear_algorithm_mask(struct csmface_t *face);
+
 
 // Debug...
 

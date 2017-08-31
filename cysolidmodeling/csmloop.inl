@@ -62,6 +62,8 @@ void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CYBOOL setop
 CYBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop);
 void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CYBOOL setop_loop_was_a_hole);
 
+void csmloop_clear_algorithm_mask(struct csmloop_t *loop);
+
 
 // Debug...
 

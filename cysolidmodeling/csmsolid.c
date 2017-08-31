@@ -283,13 +283,11 @@ CYBOOL csmsolid_is_empty(const struct csmsolid_t *solido)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_clear_algorithm_vertex_mask(struct csmsolid_t *solid)
+static void i_clear_algorithm_vertex_mask(struct csmhashtb(csmvertex_t) *svertexs)
 {
     struct csmhashtb_iterator(csmvertex_t) *iterator;
     
-    assert_no_null(solid);
-    
-    iterator = csmhashtb_create_iterator(solid->svertexs, csmvertex_t);
+    iterator = csmhashtb_create_iterator(svertexs, csmvertex_t);
     
     while (csmhashtb_has_next(iterator, csmvertex_t) == CIERTO)
     {
@@ -300,6 +298,35 @@ void csmsolid_clear_algorithm_vertex_mask(struct csmsolid_t *solid)
     }
     
     csmhashtb_free_iterator(&iterator, csmvertex_t);
+}
+                                          
+// ----------------------------------------------------------------------------------------------------
+
+static void i_clear_algorithm_face_mask(struct csmhashtb(csmface_t) *sfaces)
+{
+    struct csmhashtb_iterator(csmface_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(iterator, csmface_t) == CIERTO)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        csmface_clear_algorithm_mask(face);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_clear_algorithm_data(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    
+    i_clear_algorithm_vertex_mask(solid->svertexs);
+    i_clear_algorithm_face_mask(solid->sfaces);
 }
 
 // ----------------------------------------------------------------------------------------------------

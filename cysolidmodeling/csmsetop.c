@@ -684,6 +684,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         csmloopglue_merge_face_loops(face_from_solid_A);
     }
     
+    csmsolid_clear_algorithm_data(result);
+    
     csmdebug_clear_debug_points();
     csmsolid_print_debug(result, CIERTO);
     csmdebug_set_viewer_results(result, NULL);
@@ -714,10 +716,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     csmdebug_show_viewer();
     
     csmsolid_redo_geometric_generated_data(solid_A);
-    csmsolid_clear_algorithm_vertex_mask(solid_A);
+    csmsolid_clear_algorithm_data(solid_A);
     
     csmsolid_redo_geometric_generated_data(solid_B);
-    csmsolid_clear_algorithm_vertex_mask(solid_B);
+    csmsolid_clear_algorithm_data(solid_B);
 
     if (csmdebug_debug_enabled() == CIERTO)
     {
