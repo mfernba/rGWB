@@ -444,6 +444,7 @@ static void i_set_output_debug_file(const char *file_name)
 
 static void i_show_split_results(
                         double A, double B, double C, double D,
+                        CYBOOL show_plane,
                         struct csmsolid_t *solid_above, struct csmsolid_t *solid_below)
 {
     double desp;
@@ -472,7 +473,11 @@ static void i_show_split_results(
 
     if (solid_above != NULL || solid_below != NULL )
     {
-        csmdebug_set_plane(A, B, C, D);
+        if (show_plane == CIERTO)
+            csmdebug_set_plane(A, B, C, D);
+        else
+            csmdebug_clear_plane();
+        
         csmdebug_set_viewer_results(solid_above, solid_below);
         csmdebug_show_viewer();
     }
@@ -501,7 +506,7 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
     splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
     assert(splitted == CIERTO);
     
-    i_show_split_results(A, B, C, D, solid_above, solid_below);
+    i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
 
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -531,7 +536,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
     splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
     assert(splitted == CIERTO);
     
-    i_show_split_results(A, B, C, D, solid_above, solid_below);
+    i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
 
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -567,7 +572,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
     splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
     assert(splitted == CIERTO);
 
-    i_show_split_results(A, B, C, D, solid_above, solid_below);
+    i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -605,7 +610,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
     splitted = csmsplit_does_plane_split_solid(solid_below, A, B, C, D, &solid_above, &solid_below);
     assert(splitted == CIERTO);
     
-    i_show_split_results(A, B, C, D, solid_above, solid_below);
+    i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
 
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -1513,7 +1518,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
             desp = -0.5;
             csmsolid_move(solid_below, A * desp, B * desp, C * desp);
             
-            i_show_split_results(A, B, C, D, solid_above, solid_below);
+            i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
             
             csmsolid_free(&solid_above);
             csmsolid_free(&solid_below);
@@ -1851,14 +1856,15 @@ static void i_test_mechanical_part1(void)
     struct gccontorno_t *main_part_shape;
     
     i_set_output_debug_file("mechanical1.txt");
-
     
     ax = 0.1;
     ay = 0.1;
     main_part_length = 1.;
     
-    main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
-    //main_part_shape = gcelem2d_contorno_circular(ax, 32);
+    csmdebug_set_enabled_by_code(FALSO);
+    
+    //main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
+    main_part_shape = gcelem2d_contorno_circular(ax, 32);
     
     basic_part = csmsweep_create_solid_from_shape_debug(
                         main_part_shape,
@@ -1887,12 +1893,14 @@ static void i_test_mechanical_part1(void)
             {
                 struct csmsolid_t *main_part_loc;
             
-                //main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
-                //main_part_loc = csmsetop_intersection_A_and_B(main_part, ring_part);
-                main_part_loc = csmsetop_union_A_and_B(main_part, ring_part);
+                csmdebug_set_enabled_by_code(CIERTO);
+                csmdebug_set_viewer_parameters(main_part, ring_part);
+                csmdebug_show_viewer();
+                csmdebug_set_enabled_by_code(FALSO);
+                
+                main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
                 csmsolid_free(&main_part);
                 main_part = main_part_loc;
-                break;
             }
             
             csmsolid_move(ring_part, 0., 0., incr_z);
@@ -1901,8 +1909,56 @@ static void i_test_mechanical_part1(void)
         csmsolid_free(&ring_part);
      }
     
-    csmsolid_move(basic_part, 0.25 * ax, 0., 0.05 * main_part_length);
-    //main_part = csmsetop_difference_A_minus_B(main_part, basic_part);
+    csmdebug_set_enabled_by_code(CIERTO);
+    csmdebug_set_viewer_results(main_part, NULL);
+    csmdebug_show_viewer();
+    csmdebug_set_enabled_by_code(FALSO);
+   
+    
+    {
+        struct gccontorno_t *diff_shape;
+        struct csmsolid_t *basic_part2, *main_part_loc;
+        
+        diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
+        
+        basic_part2 = csmsweep_create_solid_from_shape_debug(
+                        diff_shape,
+                        0., 0., main_part_length, 1., 0., 0., 0., 1., 0.,
+                        diff_shape,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+
+        csmsolid_move(basic_part2, 0.25 * ax, 0., 0.05 * main_part_length);
+        
+        main_part_loc = csmsetop_difference_A_minus_B(main_part, basic_part2);
+        csmsolid_free(&main_part);
+        main_part = main_part_loc;
+        
+        gccontorno_destruye(&diff_shape);
+        csmsolid_free(&basic_part2);
+    }
+
+    csmdebug_set_enabled_by_code(CIERTO);
+
+    csmdebug_set_viewer_results(main_part, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        double A, B, C, D;
+        struct csmsolid_t *solid_above, *solid_below;
+        CYBOOL splitted;
+
+        csmdebug_set_enabled_by_code(FALSO);
+        
+        csmmath_implicit_plane_equation(0., 0., 0., 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
+    
+        splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
+        assert(splitted == CIERTO);
+
+        csmdebug_set_enabled_by_code(CIERTO);
+        
+        i_show_split_results(A, B, C, D, FALSO, solid_above, solid_below);
+    }
     
     gccontorno_destruye(&main_part_shape);
     csmsolid_free(&main_part);
@@ -1965,7 +2021,7 @@ void csmtest_test(void)
     i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
-    */
+     */
     
     //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara

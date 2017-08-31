@@ -282,6 +282,13 @@ void csmdebug_append_debug_point(double x, double y, double z, char **descriptio
 
 // --------------------------------------------------------------------------------
 
+void csmdebug_clear_plane(void)
+{
+    g_Draw_plane = FALSO;
+}
+
+// --------------------------------------------------------------------------------
+
 void csmdebug_set_plane(double A, double B, double C, double D)
 {
     g_Draw_plane = CIERTO;

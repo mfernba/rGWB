@@ -47,6 +47,8 @@ CONSTRUCTOR(ArrEstructura(csmface_t) *, csmsetopcom_convert_inner_loops_of_null_
 
 void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_t) *set_of_null_faces);
 
+void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, ArrEstructura(csmface_t) *set_of_null_faces);
+
 void csmsetopcom_move_face_to_solid(
                         unsigned long recursion_level,
                         struct csmface_t *face, struct csmsolid_t *face_solid,

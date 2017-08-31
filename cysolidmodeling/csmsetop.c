@@ -329,7 +329,7 @@ static void i_join_null_edges(
         null_edges_that_cannot_be_matched_A = i_there_are_only_null_edges_that_cannot_be_matched(set_of_null_edges_A);
         null_edges_that_cannot_be_matched_B = i_there_are_only_null_edges_that_cannot_be_matched(set_of_null_edges_B);
         
-        assert(null_edges_that_cannot_be_matched_A == CIERTO || null_edges_that_cannot_be_matched_B == CIERTO);
+        //assert(null_edges_that_cannot_be_matched_A == CIERTO || null_edges_that_cannot_be_matched_B == CIERTO);
     }
     
     arr_DestruyeEstructurasST(&loose_ends_A, NULL, csmhedge_t);
@@ -606,9 +606,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     
     csmsolid_redo_geometric_generated_data(solid_A);
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_A);
+    csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_A, set_of_null_faces_A);
     
     csmsolid_redo_geometric_generated_data(solid_B);
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_B);
+    csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_B, set_of_null_faces_B);
 
     no_null_faces = arr_NumElemsPunteroST(set_of_null_faces_A, csmface_t);
     assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));

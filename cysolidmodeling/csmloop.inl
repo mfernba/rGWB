@@ -57,8 +57,10 @@ struct csmloop_t *csmloop_prev(struct csmloop_t *loop);
 void csmloop_revert_loop_orientation(struct csmloop_t *loop);
 
 CYBOOL csmloop_setop_convert_loop_in_face(const struct csmloop_t *loop);
-
 void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CYBOOL setop_convert_loop_in_face);
+
+CYBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop);
+void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CYBOOL setop_loop_was_a_hole);
 
 
 // Debug...

@@ -49,6 +49,7 @@ void csmdebug_show_viewer(void);
 void csmdebug_clear_debug_points(void);
 void csmdebug_append_debug_point(double x, double y, double z, char **description);
 
+void csmdebug_clear_plane(void);
 void csmdebug_set_plane(double A, double B, double C, double D);
 
 void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics);

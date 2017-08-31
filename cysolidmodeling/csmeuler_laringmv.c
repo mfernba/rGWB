@@ -49,6 +49,8 @@ void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
             
             if (csmface_is_point_interior_to_face(face1, x, y, z) == FALSO)
             {
+                csmloop_set_setop_loop_was_a_hole(iterator_face1, CIERTO);
+                
                 csmdebug_print_debug_info("\t***laringmv loop %lu to face %lu\n", csmloop_id(iterator_face1), csmface_id(face2));
                 csmface_add_loop_while_removing_from_old(face2, iterator_face1);
             }
@@ -61,8 +63,11 @@ void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
 
 // ------------------------------------------------------------------------------------------
 
-void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(struct csmface_t *face1, struct csmface_t *face2)
+void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(
+                        struct csmface_t *face1, struct csmface_t *face2,
+                        CYBOOL *did_move_some_loop_opt)
 {
+    CYBOOL did_move_some_loop_loc;
     register struct csmloop_t *iterator_face1;
     unsigned long num_iteraciones;
     
@@ -70,6 +75,7 @@ void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(struct csmface_t *face1, 
     
     iterator_face1 = csmface_floops(face1);
     num_iteraciones = 0;
+    did_move_some_loop_loc = FALSO;
     
     do
     {
@@ -95,10 +101,14 @@ void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(struct csmface_t *face1, 
                 
                 csmloop_set_setop_convert_loop_in_face(iterator_face1, CIERTO);
                 csmface_add_loop_while_removing_from_old(face2, iterator_face1);
+                
+                did_move_some_loop_loc = CIERTO;
             }
         }
         
         iterator_face1 = next_loop;
         
     } while (iterator_face1 != NULL);
+    
+    ASIGNA_OPC(did_move_some_loop_opt, did_move_some_loop_loc);
 }

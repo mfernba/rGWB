@@ -274,18 +274,32 @@ void csmloopglue_merge_faces(struct csmface_t *face1, struct csmface_t **face2)
 void csmloopglue_merge_face_loops(struct csmface_t *face)
 {
     struct csmloop_t *loop1, *loop2;
-    CYBOOL can_merge_loops;
+    CYBOOL did_find_compatible_loop2;
     struct csmhedge_t *common_hedge_loop1, *common_hedge_loop2;
     
     assert_no_null(face);
     
     loop1 = csmface_floops(face);
     loop2 = csmloop_next(loop1);
-    assert(csmloop_next(loop2) == NULL);
-
-    can_merge_loops = i_is_possible_to_merge_loops(loop1, loop2, &common_hedge_loop1, &common_hedge_loop2);
-    assert(can_merge_loops == CIERTO);
+    assert_no_null(loop2);
     
+    did_find_compatible_loop2 = FALSO;
+    
+    do
+    {
+        if (i_is_possible_to_merge_loops(loop1, loop2, &common_hedge_loop1, &common_hedge_loop2) == CIERTO)
+        {
+            did_find_compatible_loop2 = CIERTO;
+            break;
+        }
+        else
+        {
+            loop2 = csmloop_next(loop2);
+        }
+        
+    } while (loop2 != NULL && did_find_compatible_loop2 == FALSO);
+
+    assert(did_find_compatible_loop2 == CIERTO);
     i_glue_loops_given_hedges(common_hedge_loop1, common_hedge_loop2);
 
     //assert(loop1 == csmface_floops(face));

@@ -30,6 +30,7 @@ struct csmloop_t
     struct csmface_t *lface;
     
     CYBOOL setop_convert_loop_in_face;
+    CYBOOL setop_loop_was_a_hole;
 };
 
 // --------------------------------------------------------------------------------------------------------------
@@ -51,7 +52,8 @@ CONSTRUCTOR(static struct csmloop_t *, i_crea, (
                         unsigned long id,
                         struct csmhedge_t *ledge,
                         struct csmface_t *lface,
-                        CYBOOL setop_convert_loop_in_face))
+                        CYBOOL setop_convert_loop_in_face,
+                        CYBOOL setop_loop_was_a_hole))
 {
     struct csmloop_t *loop;
     
@@ -63,6 +65,7 @@ CONSTRUCTOR(static struct csmloop_t *, i_crea, (
     loop->lface = lface;
     
     loop->setop_convert_loop_in_face = setop_convert_loop_in_face;
+    loop->setop_loop_was_a_hole = setop_loop_was_a_hole;
     
     return loop;
 }
@@ -75,6 +78,7 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
     struct csmhedge_t *ledge;
     struct csmface_t *lface;
     CYBOOL setop_convert_loop_in_face;
+    CYBOOL setop_loop_was_a_hole;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
     
@@ -82,8 +86,9 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
     lface = face;
     
     setop_convert_loop_in_face = FALSO;
+    setop_loop_was_a_hole = FALSO;
     
-    return i_crea(id, ledge, lface, setop_convert_loop_in_face);
+    return i_crea(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -93,12 +98,14 @@ CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lfac
     unsigned long id;
     struct csmhedge_t *ledge;
     CYBOOL setop_convert_loop_in_face;
+    CYBOOL setop_loop_was_a_hole;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
     ledge = NULL;
     setop_convert_loop_in_face = FALSO;
+    setop_loop_was_a_hole = FALSO;
     
-    return i_crea(id, ledge, lface, setop_convert_loop_in_face);
+    return i_crea(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -744,6 +751,22 @@ void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CYBOOL setop
 {
     assert_no_null(loop);
     loop->setop_convert_loop_in_face = setop_convert_loop_in_face;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop)
+{
+    assert_no_null(loop);
+    return loop->setop_loop_was_a_hole;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CYBOOL setop_loop_was_a_hole)
+{
+    assert_no_null(loop);
+    loop->setop_loop_was_a_hole = setop_loop_was_a_hole;
 }
 
 // ----------------------------------------------------------------------------------------------------

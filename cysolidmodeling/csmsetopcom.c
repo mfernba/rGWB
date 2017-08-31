@@ -391,9 +391,11 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
         
          if (new_face != NULL && original_loop_is_a_hole == CIERTO)
         {
-            csmeuler_laringmv_from_face1_to_2_if_fits_in_face(new_face, old_face);
+            CYBOOL did_move_some_loop;
             
-            if (csmface_floops(new_face) == NULL)
+            csmeuler_laringmv_from_face1_to_2_if_fits_in_face(new_face, old_face, &did_move_some_loop);
+            
+            if (did_move_some_loop == CIERTO && csmface_floops(new_face) == NULL)
                 csmsolid_remove_face(he1_solid, &new_face);
         }
     }
@@ -501,10 +503,13 @@ void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid)
                 
                 if (csmloop_setop_convert_loop_in_face(loop_iterator) == CIERTO)
                 {
+                    struct csmface_t *new_face;
+                    
                     there_are_changes = CIERTO;
                     
                     csmloop_set_setop_convert_loop_in_face(loop_iterator, FALSO);
-                    csmeuler_lmfkrh(loop_iterator, NULL);
+                    csmeuler_lmfkrh(loop_iterator, &new_face);
+                    csmface_redo_geometric_generated_data(new_face);
                 }
                 
                 loop_iterator = next_loop;
@@ -659,6 +664,91 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
         }
         
     } while (did_delete_faces == CIERTO);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static bool i_face_equal_ptr(const struct csmface_t *face1, const struct csmface_t *face2)
+{
+    if (face1 == face2)
+        return CIERTO;
+    else
+        return FALSO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, ArrEstructura(csmface_t) *set_of_null_faces)
+{
+    unsigned long num_null_faces;
+    CYBOOL there_are_changes;
+    
+    num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    assert(num_null_faces > 0);
+    assert(num_null_faces % 2 == 0);
+
+    there_are_changes = FALSO;
+    
+    do
+    {
+        struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+        face_iterator = csmsolid_face_iterator(solid);
+        there_are_changes = FALSO;
+    
+        while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+        {
+            struct csmface_t *face;
+            struct csmloop_t *face_floops;
+            
+            csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+            face_floops = csmface_floops(face);
+            
+            if (csmloop_next(face_floops) == NULL
+                    && csmloop_setop_loop_was_a_hole(face_floops) == CIERTO
+                    && arr_ExisteEstructuraST(set_of_null_faces, csmface_t, face, struct csmface_t, i_face_equal_ptr, NULL) == FALSO)
+            {
+                unsigned long idx_first_in_face, i;
+                CYBOOL did_remove_face;
+                
+                idx_first_in_face = num_null_faces / 2 ;
+                did_remove_face = FALSO;
+                
+                for (i = idx_first_in_face; i < num_null_faces; i++)
+                {
+                    struct csmface_t *null_face;
+                    
+                    null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+                    
+                    if (csmface_are_coplanar_faces(face, null_face) == CIERTO)
+                    {
+                        CYBOOL did_move_some_loop;
+                        
+                        csmeuler_laringmv_from_face1_to_2_if_fits_in_face(face, null_face, &did_move_some_loop);
+                        
+                        if (did_move_some_loop == CIERTO)
+                        {
+                            assert(csmface_floops(face) == NULL);
+                            
+                            there_are_changes = CIERTO;
+                            
+                            csmloop_set_setop_loop_was_a_hole(face_floops, FALSO);
+                            csmsolid_remove_face(solid, &face);
+                        }
+                    }
+                    
+                    if (there_are_changes == CIERTO)
+                        break;
+                }
+            }
+            
+            if (there_are_changes == CIERTO)
+                break;
+        }
+        
+        csmhashtb_free_iterator(&face_iterator, csmface_t);
+        
+    } while (there_are_changes == CIERTO);
 }
 
 // ----------------------------------------------------------------------------------------------------
