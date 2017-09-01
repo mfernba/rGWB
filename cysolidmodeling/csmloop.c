@@ -333,11 +333,12 @@ static CYBOOL i_is_point_on_loop_boundary(
                         struct csmhedge_t *ledge,
                         double x, double y, double z, double tolerance,
                         struct csmvertex_t **hit_vertex_opc,
-                        struct csmhedge_t **hit_hedge_opc)
+                        struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
     CYBOOL is_point_on_loop_boundary;
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
+    double t_relative_to_hit_hedge_loc;
     register struct csmhedge_t *iterator;
     unsigned long num_iteraciones;
     
@@ -347,6 +348,7 @@ static CYBOOL i_is_point_on_loop_boundary(
     is_point_on_loop_boundary = FALSO;
     hit_vertex_loc = NULL;
     hit_hedge_loc = NULL;
+    t_relative_to_hit_hedge_loc = 0.;
     
     do
     {
@@ -380,16 +382,19 @@ static CYBOOL i_is_point_on_loop_boundary(
             {
                 hit_vertex_loc = vertex;
                 hit_hedge_loc = NULL;
+                t_relative_to_hit_hedge_loc = 0.0;
             }
             else if (csmmath_compare_doubles(t, 1.0, tolerance) == CSMMATH_EQUAL_VALUES)
             {
                 hit_vertex_loc = next_vertex;
                 hit_hedge_loc = NULL;
+                t_relative_to_hit_hedge_loc = 1.0;
             }
             else
             {
                 hit_vertex_loc = NULL;
                 hit_hedge_loc = iterator;
+                t_relative_to_hit_hedge_loc = t;
             }
             break;
         }
@@ -400,6 +405,7 @@ static CYBOOL i_is_point_on_loop_boundary(
     
     ASIGNA_OPC(hit_vertex_opc, hit_vertex_loc);
     ASIGNA_OPC(hit_hedge_opc, hit_hedge_loc);
+    ASIGNA_OPC(t_relative_to_hit_hedge_opc, t_relative_to_hit_hedge_loc);
     
     return is_point_on_loop_boundary;
 }
@@ -447,17 +453,23 @@ CYBOOL csmloop_is_point_inside_loop(
                         double tolerance,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
-                        struct csmhedge_t **hit_hedge_opc)
+                        struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
     CYBOOL is_point_inside_loop;
     enum csmmath_contaiment_point_loop_t type_of_containment_loc;
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
+    double t_relative_to_hit_hedge_loc;
 
     assert_no_null(loop);
     i_niter++;
     
-    if (i_is_point_on_loop_boundary(loop->ledge, x, y, z, tolerance, &hit_vertex_loc, &hit_hedge_loc) == CIERTO)
+    if (i_is_point_on_loop_boundary(
+                        loop->ledge,
+                        x, y, z,
+                        tolerance,
+                        &hit_vertex_loc,
+                        &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == CIERTO)
     {
         is_point_inside_loop = CIERTO;
         
@@ -482,6 +494,7 @@ CYBOOL csmloop_is_point_inside_loop(
         type_of_containment_loc = CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR;
         hit_vertex_loc = NULL;
         hit_hedge_loc = NULL;
+        t_relative_to_hit_hedge_loc = 0.;
         
         ray_hedge = loop->ledge;
         start_hedge = NULL;
@@ -582,6 +595,7 @@ CYBOOL csmloop_is_point_inside_loop(
     ASIGNA_OPC(type_of_containment_opc, type_of_containment_loc);
     ASIGNA_OPC(hit_vertex_opc, hit_vertex_loc);
     ASIGNA_OPC(hit_hedge_opc, hit_hedge_loc);
+    ASIGNA_OPC(t_relative_to_hit_hedge_opc, t_relative_to_hit_hedge_loc);
     
     return is_point_inside_loop;
 }

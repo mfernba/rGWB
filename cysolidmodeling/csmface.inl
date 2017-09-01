@@ -27,14 +27,14 @@ CYBOOL csmface_contains_vertex(
                         const struct csmvertex_t *vertex,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
-                        struct csmhedge_t **hit_hedge_opc);
+                        struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 
 CYBOOL csmface_contains_point(
                         const struct csmface_t *face,
                         double x, double y, double z,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
-                        struct csmhedge_t **hit_hedge_opc);
+                        struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 
 CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x, double y, double z);
 

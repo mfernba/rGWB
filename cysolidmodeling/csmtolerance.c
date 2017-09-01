@@ -37,3 +37,11 @@ double csmtolerance_null_vector(void)
 {
     return 1.e-6;
 }
+
+// --------------------------------------------------------------------------------
+
+double csmtolerance_point_in_loop_frontier(void)
+{
+    return 1.e-6;
+}
+

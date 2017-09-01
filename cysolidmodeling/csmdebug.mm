@@ -15,6 +15,7 @@ extern "C"
 
 #include <basicSystem/bsassert.h>
 #include <basicSystem/bsmaterial.h>
+#include "standarc.h"
 #include "cypestr.h"
 #include "a_punter.h"
 
@@ -58,7 +59,8 @@ static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
 static int i_DEBUG_SCREEN = 0;
 static int i_DEBUG_VISUAL = 1;
-static int i_DEBUG_FILE = 0;
+static int i_DEBUG_FILE = 0
+;
 static FILE *g_output_file = NULL;
 
 // --------------------------------------------------------------------------------
@@ -314,21 +316,23 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
         bsgraphics2_escr_color(graphics, debug_point_material);
         bsgraphics2_escr_punto3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
         
-        /*bsgraphics2_append_desplazamiento_3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
-        bsgraphics2_append_ejes_plano_pantalla(graphics);
-        
-        (i % 2 == 0) ? justificacion = BSGRAPHICS2_JUSTIFICACION_SUP_CEN: justificacion = BSGRAPHICS2_JUSTIFICACION_INF_CEN;
+        if (fabs(fabs(g_Debug_points[i].z) - 0.05) < 1.e-3)
+        {
+            bsgraphics2_append_desplazamiento_3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
+            bsgraphics2_append_ejes_plano_pantalla(graphics);
+            
+            (i % 2 == 0) ? justificacion = BSGRAPHICS2_JUSTIFICACION_SUP_CEN: justificacion = BSGRAPHICS2_JUSTIFICACION_INF_CEN;
 
-        bsgraphics2_escr_texto_mts(
+            bsgraphics2_escr_texto_mts(
                     graphics,
                     g_Debug_points[i].text, 0., 0., 1., 0.,
                     justificacion,
                     BSGRAPHICS2_ESTILO_NORMAL,
-                    0.02);
+                    0.002);
         
-        bsgraphics2_desapila_transformacion(graphics);
-        bsgraphics2_desapila_transformacion(graphics);        
-         */
+            bsgraphics2_desapila_transformacion(graphics);
+            bsgraphics2_desapila_transformacion(graphics);
+        }
     }
     
     if (g_Draw_plane == CIERTO)

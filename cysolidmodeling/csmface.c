@@ -314,7 +314,7 @@ CYBOOL csmface_contains_vertex(
                         const struct csmvertex_t *vertex,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
-                        struct csmhedge_t **hit_hedge_opc)
+                        struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
     double x, y, z;
     
@@ -334,8 +334,8 @@ CYBOOL csmface_contains_vertex(
         return csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
-                        face->fuzzy_epsilon,
-                        type_of_containment_opc, hit_vertex_opc, hit_hedge_opc);
+                        csmtolerance_point_in_loop_frontier(),
+                        type_of_containment_opc, hit_vertex_opc, hit_hedge_opc, t_relative_to_hit_hedge_opc);
     }
 }
 
@@ -346,12 +346,13 @@ CYBOOL csmface_contains_point(
                         double x, double y, double z,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
-                        struct csmhedge_t **hit_hedge_opc)
+                        struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
     CYBOOL containts_point;
     enum csmmath_contaiment_point_loop_t type_of_containment_loc;
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
+    double t_relative_to_hit_hedge_loc;
     
     assert_no_null(face);
     
@@ -365,14 +366,15 @@ CYBOOL csmface_contains_point(
         type_of_containment_loc = (enum csmmath_contaiment_point_loop_t)USHRT_MAX;
         hit_vertex_loc = NULL;
         hit_hedge_loc = NULL;
+        t_relative_to_hit_hedge_loc = 0.;
     }
     else
     {
         if (csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
-                        face->fuzzy_epsilon,
-                        &type_of_containment_loc, &hit_vertex_loc, &hit_hedge_loc) == FALSO)
+                        csmtolerance_point_in_loop_frontier(),
+                        &type_of_containment_loc, &hit_vertex_loc, &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == FALSO)
         {
             containts_point = FALSO;
         }
@@ -396,12 +398,13 @@ CYBOOL csmface_contains_point(
                         enum csmmath_contaiment_point_loop_t type_of_containment_hole;
                         struct csmvertex_t *hit_vertex_hole;
                         struct csmhedge_t *hit_hedge_hole;
+                        double t_relative_to_hit_hedge_hole;
                         
                         if (csmloop_is_point_inside_loop(
                                 loop_iterator,
                                 x, y, z, face->dropped_coord,
-                                face->fuzzy_epsilon,
-                                &type_of_containment_hole, &hit_vertex_hole, &hit_hedge_hole) == CIERTO)
+                                csmtolerance_point_in_loop_frontier(),
+                                &type_of_containment_hole, &hit_vertex_hole, &hit_hedge_hole, &t_relative_to_hit_hedge_hole) == CIERTO)
                         {
                             if (type_of_containment_hole == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
                             {
@@ -414,6 +417,7 @@ CYBOOL csmface_contains_point(
                                 type_of_containment_loc = type_of_containment_hole;
                                 hit_vertex_loc = hit_vertex_hole;
                                 hit_hedge_loc = hit_hedge_hole;
+                                t_relative_to_hit_hedge_loc = t_relative_to_hit_hedge_hole;
                             }
                             break;
                         }
@@ -428,6 +432,7 @@ CYBOOL csmface_contains_point(
     ASIGNA_OPC(type_of_containment_opc, type_of_containment_loc);
     ASIGNA_OPC(hit_vertex_opc, hit_vertex_loc);
     ASIGNA_OPC(hit_hedge_opc, hit_hedge_loc);
+    ASIGNA_OPC(t_relative_to_hit_hedge_opc, t_relative_to_hit_hedge_loc);
     
     return containts_point;
 }
@@ -454,8 +459,8 @@ CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x,
         if (csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
-                        face->fuzzy_epsilon,
-                        &type_of_containment, NULL, NULL) == FALSO)
+                        csmtolerance_point_in_loop_frontier(),
+                        &type_of_containment, NULL, NULL, NULL) == FALSO)
         {
             is_interior_to_face = FALSO;
         }
@@ -477,8 +482,8 @@ CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x,
                     if (csmloop_is_point_inside_loop(
                             loop_iterator,
                             x, y, z, face->dropped_coord,
-                            face->fuzzy_epsilon,
-                            &type_of_containment, NULL, NULL) == CIERTO)
+                            csmtolerance_point_in_loop_frontier(),
+                            &type_of_containment, NULL, NULL, NULL) == CIERTO)
                     {
                         if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
                             is_interior_to_face = FALSO;
@@ -608,8 +613,8 @@ CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_
         if (csmloop_is_point_inside_loop(
                     face->flout,
                     x, y, z, face->dropped_coord,
-                    face->fuzzy_epsilon,
-                    NULL, NULL, NULL) == FALSO)
+                    csmtolerance_point_in_loop_frontier(),
+                    NULL, NULL, NULL, NULL) == FALSO)
         {
             return FALSO;
         }

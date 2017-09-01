@@ -92,13 +92,13 @@ static void i_test_crea_lamina(void)
         
         assert(initial_face != new_face);
 
-        assert(csmface_contains_point(initial_face, 0.5, 0.5, 0.5, NULL, NULL, NULL) == CIERTO);
-        assert(csmface_contains_point(initial_face, 1., 1., 1., NULL, NULL, NULL) == CIERTO);
-        assert(csmface_contains_point(initial_face, 5., 5., 0., NULL, NULL, NULL) == FALSO);
+        assert(csmface_contains_point(initial_face, 0.5, 0.5, 0.5, NULL, NULL, NULL, NULL) == CIERTO);
+        assert(csmface_contains_point(initial_face, 1., 1., 1., NULL, NULL, NULL, NULL) == CIERTO);
+        assert(csmface_contains_point(initial_face, 5., 5., 0., NULL, NULL, NULL, NULL) == FALSO);
         
-        assert(csmface_contains_point(new_face, 0.5, 0.5, 0.5, NULL, NULL, NULL) == CIERTO);
-        assert(csmface_contains_point(new_face, 1., 1., 1., NULL, NULL, NULL) == CIERTO);
-        assert(csmface_contains_point(new_face, 5., 5., 0., NULL, NULL, NULL) == FALSO);
+        assert(csmface_contains_point(new_face, 0.5, 0.5, 0.5, NULL, NULL, NULL, NULL) == CIERTO);
+        assert(csmface_contains_point(new_face, 1., 1., 1., NULL, NULL, NULL, NULL) == CIERTO);
+        assert(csmface_contains_point(new_face, 5., 5., 0., NULL, NULL, NULL, NULL) == FALSO);
     }
     
     csmeuler_lkef(&he_pos, &he_neg);
@@ -1864,7 +1864,7 @@ static void i_test_mechanical_part1(void)
     csmdebug_set_enabled_by_code(FALSO);
     
     //main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
-    main_part_shape = gcelem2d_contorno_circular(ax, 32);
+    main_part_shape = gcelem2d_contorno_circular(ax, 8);
     
     basic_part = csmsweep_create_solid_from_shape_debug(
                         main_part_shape,
@@ -1896,11 +1896,6 @@ static void i_test_mechanical_part1(void)
             {
                 struct csmsolid_t *main_part_loc;
             
-                csmdebug_set_enabled_by_code(CIERTO);
-                csmdebug_set_viewer_parameters(main_part, ring_part);
-                csmdebug_show_viewer();
-                csmdebug_set_enabled_by_code(FALSO);
-                
                 if (no_operations % 2 == 0)
                     main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
                 else
@@ -1923,14 +1918,15 @@ static void i_test_mechanical_part1(void)
     csmdebug_set_enabled_by_code(CIERTO);
     csmdebug_set_viewer_results(main_part, NULL);
     csmdebug_show_viewer();
-    csmdebug_set_enabled_by_code(FALSO);
+    //csmdebug_set_enabled_by_code(FALSO);
    
     
     {
         struct gccontorno_t *diff_shape;
         struct csmsolid_t *basic_part2, *main_part_loc;
         
-        diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
+        //diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
+        diff_shape = gcelem2d_contorno_circular(0.6 * ax, 5);
         
         basic_part2 = csmsweep_create_solid_from_shape_debug(
                         diff_shape,
