@@ -16,9 +16,11 @@
 
 #include "a_pto2d.h"
 #include "cont2d.h"
+#include "copiafor.h"
 #include "cyassert.h"
 #include "cypeid.h"
 #include "cypespy.h"
+#include "cypestr.h"
 #include "defmath.tlh"
 #include "standarc.h"
 
@@ -833,9 +835,15 @@ void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBO
         }
         else
         {
+            char *is_null_edge;
             const char *he_position;
             struct csmhedge_t *he1, *he2;
             struct csmhedge_t *he_mate;
+            
+            if (csmedge_setop_is_null_edge(edge) == CIERTO)
+                is_null_edge = copiafor_codigo1("[Null Edge: %lu]", csmedge_id(edge));
+            else
+                is_null_edge = cad_copia_cadena("");
             
             he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
             he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
@@ -845,26 +853,30 @@ void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBO
             if (he_mate != NULL)
             {
                 csmdebug_print_debug_info(
-                    "\t\t(%3s %4lu [edge %6lu. Mate: %4lu], %4lu, %6.3f, %6.3f, %6.3f, %d)\n",
+                    "\t\t(%3s %4lu [edge %6lu. Mate: %4lu], %4lu, %6.3f, %6.3f, %6.3f, %d) %s\n",
                     he_position,
                     csmnode_id(CSMNODE(iterator)),
                     csmnode_id(CSMNODE(edge)),
                     csmnode_id(CSMNODE(he_mate)),
                     csmnode_id(CSMNODE(vertex)),
                     x, y, z,
-                    ES_CIERTO(csmhedge_loop(iterator) == loop));
+                    ES_CIERTO(csmhedge_loop(iterator) == loop),
+                    is_null_edge);
             }
             else
             {
                 csmdebug_print_debug_info(
-                    "\t\t(%3s %4lu [edge %6lu. Mate: ----], %4lu, %6.3f, %6.3f, %6.3f, %d)\n",
+                    "\t\t(%3s %4lu [edge %6lu. Mate: ----], %4lu, %6.3f, %6.3f, %6.3f, %d) %s\n",
                     he_position,
                     csmnode_id(CSMNODE(iterator)),
                     csmnode_id(CSMNODE(edge)),
                     csmnode_id(CSMNODE(vertex)),
                     x, y, z,
-                    ES_CIERTO(csmhedge_loop(iterator) == loop));
+                    ES_CIERTO(csmhedge_loop(iterator) == loop),
+                    is_null_edge);
             }
+            
+            cypestr_destruye(&is_null_edge);
         }
         
         if (assert_si_no_es_integro == CIERTO)

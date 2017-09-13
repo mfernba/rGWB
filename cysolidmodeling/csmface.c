@@ -32,6 +32,8 @@ struct csmface_t
     double fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;
     struct csmbbox_t *bbox;
+    
+    CYBOOL setop_is_null_face;
 };
 
 static const double i_COS_15_DEGREES = 0.9659358;
@@ -44,7 +46,8 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         struct csmloop_t *flout,
                         struct csmloop_t *floops,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
-                        struct csmbbox_t **bbox))
+                        struct csmbbox_t **bbox,
+                        CYBOOL setop_is_null_face))
 {
     struct csmface_t *face;
     
@@ -66,6 +69,8 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     face->dropped_coord = dropped_coord;
     
     face->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
+ 
+    face->setop_is_null_face = setop_is_null_face;
     
     return face;
 }
@@ -81,6 +86,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     double A, B, C, D, fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;
     struct csmbbox_t *bbox;
+    CYBOOL setop_is_null_face;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
 
@@ -97,8 +103,20 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     dropped_coord = (enum csmmath_dropped_coord_t)USHRT_MAX;
     
     bbox = csmbbox_create_empty_box();
+
+    setop_is_null_face = FALSO;
     
-    return i_crea(id, fsolid, fsolid_aux, flout, floops, A, B, C, D, fuzzy_epsilon, dropped_coord, &bbox);
+    return i_crea(
+                id,
+                fsolid,
+                fsolid_aux,
+                flout,
+                floops,
+                A, B, C, D,
+                fuzzy_epsilon,
+                dropped_coord,
+                &bbox,
+                setop_is_null_face);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -111,13 +129,25 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     unsigned long id;
     struct csmloop_t *flout, *floops;
     struct csmbbox_t *bbox;
+    CYBOOL setop_is_null_face;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
     flout = NULL;
     floops = NULL;
     bbox = csmbbox_create_empty_box();
+    setop_is_null_face = FALSO;
     
-    return i_crea(id, fsolid, NULL, flout, floops, A, B, C, D, fuzzy_epsilon, dropped_coord, &bbox);
+    return i_crea(
+                id,
+                fsolid,
+                NULL,
+                flout,
+                floops,
+                A, B, C, D,
+                fuzzy_epsilon,
+                dropped_coord,
+                &bbox,
+                setop_is_null_face);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -334,7 +364,7 @@ CYBOOL csmface_contains_vertex(
         return csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
-                        csmtolerance_point_in_loop_frontier(),
+                        csmtolerance_point_in_loop_boundary(),
                         type_of_containment_opc, hit_vertex_opc, hit_hedge_opc, t_relative_to_hit_hedge_opc);
     }
 }
@@ -373,7 +403,7 @@ CYBOOL csmface_contains_point(
         if (csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
-                        csmtolerance_point_in_loop_frontier(),
+                        csmtolerance_point_in_loop_boundary(),
                         &type_of_containment_loc, &hit_vertex_loc, &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == FALSO)
         {
             containts_point = FALSO;
@@ -403,7 +433,7 @@ CYBOOL csmface_contains_point(
                         if (csmloop_is_point_inside_loop(
                                 loop_iterator,
                                 x, y, z, face->dropped_coord,
-                                csmtolerance_point_in_loop_frontier(),
+                                csmtolerance_point_in_loop_boundary(),
                                 &type_of_containment_hole, &hit_vertex_hole, &hit_hedge_hole, &t_relative_to_hit_hedge_hole) == CIERTO)
                         {
                             if (type_of_containment_hole == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
@@ -459,7 +489,7 @@ CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x,
         if (csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
-                        csmtolerance_point_in_loop_frontier(),
+                        csmtolerance_point_in_loop_boundary(),
                         &type_of_containment, NULL, NULL, NULL) == FALSO)
         {
             is_interior_to_face = FALSO;
@@ -482,7 +512,7 @@ CYBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x,
                     if (csmloop_is_point_inside_loop(
                             loop_iterator,
                             x, y, z, face->dropped_coord,
-                            csmtolerance_point_in_loop_frontier(),
+                            csmtolerance_point_in_loop_boundary(),
                             &type_of_containment, NULL, NULL, NULL) == CIERTO)
                     {
                         if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
@@ -613,7 +643,7 @@ CYBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_
         if (csmloop_is_point_inside_loop(
                     face->flout,
                     x, y, z, face->dropped_coord,
-                    csmtolerance_point_in_loop_frontier(),
+                    csmtolerance_point_in_loop_boundary(),
                     NULL, NULL, NULL, NULL) == FALSO)
         {
             return FALSO;
@@ -937,7 +967,9 @@ void csmface_clear_algorithm_mask(struct csmface_t *face)
     struct csmloop_t *loop_iterator;
     
     assert_no_null(face);
-        
+    
+    face->setop_is_null_face = FALSO;
+    
     loop_iterator = face->floops;
     
     while (loop_iterator != NULL)
@@ -949,6 +981,22 @@ void csmface_clear_algorithm_mask(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
+CYBOOL csmface_is_setop_null_face(struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->setop_is_null_face;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_mark_setop_null_face(struct csmface_t *face)
+{
+    assert_no_null(face);
+    face->setop_is_null_face = CIERTO;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_integro, unsigned long *num_holes_opc)
 {
     unsigned long num_holes_loc;
@@ -956,7 +1004,7 @@ void csmface_print_info_debug(struct csmface_t *face, CYBOOL assert_si_no_es_int
     double A, B, C, D;
     
     csmface_face_equation_info(face, &A, &B, &C, &D);
-    csmdebug_print_debug_info("\tFace %lu (%g, %g, %g, %g)\n", face->id, A, B, C, D);
+    csmdebug_print_debug_info("\tFace %lu (%g, %g, %g, %g) Setop Null face: %lu\n", face->id, A, B, C, D, face->setop_is_null_face);
     
     loop_iterator = csmface_floops(face);
     num_holes_loc = 0;

@@ -6,7 +6,7 @@
 
 double csmtolerance_equal_coords(void)
 {
-    return 1.e-6;
+    return 1.e-3;
 }
 
 // --------------------------------------------------------------------------------
@@ -40,8 +40,8 @@ double csmtolerance_null_vector(void)
 
 // --------------------------------------------------------------------------------
 
-double csmtolerance_point_in_loop_frontier(void)
+double csmtolerance_point_in_loop_boundary(void)
 {
-    return 1.e-6;
+    return 1.e-3;
 }
 

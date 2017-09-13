@@ -29,6 +29,13 @@ void csmdebug_print_debug_info(const char *format, ...);
 void csmdebug_set_ouput_file(const char *file_path);
     
 void csmdebug_close_output_file(void);
+
+
+CYBOOL csmdebug_is_print_solid_unblocked(void);
+    
+void csmdebug_block_print_solid(void);
+    
+void csmdebug_unblock_print_solid(void);
     
 
 // Graphical debug...

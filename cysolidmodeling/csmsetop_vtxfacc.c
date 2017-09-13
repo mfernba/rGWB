@@ -607,6 +607,7 @@ static void i_mark_null_edge_on_face(
     csmvertex_set_mask_attrib(splitted_vertex, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS);
     
     arr_AppendPunteroST(set_of_null_edges_other_solid, null_edge, csmedge_t);
+    csmedge_setop_set_is_null_edge(null_edge, CIERTO);
     
     if (csmdebug_debug_enabled() == CIERTO)
         csmdebug_print_debug_info("Companion edge %lu on other solid\n", csmedge_id(null_edge));
@@ -707,6 +708,7 @@ static void i_process_vf_inters(
             }
             
             csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
+            csmedge_setop_set_is_null_edge(null_edge, CIERTO);
             arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
             
             csmedge_print_debug_info(null_edge, CIERTO);

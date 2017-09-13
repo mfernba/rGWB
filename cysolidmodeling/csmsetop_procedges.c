@@ -829,7 +829,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         }
         csmdebug_end_context();
     
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
         
         csmdebug_begin_context("Intersections B vs A");
         {
@@ -841,7 +841,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         }
         csmdebug_end_context();
 
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
         
         i_append_common_vertices_solid_A_and_B_not_previously_found(solid_A, solid_B, vv_intersections_loc);
     }

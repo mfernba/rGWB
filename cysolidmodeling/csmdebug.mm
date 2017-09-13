@@ -57,10 +57,12 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 0;
+static int i_DEBUG_SCREEN = 1;
 static int i_DEBUG_VISUAL = 1;
-static int i_DEBUG_FILE = 0
-;
+static int i_DEBUG_FILE = 1;
+
+static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
+
 static FILE *g_output_file = NULL;
 
 // --------------------------------------------------------------------------------
@@ -214,6 +216,27 @@ void csmdebug_close_output_file(void)
 
 // --------------------------------------------------------------------------------
 
+CYBOOL csmdebug_is_print_solid_unblocked(void)
+{
+    return !i_DEBUG_PRINT_SOLID_BLOCKED;
+}
+    
+// --------------------------------------------------------------------------------
+
+void csmdebug_block_print_solid(void)
+{
+    i_DEBUG_PRINT_SOLID_BLOCKED = CIERTO;
+}
+    
+// --------------------------------------------------------------------------------
+
+void csmdebug_unblock_print_solid(void)
+{
+    i_DEBUG_PRINT_SOLID_BLOCKED = FALSO;
+}
+
+// --------------------------------------------------------------------------------
+
 void csmdebug_set_viewer(
                     struct csmviewer_t *viewer,
                     void (*func_show_viewer)(struct csmviewer_t *),
@@ -308,6 +331,36 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
     unsigned long i;
     
     debug_point_material = bsmaterial_crea_rgb(1., 0., 0.);
+
+    bsgraphics2_escr_color(graphics, debug_point_material);
+    
+    /*
+     bsgraphics2_escr_punto3D(graphics, -0.035, -2.46e-11,   0.1);
+	bsgraphics2_escr_punto3D(graphics, -0.0324, -0.00264,   0.1);
+	bsgraphics2_escr_punto3D(graphics, -0.0324, 0.00264,   0.1);
+	bsgraphics2_escr_punto3D(graphics, -0.00144, -0.0336,  0.05);
+	bsgraphics2_escr_punto3D(graphics, -0.00144, -0.0336,   0.1);
+	bsgraphics2_escr_punto3D(graphics, -0.00144, 0.0336,  0.05);
+	bsgraphics2_escr_punto3D(graphics, -0.00144, 0.0336,   0.1);
+	bsgraphics2_escr_punto3D(graphics, 0.0124, -0.038,  0.05);
+	bsgraphics2_escr_punto3D(graphics, 0.0124, 0.038,  0.05);
+	bsgraphics2_escr_punto3D(graphics, 0.025, -0.06,   0.1);
+	bsgraphics2_escr_punto3D(graphics, 0.025,  0.06,   0.1);
+	bsgraphics2_escr_punto3D(graphics, 0.04,     0,  0.05);
+	bsgraphics2_escr_punto3D(graphics, 0.085,     0,   0.1);
+*/
+    
+    /*
+    bsgraphics2_escr_punto3D(graphics, -0.0324, -0.00264,   0.1);
+    bsgraphics2_escr_punto3D(graphics, -0.0324,  0.00264,   0.1);
+    
+    bsgraphics2_escr_punto3D(graphics, -0.035, -0.000,  0.100);
+    bsgraphics2_escr_punto3D(graphics, -0.032, -0.003,  0.100);
+    bsgraphics2_escr_punto3D(graphics, -0.032, -0.003,  0.100);
+    bsgraphics2_escr_punto3D(graphics, -0.035, -0.000,  0.100);
+    bsgraphics2_escr_punto3D(graphics, -0.032,  0.003,  0.100);
+    bsgraphics2_escr_punto3D(graphics, -0.032,  0.003,  0.100);
+    */
     
     for (i = 0; i < g_no_debug_points; i++)
     {

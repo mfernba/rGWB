@@ -40,6 +40,10 @@ struct i_neighborhood_t
     double Ux12, Uy12, Uz12;
     
     double A_face, B_face, C_face;
+    
+    double Ux1_u, Uy1_u, Uz1_u;
+    double Ux2_u, Uy2_u, Uz2_u;
+    double Ux12_u, Uy12_u, Uz12_u;
 };
 
 struct i_inters_sectors_t
@@ -112,8 +116,42 @@ CONSTRUCTOR(static struct i_neighborhood_t *, i_create_neighborhood, (
     neighborhood->A_face = A_face;
     neighborhood->B_face = B_face;
     neighborhood->C_face = C_face;
+
+    neighborhood->Ux1_u = Ux1;
+    neighborhood->Uy1_u = Uy1;
+    neighborhood->Uz1_u = Uz1;
+
+    neighborhood->Ux2_u = Ux2;
+    neighborhood->Uy2_u = Uy2;
+    neighborhood->Uz2_u = Uz2;
+
+    neighborhood->Ux12_u = Ux12;
+    neighborhood->Uy12_u = Uy12;
+    neighborhood->Uz12_u = Uz12;
     
     return neighborhood;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_neighborhood_compute_unit_vector_data(struct i_neighborhood_t *neighborhood)
+{
+    assert_no_null(neighborhood);
+
+    neighborhood->Ux1_u = neighborhood->Ux1;
+    neighborhood->Uy1_u = neighborhood->Uy1;
+    neighborhood->Uz1_u = neighborhood->Uz1;
+    csmmath_make_unit_vector3D(&neighborhood->Ux1_u, &neighborhood->Uy1_u, &neighborhood->Uz1_u);
+
+    neighborhood->Ux2_u = neighborhood->Ux2;
+    neighborhood->Uy2_u = neighborhood->Uy2;
+    neighborhood->Uz2_u = neighborhood->Uz2;
+    csmmath_make_unit_vector3D(&neighborhood->Ux2_u, &neighborhood->Uy2_u, &neighborhood->Uz2_u);
+
+    neighborhood->Ux12_u = neighborhood->Ux12;
+    neighborhood->Uy12_u = neighborhood->Uy12;
+    neighborhood->Uz12_u = neighborhood->Uz12;
+    csmmath_make_unit_vector3D(&neighborhood->Ux12_u, &neighborhood->Uy12_u, &neighborhood->Uz12_u);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -256,6 +294,13 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_preprocess_neighborhood,
                         neigborhood->Ux1, neigborhood->Uy1, neigborhood->Uz1,
                         neigborhood->Ux2, neigborhood->Uy2, neigborhood->Uz2,
                         &neigborhood->Ux12, &neigborhood->Uy12, &neigborhood->Uz12);
+            
+            i_neighborhood_compute_unit_vector_data(neigborhood_bisec);
+            i_neighborhood_compute_unit_vector_data(neigborhood);
+        }
+        else
+        {
+            i_neighborhood_compute_unit_vector_data(neigborhood);
         }
         
         he_iterator = csmhedge_next(csmopbas_mate(he_iterator));
@@ -296,27 +341,27 @@ static CYBOOL i_is_intersection_within_sector(const struct i_neighborhood_t *nei
     
     assert_no_null(neighborhood);
     
-    csmmath_cross_product3D(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux1, neighborhood->Uy1, neighborhood->Uz1, &Wx1, &Wy1, &Wz1);
+    csmmath_cross_product3D(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux1_u, neighborhood->Uy1_u, neighborhood->Uz1_u, &Wx1, &Wy1, &Wz1);
     tolerance_null_vector = csmtolerance_null_vector();
     
     if (csmmath_is_null_vector(Wx1, Wy1, Wz1, tolerance_null_vector) == CIERTO)
     {
         double dot_product;
         
-        dot_product = csmmath_dot_product3D(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux1, neighborhood->Uy1, neighborhood->Uz1);
+        dot_product = csmmath_dot_product3D(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux1_u, neighborhood->Uy1_u, neighborhood->Uz1_u);
         return (dot_product > 0.0) ? CIERTO: FALSO;
     }
     else
     {
         double Wx2, Wy2, Wz2;
         
-        csmmath_cross_product3D(neighborhood->Ux2, neighborhood->Uy2, neighborhood->Uz2, Wx_inters, Wy_inters, Wz_inters, &Wx2, &Wy2, &Wz2);
+        csmmath_cross_product3D(neighborhood->Ux2_u, neighborhood->Uy2_u, neighborhood->Uz2_u, Wx_inters, Wy_inters, Wz_inters, &Wx2, &Wy2, &Wz2);
 
         if (csmmath_is_null_vector(Wx2, Wy2, Wz2, tolerance_null_vector) == CIERTO)
         {
             double dot_product;
             
-            dot_product = csmmath_dot_product3D(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux2, neighborhood->Uy2, neighborhood->Uz2);
+            dot_product = csmmath_dot_product3D(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux2_u, neighborhood->Uy2_u, neighborhood->Uz2_u);
             return (dot_product > 0.0) ? CIERTO: FALSO;
         }
         else
@@ -324,10 +369,13 @@ static CYBOOL i_is_intersection_within_sector(const struct i_neighborhood_t *nei
             double dot_product1, dot_product2;
             enum csmmath_double_relation_t t1, t2;
             
-            dot_product1 = csmmath_dot_product3D(Wx1, Wy1, Wz1, neighborhood->Ux12, neighborhood->Uy12, neighborhood->Uz12);
+            csmmath_make_unit_vector3D(&Wx1, &Wy1, &Wz1);
+            csmmath_make_unit_vector3D(&Wx2, &Wy2, &Wz2);
+            
+            dot_product1 = csmmath_dot_product3D(Wx1, Wy1, Wz1, neighborhood->Ux12_u, neighborhood->Uy12_u, neighborhood->Uz12_u);
             t1 = csmmath_compare_doubles(dot_product1, 0.0, tolerance_null_vector);
             
-            dot_product2 = csmmath_dot_product3D(Wx2, Wy2, Wz2, neighborhood->Ux12, neighborhood->Uy12, neighborhood->Uz12);
+            dot_product2 = csmmath_dot_product3D(Wx2, Wy2, Wz2, neighborhood->Ux12_u, neighborhood->Uy12_u, neighborhood->Uz12_u);
             t2 = csmmath_compare_doubles(dot_product2, 0.0, tolerance_null_vector);
             
             if (t1 == CSMMATH_VALUE1_LESS_THAN_VALUE2 && t2 == CSMMATH_VALUE1_LESS_THAN_VALUE2)
@@ -417,6 +465,8 @@ static CYBOOL i_exists_intersection_between_sectors(const struct i_neighborhood_
     {
         CYBOOL is_within_a, is_within_b;
         
+        csmmath_make_unit_vector3D(&Wx_inters, &Wy_inters, &Wz_inters);
+        
         is_within_a = i_is_intersection_within_sector(neighborhood_a, Wx_inters, Wy_inters, Wz_inters);
         is_within_b = i_is_intersection_within_sector(neighborhood_b, Wx_inters, Wy_inters, Wz_inters);
         
@@ -482,9 +532,22 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
             assert_no_null(hedge_neighborhood);
             
             csmdebug_print_debug_info("He: %lu\n", csmhedge_id(hedge_neighborhood->he));
-            csmdebug_print_debug_info("U1:  %g, %g, %g\n", hedge_neighborhood->Ux1, hedge_neighborhood->Uy1, hedge_neighborhood->Uz1);
-            csmdebug_print_debug_info("U2:  %g, %g, %g\n", hedge_neighborhood->Ux2, hedge_neighborhood->Uy2, hedge_neighborhood->Uz2);
-            csmdebug_print_debug_info("U12: %g, %g, %g\n", hedge_neighborhood->Ux12, hedge_neighborhood->Uy12, hedge_neighborhood->Uz12);
+            
+            csmdebug_print_debug_info(
+                        "U1:  %g, %g, %g u(%g, %g, %g)\n",
+                        hedge_neighborhood->Ux1, hedge_neighborhood->Uy1, hedge_neighborhood->Uz1,
+                        hedge_neighborhood->Ux1_u, hedge_neighborhood->Uy1_u, hedge_neighborhood->Uz1_u);
+            
+            csmdebug_print_debug_info(
+                        "U2:  %g, %g, %g u(%g, %g, %g)\n",
+                        hedge_neighborhood->Ux2, hedge_neighborhood->Uy2, hedge_neighborhood->Uz2,
+                        hedge_neighborhood->Ux2_u, hedge_neighborhood->Uy2_u, hedge_neighborhood->Uz2_u);
+            
+            csmdebug_print_debug_info(
+                        "U12: %g, %g, %g u(%g, %g, %g)\n",
+                        hedge_neighborhood->Ux12, hedge_neighborhood->Uy12, hedge_neighborhood->Uz12,
+                        hedge_neighborhood->Ux12_u, hedge_neighborhood->Uy12_u, hedge_neighborhood->Uz12_u);
+            
             csmdebug_print_debug_info("Face Normal: %g, %g, %g\n", hedge_neighborhood->A_face, hedge_neighborhood->B_face, hedge_neighborhood->C_face);
         }
         
@@ -1359,6 +1422,7 @@ static void i_separateEdgeSequence(
     
     csmeuler_lmev(from, to, x, y, z, NULL, &null_edge, NULL, NULL);
     arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+    csmedge_setop_set_is_null_edge(null_edge, CIERTO);
     
     if (csmdebug_debug_enabled() == CIERTO)
     {
@@ -1429,6 +1493,7 @@ static void i_separateInteriorHedge(
     null_edge2 = csmhedge_edge(csmhedge_prev(he));
     assert(null_edge1 == null_edge2);
     arr_AppendPunteroST(set_of_null_edges, null_edge2, csmedge_t);
+    csmedge_setop_set_is_null_edge(null_edge2, CIERTO);
 }
 
 // ------------------------------------------------------------------------------------------

@@ -18,6 +18,8 @@ struct csmedge_t
     
     struct csmhedge_t *he1;
     struct csmhedge_t *he2;
+    
+    CYBOOL setop_is_null_edge;
 };
 
 // --------------------------------------------------------------------------------------------------------------
@@ -25,7 +27,8 @@ struct csmedge_t
 CONSTRUCTOR(static struct csmedge_t *, i_crea, (
                         unsigned long id,
                         struct csmhedge_t *he1,
-                        struct csmhedge_t *he2))
+                        struct csmhedge_t *he2,
+                        CYBOOL setop_is_null_edge))
 {
     struct csmedge_t *edge;
     
@@ -36,6 +39,8 @@ CONSTRUCTOR(static struct csmedge_t *, i_crea, (
     edge->he1 = he1;
     edge->he2 = he2;
     
+    edge->setop_is_null_edge = setop_is_null_edge;
+    
     return edge;
 }
 
@@ -45,13 +50,16 @@ struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
     struct csmhedge_t *he1, *he2;
+    CYBOOL setop_is_null_edge;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
 
     he1 = NULL;
     he2 = NULL;
     
-    return i_crea(id, he1, he2);
+    setop_is_null_edge = FALSO;
+    
+    return i_crea(id, he1, he2, setop_is_null_edge);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -60,13 +68,16 @@ CONSTRUCTOR(struct csmedge_t *, i_duplicate_edge, (unsigned long *id_nuevo_eleme
 {
     unsigned long id;
     struct csmhedge_t *he1, *he2;
+    CYBOOL setop_is_null_edge;
     
     id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
 
     he1 = NULL;
     he2 = NULL;
     
-    return i_crea(id, he1, he2);
+    setop_is_null_edge = FALSO;
+    
+    return i_crea(id, he1, he2, setop_is_null_edge);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -220,6 +231,22 @@ void csmedge_reverse_orientation(struct csmedge_t *edge)
     he_aux = edge->he1;
     edge->he1 = edge->he2;
     edge->he2 = he_aux;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CYBOOL is_null_edge)
+{
+    assert_no_null(edge);
+    edge->setop_is_null_edge = is_null_edge;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CYBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge)
+{
+    assert_no_null(edge);
+    return edge->setop_is_null_edge;
 }
 
 // ----------------------------------------------------------------------------------------------------

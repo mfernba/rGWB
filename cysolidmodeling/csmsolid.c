@@ -321,11 +321,31 @@ static void i_clear_algorithm_face_mask(struct csmhashtb(csmface_t) *sfaces)
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_clear_algorithm_edge_mask(struct csmhashtb(csmedge_t) *sedges)
+{
+    struct csmhashtb_iterator(csmedge_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    
+    while (csmhashtb_has_next(iterator, csmedge_t) == CIERTO)
+    {
+        struct csmedge_t *edge;
+        
+        csmhashtb_next_pair(iterator, NULL, &edge, csmedge_t);
+        csmedge_setop_set_is_null_edge(edge, FALSO);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_clear_algorithm_data(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
     
     i_clear_algorithm_vertex_mask(solid->svertexs);
+    i_clear_algorithm_edge_mask(solid->sedges);
     i_clear_algorithm_face_mask(solid->sfaces);
 }
 
@@ -854,7 +874,42 @@ static void i_print_info_debug_faces(
 
 void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro)
 {
-    if (csmdebug_debug_enabled() == CIERTO)
+    if (csmdebug_debug_enabled() == CIERTO && csmdebug_is_print_solid_unblocked() == CIERTO)
+    {
+        unsigned long num_faces, num_vertexs, num_edges, num_holes;
+        
+        assert_no_null(solido);
+        
+        csmdebug_begin_context("SOLID DESCRIPTION");
+        
+        if (solido->name != NULL)
+            csmdebug_print_debug_info("Solid Address: %s (%p)\n", solido->name, solido);
+        else
+            csmdebug_print_debug_info("Solid Address: %p\n", solido);
+        
+        csmdebug_print_debug_info("Face table\n");
+        i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
+        csmdebug_print_debug_info("\n");
+        
+        /*
+        csmdebug_print_debug_info("Edge table\n");
+        i_print_debug_info_edges(solido->sedges, assert_si_no_es_integro, &num_edges);
+        csmdebug_print_debug_info("\n");
+        
+        csmdebug_print_debug_info("Vertex table\n");
+        i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, &num_vertexs);
+        csmdebug_print_debug_info("\n");
+        */
+        
+        csmdebug_end_context();
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_print_complete_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro)
+{
+    if (csmdebug_debug_enabled() == CIERTO && csmdebug_is_print_solid_unblocked() == CIERTO)
     {
         unsigned long num_faces, num_vertexs, num_edges, num_holes;
         
@@ -913,6 +968,7 @@ static void i_draw_debug_info_hedge(
                         double A, double B, double C,
                         CYBOOL is_ledge,
                         CYBOOL draw_edge_info,
+                        CYBOOL is_null_face,
                         struct bsgraphics2_t *graphics)
 {
     struct csmedge_t *edge;
@@ -925,13 +981,14 @@ static void i_draw_debug_info_hedge(
     edge = csmhedge_edge(he);
     
     if (csmedge_hedge_lado_const(edge, CSMEDGE_LADO_HEDGE_POS) == he)
+        is_he_pos = CIERTO;
+    else
+        is_he_pos = FALSO;
+    
+    if (is_he_pos == CIERTO || is_null_face == CIERTO)
     {
         bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
         is_he_pos = CIERTO;
-    }
-    else
-    {
-        is_he_pos = FALSO;
     }
     
     if (draw_edge_info == CIERTO)
@@ -990,7 +1047,10 @@ static void i_draw_debug_info_hedge(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_debug_info_faces(struct csmhashtb(csmface_t) *sfaces, CYBOOL draw_edge_info, struct bsgraphics2_t *graphics)
+static void i_draw_debug_info_faces(
+                        struct csmhashtb(csmface_t) *sfaces,
+                        CYBOOL draw_edge_info,
+                        struct bsgraphics2_t *graphics)
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
     
@@ -1000,10 +1060,22 @@ static void i_draw_debug_info_faces(struct csmhashtb(csmface_t) *sfaces, CYBOOL 
     {
         struct csmface_t *face;
         double A, B, C, D;
+        CYBOOL is_null_face;
         struct csmloop_t *floops;
         
         csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
         csmface_face_equation_info(face, &A, &B, &C, &D);
+        
+        if (csmface_is_setop_null_face(face) == CIERTO)
+        {
+            is_null_face = CIERTO;
+            bsgraphics2_escr_grosor_linea(graphics, BSGRAPHICS2_GROSOR_TREMENDAMENTE_GRUESO);
+        }
+        else
+        {
+            is_null_face = FALSO;
+            bsgraphics2_escr_grosor_linea(graphics, BSGRAPHICS2_GROSOR_NORMAL);
+        }
         
         floops = csmface_floops(face);
         
@@ -1020,8 +1092,7 @@ static void i_draw_debug_info_faces(struct csmhashtb(csmface_t) *sfaces, CYBOOL 
                 struct csmhedge_t *he_next;
                 
                 he_next = csmhedge_next(he);
-                
-                i_draw_debug_info_hedge(he, he_next, A, B, C, is_ledge, draw_edge_info, graphics);
+                i_draw_debug_info_hedge(he, he_next, A, B, C, is_ledge, draw_edge_info, is_null_face, graphics);
                 
                 he = he_next;
                 is_ledge = FALSO;

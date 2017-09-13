@@ -1864,7 +1864,7 @@ static void i_test_mechanical_part1(void)
     csmdebug_set_enabled_by_code(FALSO);
     
     //main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
-    main_part_shape = gcelem2d_contorno_circular(ax, 8);
+    main_part_shape = gcelem2d_contorno_circular(ax, 32);
     
     basic_part = csmsweep_create_solid_from_shape_debug(
                         main_part_shape,
@@ -1884,7 +1884,7 @@ static void i_test_mechanical_part1(void)
         
         no_divisions = 20;
         ring_part_height = main_part_length / no_divisions;
-        ring_part = i_make_ring_part(0., ring_part_height, 1.2 * ax, 0.4 * ax, 16);
+        ring_part = i_make_ring_part(0., ring_part_height, /*1.2*/1.5 * ax, 0.4 * ax, 16);
         ring_part2 = i_make_ring_part(0., ring_part_height, 1.2 * ax, 0.4 * ax, 4);
         
         incr_z = ring_part_height;
@@ -1905,6 +1905,7 @@ static void i_test_mechanical_part1(void)
                 main_part = main_part_loc;
                 
                 no_operations++;
+                //break;
             }
             
             csmsolid_move(ring_part, 0., 0., incr_z);
@@ -1926,14 +1927,14 @@ static void i_test_mechanical_part1(void)
         struct csmsolid_t *basic_part2, *main_part_loc;
         
         //diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
-        diff_shape = gcelem2d_contorno_circular(0.6 * ax, 5);
+        diff_shape = gcelem2d_contorno_circular(0.6 * ax, 16);
         
         basic_part2 = csmsweep_create_solid_from_shape_debug(
                         diff_shape,
-                        0., 0., main_part_length, 1., 0., 0., 0., 1., 0.,
+                        0., 0., 0.5 * main_part_length, 1., 0., 0., 0., 1., 0.,
                         diff_shape,
                         0., 0., 0., 1., 0., 0., 0., 1., 0.,
-                        0);
+                        1000);
 
         csmsolid_move(basic_part2, 0.25 * ax, 0., 0.05 * main_part_length);
         
@@ -2017,24 +2018,23 @@ void csmtest_test(void)
     i_test_multiple_solidos1(viewer);
     i_test_multiple_solidos2(viewer);
     i_test_multiple_solidos3(viewer);
-    */
     
-    /*
     i_test_cilindro1(viewer);
     i_test_cilindro2(viewer);
     i_test_cilindro3(viewer);
-    i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75
+    i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
     i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
     i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
     i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
-     */
     
     //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                               // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
-    i_test_mechanical_part1();
+    */
+    
+    i_test_mechanical_part1(); // Revisar por qué falla!!!
 
     
     csmviewer_free(&viewer);

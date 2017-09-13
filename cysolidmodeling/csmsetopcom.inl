@@ -41,6 +41,8 @@ void csmsetopcom_cut_he(
 
 void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid);
 
+void csmsetopcom_remove_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges);
+
 // Faces...
 
 CONSTRUCTOR(ArrEstructura(csmface_t) *, csmsetopcom_convert_inner_loops_of_null_faces_to_faces, (ArrEstructura(csmface_t) *set_of_null_faces));

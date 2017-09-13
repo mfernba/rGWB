@@ -29,6 +29,10 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
 
 void csmedge_reverse_orientation(struct csmedge_t *edge);
 
+void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CYBOOL is_null_edge);
+
+CYBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge);
+
 
 // Geometry...
 
