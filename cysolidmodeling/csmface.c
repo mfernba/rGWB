@@ -352,21 +352,12 @@ CYBOOL csmface_contains_vertex(
     
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
     
-    if (i_is_point_on_face_plane(
+    return csmface_contains_point(
+                        face,
                         x, y, z,
-                        face->A, face->B, face->C, face->D,
-                        face->fuzzy_epsilon) == FALSO)
-    {
-        return FALSO;
-    }
-    else
-    {
-        return csmloop_is_point_inside_loop(
-                        face->flout,
-                        x, y, z, face->dropped_coord,
-                        csmtolerance_point_in_loop_boundary(),
-                        type_of_containment_opc, hit_vertex_opc, hit_hedge_opc, t_relative_to_hit_hedge_opc);
-    }
+                        type_of_containment_opc,
+                        hit_vertex_opc,
+                        hit_hedge_opc, t_relative_to_hit_hedge_opc);
 }
 
 // ------------------------------------------------------------------------------------------

@@ -1927,16 +1927,168 @@ static void i_test_mechanical_part1(void)
         struct csmsolid_t *basic_part2, *main_part_loc;
         
         //diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
-        diff_shape = gcelem2d_contorno_circular(0.6 * ax, 16);
+        diff_shape = gcelem2d_contorno_circular(0.6 * ax, 6);
         
         basic_part2 = csmsweep_create_solid_from_shape_debug(
                         diff_shape,
-                        0., 0., 0.5 * main_part_length, 1., 0., 0., 0., 1., 0.,
+                        0., 0., /*0.55*/ 0.5 * main_part_length, 1., 0., 0., 0., 1., 0.,
                         diff_shape,
-                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0., 0., 0.05, 1., 0., 0., 0., 1., 0.,
                         1000);
 
-        csmsolid_move(basic_part2, 0.25 * ax, 0., 0.05 * main_part_length);
+        csmsolid_move(basic_part2, 0.25 * ax, 0., 0./*0.05 * main_part_length*/);
+        
+        main_part_loc = csmsetop_difference_A_minus_B(main_part, basic_part2);
+        csmsolid_free(&main_part);
+        main_part = main_part_loc;
+        
+        gccontorno_destruye(&diff_shape);
+        csmsolid_free(&basic_part2);
+    }
+
+    csmdebug_set_enabled_by_code(CIERTO);
+
+    csmdebug_set_viewer_results(main_part, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        double A, B, C, D;
+        struct csmsolid_t *solid_above, *solid_below;
+        CYBOOL splitted;
+
+        csmdebug_set_enabled_by_code(FALSO);
+        
+        csmmath_implicit_plane_equation(0., 0., 0., 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
+    
+        splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
+        assert(splitted == CIERTO);
+
+        csmdebug_set_enabled_by_code(CIERTO);
+        
+        i_show_split_results(A, B, C, D, FALSO, solid_above, solid_below);
+    }
+    
+    gccontorno_destruye(&main_part_shape);
+    csmsolid_free(&main_part);
+    csmsolid_free(&basic_part);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_mechanical_part1_redux(void)
+{
+    struct csmsolid_t *basic_part;
+    struct csmsolid_t *main_part;
+    double ax, ay, main_part_length;
+    struct gccontorno_t *main_part_shape;
+    
+    i_set_output_debug_file("mechanical1_redux.txt");
+    
+    ax = 0.1;
+    ay = 0.1;
+    main_part_length = 1.;
+    
+    csmdebug_set_enabled_by_code(FALSO);
+    
+    main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
+    //main_part_shape = gcelem2d_contorno_circular(ax, 32);
+    
+    basic_part = csmsweep_create_solid_from_shape_debug(
+                        main_part_shape,
+                        0., 0., main_part_length, 1., 0., 0., 0., 1., 0.,
+                        main_part_shape,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    main_part = csmsolid_duplicate(basic_part);
+    
+    {
+        unsigned long i, no_divisions;
+        double ring_part_height;
+        struct csmsolid_t *ring_part, *ring_part2;
+        double incr_z;
+        unsigned long no_operations;
+        
+        no_divisions = 20;
+        ring_part_height = main_part_length / no_divisions;
+        ring_part = i_make_ring_part(0., ring_part_height, /*1.2*/1.5 * ax, 0.4 * ax, 16);
+        ring_part2 = i_make_ring_part(0., ring_part_height, 1.2 * ax, 0.4 * ax, 4);
+        
+        incr_z = ring_part_height;
+        no_operations = 0;
+        
+        for (i = 0; i < no_divisions - 1; i++)
+        {
+            if (i % 2 == 1)
+            {
+                struct csmsolid_t *main_part_loc;
+            
+                if (no_operations % 2 == 0)
+                    main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
+                else
+                    main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part2);
+                
+                csmsolid_free(&main_part);
+                main_part = main_part_loc;
+                
+                no_operations++;
+                //break;
+            }
+            
+            csmsolid_move(ring_part, 0., 0., incr_z);
+            csmsolid_move(ring_part2, 0., 0., incr_z);
+        }
+     
+        csmsolid_free(&ring_part);
+        csmsolid_free(&ring_part2);
+     }
+    
+    csmdebug_set_enabled_by_code(CIERTO);
+    csmdebug_set_viewer_results(main_part, NULL);
+    csmdebug_show_viewer();
+    //csmdebug_set_enabled_by_code(FALSO);
+   
+    
+    {
+        double A, B, C, D;
+        struct csmsolid_t *solid_above, *solid_below;
+        CYBOOL splitted;
+
+        csmdebug_set_enabled_by_code(FALSO);
+        
+        csmmath_implicit_plane_equation(0., 0., 0.5, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
+    
+        splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
+        assert(splitted == CIERTO);
+
+        csmdebug_set_enabled_by_code(CIERTO);
+        
+        main_part = solid_above;
+        
+        csmmath_implicit_plane_equation(0., 0., 0.56, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
+        splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
+        assert(splitted == CIERTO);
+        
+        main_part = solid_below;
+        
+        csmdebug_clear_plane();
+    }
+    
+    {
+        struct gccontorno_t *diff_shape;
+        struct csmsolid_t *basic_part2, *main_part_loc;
+        
+        //diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
+        diff_shape = gcelem2d_contorno_circular(0.6 * ax, 6);
+        
+        basic_part2 = csmsweep_create_solid_from_shape_debug(
+                        diff_shape,
+                        0., 0., 0.55 /*0.5 * main_part_length*/, 1., 0., 0., 0., 1., 0.,
+                        diff_shape,
+                        0., 0., 0.5, 1., 0., 0., 0., 1., 0.,
+                        1000);
+
+        csmsolid_move(basic_part2, 0.25 * ax, 0., 0./*0.05 * main_part_length*/);
         
         main_part_loc = csmsetop_difference_A_minus_B(main_part, basic_part2);
         csmsolid_free(&main_part);
@@ -2034,8 +2186,8 @@ void csmtest_test(void)
 
     */
     
+    //i_test_mechanical_part1_redux();
     i_test_mechanical_part1(); // Revisar por qué falla!!!
-
     
     csmviewer_free(&viewer);
 }

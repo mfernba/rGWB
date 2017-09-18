@@ -1606,7 +1606,7 @@ static void i_insert_null_edges(
                 {
                     CYBOOL orient;
                     
-                    assert(hb1 != hb2);
+                    //assert(hb1 != hb2);
                     
                     orient = i_get_orient(ha1, hb1, hb2);
                     i_separateInteriorHedge(ha1, orient, set_of_null_edges_A);
@@ -1617,7 +1617,7 @@ static void i_insert_null_edges(
                 {
                     CYBOOL orient;
                     
-                    assert(ha2 != ha1);
+                    //assert(ha2 != ha1);
                     
                     orient = i_get_orient(hb1, ha2, ha1);
                     i_separateInteriorHedge(hb1, orient, set_of_null_edges_B);

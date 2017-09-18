@@ -334,6 +334,11 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
 
     bsgraphics2_escr_color(graphics, debug_point_material);
     
+    //bsgraphics2_escr_punto3D(graphics, -0.0282, -0.0118,  0.55);
+    //bsgraphics2_escr_punto3D(graphics, -0.0282,  0.0118,  0.55);
+    //bsgraphics2_escr_punto3D(graphics, -0.006, -0.050,  0.550);
+    //bsgraphics2_escr_punto3D(graphics, -0.035, -0.000,  0.550);
+    
     /*
      bsgraphics2_escr_punto3D(graphics, -0.035, -2.46e-11,   0.1);
 	bsgraphics2_escr_punto3D(graphics, -0.0324, -0.00264,   0.1);

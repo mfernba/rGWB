@@ -176,11 +176,13 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_initial_vertex_neighborh
                         double A, double B, double C, double D))
 {
     ArrEstructura(i_neighborhood_t) *vertex_neighborhood;
+    double x_vertex, y_vertex, z_vertex;
     register struct csmhedge_t *hedge_iterator, *vertex_hedge;
     unsigned long num_iters;
     
     vertex_neighborhood = arr_CreaPunteroST(0, i_neighborhood_t);
     
+    csmvertex_get_coordenadas(vertex, &x_vertex, &y_vertex, &z_vertex);
     vertex_hedge = csmvertex_hedge(vertex);
     hedge_iterator = vertex_hedge;
     
@@ -211,7 +213,7 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_initial_vertex_neighborh
             arr_AppendPunteroST(vertex_neighborhood, hedge_neighborhood_wide, i_neighborhood_t);
             
             tolerance = i_classification_tolerance(hedge_iterator);
-            i_classify_point_respect_to_plane(Ux_bisec, Uy_bisec, Uz_bisec, A, B, C, D, tolerance, NULL, &cl_resp_plane);
+            i_classify_point_respect_to_plane(x_vertex + Ux_bisec, y_vertex + Uy_bisec, z_vertex + Uz_bisec, A, B, C, D, tolerance, NULL, &cl_resp_plane);
             hedge_neighborhood->position = cl_resp_plane;
         }
         
