@@ -299,7 +299,7 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
         
     } while (iterator != NULL);
     
-    return MAX(1.01 * max_distance_to_plane, 1.e-3);
+    return MAX(1.01 * max_distance_to_plane, csmtolerance_coplanarity());
 }
 
 // ----------------------------------------------------------------------------------------------------
