@@ -195,6 +195,9 @@ CYBOOL csmopbas_is_wide_hedge(
     hedge_next = csmhedge_next(hedge);
     vertex_next = csmhedge_vertex(hedge_next);
     csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_next, &Ux_to_next, &Uy_to_next, &Uz_to_next);
+    
+    csmmath_make_unit_vector3D(&Ux_to_prev, &Uy_to_prev, &Uz_to_prev);
+    csmmath_make_unit_vector3D(&Ux_to_next, &Uy_to_next, &Uz_to_next);
 
     csmmath_cross_product3D(
                         Ux_to_prev, Uy_to_prev, Uz_to_prev, Ux_to_next, Uy_to_next, Uz_to_next,

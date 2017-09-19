@@ -35,6 +35,7 @@
 
 #include "csmdebug.inl"
 #include "csmviewer.inl"
+#include "defmath.tlh"
 
 // ------------------------------------------------------------------------------------------
 
@@ -1625,7 +1626,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
         {
             struct csmsolid_t *solid5;
             
-            cshape2d = gcelem2d_contorno_circular(0.45, no_points_circle); // Revisar resta con num_puntos_circulo = 8
+            cshape2d = gcelem2d_contorno_circular(0.46, no_points_circle); // Revisar resta con num_puntos_circulo = 8
             
             solid5 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
@@ -1639,7 +1640,6 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             //solid_res = csmsetop_intersection_A_and_B(solid_res5, solid_res);
         }
         
-        /*
         {
             CYBOOL does_split;
             struct csmsolid_t *solid_above, *solid_below;
@@ -1660,12 +1660,11 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             desp = -0.5;
             csmsolid_move(solid_below, A * desp, B * desp, C * desp);
             
-            i_show_split_results(A, B, C, D, solid_above, solid_below);
+            i_show_split_results(A, B, C, D, FALSO, solid_above, solid_below);
             
             csmsolid_free(&solid_above);
             csmsolid_free(&solid_below);
         }
-         */
         
         csmsolid_free(&solid3);
     }
@@ -1927,7 +1926,7 @@ static void i_test_mechanical_part1(void)
         struct csmsolid_t *basic_part2, *main_part_loc;
         
         //diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
-        diff_shape = gcelem2d_contorno_circular(0.6 * ax, 6);
+        diff_shape = gcelem2d_contorno_circular(0.8 * ax, 16);
         
         basic_part2 = csmsweep_create_solid_from_shape_debug(
                         diff_shape,
@@ -2127,6 +2126,129 @@ static void i_test_mechanical_part1_redux(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_mechanical_part2(void)
+{
+    double ax, ay, head_length, bolt_length, thread_length;
+    struct gccontorno_t *head_shape, *body_shape, *thread_shape;
+    struct csmsolid_t *head_solid, *body_solid, *thread_solid, *bolt_solid;
+    
+    i_set_output_debug_file("mechanical2.txt");
+    
+    ax = 0.025;
+    ay = 0.1;
+    head_length = 0.01;
+    bolt_length = 0.08;
+    thread_length = 0.0025;
+    
+    //main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
+    head_shape = gcelem2d_contorno_circular(ax, 6);
+    body_shape = gcelem2d_contorno_circular(0.5 * ax, 32);
+    thread_shape = gcelem2d_contorno_circular(0.6 * ax, 32);
+    
+    head_solid = csmsweep_create_solid_from_shape_debug(
+                        head_shape,
+                        0., 0., head_length, 1., 0., 0., 0., 1., 0.,
+                        head_shape,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+
+    body_solid = csmsweep_create_solid_from_shape_debug(
+                        body_shape,
+                        0., 0., bolt_length, 1., 0., 0., 0., 1., 0.,
+                        body_shape,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    thread_solid = csmsweep_create_solid_from_shape_debug(
+                        thread_shape,
+                        0., 0., thread_length, 1., 0., 0., 0., 1., 0.,
+                        thread_shape,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    csmsolid_move(head_solid, 0., 0., bolt_length);
+    
+    bolt_solid = csmsetop_union_A_and_B(head_solid, body_solid);
+    
+    csmdebug_set_enabled_by_code(FALSO);
+    {
+        unsigned long i, num_divisions;
+        
+        num_divisions = bolt_length / thread_length;
+        
+        for (i = 0; i < num_divisions; i++)
+        {
+            if (i % 2 == 0)
+                bolt_solid = csmsetop_union_A_and_B(bolt_solid, thread_solid);
+            
+            csmsolid_move(thread_solid, 0., 0., thread_length);
+        }
+    }
+    csmdebug_set_enabled_by_code(CIERTO);
+    
+    csmdebug_set_viewer_results(bolt_solid, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        struct csmsolid_t *bolt_solid2, *bolt_solid3;
+        struct gccontorno_t *block_shape;
+        struct csmsolid_t *block_solid;
+        
+        bolt_solid2 = csmsolid_duplicate(bolt_solid);
+        csmsolid_rotate(bolt_solid2, 0.6 * PI, 0., 0., 0.5 * (bolt_length + head_length), 0., 1., 0.);
+        csmsolid_move(bolt_solid2, 0.1 - 0.2 * (bolt_length + head_length) + head_length, 0., 0.);
+        
+        bolt_solid3 = csmsolid_duplicate(bolt_solid);
+        csmsolid_rotate(bolt_solid3, -0.5 * PI, 0., 0., 0.5 * (bolt_length + head_length), 0., 1., 0.);
+        csmsolid_move(bolt_solid3, -0.1 + 0.5 * (bolt_length + head_length) - head_length, 0., 0.);
+
+        csmdebug_set_viewer_results(bolt_solid2, bolt_solid3);
+        csmdebug_show_viewer();
+        
+        csmdebug_set_enabled_by_code(FALSO);
+        {
+            block_shape = gcelem2d_contorno_rectangular(0.2, 0.2);
+        
+            block_solid = csmsweep_create_solid_from_shape_debug(
+                        block_shape,
+                        0., 0., bolt_length + head_length, 1., 0., 0., 0., 1., 0.,
+                        block_shape,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+
+            csmdebug_set_viewer_results(bolt_solid2, block_solid);
+            csmdebug_show_viewer();
+            
+            block_solid = csmsetop_difference_A_minus_B(block_solid, bolt_solid);
+            block_solid = csmsetop_difference_A_minus_B(block_solid, bolt_solid2);
+            block_solid = csmsetop_difference_A_minus_B(block_solid, bolt_solid3);
+        }
+        csmdebug_set_enabled_by_code(CIERTO);
+        
+        csmdebug_set_viewer_results(block_solid, NULL);
+        csmdebug_show_viewer();
+        
+        {
+            double A, B, C, D;
+            struct csmsolid_t *solid_above, *solid_below;
+            CYBOOL splitted;
+
+            csmdebug_set_enabled_by_code(FALSO);
+            
+            csmmath_implicit_plane_equation(0., 0., 0., 0., 0., 1., 1., 0., 0., &A, &B, &C, &D);
+        
+            splitted = csmsplit_does_plane_split_solid(block_solid, A, B, C, D, &solid_above, &solid_below);
+            assert(splitted == CIERTO);
+
+            csmdebug_set_enabled_by_code(CIERTO);
+            
+            i_show_split_results(A, B, C, D, FALSO, solid_above, NULL);
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -2154,7 +2276,6 @@ void csmtest_test(void)
     i_test_divide_solido_rectangular_hueco_por_plano_superior2();
     */
 
-    /*
     i_test_union_solidos1(viewer);
     i_test_union_solidos2(viewer);
     i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
@@ -2184,10 +2305,10 @@ void csmtest_test(void)
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                               // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
-    */
     
-    //i_test_mechanical_part1_redux();
-    i_test_mechanical_part1(); // Revisar por qué falla!!!
+    i_test_mechanical_part1_redux();
+    i_test_mechanical_part1();
+    i_test_mechanical_part2();
     
     csmviewer_free(&viewer);
 }
