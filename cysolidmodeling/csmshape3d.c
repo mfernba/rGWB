@@ -66,8 +66,8 @@ static void i_extrude_torus_hedge(
 // --------------------------------------------------------------------------------
 
 struct csmsolid_t *csmshape3d_create_torus(
-                        double R, double r,
-                        unsigned long no_points_circle,
+                        double R, unsigned long no_points_circle_R,
+                        double r, unsigned long no_points_circle_r,
                         double x_center, double y_center, double z_center,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         unsigned long start_id_of_new_element)
@@ -80,19 +80,20 @@ struct csmsolid_t *csmshape3d_create_torus(
     struct csmface_t *initial_face, *face_to_extrude;
     double Wx, Wy, Wz;
     
-    assert(no_points_circle >= 3);
+    assert(no_points_circle_R >= 3);
+    assert(no_points_circle_r >= 3);
     
     i_compute_point_on_torus(R, r, 0., 0., &x, &y, &z);
     torus = csmeuler_mvfs(x, y, z, start_id_of_new_element, &initial_hedge);
     csmdebug_set_viewer_parameters(torus, NULL);
     
-    incr_alfa_rad = 2. * PI / no_points_circle;
-    incr_beta_rad = 2. * PI / no_points_circle;
+    incr_alfa_rad = 2. * PI / no_points_circle_r;
+    incr_beta_rad = 2. * PI / no_points_circle_R;
     csmvertex_set_mask_attrib(csmhedge_vertex(initial_hedge), (csmvertex_mask_t)0);
     
     previous_hedge = initial_hedge;
     
-    for (i = 1; i < no_points_circle; i++)
+    for (i = 1; i < no_points_circle_r; i++)
     {
         double alfa_rad, beta_rad;
         struct csmhedge_t *new_hedge;
@@ -110,7 +111,7 @@ struct csmsolid_t *csmshape3d_create_torus(
     csmeuler_lmef(initial_hedge, previous_hedge, &face_to_extrude, NULL, NULL);
     initial_face = csmopbas_face_from_hedge(previous_hedge);
     
-    for (i = 1; i < no_points_circle + 1; i++)
+    for (i = 1; i < no_points_circle_R + 1; i++)
     {
         struct csmloop_t *flout;
         double beta_rad;
@@ -121,7 +122,7 @@ struct csmsolid_t *csmshape3d_create_torus(
         first = csmloop_ledge(flout);
         scan = csmhedge_next(first);
         
-        if (i == no_points_circle)
+        if (i == no_points_circle_R)
             beta_rad = 0.;
         else
             beta_rad = incr_beta_rad * i;

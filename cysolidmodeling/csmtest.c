@@ -25,6 +25,7 @@
 #include "csmsolid.h"
 #include "csmsweep.h"
 #include "csmsplit.h"
+#include "csmshape3d.h"
 
 #include "copiafor.h"
 #include "cyassert.h"
@@ -2249,6 +2250,42 @@ static void i_test_mechanical_part2(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_toroide(void)
+{
+    struct csmsolid_t *toroide;
+    struct csmsolid_t *block;
+    struct csmsolid_t *res;
+    
+    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    toroide = csmshape3d_create_torus(
+                        3.,  16,
+                        .75, 8,
+                        0., 0., 0.,
+                        0., 1., 0.,
+                        0., 0., 1.,
+                        1);
+    
+    {
+        struct gccontorno_t *block_shape;
+        
+        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        
+        block = csmsweep_create_solid_from_shape_debug(
+                        block_shape,
+                        0., 0.,  0.5, 1., 0., 0., 0., 1., 0.,
+                        block_shape,
+                        0., 0., -0.5, 1., 0., 0., 0., 1., 0.,
+                        10000);
+    }
+    
+    res = csmsetop_difference_A_minus_B(block, toroide);
+    
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -2276,6 +2313,7 @@ void csmtest_test(void)
     i_test_divide_solido_rectangular_hueco_por_plano_superior2();
     */
 
+    /*
     i_test_union_solidos1(viewer);
     i_test_union_solidos2(viewer);
     i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
@@ -2309,6 +2347,9 @@ void csmtest_test(void)
     i_test_mechanical_part1_redux();
     i_test_mechanical_part1();
     i_test_mechanical_part2();
+    */
+    
+    i_test_toroide();
     
     csmviewer_free(&viewer);
 }
