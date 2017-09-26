@@ -41,7 +41,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
                         unsigned long id_nuevo_elemento,
                         struct csmhashtb(csmface_t) **sfaces,
                         struct csmhashtb(csmedge_t) **sedges,
-                        struct csmhashtb(csmvertex_t) **svertexs))
+                        struct csmhashtb(csmvertex_t) **svertexs,
+                        CYBOOL draw_only_border_edges))
 {
     struct csmsolid_t *solido;
     
@@ -55,6 +56,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
     solido->sedges = ASIGNA_PUNTERO_PP_NO_NULL(sedges, struct csmhashtb(csmedge_t));
     solido->svertexs = ASIGNA_PUNTERO_PP_NO_NULL(svertexs, struct csmhashtb(csmvertex_t));
     
+    solido->draw_only_border_edges = draw_only_border_edges;
+    
     return solido;
 }
 
@@ -67,6 +70,7 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
     struct csmhashtb(csmface_t) *sfaces;
     struct csmhashtb(csmedge_t) *sedges;
     struct csmhashtb(csmvertex_t) *svertexs;
+    CYBOOL draw_only_border_edges;
     
     name = NULL;
     
@@ -76,7 +80,9 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
     sedges = csmhashtb_create_empty(csmedge_t);
     svertexs = csmhashtb_create_empty(csmvertex_t);
     
-    return i_crea(&name, id_nuevo_elemento, &sfaces, &sedges, &svertexs);
+    draw_only_border_edges = CIERTO;
+    
+    return i_crea(&name, id_nuevo_elemento, &sfaces, &sedges, &svertexs, draw_only_border_edges);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -101,7 +107,7 @@ const char *csmsolid_get_name(const struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (const char *name, unsigned long id_nuevo_elemento))
+CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (const char *name, unsigned long id_nuevo_elemento, CYBOOL draw_only_border_edges))
 {
     char *name_copy;
     struct csmhashtb(csmface_t) *sfaces;
@@ -117,7 +123,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (const char *name, un
     sedges = csmhashtb_create_empty(csmedge_t);
     svertexs = csmhashtb_create_empty(csmvertex_t);
     
-    return i_crea(&name_copy, id_nuevo_elemento, &sfaces, &sedges, &svertexs);
+    return i_crea(&name_copy, id_nuevo_elemento, &sfaces, &sedges, &svertexs, draw_only_border_edges);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -224,7 +230,7 @@ struct csmsolid_t *csmsolid_duplicate(const struct csmsolid_t *solid)
     
     assert_no_null(solid);
     
-    new_solid = i_duplicate_solid(solid->name, solid->id_nuevo_elemento);
+    new_solid = i_duplicate_solid(solid->name, solid->id_nuevo_elemento, solid->draw_only_border_edges);
     assert_no_null(new_solid);
 
     i_duplicate_vertexs_table(solid->svertexs, &new_solid->id_nuevo_elemento, new_solid->svertexs, &relation_svertexs_old_to_new);
@@ -708,6 +714,14 @@ struct csmhashtb_iterator(csmvertex_t) *csmsolid_vertex_iterator(struct csmsolid
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_set_draw_only_border_edges(struct csmsolid_t *solido, CYBOOL draw_only_border_edges)
+{
+    assert_no_null(solido);
+    solido->draw_only_border_edges = draw_only_border_edges;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 CYBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
                         struct csmsolid_t *solid,
                         const struct csmvertex_t *vertex,
@@ -1171,7 +1185,7 @@ static void i_draw_solid_faces(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_border_edge(struct csmedge_t *edge, struct bsgraphics2_t *graphics)
+static void i_draw_border_edge(struct csmedge_t *edge, CYBOOL draw_only_border_edges, struct bsgraphics2_t *graphics)
 {
     struct csmhedge_t *he1, *he2;
     struct csmface_t *face_he1, *face_he2;
@@ -1182,7 +1196,7 @@ static void i_draw_border_edge(struct csmedge_t *edge, struct bsgraphics2_t *gra
     he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
     face_he2 = i_face_from_hedge(he2);
     
-    if (csmface_faces_define_border_edge(face_he1, face_he2) == CIERTO)
+    if (draw_only_border_edges == FALSO || csmface_faces_define_border_edge(face_he1, face_he2) == CIERTO)
     {
         double x1, y1, z1, x2, y2, z2;
     
@@ -1193,7 +1207,7 @@ static void i_draw_border_edge(struct csmedge_t *edge, struct bsgraphics2_t *gra
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_border_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgraphics2_t *graphics)
+static void i_draw_border_edges(struct csmhashtb(csmedge_t) *sedges, CYBOOL draw_only_border_edges, struct bsgraphics2_t *graphics)
 {
     struct csmhashtb_iterator(csmedge_t) *iterator;
     
@@ -1204,7 +1218,7 @@ static void i_draw_border_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgr
         struct csmedge_t *edge;
         
         csmhashtb_next_pair(iterator, NULL, &edge, csmedge_t);
-        i_draw_border_edge(edge, graphics);
+        i_draw_border_edge(edge, draw_only_border_edges, graphics);
     }
     
     csmhashtb_free_iterator(&iterator, csmedge_t);
@@ -1228,7 +1242,7 @@ void csmsolid_draw(
     i_draw_solid_faces(solido->sfaces, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
     
     bsgraphics2_escr_color(graphics, border_edges_material);
-    i_draw_border_edges(solido->sedges, graphics);
+    i_draw_border_edges(solido->sedges, solido->draw_only_border_edges, graphics);
 }
 
 // ----------------------------------------------------------------------------------------------------

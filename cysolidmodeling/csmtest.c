@@ -2324,6 +2324,170 @@ static void i_test_cono(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_sphere(void)
+{
+    struct csmsolid_t *cono;
+    struct csmsolid_t *block;
+    struct csmsolid_t *res;
+    
+    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    cono = csmshape3d_create_sphere(
+                        2.,
+                        8,
+                        16,
+                        1.2, 1., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+
+    csmdebug_set_viewer_results(cono, NULL);
+    //csmdebug_show_viewer();
+    
+    {
+        struct gccontorno_t *block_shape;
+        
+        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        
+        block = csmsweep_create_solid_from_shape_debug(
+                        block_shape,
+                        0., 0.,  0.5, 1., 0., 0., 0., 1., 0.,
+                        block_shape,
+                        0., 0., -0.5, 1., 0., 0., 0., 1., 0.,
+                        10000);
+    }
+    
+    res = csmsetop_difference_A_minus_B(block, cono);
+    
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_sphere2(void)
+{
+    struct csmsolid_t *sphere, *torus, *torus2, *cone;
+    struct csmsolid_t *block;
+    struct csmsolid_t *res;
+    
+    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    sphere = csmshape3d_create_sphere(
+                        2.8,
+                        8,
+                        16,
+                        0., 0., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+
+    torus = csmshape3d_create_torus(
+                        3.,  16,
+                        .75, 16,
+                        0., 0., 0.,
+                        0., 1., 0.,
+                        0., 0., 1.,
+                        1);
+
+    torus2 = csmshape3d_create_torus(
+                        3.,  16,
+                        .75, 16,
+                        0., 0., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+    
+    cone = csmshape3d_create_cone(
+                        5., 2., 32,
+                        0., 0., 0.,
+                        -1., 0., 0.,
+                        0., 0., 1.,
+                        1);
+    
+    csmdebug_set_viewer_results(sphere, torus);
+    //csmdebug_show_viewer();
+    
+    {
+        struct gccontorno_t *block_shape;
+        
+        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        
+        block = csmsweep_create_solid_from_shape_debug(
+                        block_shape,
+                        0., 0.,  0.5, 1., 0., 0., 0., 1., 0.,
+                        block_shape,
+                        0., 0., -0.5, 1., 0., 0., 0., 1., 0.,
+                        10000);
+    }
+    
+    res = csmsetop_difference_A_minus_B(sphere, torus);
+    res = csmsetop_difference_A_minus_B(res, torus2);
+    res = csmsetop_difference_A_minus_B(res, cone);
+    csmsolid_set_draw_only_border_edges(res, FALSO);
+    
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_sphere3(void)
+{
+    struct csmsolid_t *sphere, *torus, *torus2;
+    struct csmsolid_t *block;
+    struct csmsolid_t *res;
+    
+    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    sphere = csmshape3d_create_sphere(
+                        2.8,
+                        8,
+                        16,
+                        0., 0., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+
+    torus = csmshape3d_create_torus(
+                        3.,  16,
+                        .75, 16,
+                        0., 0., 0.,
+                        0., 1., 0.,
+                        0., 0., 1.,
+                        1);
+
+    torus2 = csmshape3d_create_torus(
+                        3.,  16,
+                        .75, 16,
+                        0., 0., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+    
+    csmdebug_set_viewer_results(sphere, torus);
+    //csmdebug_show_viewer();
+    
+    {
+        struct gccontorno_t *block_shape;
+        
+        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        
+        block = csmsweep_create_solid_from_shape_debug(
+                        block_shape,
+                        0., 0.,  0.5, 1., 0., 0., 0., 1., 0.,
+                        block_shape,
+                        0., 0., -0.5, 1., 0., 0., 0., 1., 0.,
+                        10000);
+    }
+    
+    res = csmsetop_union_A_and_B(sphere, torus);
+    res = csmsetop_difference_A_minus_B(res, torus2);
+    csmsolid_set_draw_only_border_edges(res, FALSO);
+    
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -2387,8 +2551,14 @@ void csmtest_test(void)
     i_test_mechanical_part2();
     */
     
-    //i_test_toroide();
+    /*
+    i_test_toroide();
     i_test_cono();
+    i_test_sphere();
+    */
+
+    i_test_sphere2();
+    i_test_sphere3();
     
     csmviewer_free(&viewer);
 }

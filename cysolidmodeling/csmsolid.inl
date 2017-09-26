@@ -75,6 +75,9 @@ CYBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
 
 // Debug...
 
+void csmsolid_set_draw_only_border_edges(struct csmsolid_t *solido, CYBOOL draw_only_border_edges);
+
 void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro);
 
 void csmsolid_print_complete_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro);
+

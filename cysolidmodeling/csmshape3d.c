@@ -13,7 +13,6 @@
 #include "csmeuler_lmev.inl"
 #include "csmeuler_mvfs.inl"
 #include "csmmath.inl"
-#include "csmdebug.inl"
 #include "csmface.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
@@ -101,7 +100,7 @@ struct csmsolid_t *csmshape3d_create_torus(
     
     i_compute_point_on_torus(R, r, 0., 0., &x, &y, &z);
     torus = csmeuler_mvfs(x, y, z, start_id_of_new_element, &initial_hedge);
-    csmdebug_set_viewer_parameters(torus, NULL);
+    csmsolid_set_draw_only_border_edges(torus, FALSO);    
     
     incr_alfa_rad = 2. * PI / no_points_circle_r;
     incr_beta_rad = 2. * PI / no_points_circle_R;
@@ -164,14 +163,9 @@ struct csmsolid_t *csmshape3d_create_torus(
         csmeuler_lmef(scan_prev, scan_next_next, NULL, NULL, NULL);
         
         face_to_extrude = csmopbas_face_from_hedge(scan_next_next);
-        
-        //csmsolid_print_complete_debug(torus, FALSO);
-        //csmdebug_show_viewer();
     }
     
-    //csmsolid_print_complete_debug(torus, FALSO);
     csmloopglue_merge_faces(initial_face, &face_to_extrude);
-    //csmsolid_print_complete_debug(torus, FALSO);
 
     i_apply_transform_to_solid(
                         x_center, y_center, z_center,
@@ -199,6 +193,84 @@ static void i_compute_point_on_cone_base(
     *z = 0.;
 }
 
+
+// --------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmsolid_t *, i_create_circle_solid, (
+                        double radius, unsigned long no_points_circle_radius,
+                        unsigned long start_id_of_new_element,
+                        struct csmface_t **bottom_face_opt, struct csmface_t **top_face_opt))
+{
+    struct csmsolid_t *circle;
+    double x, y, z;
+    struct csmhedge_t *initial_hedge, *previous_hedge;
+    unsigned long i;
+    double incr_beta_rad;
+    struct csmface_t *bottom_face_loc;
+    
+    assert(no_points_circle_radius >= 3);
+
+    i_compute_point_on_cone_base(radius, 0., &x, &y, &z);
+    circle = csmeuler_mvfs(x, y, z, start_id_of_new_element, &initial_hedge);
+    bottom_face_loc = csmopbas_face_from_hedge(initial_hedge);
+    
+    incr_beta_rad = 2. * PI / no_points_circle_radius;
+    
+    previous_hedge = initial_hedge;
+    csmvertex_set_mask_attrib(csmhedge_vertex(initial_hedge), (csmvertex_mask_t)0);
+    
+    for (i = 1; i < no_points_circle_radius; i++)
+    {
+        double beta_rad;
+     
+        beta_rad = 2. * PI - incr_beta_rad * i;
+        i_compute_point_on_cone_base(radius, beta_rad, &x, &y, &z);
+        
+        csmeuler_lmev_strut_edge(previous_hedge, x, y, z, &previous_hedge);
+        csmvertex_set_mask_attrib(csmhedge_vertex(previous_hedge), (csmvertex_mask_t)i);
+    }
+    
+    csmeuler_lmef(initial_hedge, previous_hedge, top_face_opt, NULL, NULL);
+    
+    ASIGNA_OPC(bottom_face_opt, bottom_face_loc);
+    
+    return circle;
+}
+
+// --------------------------------------------------------------------------------
+
+static void i_connect_face_hegdes_with_vertex(
+                        struct csmface_t *face,
+                        double x, double y, double z)
+{
+    struct csmloop_t *face_flout;
+    struct csmhedge_t *first, *scan;
+    struct csmhedge_t *scan_prev, *scan_next_next;
+    struct csmvertex_t *top_vertex;
+    
+    face_flout = csmface_flout(face);
+    first = csmloop_ledge(face_flout);
+    scan = csmhedge_next(first);
+    
+    csmeuler_lmev(scan, scan, x, y, z, &top_vertex, NULL, NULL, NULL);
+    
+    while (scan != first)
+    {
+        struct csmhedge_t *scan_next;
+        struct csmhedge_t *new_he_pos, *new_he_neg;
+        
+        scan_next = csmhedge_next(scan);
+        csmeuler_lmev_strut_edge(scan_next, x, y, z, NULL);
+        
+        scan_prev = csmhedge_prev(scan);
+        scan_next_next = csmhedge_next(csmhedge_next(scan));
+        csmeuler_lmef(scan_prev, scan_next_next, NULL, &new_he_pos, &new_he_neg);        
+        csmeuler_lkev(&new_he_neg, &new_he_pos, NULL, NULL, NULL, NULL);
+        
+        scan = csmhedge_next(csmopbas_mate(csmhedge_next(scan)));
+    }
+}
+                        
 // --------------------------------------------------------------------------------
 
 struct csmsolid_t *csmshape3d_create_cone(
@@ -208,73 +280,146 @@ struct csmsolid_t *csmshape3d_create_cone(
                         unsigned long start_id_of_new_element)
 {
     struct csmsolid_t *cone;
-    double x, y, z;
-    struct csmhedge_t *initial_hedge, *previous_hedge;
-    unsigned long i;
-    double incr_beta_rad;
     struct csmface_t *top_face;
-    struct csmloop_t *top_face_flout;
-    struct csmhedge_t *first, *scan;
-    struct csmhedge_t *scan_prev, *scan_next_next;
-    struct csmvertex_t *top_vertex;
     
     assert(height > 0.);
-    assert(no_points_circle_radius >= 3);
-    
-    i_compute_point_on_cone_base(radius, 0., &x, &y, &z);
-    cone = csmeuler_mvfs(x, y, z, start_id_of_new_element, &initial_hedge);
-    csmdebug_set_viewer_parameters(cone, NULL);
-    
-    incr_beta_rad = 2. * PI / no_points_circle_radius;
-    
-    previous_hedge = initial_hedge;
-    
-    for (i = 1; i < no_points_circle_radius; i++)
-    {
-        double beta_rad;
-        struct csmhedge_t *new_hedge;
-     
-        beta_rad = 2. * PI - incr_beta_rad * i;
-        
-        i_compute_point_on_cone_base(radius, beta_rad, &x, &y, &z);
-        csmeuler_lmev_strut_edge(previous_hedge, x, y, z, &new_hedge);
-        previous_hedge = new_hedge;
-    }
-    
-    csmeuler_lmef(initial_hedge, previous_hedge, &top_face, NULL, NULL);
 
-    top_face_flout = csmface_flout(top_face);
-    first = csmloop_ledge(top_face_flout);
-    scan = csmhedge_next(first);
-
-    csmeuler_lmev(scan, scan, 0., 0., height, &top_vertex, NULL, NULL, NULL);
-    
-    while (scan != first)
-    {
-        struct csmhedge_t *scan_next;
-        struct csmhedge_t *new_he_pos, *new_he_neg;
-        
-        scan_next = csmhedge_next(scan);
-        csmeuler_lmev_strut_edge(scan_next, 0., 0., height,NULL);
-        
-        scan_prev = csmhedge_prev(scan);
-        scan_next_next = csmhedge_next(csmhedge_next(scan));
-        csmeuler_lmef(scan_prev, scan_next_next, NULL, &new_he_pos, &new_he_neg);        
-        csmeuler_lkev(&new_he_neg, &new_he_pos, NULL, NULL, NULL, NULL);
-        
-        scan = csmhedge_next(csmopbas_mate(csmhedge_next(scan)));
-    }
+    cone = i_create_circle_solid(radius, no_points_circle_radius, start_id_of_new_element, NULL, &top_face);
+    i_connect_face_hegdes_with_vertex(top_face, 0., 0., height);
 
     i_apply_transform_to_solid(
                         x_base_center, y_base_center, z_base_center,
                         Ux, Uy, Uz, Vx, Vy, Vz,
                         cone);
     
+    csmsolid_clear_algorithm_data(cone);
+    
     return cone;
 }
 
+// --------------------------------------------------------------------------------
 
+static void i_extrude_sphere_hedge(
+                        double r_sphere,
+                        unsigned long no_points_circle_radius_meridians,
+                        double direction_sign,
+                        double alfa_rad,
+                        struct csmhedge_t *hedge)
+{
+    struct csmvertex_t *iterator_vertex;
+    unsigned long circle_point_idx;
+    double incr_beta_rad, beta_rad;
+    struct csmhedge_t *new_hedge;
+    double x, y, z;
+    
+    assert(r_sphere > 0.);
+    assert(no_points_circle_radius_meridians >= 3);
+    
+    iterator_vertex = csmhedge_vertex(hedge);
+    circle_point_idx = (unsigned long)csmvertex_get_mask_attrib(iterator_vertex);
+    
+    incr_beta_rad = 2. * PI / no_points_circle_radius_meridians;
+    beta_rad = 2. * PI - incr_beta_rad * circle_point_idx;
+    
+    x = r_sphere * cos(beta_rad) * cos(alfa_rad);
+    y = r_sphere * sin(beta_rad) * cos(alfa_rad);
+    z = direction_sign * r_sphere * sin(alfa_rad);
+    
+    csmeuler_lmev_strut_edge(hedge, x, y, z, &new_hedge);
+    csmvertex_set_mask_attrib(csmhedge_vertex(new_hedge), (csmvertex_mask_t)circle_point_idx);
+}
 
+// --------------------------------------------------------------------------------
+
+static void i_generate_semisphere(
+                        struct csmface_t *initial_face,
+                        double direction_sign,
+                        double radius,
+                        unsigned long no_points_circle_radius_parallels_semisphere,
+                        unsigned long no_points_circle_radius_meridians)
+{
+    unsigned long i, no_homothetic_circles;
+    double incr_alfa;
+    struct csmface_t *face_to_extrude;
+    
+    assert(radius > 0.);
+    assert(no_points_circle_radius_parallels_semisphere >= 3);
+    
+    no_homothetic_circles = no_points_circle_radius_parallels_semisphere - 1;
+    incr_alfa = 0.5 * PI / no_points_circle_radius_parallels_semisphere;
+    
+    face_to_extrude = initial_face;
+    
+    for (i = 0; i < no_homothetic_circles; i++)
+    {
+        struct csmloop_t *flout;
+        struct csmhedge_t *first, *scan;
+        struct csmhedge_t *scan_prev, *scan_next_next;
+        double alfa_rad;
+        
+        flout = csmface_flout(face_to_extrude);
+        first = csmloop_ledge(flout);
+        scan = csmhedge_next(first);
+        
+        alfa_rad = (i + 1) * incr_alfa;
+        i_extrude_sphere_hedge(radius, no_points_circle_radius_meridians, direction_sign, alfa_rad, scan);
+        
+        while (scan != first)
+        {
+            struct csmhedge_t *scan_next;
+            
+            scan_next = csmhedge_next(scan);
+            i_extrude_sphere_hedge(radius, no_points_circle_radius_meridians, direction_sign, alfa_rad, scan_next);
+            
+            scan_prev = csmhedge_prev(scan);
+            scan_next_next = csmhedge_next(csmhedge_next(scan));
+            csmeuler_lmef(scan_prev, scan_next_next, NULL, NULL, NULL);
+            
+            scan = csmhedge_next(csmopbas_mate(csmhedge_next(scan)));
+        }
+        
+        scan_prev = csmhedge_prev(scan);
+        scan_next_next = csmhedge_next(csmhedge_next(scan));
+        csmeuler_lmef(scan_prev, scan_next_next, NULL, NULL, NULL);
+        
+        face_to_extrude = csmopbas_face_from_hedge(scan_next_next);
+    }
+    
+    i_connect_face_hegdes_with_vertex(face_to_extrude, 0., 0., direction_sign * radius);
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsolid_t *csmshape3d_create_sphere(
+                        double radius,
+                        unsigned long no_points_circle_radius_parallels_semisphere,
+                        unsigned long no_points_circle_radius_meridians,
+                        double x_center, double y_center, double z_center,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        unsigned long start_id_of_new_element)
+{
+    struct csmsolid_t *sphere;
+    struct csmface_t *bottom_face, *top_face;
+    double direction_sign;
+    
+    sphere = i_create_circle_solid(radius, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
+    csmsolid_set_draw_only_border_edges(sphere, FALSO);
+    
+    direction_sign = 1.;
+    i_generate_semisphere(top_face, direction_sign, radius, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
+
+    direction_sign = -1.;
+    i_generate_semisphere(bottom_face, direction_sign, radius, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
+    
+    i_apply_transform_to_solid(
+                        x_center, y_center, z_center,
+                        Ux, Uy, Uz, Vx, Vy, Vz,
+                        sphere);
+
+    csmsolid_clear_algorithm_data(sphere);
+    
+    return sphere;
+}
 
 
 
