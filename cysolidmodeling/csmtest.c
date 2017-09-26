@@ -2286,6 +2286,44 @@ static void i_test_toroide(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_cono(void)
+{
+    struct csmsolid_t *cono;
+    struct csmsolid_t *block;
+    struct csmsolid_t *res;
+    
+    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    cono = csmshape3d_create_cone(
+                        5., 1., 32,
+                        0., 0., 0.,
+                        1., 0., 0.,
+                        0., 0., 1.,
+                        1);
+
+    csmdebug_set_viewer_results(cono, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        struct gccontorno_t *block_shape;
+        
+        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        
+        block = csmsweep_create_solid_from_shape_debug(
+                        block_shape,
+                        0., 0.,  0.5, 1., 0., 0., 0., 1., 0.,
+                        block_shape,
+                        0., 0., -0.5, 1., 0., 0., 0., 1., 0.,
+                        10000);
+    }
+    
+    res = csmsetop_difference_A_minus_B(block, cono);
+    
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -2349,7 +2387,8 @@ void csmtest_test(void)
     i_test_mechanical_part2();
     */
     
-    i_test_toroide();
+    //i_test_toroide();
+    i_test_cono();
     
     csmviewer_free(&viewer);
 }

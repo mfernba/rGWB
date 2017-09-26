@@ -14,3 +14,9 @@ DLL_CYSOLIDMODELING CONSTRUCTOR(struct csmsolid_t *, csmshape3d_create_torus, (
                         double x_center, double y_center, double z_center,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         unsigned long start_id_of_new_element));
+
+DLL_CYSOLIDMODELING CONSTRUCTOR(struct csmsolid_t *, csmshape3d_create_cone, (
+                        double height, double radius, unsigned long no_points_circle_radius,
+                        double x_base_center, double y_base_center, double z_base_center,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        unsigned long start_id_of_new_element));
