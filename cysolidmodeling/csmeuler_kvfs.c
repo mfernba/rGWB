@@ -15,7 +15,7 @@
 #include "csmsolid.tli"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
+#include "csmassert.inl"
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -31,10 +31,10 @@ void csmeuler_kvfs(struct csmsolid_t *solido)
     assert(csmhashtb_count(solido->svertexs, csmvertex_t) == 1);
     
     face_iterator = csmhashtb_create_iterator(solido->sfaces, csmface_t);
-    assert(csmhashtb_has_next(face_iterator, csmface_t) == CIERTO);
+    assert(csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE);
     
     csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
-    assert(csmhashtb_has_next(face_iterator, csmface_t) == FALSO);
+    assert(csmhashtb_has_next(face_iterator, csmface_t) == CSMFALSE);
     
     floops = csmface_floops(face);
     assert(csmloop_next(floops) == NULL);

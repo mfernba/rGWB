@@ -19,6 +19,6 @@ struct csmsolid_t
     struct csmhashtb(csmedge_t) *sedges;
     struct csmhashtb(csmvertex_t) *svertexs;
 
-    CYBOOL draw_only_border_edges;
+    CSMBOOL draw_only_border_edges;
 };
 

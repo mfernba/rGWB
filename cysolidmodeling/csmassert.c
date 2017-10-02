@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 manueru. All rights reserved.
 //
 
-#include "cyassert.h"
+#include "csmassert.inl"
 
 #include "csmdebug.inl"
 
@@ -15,9 +15,9 @@
 
 // ---------------------------------------------------------------------------------
 
-void cyassert_dontuse_assertion_failed(CYBOOL condition, const char *file, int line, const char *assertion)
+void csmassert_dontuse_assertion_failed(CSMBOOL condition, const char *file, int line, const char *assertion)
 {
-    if (condition == FALSO)
+    if (condition == CSMFALSE)
     {
         csmdebug_print_debug_info("Solid modeler assertion failed: (%s)\nFILE: %s\nLINE: %d\n", assertion, file, line);
         csmdebug_close_output_file();
@@ -29,14 +29,14 @@ void cyassert_dontuse_assertion_failed(CYBOOL condition, const char *file, int l
 
 // ---------------------------------------------------------------------------------
 
-void cyassert_dontuse_assertion_not_null_failed(const void *ptr, const char *file, int line, const char *assertion)
+void csmassert_dontuse_assertion_not_null_failed(const void *ptr, const char *file, int line, const char *assertion)
 {
-    cyassert_dontuse_assertion_failed(ptr != NULL, file, line, assertion);
+    csmassert_dontuse_assertion_failed(ptr != NULL, file, line, assertion);
 }
 
 // ---------------------------------------------------------------------------------
 
-void cyassert_dontuse_default_error(const char *file, int line)
+void csmassert_dontuse_default_error(const char *file, int line)
 {
     fprintf(stderr, "Solid modeler switch case not handled at FILE: %s\nLINE: %d\n", file, line);
     _Exit(-1);

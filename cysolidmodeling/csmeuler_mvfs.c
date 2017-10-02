@@ -46,7 +46,7 @@ struct csmsolid_t *csmeuler_mvfs(double x, double y, double z, unsigned long sta
     
     csmvertex_set_hedge(vertex, hedge);
     
-    ASIGNA_OPC(hedge_opc, hedge);
+    ASSIGN_OPTIONAL_VALUE(hedge_opc, hedge);
     
     return solido;
 }

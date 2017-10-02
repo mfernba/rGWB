@@ -13,8 +13,8 @@
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 
 // ------------------------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ void csmopbas_addhe(
     
     csmhedge_set_vertex(new_hedge_loc, vertex);
     
-    ASIGNA_OPC(new_hedge_opc, new_hedge_loc);
+    ASSIGN_OPTIONAL_VALUE(new_hedge_opc, new_hedge_loc);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     struct csmedge_t *edge;
     struct csmloop_t *loop;
     struct csmvertex_t *vertex;
-    CYBOOL destroy_hedge;
+    CSMBOOL destroy_hedge;
     
     hedge_loc = ASIGNA_PUNTERO_PP_NO_NULL(hedge, struct csmhedge_t);
     edge = csmhedge_edge(hedge_loc);
@@ -124,7 +124,7 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     
     if (edge == NULL)
     {
-        destroy_hedge = CIERTO;
+        destroy_hedge = CSMTRUE;
         
         hedge_prev = NULL;
         hedge_next = NULL;
@@ -135,14 +135,14 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
         {
             assert(csmhedge_prev(hedge_loc) == hedge_loc);
             
-            destroy_hedge = FALSO;
+            destroy_hedge = CSMFALSE;
             
             hedge_prev = hedge_loc;
             hedge_next = hedge_loc;
         }
         else
         {
-            destroy_hedge = CIERTO;
+            destroy_hedge = CSMTRUE;
             
             hedge_prev = csmhedge_prev(hedge_loc);
             assert(hedge_prev != hedge_loc);
@@ -155,7 +155,7 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
         csmedge_remove_hedge(edge, hedge_loc);
     }
     
-    if (destroy_hedge == CIERTO)
+    if (destroy_hedge == CSMTRUE)
     {
         if (csmvertex_hedge(vertex) == hedge_loc)
             csmvertex_set_hedge(vertex, NULL);
@@ -166,17 +166,17 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
         csmnode_free_node_in_list(&hedge_loc, csmhedge_t);
     }
     
-    ASIGNA_OPC(hedge_prev_opc, hedge_prev);
-    ASIGNA_OPC(hedge_next_opc, hedge_next);
+    ASSIGN_OPTIONAL_VALUE(hedge_prev_opc, hedge_prev);
+    ASSIGN_OPTIONAL_VALUE(hedge_next_opc, hedge_next);
 }
 
 // ------------------------------------------------------------------------------------------
 
-CYBOOL csmopbas_is_wide_hedge(
+CSMBOOL csmopbas_is_wide_hedge(
                         struct csmhedge_t *hedge,
                         double *Ux_bisec_opt, double *Uy_bisec_opt, double *Uz_bisec_opt)
 {
-    CYBOOL is_wide;
+    CSMBOOL is_wide;
     double Ux_bisec_loc, Uy_bisec_loc, Uz_bisec_loc;
     struct csmhedge_t *hedge_prev, *hedge_next;
     const struct csmvertex_t *vertex_prev, *vertex, *vertex_next;
@@ -208,9 +208,9 @@ CYBOOL csmopbas_is_wide_hedge(
     
     if (csmmath_is_null_vector(
                         Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next,
-                        csmtolerance_null_vector()) == CIERTO)
+                        csmtolerance_null_vector()) == CSMTRUE)
     {
-        is_wide = CIERTO;
+        is_wide = CSMTRUE;
         csmmath_cross_product3D(A, B, C, Ux_to_next, Uy_to_next, Uz_to_next, &Ux_bisec_loc, &Uy_bisec_loc, &Uz_bisec_loc);
     }
     else
@@ -218,11 +218,11 @@ CYBOOL csmopbas_is_wide_hedge(
         double dot_product;
 
         dot_product = csmmath_dot_product3D(Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next, A, B, C);
-        is_wide = ES_CIERTO(dot_product > 0.);
+        is_wide = IS_TRUE(dot_product > 0.);
         
         if (dot_product > 0.)
         {
-            is_wide = CIERTO;
+            is_wide = CSMTRUE;
             
             Ux_bisec_loc = -(Ux_to_prev + Ux_to_next);
             Uy_bisec_loc = -(Uy_to_prev + Uy_to_next);
@@ -230,7 +230,7 @@ CYBOOL csmopbas_is_wide_hedge(
         }
         else
         {
-            is_wide = FALSO;
+            is_wide = CSMFALSE;
             
             Ux_bisec_loc = 0.;
             Uy_bisec_loc = 0.;
@@ -238,9 +238,9 @@ CYBOOL csmopbas_is_wide_hedge(
         }
     }
     
-    ASIGNA_OPC(Ux_bisec_opt, Ux_bisec_loc);
-    ASIGNA_OPC(Uy_bisec_opt, Uy_bisec_loc);
-    ASIGNA_OPC(Uz_bisec_opt, Uz_bisec_loc);
+    ASSIGN_OPTIONAL_VALUE(Ux_bisec_opt, Ux_bisec_loc);
+    ASSIGN_OPTIONAL_VALUE(Uy_bisec_opt, Uy_bisec_loc);
+    ASSIGN_OPTIONAL_VALUE(Uz_bisec_opt, Uz_bisec_loc);
     
     return is_wide;
 }

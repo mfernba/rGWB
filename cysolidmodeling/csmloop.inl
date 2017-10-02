@@ -30,7 +30,7 @@ double csmloop_max_distance_to_plane(
                         const struct csmloop_t *loop,
                         double A, double B, double C, double D);
 
-CYBOOL csmloop_is_point_inside_loop(
+CSMBOOL csmloop_is_point_inside_loop(
                         const struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         double tolerance,
@@ -38,9 +38,9 @@ CYBOOL csmloop_is_point_inside_loop(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 
-CYBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib);
+CSMBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib);
 
-CYBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop);
+CSMBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop);
 
 
 // Topology...
@@ -56,18 +56,18 @@ struct csmloop_t *csmloop_prev(struct csmloop_t *loop);
 
 void csmloop_revert_loop_orientation(struct csmloop_t *loop);
 
-CYBOOL csmloop_setop_convert_loop_in_face(const struct csmloop_t *loop);
-void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CYBOOL setop_convert_loop_in_face);
+CSMBOOL csmloop_setop_convert_loop_in_face(const struct csmloop_t *loop);
+void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CSMBOOL setop_convert_loop_in_face);
 
-CYBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop);
-void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CYBOOL setop_loop_was_a_hole);
+CSMBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop);
+void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CSMBOOL setop_loop_was_a_hole);
 
 void csmloop_clear_algorithm_mask(struct csmloop_t *loop);
 
 
 // Debug...
 
-void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBOOL assert_si_no_es_integro);
+void csmloop_print_info_debug(struct csmloop_t *loop, CSMBOOL is_outer_loop, CSMBOOL assert_si_no_es_integro);
 
 void csmloop_append_loop_to_shape(
                         struct csmloop_t *loop,

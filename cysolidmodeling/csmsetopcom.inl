@@ -15,9 +15,9 @@ void csmsetopcom_append_vertex_if_not_exists(struct csmvertex_t *vertex, ArrEstr
 
 // Hedges...
 
-CYBOOL csmsetopcom_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(struct csmedge_t *edge);
+CSMBOOL csmsetopcom_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(struct csmedge_t *edge);
 
-CYBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge_t *he2);
+CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge_t *he2);
 
 
 // Edges...
@@ -26,7 +26,7 @@ void csmsetopcom_sort_edges_lexicographically_by_xyz(ArrEstructura(csmedge_t) *s
 
 void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_null_edges, ArrEstructura(csmhedge_t) *loose_ends);
 
-CYBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends);
+CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends);
 
 void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose_ends);
 
@@ -37,7 +37,7 @@ void csmsetopcom_cut_he(
                     ArrEstructura(csmedge_t) *set_of_null_edges,
                     ArrEstructura(csmface_t) *set_of_null_faces,
                     unsigned long *no_null_edges_deleted,
-                    CYBOOL *null_face_created_opt);
+                    CSMBOOL *null_face_created_opt);
 
 void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid);
 

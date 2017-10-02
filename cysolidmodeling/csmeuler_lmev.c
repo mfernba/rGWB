@@ -15,7 +15,7 @@
 #include "csmsolid.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
+#include "csmassert.inl"
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -63,10 +63,10 @@ void csmeuler_lmev(
     assert(old_vertex == csmhedge_vertex(he2));
     csmvertex_set_hedge(old_vertex, he2);
     
-    ASIGNA_OPC(vertex_opc, new_vertex);
-    ASIGNA_OPC(edge_opc, new_edge);
-    ASIGNA_OPC(hedge_from_new_vertex_opc, hedge_from_new_vertex_loc);
-    ASIGNA_OPC(hedge_to_new_vertex_opc, hedge_to_new_vertex_loc);
+    ASSIGN_OPTIONAL_VALUE(vertex_opc, new_vertex);
+    ASSIGN_OPTIONAL_VALUE(edge_opc, new_edge);
+    ASSIGN_OPTIONAL_VALUE(hedge_from_new_vertex_opc, hedge_from_new_vertex_loc);
+    ASSIGN_OPTIONAL_VALUE(hedge_to_new_vertex_opc, hedge_to_new_vertex_loc);
 }
 
 // ----------------------------------------------------------------------------------------------------

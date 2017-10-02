@@ -18,28 +18,28 @@ extern "C" {
 #include <limits.h>
 
 #ifndef __cplusplus
-#define CYBOOL char
-#define CIERTO 1
-#define FALSO 0
+#define CSMBOOL char
+#define CSMTRUE 1
+#define CSMFALSE 0
 #endif
 
 #ifdef __cplusplus
-#define CYBOOL bool
-#define CIERTO true
-#define FALSO false
+#define CSMBOOL bool
+#define CSMTRUE true
+#define CSMFALSE false
 #endif
 
 #define CONSTRUCTOR(type, name, params) type name params
 
-#define ES_CIERTO(condicion) (condicion) ? CIERTO: FALSO
+#define IS_TRUE(condicion) (condicion) ? CSMTRUE: CSMFALSE
 
-#define ASIGNA_OPC(a, b) if ((a) != NULL) *(a) = (b)
+#define ASSIGN_OPTIONAL_VALUE(a, b) if ((a) != NULL) *(a) = (b)
 
 #define DLL_CYSOLIDMODELING
 
 #define comparac_t ecomparacion_t
 
-#define INVIERTE_CYBOOL(valor) (((valor) == CIERTO) ? FALSO: CIERTO)
+#define INVERT_BOOLEAN(valor) (((valor) == CSMTRUE) ? CSMFALSE: CSMTRUE)
 
 #ifndef __cplusplus
 #define comparac_IGUALES ECOMPARACION_IGUALES

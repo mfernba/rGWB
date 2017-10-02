@@ -11,8 +11,8 @@
 
 #include "csmuthash.hxx"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 
 struct csmhashtb_item_t
 {
@@ -162,7 +162,7 @@ void *csmhashtb_nousar_ptr_for_id(struct csmhashtb_t *tabla, unsigned long id)
 
 // ------------------------------------------------------------------------------------------
 
-CYBOOL csmhashtb_nousar_contains_id(struct csmhashtb_t *tabla, unsigned long id, void **ptr_opc)
+CSMBOOL csmhashtb_nousar_contains_id(struct csmhashtb_t *tabla, unsigned long id, void **ptr_opc)
 {
     struct csmhashtb_item_t *item;
     
@@ -172,12 +172,12 @@ CYBOOL csmhashtb_nousar_contains_id(struct csmhashtb_t *tabla, unsigned long id,
     
     if (item != NULL)
     {
-        ASIGNA_OPC(ptr_opc, item->ptr);
-        return CIERTO;
+        ASSIGN_OPTIONAL_VALUE(ptr_opc, item->ptr);
+        return CSMTRUE;
     }
     else
     {
-        return FALSO;
+        return CSMFALSE;
     }
 }
 
@@ -214,14 +214,14 @@ void csmhashtb_nousar_free_iterator(struct csmhashtb_iterator_t **iterator)
 
 // ------------------------------------------------------------------------------------------
 
-CYBOOL csmhashtb_nousar_has_next(const struct csmhashtb_iterator_t *iterator)
+CSMBOOL csmhashtb_nousar_has_next(const struct csmhashtb_iterator_t *iterator)
 {
     assert_no_null(iterator);
     
     if (iterator->next_item != NULL)
-        return ES_CIERTO(iterator->next_item != NULL);
+        return IS_TRUE(iterator->next_item != NULL);
     else
-        return FALSO;
+        return CSMFALSE;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -231,8 +231,8 @@ void csmhashtb_nousar_next_pair(struct csmhashtb_iterator_t *iterator, unsigned 
     assert_no_null(iterator);
     assert_no_null(iterator->next_item);
     
-    ASIGNA_OPC(id_opc, iterator->next_item->id);
-    ASIGNA_OPC(ptr_opc, iterator->next_item->ptr);
+    ASSIGN_OPTIONAL_VALUE(id_opc, iterator->next_item->id);
+    ASSIGN_OPTIONAL_VALUE(ptr_opc, iterator->next_item->ptr);
     
     iterator->next_item = iterator->next_item->hh.next;
 }

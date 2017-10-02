@@ -28,7 +28,7 @@ void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge);
 
 // Algorithm masks...
 
-CYBOOL csmvertex_has_mask_attrib(const struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib);
+CSMBOOL csmvertex_has_mask_attrib(const struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib);
 
 csmvertex_mask_t csmvertex_get_mask_attrib(const struct csmvertex_t *vertex);
 
@@ -55,7 +55,7 @@ void csmvertex_get_coords_not_dropped(
 
 void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, double z);
 
-CYBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, double epsilon);
+CSMBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, double epsilon);
 
 
 void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtransform_t *transform);

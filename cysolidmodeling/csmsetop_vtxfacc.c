@@ -22,9 +22,9 @@
 
 #include "a_punter.h"
 #include "copiafor.h"
-#include "cyassert.h"
-#include "cypespy.h"
-#include "defmath.tlh"
+#include "csmassert.inl"
+#include "csmmem.inl"
+#include "csmmath.tli"
 
 ArrEstructura(csmvertex_t);
 ArrEstructura(csmedge_t);
@@ -69,7 +69,7 @@ void csmsetop_vtxfacc_free_inters(struct csmsetop_vtxfacc_inters_t **vf_inters)
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmsetop_vtxfacc_equals(const struct csmsetop_vtxfacc_inters_t *vf_inters1, const struct csmsetop_vtxfacc_inters_t *vf_inters2)
+CSMBOOL csmsetop_vtxfacc_equals(const struct csmsetop_vtxfacc_inters_t *vf_inters1, const struct csmsetop_vtxfacc_inters_t *vf_inters2)
 {
     assert_no_null(vf_inters1);
     assert_no_null(vf_inters2);
@@ -77,13 +77,13 @@ CYBOOL csmsetop_vtxfacc_equals(const struct csmsetop_vtxfacc_inters_t *vf_inters
     if (vf_inters1->vertex == vf_inters2->vertex)
     {
         if (vf_inters1->face == vf_inters2->face)
-            return CIERTO;
+            return CSMTRUE;
         else
-            return FALSO;
+            return CSMFALSE;
     }
     else
     {
-        return FALSO;
+        return CSMFALSE;
     }
 }
 
@@ -125,8 +125,8 @@ static void i_classify_point_respect_to_plane(
     dist_to_plane_loc = csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D);
     cl_resp_plane_loc = csmsetopcom_classify_value_respect_to_plane(dist_to_plane_loc, tolerance);
 
-    ASIGNA_OPC(dist_to_plane_opc, dist_to_plane_loc);
-    ASIGNA_OPC(cl_resp_plane_opc, cl_resp_plane_loc);    
+    ASSIGN_OPTIONAL_VALUE(dist_to_plane_opc, dist_to_plane_loc);
+    ASSIGN_OPTIONAL_VALUE(cl_resp_plane_opc, cl_resp_plane_loc);    
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -140,7 +140,7 @@ static double i_classification_tolerance(struct csmhedge_t *hedge)
     face_tolerance = csmface_tolerace(face_hedge);
     general_tolerance = csmtolerance_equal_coords();
     
-    return MAX(face_tolerance, general_tolerance);
+    return CSMMATH_MAX(face_tolerance, general_tolerance);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ static void i_classify_hedge_respect_to_plane(
                         tolerance,
                         dist_to_plane_opc, cl_resp_plane_opc);
 
-    ASIGNA_OPC(vertex_opc, vertex_loc);
+    ASSIGN_OPTIONAL_VALUE(vertex_opc, vertex_loc);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -204,7 +204,7 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_initial_vertex_neighborh
         hedge_neighborhood = i_create_neighborhod(hedge_iterator, cl_resp_plane);
         arr_AppendPunteroST(vertex_neighborhood, hedge_neighborhood, i_neighborhood_t);
         
-        if (csmopbas_is_wide_hedge(hedge_iterator, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CIERTO)
+        if (csmopbas_is_wide_hedge(hedge_iterator, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CSMTRUE)
         {
             struct i_neighborhood_t *hedge_neighborhood_wide;
             double tolerance;
@@ -234,16 +234,16 @@ static void i_reclassify_on_sector_vertex_neighborhood(
                         double tolerance_coplanarity)
 {
     struct csmface_t *common_face;
-    CYBOOL same_orientation;
+    CSMBOOL same_orientation;
     
     assert_no_null(hedge_neighborhood);
     assert_no_null(next_hedge_neighborhood);
 
     common_face = csmsetopcom_face_for_hedge_sector(hedge_neighborhood->hedge, next_hedge_neighborhood->hedge);
     
-    if (csmface_is_coplanar_to_plane(common_face, A, B, C, D, tolerance_coplanarity, &same_orientation) == CIERTO)
+    if (csmface_is_coplanar_to_plane(common_face, A, B, C, D, tolerance_coplanarity, &same_orientation) == CSMTRUE)
     {
-        if (same_orientation == CIERTO)
+        if (same_orientation == CSMTRUE)
         {
             switch (a_vs_b)
             {
@@ -458,7 +458,7 @@ static enum csmsetop_classify_resp_solid_t i_sector_position(const ArrEstructura
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_is_in_out_sequence_at_index(const ArrEstructura(i_neighborhood_t) *vertex_neighborhood, unsigned long idx)
+static CSMBOOL i_is_in_out_sequence_at_index(const ArrEstructura(i_neighborhood_t) *vertex_neighborhood, unsigned long idx)
 {
     unsigned long num_sectors;
     
@@ -468,21 +468,21 @@ static CYBOOL i_is_in_out_sequence_at_index(const ArrEstructura(i_neighborhood_t
     if (i_sector_position(vertex_neighborhood, idx) == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
     {
         if (i_sector_position(vertex_neighborhood, (idx + 1) % num_sectors) == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
-            return CIERTO;
+            return CSMTRUE;
         else
-            return FALSO;
+            return CSMFALSE;
     }
     else
     {
-        return FALSO;
+        return CSMFALSE;
     }
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_could_locate_begin_sequence(const ArrEstructura(i_neighborhood_t) *vertex_neighborhood, unsigned long *start_idx)
+static CSMBOOL i_could_locate_begin_sequence(const ArrEstructura(i_neighborhood_t) *vertex_neighborhood, unsigned long *start_idx)
 {
-    CYBOOL found;
+    CSMBOOL found;
     unsigned long start_idx_loc;
     unsigned long i, num_sectors;
     
@@ -490,14 +490,14 @@ static CYBOOL i_could_locate_begin_sequence(const ArrEstructura(i_neighborhood_t
     assert(num_sectors > 0);
     assert_no_null(start_idx);
     
-    found = FALSO;
+    found = CSMFALSE;
     start_idx_loc = ULONG_MAX;
     
     for (i = 0; i < num_sectors; i++)
     {
-        if (i_is_in_out_sequence_at_index(vertex_neighborhood, i) == CIERTO)
+        if (i_is_in_out_sequence_at_index(vertex_neighborhood, i) == CSMTRUE)
         {
-            found = CIERTO;
+            found = CSMTRUE;
             start_idx_loc = i;
             break;
         }
@@ -510,7 +510,7 @@ static CYBOOL i_could_locate_begin_sequence(const ArrEstructura(i_neighborhood_t
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_is_out_in_sequence_at_index(const ArrEstructura(i_neighborhood_t) *vertex_neighborhood, unsigned long idx)
+static CSMBOOL i_is_out_in_sequence_at_index(const ArrEstructura(i_neighborhood_t) *vertex_neighborhood, unsigned long idx)
 {
     unsigned long num_sectors;
     
@@ -520,13 +520,13 @@ static CYBOOL i_is_out_in_sequence_at_index(const ArrEstructura(i_neighborhood_t
     if (i_sector_position(vertex_neighborhood, idx) == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
     {
         if (i_sector_position(vertex_neighborhood, (idx + 1) % num_sectors) == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
-            return CIERTO;
+            return CSMTRUE;
         else
-            return FALSO;
+            return CSMFALSE;
     }
     else
     {
-        return FALSO;
+        return CSMFALSE;
     }
 }
 
@@ -551,7 +551,7 @@ static void i_print_debug_info_vertex_neighborhood(
                         double A, double B, double C, double D,
                         ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
 {
-    if (csmdebug_debug_enabled() == CIERTO)
+    if (csmdebug_debug_enabled() == CSMTRUE)
     {
         double x, y, z;
         unsigned long i, num_sectors;
@@ -609,9 +609,9 @@ static void i_mark_null_edge_on_face(
     csmvertex_set_mask_attrib(splitted_vertex, CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS);
     
     arr_AppendPunteroST(set_of_null_edges_other_solid, null_edge, csmedge_t);
-    csmedge_setop_set_is_null_edge(null_edge, CIERTO);
+    csmedge_setop_set_is_null_edge(null_edge, CSMTRUE);
     
-    if (csmdebug_debug_enabled() == CIERTO)
+    if (csmdebug_debug_enabled() == CSMTRUE)
         csmdebug_print_debug_info("Companion edge %lu on other solid\n", csmedge_id(null_edge));
     
     csmeuler_lkemr(&hedge_to_new_vertex, &hedge_from_new_vertex, NULL, &he_on_new_ring);
@@ -651,13 +651,13 @@ static void i_process_vf_inters(
     
     //csmdebug_show_viewer();
     
-    if (i_could_locate_begin_sequence(vertex_neighborhood, &start_idx) == CIERTO)
+    if (i_could_locate_begin_sequence(vertex_neighborhood, &start_idx) == CSMTRUE)
     {
         unsigned long num_sectors;
         unsigned long idx;
         struct i_neighborhood_t *head_neighborhood;
         unsigned long num_iters;
-        CYBOOL process_next_sequence;
+        CSMBOOL process_next_sequence;
 
         num_sectors = arr_NumElemsPunteroST(vertex_neighborhood, i_neighborhood_t);
         assert(num_sectors > 0);
@@ -666,9 +666,9 @@ static void i_process_vf_inters(
         head_neighborhood = arr_GetPunteroST(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         
         num_iters = 0;
-        process_next_sequence = CIERTO;
+        process_next_sequence = CSMTRUE;
         
-        while (process_next_sequence == CIERTO)
+        while (process_next_sequence == CSMTRUE)
         {
             struct i_neighborhood_t *tail_neighborhood;
             double x_split, y_split, z_split;
@@ -680,7 +680,7 @@ static void i_process_vf_inters(
             assert(num_iters < 100000);
             num_iters++;
             
-            while (i_is_out_in_sequence_at_index(vertex_neighborhood, idx) == FALSO)
+            while (i_is_out_in_sequence_at_index(vertex_neighborhood, idx) == CSMFALSE)
             {
                 assert(num_iters < 100000);
                 num_iters++;
@@ -695,7 +695,7 @@ static void i_process_vf_inters(
             i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, NULL, NULL, &cl_head_resp_plane);
             assert(cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_OUT || cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
             
-            if (csmdebug_debug_enabled() == CIERTO)
+            if (csmdebug_debug_enabled() == CSMTRUE)
             {
                 char *description;
                 
@@ -710,10 +710,10 @@ static void i_process_vf_inters(
             }
             
             csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
-            csmedge_setop_set_is_null_edge(null_edge, CIERTO);
+            csmedge_setop_set_is_null_edge(null_edge, CSMTRUE);
             arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
             
-            csmedge_print_debug_info(null_edge, CIERTO);
+            csmedge_print_debug_info(null_edge, CSMTRUE);
 
             csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             
@@ -722,7 +722,7 @@ static void i_process_vf_inters(
                         x_split, y_split, z_split, vertex_algorithm_mask,
                         set_of_null_edges_other_solid);
             
-            while (i_is_in_out_sequence_at_index(vertex_neighborhood, idx) == FALSO)
+            while (i_is_in_out_sequence_at_index(vertex_neighborhood, idx) == CSMFALSE)
             {
                 assert(num_iters < 100000);
                 num_iters++;
@@ -731,7 +731,7 @@ static void i_process_vf_inters(
                 
                 if (idx == start_idx)
                 {
-                    process_next_sequence = FALSO;
+                    process_next_sequence = CSMFALSE;
                     break;
                 }
             }

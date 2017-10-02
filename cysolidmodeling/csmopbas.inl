@@ -28,6 +28,6 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
 
 // Geometry...
 
-CYBOOL csmopbas_is_wide_hedge(
+CSMBOOL csmopbas_is_wide_hedge(
                         struct csmhedge_t *hedge,
                         double *Ux_bisec_opt, double *Uy_bisec_opt, double *Uz_bisec_opt);

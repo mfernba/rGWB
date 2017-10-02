@@ -6,9 +6,9 @@
 //  Copyright (c) 2015 manueru. All rights reserved.
 //
 
-#include "cypespy.h"
+#include "csmmem.inl"
 
-#include "cyassert.h"
+#include "csmassert.inl"
 
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +17,7 @@ static const int i_MEMORY_CREATION_MARK = 0xAB;
 
 // ---------------------------------------------------------------------------------
 
-void *cypespy_dontuse_malloc(size_t n_bytes)
+void *csmmem_dontuse_malloc(size_t n_bytes)
 {
     void *memory;
     
@@ -33,7 +33,7 @@ void *cypespy_dontuse_malloc(size_t n_bytes)
 
 // ---------------------------------------------------------------------------------
 
-void cypespy_dontuse_free(void **data, size_t bytes)
+void csmmem_dontuse_free(void **data, size_t bytes)
 {
     void *data_loc;
     
@@ -47,7 +47,7 @@ void cypespy_dontuse_free(void **data, size_t bytes)
 
 // ---------------------------------------------------------------------------------
 
-void *cypespy_dontuse_dereference_memory(void **data)
+void *csmmem_dontuse_dereference_memory(void **data)
 {
     void *data_loc;
     
@@ -61,7 +61,7 @@ void *cypespy_dontuse_dereference_memory(void **data)
 
 // ---------------------------------------------------------------------------------
 
-void *cypespy_dontuse_dereference_optional_memory(void **data)
+void *csmmem_dontuse_dereference_optional_memory(void **data)
 {
     if (data == NULL || *data == NULL)
     {

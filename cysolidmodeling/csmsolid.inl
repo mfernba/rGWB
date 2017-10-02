@@ -13,7 +13,7 @@ const char *csmsolid_get_name(const struct csmsolid_t *solido);
 
 unsigned long *csmsolid_id_new_element(struct csmsolid_t *solido);
 
-CYBOOL csmsolid_is_empty(const struct csmsolid_t *solido);
+CSMBOOL csmsolid_is_empty(const struct csmsolid_t *solido);
 
 void csmsolid_clear_algorithm_data(struct csmsolid_t *solid);
 
@@ -49,7 +49,7 @@ void csmsolid_remove_edge(struct csmsolid_t *solido, struct csmedge_t **edge);
 
 void csmsolid_move_edge_to_solid(struct csmsolid_t *edge_solid, struct csmedge_t *edge, struct csmsolid_t *destination_solid);
 
-CYBOOL csmsolid_contains_edge(const struct csmsolid_t *solid, const struct csmedge_t *edge);
+CSMBOOL csmsolid_contains_edge(const struct csmsolid_t *solid, const struct csmedge_t *edge);
 
 CONSTRUCTOR(struct csmhashtb_iterator(csmedge_t) *, csmsolid_edge_iterator, (struct csmsolid_t *solid));
 
@@ -62,11 +62,11 @@ void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vert
 
 void csmsolid_move_vertex_to_solid(struct csmsolid_t *vertex_solid, struct csmvertex_t *vertex, struct csmsolid_t *destination_solid);
 
-CYBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csmvertex_t *vertex);
+CSMBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csmvertex_t *vertex);
 
 CONSTRUCTOR(struct csmhashtb_iterator(csmvertex_t) *, csmsolid_vertex_iterator, (struct csmsolid_t *solid));
 
-CYBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
+CSMBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
                         struct csmsolid_t *solid,
                         const struct csmvertex_t *vertex,
                         double tolerance,
@@ -75,9 +75,9 @@ CYBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
 
 // Debug...
 
-void csmsolid_set_draw_only_border_edges(struct csmsolid_t *solido, CYBOOL draw_only_border_edges);
+void csmsolid_set_draw_only_border_edges(struct csmsolid_t *solido, CSMBOOL draw_only_border_edges);
 
-void csmsolid_print_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro);
+void csmsolid_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_es_integro);
 
-void csmsolid_print_complete_debug(struct csmsolid_t *solido, CYBOOL assert_si_no_es_integro);
+void csmsolid_print_complete_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_es_integro);
 

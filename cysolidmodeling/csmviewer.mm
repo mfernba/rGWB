@@ -84,7 +84,7 @@ void csmviewer_free(struct csmviewer_t **viewer)
 
 static void i_draw_solid_with_material(
                         struct csmsolid_t *solid,
-                        CYBOOL draw_debug_info, CYBOOL draw_edge_info,
+                        CSMBOOL draw_debug_info, CSMBOOL draw_edge_info,
                         struct bsmaterial_t **material,
                         struct bsgraphics2_t *graphics)
 {
@@ -92,19 +92,19 @@ static void i_draw_solid_with_material(
     
     if (solid != NULL)
     {
-        if (draw_debug_info == CIERTO)
+        if (draw_debug_info == CSMTRUE)
         {
             bsgraphics2_escr_color(graphics, *material);
             csmsolid_draw_debug_info(solid, draw_edge_info, graphics);
         }
         else
         {
-            CYBOOL draw_solid_face;
-            CYBOOL draw_face_normal;
+            CSMBOOL draw_solid_face;
+            CSMBOOL draw_face_normal;
             struct bsmaterial_t *border_edges_color;
             
-            draw_solid_face = CIERTO;
-            draw_face_normal = FALSO;
+            draw_solid_face = CSMTRUE;
+            draw_face_normal = CSMFALSE;
             border_edges_color = bsmaterial_crea_rgb(0., 0., 0.);
             
             csmsolid_draw(solid, draw_solid_face, draw_face_normal, *material, border_edges_color, border_edges_color, graphics);
@@ -127,20 +127,20 @@ static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graph
         struct bsmaterial_t *material;
             
         material = bsmaterial_crea_rgba(0., 1., 0., 0.5);
-        i_draw_solid_with_material(viewer->solid_res1, FALSO, FALSO, &material, graphics);
+        i_draw_solid_with_material(viewer->solid_res1, CSMFALSE, CSMFALSE, &material, graphics);
 
         material = bsmaterial_crea_rgba(0., 0., 1., 0.5);
-        i_draw_solid_with_material(viewer->solid_res2, FALSO, FALSO, &material, graphics);
+        i_draw_solid_with_material(viewer->solid_res2, CSMFALSE, CSMFALSE, &material, graphics);
     }
     else
     {
         struct bsmaterial_t *material;
             
         material = bsmaterial_crea_rgb(0., 1., 0.);
-        i_draw_solid_with_material(viewer->solid1, CIERTO, FALSO, &material, graphics);
+        i_draw_solid_with_material(viewer->solid1, CSMTRUE, CSMFALSE, &material, graphics);
 
         material = bsmaterial_crea_rgb(0., 0., 1.);
-        i_draw_solid_with_material(viewer->solid2, CIERTO, FALSO, &material, graphics);
+        i_draw_solid_with_material(viewer->solid2, CSMTRUE, CSMFALSE, &material, graphics);
     }
     
     csmdebug_draw_debug_info(graphics);

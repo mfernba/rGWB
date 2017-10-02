@@ -8,9 +8,9 @@
 
 #include "csmnode.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
-#include "cypestr.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
+#include "csmstring.inl"
 
 // ------------------------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ struct csmnode_t csmnode_nousar_crea_node(
     node.id = id;
     
     node.clase_derivada = clase_derivada;
-    node.tipo_clase_derivada = cad_copia_cadena(tipo_clase_derivada);
+    node.tipo_clase_derivada = csmstring_duplicate(tipo_clase_derivada);
     node.func_destruye_clase_derivada = func_destruye_clase_derivada;
     
     node.prev = NULL;
@@ -45,7 +45,7 @@ void csmnode_destruye(struct csmnode_t **node)
     
     node_loc = ASIGNA_PUNTERO_PP_NO_NULL(node, struct csmnode_t);
     
-    cypestr_destruye(&node_loc->tipo_clase_derivada);
+    csmstring_free(&node_loc->tipo_clase_derivada);
     node_loc->func_destruye_clase_derivada(&node_loc->clase_derivada);
 }
 
@@ -67,7 +67,7 @@ struct csmnode_derivada_t *csmnode_nousar_downcast(struct csmnode_t *node, const
     }
     else
     {
-        assert(cad_cadenas_iguales(node->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+        assert(csmstring_equal_strings(node->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
         return node->clase_derivada;
     }
 }
@@ -117,7 +117,7 @@ void csmnode_set_ptr_prev(struct csmnode_t *node, struct csmnode_t *prev_node)
 void csmnode_nousar_remove_from_own_list(struct csmnode_t *node2, const char *tipo_clase_derivada)
 {
     assert_no_null(node2);
-    assert(cad_cadenas_iguales(node2->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+    assert(csmstring_equal_strings(node2->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
     
     if (node2->prev != NULL)
     {
@@ -141,8 +141,8 @@ void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct cs
 {
     assert_no_null(node1);
     assert_no_null(node2);
-    assert(cad_cadenas_iguales(node1->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
-    assert(cad_cadenas_iguales(node2->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+    assert(csmstring_equal_strings(node1->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
+    assert(csmstring_equal_strings(node2->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
 
     csmnode_nousar_remove_from_own_list(node2, tipo_clase_derivada);
     
@@ -164,8 +164,8 @@ void csmnode_nousar_insert_node2_after_node1(struct csmnode_t *node1, struct csm
 {
     assert_no_null(node1);
     assert_no_null(node2);
-    assert(cad_cadenas_iguales(node1->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
-    assert(cad_cadenas_iguales(node2->tipo_clase_derivada, tipo_clase_derivada) == CIERTO);
+    assert(csmstring_equal_strings(node1->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
+    assert(csmstring_equal_strings(node2->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
 
     csmnode_nousar_remove_from_own_list(node2, tipo_clase_derivada);
     

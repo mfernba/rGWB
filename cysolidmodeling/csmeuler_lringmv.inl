@@ -2,4 +2,4 @@
 
 #include "csmfwddecl.hxx"
 
-void csmeuler_lringmv(struct csmloop_t *loop, struct csmface_t *face, CYBOOL as_outer_loop);
+void csmeuler_lringmv(struct csmloop_t *loop, struct csmface_t *face, CSMBOOL as_outer_loop);

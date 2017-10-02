@@ -9,8 +9,8 @@
 #include "csmmath.inl"
 #include "csmmath.tli"
 
-#include "cyassert.h"
-#include "defmath.tlh"
+#include "csmassert.inl"
+#include "csmmath.tli"
 #include <math.h>
 
 // ------------------------------------------------------------------------------------------
@@ -83,19 +83,19 @@ void csmmath_select_not_dropped_coords(
 
 // ------------------------------------------------------------------------------------------
 
-CYBOOL csmmath_equal_coords(
+CSMBOOL csmmath_equal_coords(
                         double x1, double y1, double z1,
                         double x2, double y2, double z2,
                         double epsilon)
 {
     double diff;
     
-    diff = CUAD(x1 - x2) + CUAD(y1 - y2) + CUAD(z1 - z2);
+    diff = CSMMATH_CUAD(x1 - x2) + CSMMATH_CUAD(y1 - y2) + CSMMATH_CUAD(z1 - z2);
 
-    if (csmmath_compare_doubles(diff, 0.0, CUAD(epsilon)) == CSMMATH_EQUAL_VALUES)
-        return CIERTO;
+    if (csmmath_compare_doubles(diff, 0.0, CSMMATH_CUAD(epsilon)) == CSMMATH_EQUAL_VALUES)
+        return CSMTRUE;
     else
-        return FALSO;
+        return CSMFALSE;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -215,16 +215,16 @@ void csmmath_move_point(
 
 //-------------------------------------------------------------------------------------------
 
-CYBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance)
+CSMBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance)
 {
     double squared_norm;
     
-    squared_norm = CUAD(Ux) + CUAD(Uy) + CUAD(Uz);
+    squared_norm = CSMMATH_CUAD(Ux) + CSMMATH_CUAD(Uy) + CSMMATH_CUAD(Uz);
     
-    if (fabs(squared_norm) < CUAD(tolerance))
-        return CIERTO;
+    if (fabs(squared_norm) < CSMMATH_CUAD(tolerance))
+        return CSMTRUE;
     else
-        return FALSO;
+        return CSMFALSE;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -314,12 +314,12 @@ static void i_point_on_line3D(
 
 //-------------------------------------------------------------------------------------------
 
-static CYBOOL i_son_rectas_paralelas_segun_determinante(double determinante)
+static CSMBOOL i_son_rectas_paralelas_segun_determinante(double determinante)
 {
 	if (fabs(determinante) < 1.e-6)
-		return CIERTO;
+		return CSMTRUE;
 	else
-		return FALSO;
+		return CSMFALSE;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -343,9 +343,9 @@ void csmmath_nearer_points_between_two_lines3D(
 	assert_no_null(z_mas_cercano_recta2);
 
 	prod_escalar_vectores_directores = csmmath_dot_product3D(Ux_recta1, Uy_recta1, Uz_recta1, Ux_recta2, Uy_recta2, Uz_recta2);
-	determinante = CUAD(prod_escalar_vectores_directores) - 1.;
+	determinante = CSMMATH_CUAD(prod_escalar_vectores_directores) - 1.;
 
-	if (i_son_rectas_paralelas_segun_determinante(determinante) == CIERTO)
+	if (i_son_rectas_paralelas_segun_determinante(determinante) == CSMTRUE)
 	{
 		*x_mas_cercano_recta1 = Xo_recta1;
 		*y_mas_cercano_recta1 = Yo_recta1;
@@ -380,14 +380,14 @@ void csmmath_nearer_points_between_two_lines3D(
 
 //-------------------------------------------------------------------------------------------
 
-CYBOOL csmmath_is_point_in_segment3D(
+CSMBOOL csmmath_is_point_in_segment3D(
 						double x, double y, double z,
 						double x1, double y1, double z1, double x2, double y2, double z2,
 						double precision, 
 						double *t_opc)
 {
-    CYBOOL is_point_on_segment;
-    CYBOOL is_point_on_line;
+    CSMBOOL is_point_on_segment;
+    CSMBOOL is_point_on_line;
     double t_loc;
     double Ux_seg, Uy_seg, Uz_seg;
     double squared_dot_product_seg;
@@ -400,7 +400,7 @@ CYBOOL csmmath_is_point_in_segment3D(
     
     squared_dot_product_seg = csmmath_dot_product3D(Ux_seg, Uy_seg, Uz_seg, Ux_seg, Uy_seg, Uz_seg);
     
-    if (squared_dot_product_seg < CUAD(precision))
+    if (squared_dot_product_seg < CSMMATH_CUAD(precision))
     {
         is_point_on_line = csmmath_equal_coords(x, y, z, x1, y1, z1, precision);
         t_loc = 0.;
@@ -425,19 +425,19 @@ CYBOOL csmmath_is_point_in_segment3D(
         t_loc = t_prime;
     }
     
-    if (is_point_on_line == CIERTO && t_loc >= -precision && t_loc <= 1. + precision)
-        is_point_on_segment = CIERTO;
+    if (is_point_on_line == CSMTRUE && t_loc >= -precision && t_loc <= 1. + precision)
+        is_point_on_segment = CSMTRUE;
     else
-        is_point_on_segment = FALSO;
+        is_point_on_segment = CSMFALSE;
     
-    ASIGNA_OPC(t_opc, t_loc);
+    ASSIGN_OPTIONAL_VALUE(t_opc, t_loc);
     
     return is_point_on_segment;
 }
 
 //-------------------------------------------------------------------------------------------
 
-CYBOOL csmmath_exists_intersection_between_two_lines3D(
+CSMBOOL csmmath_exists_intersection_between_two_lines3D(
 						double Xo_recta1, double Yo_recta1, double Zo_recta1, double Ux_recta1, double Uy_recta1, double Uz_recta1,
 						double Xo_recta2, double Yo_recta2, double Zo_recta2, double Ux_recta2, double Uy_recta2, double Uz_recta2,
 						double precision, 
@@ -458,25 +458,27 @@ CYBOOL csmmath_exists_intersection_between_two_lines3D(
                         &x_mas_cercano_recta1, &y_mas_cercano_recta1, &z_mas_cercano_recta1,
                         &x_mas_cercano_recta2, &y_mas_cercano_recta2, &z_mas_cercano_recta2);
 			
-    squared_distance = CUAD(x_mas_cercano_recta2 - x_mas_cercano_recta1) + CUAD(y_mas_cercano_recta2 - y_mas_cercano_recta1) + CUAD(z_mas_cercano_recta2 - z_mas_cercano_recta1);
+    squared_distance = CSMMATH_CUAD(x_mas_cercano_recta2 - x_mas_cercano_recta1)
+                        + CSMMATH_CUAD(y_mas_cercano_recta2 - y_mas_cercano_recta1)
+                        + CSMMATH_CUAD(z_mas_cercano_recta2 - z_mas_cercano_recta1);
 							
-	if (squared_distance <= CUAD(precision))
+	if (squared_distance <= CSMMATH_CUAD(precision))
 	{	
 		*x_corte = x_mas_cercano_recta1;
 		*y_corte = y_mas_cercano_recta1;
 		*z_corte = z_mas_cercano_recta1;
 	
-		return CIERTO;
+		return CSMTRUE;
 	}
 	else
 	{
-		return FALSO;
+		return CSMFALSE;
 	}
 }
 
 //-------------------------------------------------------------------------------------------
 
-CYBOOL csmmath_exists_intersection_between_two_segments3D(
+CSMBOOL csmmath_exists_intersection_between_two_segments3D(
 						double x1_seg1, double y1_seg1, double z1_seg1, double x2_seg1, double y2_seg1, double z2_seg1, 
 						double x1_seg2, double y1_seg2, double z1_seg2, double x2_seg2, double y2_seg2, double z2_seg2, 
 						double precision, 
@@ -484,7 +486,7 @@ CYBOOL csmmath_exists_intersection_between_two_segments3D(
 						double *posicion_relativa1_opc, 
 						double *posicion_relativa2_opc)
 {
-	CYBOOL hay_interseccion;
+	CSMBOOL hay_interseccion;
 	double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
 	double x_corte_loc, y_corte_loc, z_corte_loc;
 	double posicion_relativa1_loc, posicion_relativa2_loc;
@@ -496,9 +498,9 @@ CYBOOL csmmath_exists_intersection_between_two_segments3D(
 						x1_seg1, y1_seg1, z1_seg1, Ux1, Uy1, Uz1, 
 						x1_seg2, y1_seg2, z1_seg2, Ux2, Uy2, Uz2,
 						precision, 
-						&x_corte_loc, &y_corte_loc, &z_corte_loc) == FALSO)
+						&x_corte_loc, &y_corte_loc, &z_corte_loc) == CSMFALSE)
 	{	
-		hay_interseccion = FALSO;
+		hay_interseccion = CSMFALSE;
 		
 		x_corte_loc = 0.;
 		y_corte_loc = 0.;
@@ -513,9 +515,9 @@ CYBOOL csmmath_exists_intersection_between_two_segments3D(
 						x_corte_loc, y_corte_loc, z_corte_loc,
 						x1_seg1, y1_seg1, z1_seg1, x2_seg1, y2_seg1, z2_seg1, 
 						precision, 
-						&posicion_relativa1_loc) == FALSO)
+						&posicion_relativa1_loc) == CSMFALSE)
 		{	
-			hay_interseccion = FALSO;
+			hay_interseccion = CSMFALSE;
 
 			x_corte_loc = 0.;
 			y_corte_loc = 0.;
@@ -528,9 +530,9 @@ CYBOOL csmmath_exists_intersection_between_two_segments3D(
 						x_corte_loc, y_corte_loc, z_corte_loc,
 						x1_seg2, y1_seg2, z1_seg2, x2_seg2, y2_seg2, z2_seg2, 
 						precision, 
-						&posicion_relativa2_loc) == FALSO)
+						&posicion_relativa2_loc) == CSMFALSE)
 		{
-			hay_interseccion = FALSO;
+			hay_interseccion = CSMFALSE;
 
 			x_corte_loc = 0.;
 			y_corte_loc = 0.;
@@ -541,15 +543,15 @@ CYBOOL csmmath_exists_intersection_between_two_segments3D(
 		}
 		else
 		{	
-			hay_interseccion = FALSO;
+			hay_interseccion = CSMFALSE;
 		}
 	}
 	
-	ASIGNA_OPC(x_corte_opc, x_corte_loc);
-	ASIGNA_OPC(y_corte_opc, y_corte_loc);
-	ASIGNA_OPC(z_corte_opc, z_corte_loc);
-	ASIGNA_OPC(posicion_relativa1_opc, posicion_relativa1_loc);
-	ASIGNA_OPC(posicion_relativa2_opc, posicion_relativa2_loc);
+	ASSIGN_OPTIONAL_VALUE(x_corte_opc, x_corte_loc);
+	ASSIGN_OPTIONAL_VALUE(y_corte_opc, y_corte_loc);
+	ASSIGN_OPTIONAL_VALUE(z_corte_opc, z_corte_loc);
+	ASSIGN_OPTIONAL_VALUE(posicion_relativa1_opc, posicion_relativa1_loc);
+	ASSIGN_OPTIONAL_VALUE(posicion_relativa2_opc, posicion_relativa2_loc);
 
 	return hay_interseccion;
 }
@@ -587,7 +589,7 @@ static void i_anula_valores_despreciables(double *valor)
 {
 	assert_no_null(valor);
 	
-	if (ABS(*valor) < 1.e-20)
+	if (CSMMATH_ABS(*valor) < 1.e-20)
 		*valor = 0.;
 }
 
@@ -607,7 +609,7 @@ void csmmath_plane_axis_from_implicit_plane_equation(
 	assert_no_null(Vy);
 	assert_no_null(Vz);
 	
-	if (ABS(A) < 1.e-6 && ABS(B) < 1.e-6 && ABS(C) > 1.e-6)
+	if (CSMMATH_ABS(A) < 1.e-6 && CSMMATH_ABS(B) < 1.e-6 && CSMMATH_ABS(C) > 1.e-6)
 	{	
 		Ux1 = 1.;
 		Uy1 = 0.;

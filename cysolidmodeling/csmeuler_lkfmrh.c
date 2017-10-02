@@ -10,8 +10,8 @@
 #include "csmloop.inl"
 #include "csmsolid.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 
 // --------------------------------------------------------------------------------
 

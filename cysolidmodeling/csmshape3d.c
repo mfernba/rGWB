@@ -22,8 +22,8 @@
 #include "csmsolid.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
-#include "defmath.tlh"
+#include "csmassert.inl"
+#include "csmmath.tli"
 #include "standarc.h"
 
 // --------------------------------------------------------------------------------
@@ -100,10 +100,10 @@ struct csmsolid_t *csmshape3d_create_torus(
     
     i_compute_point_on_torus(R, r, 0., 0., &x, &y, &z);
     torus = csmeuler_mvfs(x, y, z, start_id_of_new_element, &initial_hedge);
-    csmsolid_set_draw_only_border_edges(torus, FALSO);    
+    csmsolid_set_draw_only_border_edges(torus, CSMFALSE);    
     
-    incr_alfa_rad = 2. * PI / no_points_circle_r;
-    incr_beta_rad = 2. * PI / no_points_circle_R;
+    incr_alfa_rad = 2. * CSMMATH_PI / no_points_circle_r;
+    incr_beta_rad = 2. * CSMMATH_PI / no_points_circle_R;
     csmvertex_set_mask_attrib(csmhedge_vertex(initial_hedge), (csmvertex_mask_t)0);
     
     previous_hedge = initial_hedge;
@@ -214,7 +214,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_circle_solid, (
     circle = csmeuler_mvfs(x, y, z, start_id_of_new_element, &initial_hedge);
     bottom_face_loc = csmopbas_face_from_hedge(initial_hedge);
     
-    incr_beta_rad = 2. * PI / no_points_circle_radius;
+    incr_beta_rad = 2. * CSMMATH_PI / no_points_circle_radius;
     
     previous_hedge = initial_hedge;
     csmvertex_set_mask_attrib(csmhedge_vertex(initial_hedge), (csmvertex_mask_t)0);
@@ -223,7 +223,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_circle_solid, (
     {
         double beta_rad;
      
-        beta_rad = 2. * PI - incr_beta_rad * i;
+        beta_rad = 2. * CSMMATH_PI - incr_beta_rad * i;
         i_compute_point_on_cone_base(radius, beta_rad, &x, &y, &z);
         
         csmeuler_lmev_strut_edge(previous_hedge, x, y, z, &previous_hedge);
@@ -232,7 +232,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_circle_solid, (
     
     csmeuler_lmef(initial_hedge, previous_hedge, top_face_opt, NULL, NULL);
     
-    ASIGNA_OPC(bottom_face_opt, bottom_face_loc);
+    ASSIGN_OPTIONAL_VALUE(bottom_face_opt, bottom_face_loc);
     
     return circle;
 }
@@ -318,8 +318,8 @@ static void i_extrude_sphere_hedge(
     iterator_vertex = csmhedge_vertex(hedge);
     circle_point_idx = (unsigned long)csmvertex_get_mask_attrib(iterator_vertex);
     
-    incr_beta_rad = 2. * PI / no_points_circle_radius_meridians;
-    beta_rad = 2. * PI - incr_beta_rad * circle_point_idx;
+    incr_beta_rad = 2. * CSMMATH_PI / no_points_circle_radius_meridians;
+    beta_rad = 2. * CSMMATH_PI - incr_beta_rad * circle_point_idx;
     
     x = r_sphere * cos(beta_rad) * cos(alfa_rad);
     y = r_sphere * sin(beta_rad) * cos(alfa_rad);
@@ -346,7 +346,7 @@ static void i_generate_semisphere(
     assert(no_points_circle_radius_parallels_semisphere >= 3);
     
     no_homothetic_circles = no_points_circle_radius_parallels_semisphere - 1;
-    incr_alfa = 0.5 * PI / no_points_circle_radius_parallels_semisphere;
+    incr_alfa = 0.5 * CSMMATH_PI / no_points_circle_radius_parallels_semisphere;
     
     face_to_extrude = initial_face;
     
@@ -403,7 +403,7 @@ struct csmsolid_t *csmshape3d_create_sphere(
     double direction_sign;
     
     sphere = i_create_circle_solid(radius, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
-    csmsolid_set_draw_only_border_edges(sphere, FALSO);
+    csmsolid_set_draw_only_border_edges(sphere, CSMFALSE);
     
     direction_sign = 1.;
     i_generate_semisphere(top_face, direction_sign, radius, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);

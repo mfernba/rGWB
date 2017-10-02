@@ -18,8 +18,8 @@
 #include "csmsolid.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 
 // --------------------------------------------------------------------------------
 

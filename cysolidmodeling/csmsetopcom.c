@@ -26,37 +26,37 @@
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
-#include "cyassert.h"
+#include "csmassert.inl"
 #include "a_punter.h"
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_equals_vertices(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2)
+static CSMBOOL i_equals_vertices(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2)
 {
     if (vertex1 == vertex2)
-        return CIERTO;
+        return CSMTRUE;
     else
-        return FALSO;
+        return CSMFALSE;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 static bool i_equals_vertices2(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2)
 {
-    return i_equals_vertices(vertex1, vertex2) == CIERTO ? true: false;
+    return i_equals_vertices(vertex1, vertex2) == CSMTRUE ? true: false;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 void csmsetopcom_append_vertex_if_not_exists(struct csmvertex_t *vertex, ArrEstructura(csmvertex_t) *set_of_on_vertices)
 {
-    if (arr_ExisteEstructuraST(set_of_on_vertices, csmvertex_t, vertex, struct csmvertex_t, i_equals_vertices2, NULL) == FALSO)
+    if (arr_ExisteEstructuraST(set_of_on_vertices, csmvertex_t, vertex, struct csmvertex_t, i_equals_vertices2, NULL) == CSMFALSE)
         arr_AppendPunteroST(set_of_on_vertices, vertex, csmvertex_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_is_hedge_on_inner_loop(struct csmhedge_t *hedge)
+static CSMBOOL i_is_hedge_on_inner_loop(struct csmhedge_t *hedge)
 {
     struct csmloop_t *hedge_loop;
     struct csmface_t *face_loop;
@@ -65,14 +65,14 @@ static CYBOOL i_is_hedge_on_inner_loop(struct csmhedge_t *hedge)
     face_loop = csmloop_lface(hedge_loop);
     
     if (csmface_flout(face_loop) != hedge_loop)
-        return CIERTO;
+        return CSMTRUE;
     else
-        return FALSO;
+        return CSMFALSE;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(struct csmhedge_t *hedge)
+static CSMBOOL i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(struct csmhedge_t *hedge)
 {
     register struct csmhedge_t *iterator;
     unsigned long no_iters;
@@ -89,39 +89,39 @@ static CYBOOL i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(struct csmhedge_t 
 
         iterator_mate = csmopbas_mate(iterator);
         
-        if (i_is_hedge_on_inner_loop(iterator) == CIERTO || i_is_hedge_on_inner_loop(iterator_mate) == CIERTO)
-            return CIERTO;
+        if (i_is_hedge_on_inner_loop(iterator) == CSMTRUE || i_is_hedge_on_inner_loop(iterator_mate) == CSMTRUE)
+            return CSMTRUE;
         else
             iterator = csmhedge_next(iterator);
         
     } while (iterator != hedge);
     
-    return FALSO;
+    return CSMFALSE;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmsetopcom_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(struct csmedge_t *edge)
+CSMBOOL csmsetopcom_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(struct csmedge_t *edge)
 {
     struct csmhedge_t *hedge_pos, *hedge_neg;
     
     hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
     hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
     
-    if (i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(hedge_pos) == CIERTO
-            || i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(hedge_neg) == CIERTO)
+    if (i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(hedge_pos) == CSMTRUE
+            || i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(hedge_neg) == CSMTRUE)
     {
-        return CIERTO;
+        return CSMTRUE;
     }
     else
     {
-        return FALSO;
+        return CSMFALSE;
     }
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge_t *he2)
+CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge_t *he2)
 {
     struct csmface_t *face_he1, *face_he2;
     
@@ -130,7 +130,7 @@ CYBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge_
     
     if (face_he1 != face_he2)
     {
-        return FALSO;
+        return CSMFALSE;
     }
     else
     {
@@ -147,11 +147,11 @@ CYBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge_
         he2_edge_he2 = csmedge_hedge_lado(edge_he2, CSMEDGE_LADO_HEDGE_NEG);
         
         if (he1 == he1_edge_he1 && he2 == he2_edge_he2)
-            return CIERTO;
+            return CSMTRUE;
         else if (he1 == he2_edge_he1 && he2 == he1_edge_he2)
-            return CIERTO;
+            return CSMTRUE;
         else
-            return FALSO;
+            return CSMFALSE;
     }
 }
 
@@ -200,7 +200,7 @@ void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_
         struct csmhedge_t *he1, *he2;
         const struct csmvertex_t *vertex1;
         double x, y, z;
-        CYBOOL is_loose_he1, is_loose_he2;
+        CSMBOOL is_loose_he1, is_loose_he2;
         
         edge = arr_GetPunteroST(set_of_null_edges, i, csmedge_t);
         assert_no_null(edge);
@@ -216,20 +216,20 @@ void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_
 
         csmdebug_print_debug_info("\t[");
         
-        if (is_loose_he1 == FALSO && is_loose_he2 == FALSO)
+        if (is_loose_he1 == CSMFALSE && is_loose_he2 == CSMFALSE)
         {
             csmdebug_print_debug_info("_,_");
         }
         else
         {
-            if (is_loose_he1 == CIERTO)
+            if (is_loose_he1 == CSMTRUE)
                 csmdebug_print_debug_info("L");
             else
                 csmdebug_print_debug_info("M");
 
             csmdebug_print_debug_info(",");
             
-            if (is_loose_he2 == CIERTO)
+            if (is_loose_he2 == CSMTRUE)
                 csmdebug_print_debug_info("L");
             else
                 csmdebug_print_debug_info("M");
@@ -247,7 +247,7 @@ void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends)
+CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends)
 {
     unsigned long i, no_loose_end;
     
@@ -256,10 +256,10 @@ CYBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge
     for (i = 0; i < no_loose_end; i++)
     {
         if (arr_GetPunteroST(loose_ends, i, csmhedge_t) == hedge)
-            return CIERTO;
+            return CSMTRUE;
     }
     
-    return FALSO;
+    return CSMFALSE;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -302,7 +302,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
     struct csmsolid_t *he1_solid;
     struct csmface_t *old_face, *new_face;
     struct csmhedge_t *he1_next, *he1_next_next;
-    CYBOOL original_loop_is_a_hole;
+    CSMBOOL original_loop_is_a_hole;
     
     old_face = csmopbas_face_from_hedge(he1);
     he1_solid = csmface_fsolid(old_face);
@@ -313,7 +313,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
                         csmhedge_id(he1), csmedge_id(csmhedge_edge(he1)),
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)));
         
-        csmsolid_print_debug(he1_solid, CIERTO);
+        csmsolid_print_debug(he1_solid, CSMTRUE);
     }
     
     if (csmhedge_loop(he1) == csmhedge_loop(he2))
@@ -326,9 +326,9 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
         assert(he1_face == he2_face);
         
         if (csmface_flout(he1_face) != csmhedge_loop(he1))
-            original_loop_is_a_hole = CIERTO;
+            original_loop_is_a_hole = CSMTRUE;
         else
-            original_loop_is_a_hole = FALSO;
+            original_loop_is_a_hole = CSMFALSE;
         
         he1_prev = csmhedge_prev(he1);
         he1_prev_prev = csmhedge_prev(he1_prev);
@@ -340,7 +340,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
             he2_next = csmhedge_next(he2);
             csmeuler_lmef(he1, he2_next, &new_face, NULL, NULL);
             
-            if (csmdebug_debug_enabled() == CIERTO)
+            if (csmdebug_debug_enabled() == CSMTRUE)
             {
                 csmdebug_print_debug_info(
                         "(SAME LOOP) joining edges (%lu [NE: %lu], %lu [NE: %lu]) with LMEF, new face %lu.\n",
@@ -348,13 +348,13 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)),
                         csmface_id(new_face));
                 
-                csmface_print_info_debug(new_face, CIERTO, NULL);
-                csmsolid_print_debug(he1_solid, CIERTO);
+                csmface_print_info_debug(new_face, CSMTRUE, NULL);
+                csmsolid_print_debug(he1_solid, CSMTRUE);
             }
         }
         else
         {
-            if (csmdebug_debug_enabled() == CIERTO)
+            if (csmdebug_debug_enabled() == CSMTRUE)
             {
                 csmdebug_print_debug_info(
                         "(SAME LOOP) joining edges (%lu [NE: %lu], %lu [NE: %lu]). Already connected.\n",
@@ -374,7 +374,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
         he2_next = csmhedge_next(he2);
         csmeuler_lmekr(he1, he2_next, NULL, NULL);
         
-        if (csmdebug_debug_enabled() == CIERTO)
+        if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmdebug_print_debug_info(
                         "(DIFFERENT LOOP) joining edges (%lu [NE: %lu], %lu [NE: %lu]) with LMEKR, lmekr he1 with %lu\n",
@@ -383,7 +383,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
                         csmhedge_id(he2_next));
         }
         
-        original_loop_is_a_hole = FALSO;
+        original_loop_is_a_hole = CSMFALSE;
     }
     
     he1_next = csmhedge_next(he1);
@@ -394,7 +394,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
         struct csmloop_t *old_face_floops;
         struct csmface_t *second_new_face;
 
-        if (csmdebug_debug_enabled() == CIERTO)
+        if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmdebug_print_debug_info(
                         "Split(): joining edges (%lu [NE: %lu], %lu [NE: %lu]) with LMEF between (%lu, %lu)\n",
@@ -402,17 +402,17 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)),
                         csmhedge_id(he2), csmhedge_id(he1_next));
             
-            csmsolid_print_debug(he1_solid, CIERTO);
+            csmsolid_print_debug(he1_solid, CSMTRUE);
         }
         
         csmeuler_lmef(he2, he1_next, &second_new_face, NULL, NULL);
 
-        if (csmdebug_debug_enabled() == CIERTO)
+        if (csmdebug_debug_enabled() == CSMTRUE)
         {
-            csmface_print_info_debug(second_new_face, CIERTO, NULL);
+            csmface_print_info_debug(second_new_face, CSMTRUE, NULL);
 
             csmdebug_print_debug_info("\tFace %lu created\n", csmface_id(second_new_face));
-            csmsolid_print_debug(csmface_fsolid(second_new_face), CIERTO);
+            csmsolid_print_debug(csmface_fsolid(second_new_face), CSMTRUE);
         }
         
         old_face_floops = csmface_floops(old_face);
@@ -420,13 +420,13 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
         if (new_face != NULL && csmloop_next(old_face_floops) != NULL)
             csmeuler_laringmv(old_face, new_face);
         
-         if (new_face != NULL && original_loop_is_a_hole == CIERTO)
+         if (new_face != NULL && original_loop_is_a_hole == CSMTRUE)
         {
-            CYBOOL did_move_some_loop;
+            CSMBOOL did_move_some_loop;
             
             csmeuler_laringmv_from_face1_to_2_if_fits_in_face(new_face, old_face, &did_move_some_loop);
             
-            if (did_move_some_loop == CIERTO && csmface_floops(new_face) == NULL)
+            if (did_move_some_loop == CSMTRUE && csmface_floops(new_face) == NULL)
                 csmsolid_remove_face(he1_solid, &new_face);
         }
     }
@@ -439,9 +439,9 @@ void csmsetopcom_cut_he(
                     ArrEstructura(csmedge_t) *set_of_null_edges,
                     ArrEstructura(csmface_t) *set_of_null_faces,
                     unsigned long *no_null_edges_deleted,
-                    CYBOOL *null_face_created_opt)
+                    CSMBOOL *null_face_created_opt)
 {
-    CYBOOL null_face_created_loc;
+    CSMBOOL null_face_created_loc;
     unsigned long idx;
     struct csmsolid_t *solid;
     struct csmedge_t *edge;
@@ -471,54 +471,54 @@ void csmsetopcom_cut_he(
         null_face = csmopbas_face_from_hedge(hedge);
         arr_AppendPunteroST(set_of_null_faces, null_face, csmface_t);
         
-        if (csmdebug_debug_enabled() == CIERTO)
+        if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmdebug_print_debug_info("***NULL FACE***\n");
-            csmface_print_info_debug(null_face, CIERTO, NULL);
+            csmface_print_info_debug(null_face, CSMTRUE, NULL);
             
             csmdebug_print_debug_info("(CUTTING HE)  (%lu, %lu) with LKEMR\n", csmhedge_id(he1_edge), csmhedge_id(he2_edge));
-            csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CIERTO);
+            csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
         }
         
         csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL);
         
-        if (csmdebug_debug_enabled() == CIERTO)
-            csmsolid_print_debug(solid, CIERTO);
+        if (csmdebug_debug_enabled() == CSMTRUE)
+            csmsolid_print_debug(solid, CSMTRUE);
         
-        null_face_created_loc = CIERTO;
+        null_face_created_loc = CSMTRUE;
     }
     else
     {
-        if (csmdebug_debug_enabled() == CIERTO)
+        if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmdebug_print_debug_info("(CUTTING HE)  (%lu, %lu) with LKEF. ", csmhedge_id(he1_edge), csmhedge_id(he2_edge));
             csmdebug_print_debug_info("Deleting face he2: %lu\n", csmface_id(csmopbas_face_from_hedge(he2_edge)));
         }
         
         csmeuler_lkef(&he1_edge, &he2_edge);
-        null_face_created_loc = FALSO;
+        null_face_created_loc = CSMFALSE;
         
-        if (csmdebug_debug_enabled() == CIERTO)
-            csmsolid_print_debug(solid, CIERTO);
+        if (csmdebug_debug_enabled() == CSMTRUE)
+            csmsolid_print_debug(solid, CSMTRUE);
     }
     
-    ASIGNA_OPC(null_face_created_opt, null_face_created_loc);
+    ASSIGN_OPTIONAL_VALUE(null_face_created_opt, null_face_created_loc);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid)
 {
-    CYBOOL there_are_changes;
+    CSMBOOL there_are_changes;
     
     do
     {
         struct csmhashtb_iterator(csmface_t) *face_iterator;
     
         face_iterator = csmsolid_face_iterator(solid);
-        there_are_changes = FALSO;
+        there_are_changes = CSMFALSE;
     
-        while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+        while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
         {
             struct csmface_t *face;
             struct csmloop_t *loop_iterator;
@@ -532,13 +532,13 @@ void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid)
                 
                 next_loop = csmloop_next(loop_iterator);
                 
-                if (csmloop_setop_convert_loop_in_face(loop_iterator) == CIERTO)
+                if (csmloop_setop_convert_loop_in_face(loop_iterator) == CSMTRUE)
                 {
                     struct csmface_t *new_face;
                     
-                    there_are_changes = CIERTO;
+                    there_are_changes = CSMTRUE;
                     
-                    csmloop_set_setop_convert_loop_in_face(loop_iterator, FALSO);
+                    csmloop_set_setop_convert_loop_in_face(loop_iterator, CSMFALSE);
                     csmeuler_lmfkrh(loop_iterator, &new_face);
                     csmface_redo_geometric_generated_data(new_face);
                 }
@@ -549,13 +549,13 @@ void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid)
             if (csmface_floops(face) == NULL)
                 csmsolid_remove_face(solid, &face);
             
-            if (there_are_changes == CIERTO)
+            if (there_are_changes == CSMTRUE)
                 break;
         }
         
         csmhashtb_free_iterator(&face_iterator, csmface_t);
         
-    } while (there_are_changes == CIERTO);
+    } while (there_are_changes == CSMTRUE);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -635,7 +635,7 @@ ArrEstructura(csmface_t) *csmsetopcom_convert_inner_loops_of_null_faces_to_faces
 
 // ----------------------------------------------------------------------------------------------------
 
-static CYBOOL i_is_face_originated_by_hole(struct csmface_t *face)
+static CSMBOOL i_is_face_originated_by_hole(struct csmface_t *face)
 {
     struct csmloop_t *floops;
     
@@ -643,7 +643,7 @@ static CYBOOL i_is_face_originated_by_hole(struct csmface_t *face)
     
     if (csmloop_next(floops) != NULL)
     {
-        return FALSO;
+        return CSMFALSE;
     }
     else
     {
@@ -663,12 +663,12 @@ static CYBOOL i_is_face_originated_by_hole(struct csmface_t *face)
             
             vertex = csmhedge_vertex(hedge_iterator);
             
-            if (csmvertex_has_mask_attrib(vertex, CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP) == FALSO)
-                return FALSO;
+            if (csmvertex_has_mask_attrib(vertex, CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP) == CSMFALSE)
+                return CSMFALSE;
             
         } while (hedge_iterator != loop_ledge);
         
-        return CIERTO;
+        return CSMTRUE;
     }
 }
 
@@ -677,7 +677,7 @@ static CYBOOL i_is_face_originated_by_hole(struct csmface_t *face)
 void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_t) *set_of_null_faces)
 {
     unsigned long no_iters;
-    CYBOOL did_delete_faces;
+    CSMBOOL did_delete_faces;
     
     no_iters = 0;
     
@@ -691,22 +691,22 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
         no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
         assert(no_null_faces > 0);
         
-        did_delete_faces = FALSO;
+        did_delete_faces = CSMFALSE;
         
-        for (i = 0; i < no_null_faces && did_delete_faces == FALSO; i++)
+        for (i = 0; i < no_null_faces && did_delete_faces == CSMFALSE; i++)
         {
             struct csmface_t *face_i;
             
             face_i = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
             
-            if (i_is_face_originated_by_hole(face_i) == CIERTO)
+            if (i_is_face_originated_by_hole(face_i) == CSMTRUE)
             {
                 unsigned long j;
                 struct csmloop_t *floops_face_i;
                 
                 floops_face_i = csmface_floops(face_i);
             
-                for (j = 0; j < no_null_faces && did_delete_faces == FALSO; j++)
+                for (j = 0; j < no_null_faces && did_delete_faces == CSMFALSE; j++)
                 {
                     if (i != j)
                     {
@@ -714,9 +714,9 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
                     
                         face_j = arr_GetPunteroST(set_of_null_faces, j, csmface_t);
                     
-                        if (csmface_is_loop_contained_in_face(face_j, floops_face_i) == CIERTO)
+                        if (csmface_is_loop_contained_in_face(face_j, floops_face_i) == CSMTRUE)
                         {
-                            did_delete_faces = CIERTO;
+                            did_delete_faces = CSMTRUE;
                             
                             csmeuler_lkfmrh(face_j, &face_i);
                             arr_BorrarEstructuraST(set_of_null_faces, i, NULL, csmface_t);
@@ -726,7 +726,7 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
             }
         }
         
-    } while (did_delete_faces == CIERTO);
+    } while (did_delete_faces == CSMTRUE);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -734,9 +734,9 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
 static bool i_face_equal_ptr(const struct csmface_t *face1, const struct csmface_t *face2)
 {
     if (face1 == face2)
-        return CIERTO;
+        return CSMTRUE;
     else
-        return FALSO;
+        return CSMFALSE;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -744,22 +744,22 @@ static bool i_face_equal_ptr(const struct csmface_t *face1, const struct csmface
 void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, ArrEstructura(csmface_t) *set_of_null_faces)
 {
     unsigned long num_null_faces;
-    CYBOOL there_are_changes;
+    CSMBOOL there_are_changes;
     
     num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
     assert(num_null_faces > 0);
     assert(num_null_faces % 2 == 0);
 
-    there_are_changes = FALSO;
+    there_are_changes = CSMFALSE;
     
     do
     {
         struct csmhashtb_iterator(csmface_t) *face_iterator;
     
         face_iterator = csmsolid_face_iterator(solid);
-        there_are_changes = FALSO;
+        there_are_changes = CSMFALSE;
     
-        while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+        while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
         {
             struct csmface_t *face;
             struct csmloop_t *face_floops;
@@ -768,14 +768,14 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct cs
             face_floops = csmface_floops(face);
             
             if (csmloop_next(face_floops) == NULL
-                    && csmloop_setop_loop_was_a_hole(face_floops) == CIERTO
-                    && arr_ExisteEstructuraST(set_of_null_faces, csmface_t, face, struct csmface_t, i_face_equal_ptr, NULL) == FALSO)
+                    && csmloop_setop_loop_was_a_hole(face_floops) == CSMTRUE
+                    && arr_ExisteEstructuraST(set_of_null_faces, csmface_t, face, struct csmface_t, i_face_equal_ptr, NULL) == CSMFALSE)
             {
                 unsigned long idx_first_in_face, i;
-                CYBOOL did_remove_face;
+                CSMBOOL did_remove_face;
                 
                 idx_first_in_face = num_null_faces / 2 ;
-                did_remove_face = FALSO;
+                did_remove_face = CSMFALSE;
                 
                 for (i = idx_first_in_face; i < num_null_faces; i++)
                 {
@@ -783,35 +783,35 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct cs
                     
                     null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
                     
-                    if (csmface_are_coplanar_faces(face, null_face) == CIERTO)
+                    if (csmface_are_coplanar_faces(face, null_face) == CSMTRUE)
                     {
-                        CYBOOL did_move_some_loop;
+                        CSMBOOL did_move_some_loop;
                         
                         csmeuler_laringmv_from_face1_to_2_if_fits_in_face(face, null_face, &did_move_some_loop);
                         
-                        if (did_move_some_loop == CIERTO)
+                        if (did_move_some_loop == CSMTRUE)
                         {
                             assert(csmface_floops(face) == NULL);
                             
-                            there_are_changes = CIERTO;
+                            there_are_changes = CSMTRUE;
                             
-                            csmloop_set_setop_loop_was_a_hole(face_floops, FALSO);
+                            csmloop_set_setop_loop_was_a_hole(face_floops, CSMFALSE);
                             csmsolid_remove_face(solid, &face);
                         }
                     }
                     
-                    if (there_are_changes == CIERTO)
+                    if (there_are_changes == CSMTRUE)
                         break;
                 }
             }
             
-            if (there_are_changes == CIERTO)
+            if (there_are_changes == CSMTRUE)
                 break;
         }
         
         csmhashtb_free_iterator(&face_iterator, csmface_t);
         
-    } while (there_are_changes == CIERTO);
+    } while (there_are_changes == CSMTRUE);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -829,7 +829,7 @@ void csmsetopcom_move_face_to_solid(
     
         assert(csmface_fsolid(face) == face_solid);
         
-        if (csmdebug_debug_enabled() == CIERTO)
+        if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmdebug_print_debug_info("Moving face %lu (solid %p) to solid %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
             assert(csmface_fsolid(face) == face_solid);
@@ -954,7 +954,7 @@ void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_
 
     face_iterator = csmhashtb_create_iterator(destination_solid->sfaces, csmface_t);
     
-    while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
     {
         struct csmface_t *face;
         struct csmloop_t *loop_iterator;
@@ -1019,7 +1019,7 @@ void csmsetopcom_cleanup_solid_setop(
     
     face_iterator = csmhashtb_create_iterator(destination_solid->sfaces, csmface_t);
     
-    while (csmhashtb_has_next(face_iterator, csmface_t) == CIERTO)
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
     {
         struct csmface_t *face;
         struct csmloop_t *loop_iterator;

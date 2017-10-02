@@ -6,9 +6,9 @@
 #include "csmnode.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
-#include "cypeid.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmid.inl"
+#include "csmmem.inl"
 
 struct csmhedge_t
 {
@@ -59,7 +59,7 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
     struct csmvertex_t *vertex;
     struct csmloop_t *loop;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_nuevo_elemento, NULL);
 
     edge = NULL;
     vertex = NULL;
@@ -76,7 +76,7 @@ CONSTRUCTOR(static struct csmhedge_t *, i_duplicate_hedge, (struct csmloop_t *lo
     struct csmedge_t *edge;
     struct csmvertex_t *vertex;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_nuevo_elemento, NULL);
 
     edge = NULL;
     vertex = NULL;
@@ -127,17 +127,17 @@ unsigned long csmhedge_id(const struct csmhedge_t *hedge)
 void csmhedge_reassign_id(struct csmhedge_t *hedge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
 {
     assert_no_null(hedge);
-    hedge->clase_base.id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
+    hedge->clase_base.id = csmid_new_id(id_nuevo_elemento, new_id_opc);
 }
 
 // --------------------------------------------------------------------------------------------------------------
 
-CYBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2)
+CSMBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2)
 {
     assert_no_null(hedge1);
     assert_no_null(hedge2);
     
-    return ES_CIERTO(hedge1->clase_base.id == hedge2->clase_base.id);
+    return IS_TRUE(hedge1->clase_base.id == hedge2->clase_base.id);
 }
 
 // --------------------------------------------------------------------------------------------------------------

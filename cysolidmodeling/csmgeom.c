@@ -4,7 +4,7 @@
 
 #include "csmmath.inl"
 
-#include "cyassert.h"
+#include "csmassert.inl"
 
 //-------------------------------------------------------------------------------------------
 

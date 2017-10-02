@@ -55,7 +55,7 @@ void *csmhashtb_nousar_ptr_for_id(struct csmhashtb_t *tabla, unsigned long id);
     (struct type *)csmhashtb_nousar_ptr_for_id((struct csmhashtb_t *)tabla, id)\
 )
 
-CYBOOL csmhashtb_nousar_contains_id(struct csmhashtb_t *tabla, unsigned long id, void **ptr_opc);
+CSMBOOL csmhashtb_nousar_contains_id(struct csmhashtb_t *tabla, unsigned long id, void **ptr_opc);
 #define csmhashtb_contains_id(tabla, type, id, ptr_opc)\
 (\
     (void)((struct csmhashtb(type) *)tabla == tabla),\
@@ -79,7 +79,7 @@ void csmhashtb_nousar_free_iterator(struct csmhashtb_iterator_t **iterator);
     csmhashtb_nousar_free_iterator((struct csmhashtb_iterator_t **)iterator)\
 )
 
-CYBOOL csmhashtb_nousar_has_next(const struct csmhashtb_iterator_t *iterator);
+CSMBOOL csmhashtb_nousar_has_next(const struct csmhashtb_iterator_t *iterator);
 #define csmhashtb_has_next(iterator, type)\
 (\
     (void)((const struct csmhashtb_iterator(type) *)iterator == iterator),\

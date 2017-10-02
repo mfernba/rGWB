@@ -8,9 +8,9 @@
 #include "csmhedge.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
-#include "cypeid.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmid.inl"
+#include "csmmem.inl"
 
 struct csmedge_t
 {
@@ -19,7 +19,7 @@ struct csmedge_t
     struct csmhedge_t *he1;
     struct csmhedge_t *he2;
     
-    CYBOOL setop_is_null_edge;
+    CSMBOOL setop_is_null_edge;
 };
 
 // --------------------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ CONSTRUCTOR(static struct csmedge_t *, i_crea, (
                         unsigned long id,
                         struct csmhedge_t *he1,
                         struct csmhedge_t *he2,
-                        CYBOOL setop_is_null_edge))
+                        CSMBOOL setop_is_null_edge))
 {
     struct csmedge_t *edge;
     
@@ -50,14 +50,14 @@ struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
     struct csmhedge_t *he1, *he2;
-    CYBOOL setop_is_null_edge;
+    CSMBOOL setop_is_null_edge;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_nuevo_elemento, NULL);
 
     he1 = NULL;
     he2 = NULL;
     
-    setop_is_null_edge = FALSO;
+    setop_is_null_edge = CSMFALSE;
     
     return i_crea(id, he1, he2, setop_is_null_edge);
 }
@@ -68,14 +68,14 @@ CONSTRUCTOR(struct csmedge_t *, i_duplicate_edge, (unsigned long *id_nuevo_eleme
 {
     unsigned long id;
     struct csmhedge_t *he1, *he2;
-    CYBOOL setop_is_null_edge;
+    CSMBOOL setop_is_null_edge;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_nuevo_elemento, NULL);
 
     he1 = NULL;
     he2 = NULL;
     
-    setop_is_null_edge = FALSO;
+    setop_is_null_edge = CSMFALSE;
     
     return i_crea(id, he1, he2, setop_is_null_edge);
 }
@@ -127,7 +127,7 @@ void csmedge_reassign_id(struct csmedge_t *edge, unsigned long *id_nuevo_element
 {
     assert_no_null(edge);
     
-    edge->id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
+    edge->id = csmid_new_id(id_nuevo_elemento, new_id_opc);
     
     if (edge->he1 != NULL)
         csmhedge_reassign_id(edge->he1, id_nuevo_elemento, NULL);
@@ -209,13 +209,13 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
 {
     assert_no_null(edge);
     
-    if (csmhedge_id_igual(edge->he1, hedge) == CIERTO)
+    if (csmhedge_id_igual(edge->he1, hedge) == CSMTRUE)
     {
         return edge->he2;
     }
     else
     {
-        assert(csmhedge_id_igual(edge->he2, hedge) == CIERTO);
+        assert(csmhedge_id_igual(edge->he2, hedge) == CSMTRUE);
         return edge->he1;
     }
 }
@@ -235,7 +235,7 @@ void csmedge_reverse_orientation(struct csmedge_t *edge)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CYBOOL is_null_edge)
+void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CSMBOOL is_null_edge)
 {
     assert_no_null(edge);
     edge->setop_is_null_edge = is_null_edge;
@@ -243,7 +243,7 @@ void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CYBOOL is_null_edge)
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge)
+CSMBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge)
 {
     assert_no_null(edge);
     return edge->setop_is_null_edge;
@@ -269,7 +269,7 @@ void csmedge_vertex_coordinates(
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmedge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_es_integro)
+void csmedge_print_debug_info(struct csmedge_t *edge, CSMBOOL assert_si_no_es_integro)
 {
     struct csmhedge_t *he1, *he2;
     double x1, y1, z1, x2, y2, z2;
@@ -285,9 +285,9 @@ void csmedge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_es_int
     {
         const struct csmvertex_t *vertex;
         
-        csmdebug_print_debug_info("\tHe1 %5lu [%d]", csmhedge_id(he1), ES_CIERTO(csmhedge_edge(he1) == edge));
+        csmdebug_print_debug_info("\tHe1 %5lu [%d]", csmhedge_id(he1), IS_TRUE(csmhedge_edge(he1) == edge));
         
-        if (assert_si_no_es_integro == CIERTO)
+        if (assert_si_no_es_integro == CSMTRUE)
             assert(csmhedge_edge(he1) == edge);
         
         vertex = csmhedge_vertex_const(he1);
@@ -303,9 +303,9 @@ void csmedge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_es_int
     {
         const struct csmvertex_t *vertex;
         
-        csmdebug_print_debug_info("\tHe2 %5lu [%d]", csmhedge_id(he2), ES_CIERTO(csmhedge_edge(he2) == edge));
+        csmdebug_print_debug_info("\tHe2 %5lu [%d]", csmhedge_id(he2), IS_TRUE(csmhedge_edge(he2) == edge));
         
-        if (assert_si_no_es_integro == CIERTO)
+        if (assert_si_no_es_integro == CSMTRUE)
             assert(csmhedge_edge(he2) == edge);
         
         vertex = csmhedge_vertex_const(he2);

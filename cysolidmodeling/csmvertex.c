@@ -8,9 +8,9 @@
 #include "csmmath.inl"
 #include "csmtransform.inl"
 
-#include "cyassert.h"
-#include "cypeid.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmid.inl"
+#include "csmmem.inl"
 
 struct csmvertex_t
 {
@@ -55,7 +55,7 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
     struct csmhedge_t *hedge;
     csmvertex_mask_t algorithm_attrib_mask;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_nuevo_elemento, NULL);
     
     hedge = NULL;
     
@@ -72,7 +72,7 @@ CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y
     struct csmhedge_t *hedge;
     csmvertex_mask_t algorithm_attrib_mask;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_nuevo_elemento, NULL);
     
     hedge = NULL;
     
@@ -124,7 +124,7 @@ unsigned long csmvertex_id(const struct csmvertex_t *vertex)
 void csmvertex_reassign_id(struct csmvertex_t *vertex, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
 {
     assert_no_null(vertex);
-    vertex->id = cypeid_nuevo_id(id_nuevo_elemento, new_id_opc);
+    vertex->id = csmid_new_id(id_nuevo_elemento, new_id_opc);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -145,10 +145,10 @@ void csmvertex_set_hedge(struct csmvertex_t *vertex, struct csmhedge_t *hedge)
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmvertex_has_mask_attrib(const struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib)
+CSMBOOL csmvertex_has_mask_attrib(const struct csmvertex_t *vertex, csmvertex_mask_t mask_attrib)
 {
     assert_no_null(vertex);
-    return ES_CIERTO((vertex->algorithm_attrib_mask & mask_attrib) == mask_attrib);
+    return IS_TRUE((vertex->algorithm_attrib_mask & mask_attrib) == mask_attrib);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -232,7 +232,7 @@ void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, d
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, double epsilon)
+CSMBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, double epsilon)
 {
     assert_no_null(vertex1);
     assert_no_null(vertex2);

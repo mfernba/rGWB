@@ -16,8 +16,8 @@
 #include "csmsolid.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 
 // --------------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ void csmeuler_lmekr(
     csmloop_set_ledge(he2_loop, NULL);
     csmface_remove_loop(he1_and_he2_face, &he2_loop);
     
-    ASIGNA_OPC(hedge_lado_pos_opc, nhe1);
-    ASIGNA_OPC(hedge_lado_neg_opc, nhe2);
+    ASSIGN_OPTIONAL_VALUE(hedge_lado_pos_opc, nhe1);
+    ASSIGN_OPTIONAL_VALUE(hedge_lado_neg_opc, nhe2);
 }
 

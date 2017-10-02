@@ -2,8 +2,8 @@
 
 #include "csmtransform.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 #include "standarc.h"
 
 struct csmtransform_t
@@ -211,7 +211,7 @@ void csmtransform_transform_point(
     w = vector_resultado[3];
     assert(w > 0.);
     
-    ASIGNA_OPC(x_trans_opc, vector_resultado[0] / w);
-    ASIGNA_OPC(y_trans_opc, vector_resultado[1] / w);
-    ASIGNA_OPC(z_trans_opc, vector_resultado[2] / w);
+    ASSIGN_OPTIONAL_VALUE(x_trans_opc, vector_resultado[0] / w);
+    ASSIGN_OPTIONAL_VALUE(y_trans_opc, vector_resultado[1] / w);
+    ASSIGN_OPTIONAL_VALUE(z_trans_opc, vector_resultado[2] / w);
 }

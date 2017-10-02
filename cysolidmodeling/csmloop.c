@@ -13,15 +13,15 @@
 #include "csmhedge.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
+#include "csmassert.inl"
+#include "csmid.inl"
+#include "csmmem.inl"
+#include "csmstring.inl"
 
 #include "a_pto2d.h"
 #include "cont2d.h"
 #include "copiafor.h"
-#include "cyassert.h"
-#include "cypeid.h"
-#include "cypespy.h"
-#include "cypestr.h"
-#include "defmath.tlh"
+#include "csmmath.tli"
 #include "standarc.h"
 
 struct csmloop_t
@@ -31,8 +31,8 @@ struct csmloop_t
     struct csmhedge_t *ledge;
     struct csmface_t *lface;
     
-    CYBOOL setop_convert_loop_in_face;
-    CYBOOL setop_loop_was_a_hole;
+    CSMBOOL setop_convert_loop_in_face;
+    CSMBOOL setop_loop_was_a_hole;
 };
 
 // --------------------------------------------------------------------------------------------------------------
@@ -54,8 +54,8 @@ CONSTRUCTOR(static struct csmloop_t *, i_crea, (
                         unsigned long id,
                         struct csmhedge_t *ledge,
                         struct csmface_t *lface,
-                        CYBOOL setop_convert_loop_in_face,
-                        CYBOOL setop_loop_was_a_hole))
+                        CSMBOOL setop_convert_loop_in_face,
+                        CSMBOOL setop_loop_was_a_hole))
 {
     struct csmloop_t *loop;
     
@@ -79,16 +79,16 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
     unsigned long id;
     struct csmhedge_t *ledge;
     struct csmface_t *lface;
-    CYBOOL setop_convert_loop_in_face;
-    CYBOOL setop_loop_was_a_hole;
+    CSMBOOL setop_convert_loop_in_face;
+    CSMBOOL setop_loop_was_a_hole;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_nuevo_elemento, NULL);
     
     ledge = NULL;
     lface = face;
     
-    setop_convert_loop_in_face = FALSO;
-    setop_loop_was_a_hole = FALSO;
+    setop_convert_loop_in_face = CSMFALSE;
+    setop_loop_was_a_hole = CSMFALSE;
     
     return i_crea(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
 }
@@ -99,13 +99,13 @@ CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lfac
 {
     unsigned long id;
     struct csmhedge_t *ledge;
-    CYBOOL setop_convert_loop_in_face;
-    CYBOOL setop_loop_was_a_hole;
+    CSMBOOL setop_convert_loop_in_face;
+    CSMBOOL setop_loop_was_a_hole;
     
-    id = cypeid_nuevo_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_nuevo_elemento, NULL);
     ledge = NULL;
-    setop_convert_loop_in_face = FALSO;
-    setop_loop_was_a_hole = FALSO;
+    setop_convert_loop_in_face = CSMFALSE;
+    setop_loop_was_a_hole = CSMFALSE;
     
     return i_crea(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
 }
@@ -173,7 +173,7 @@ unsigned long csmloop_id(const struct csmloop_t *loop)
 void csmloop_reassign_id(struct csmloop_t *loop, unsigned long *id_new_element, unsigned long *new_id_opt)
 {
     assert_no_null(loop);
-    loop->clase_base.id = cypeid_nuevo_id(id_new_element, new_id_opt);
+    loop->clase_base.id = csmid_new_id(id_new_element, new_id_opt);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -241,7 +241,7 @@ void csmloop_face_equation(
     
     //assert(num_vertexs >= 3);
     
-    if (csmmath_is_null_vector(A_loc, B_loc, C_loc, csmtolerance_null_vector()) == CIERTO)
+    if (csmmath_is_null_vector(A_loc, B_loc, C_loc, csmtolerance_null_vector()) == CSMTRUE)
     {
         A_loc = 0.;
         B_loc = 0.;
@@ -320,24 +320,24 @@ double csmloop_max_distance_to_plane(
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
         
         distance = fabs(csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D));
-        max_distance_to_plane = MAX(max_distance_to_plane, distance);
+        max_distance_to_plane = CSMMATH_MAX(max_distance_to_plane, distance);
 
         iterator = csmhedge_next(iterator);
         
     } while (iterator != loop->ledge);
     
-    return MAX(max_distance_to_plane, csmtolerance_coplanarity());
+    return CSMMATH_MAX(max_distance_to_plane, csmtolerance_coplanarity());
 }
 
 // --------------------------------------------------------------------------------------------------------------
 
-static CYBOOL i_is_point_on_loop_boundary(
+static CSMBOOL i_is_point_on_loop_boundary(
                         struct csmhedge_t *ledge,
                         double x, double y, double z, double tolerance,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
-    CYBOOL is_point_on_loop_boundary;
+    CSMBOOL is_point_on_loop_boundary;
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
     double t_relative_to_hit_hedge_loc;
@@ -347,7 +347,7 @@ static CYBOOL i_is_point_on_loop_boundary(
     iterator = ledge;
     num_iteraciones = 0;
     
-    is_point_on_loop_boundary = FALSO;
+    is_point_on_loop_boundary = CSMFALSE;
     hit_vertex_loc = NULL;
     hit_hedge_loc = NULL;
     t_relative_to_hit_hedge_loc = 0.;
@@ -376,9 +376,9 @@ static CYBOOL i_is_point_on_loop_boundary(
                         x, y, z,
                         x_vertex, y_vertex, z_vertex, x_next_vertex, y_next_vertex, z_next_vertex,
                         tolerance,
-                        &t) == CIERTO)
+                        &t) == CSMTRUE)
         {
-            is_point_on_loop_boundary = CIERTO;
+            is_point_on_loop_boundary = CSMTRUE;
             
             if (csmmath_compare_doubles(t, 0.0, tolerance) == CSMMATH_EQUAL_VALUES)
             {
@@ -405,16 +405,16 @@ static CYBOOL i_is_point_on_loop_boundary(
         
     } while (iterator != ledge);
     
-    ASIGNA_OPC(hit_vertex_opc, hit_vertex_loc);
-    ASIGNA_OPC(hit_hedge_opc, hit_hedge_loc);
-    ASIGNA_OPC(t_relative_to_hit_hedge_opc, t_relative_to_hit_hedge_loc);
+    ASSIGN_OPTIONAL_VALUE(hit_vertex_opc, hit_vertex_loc);
+    ASSIGN_OPTIONAL_VALUE(hit_hedge_opc, hit_hedge_loc);
+    ASSIGN_OPTIONAL_VALUE(t_relative_to_hit_hedge_opc, t_relative_to_hit_hedge_loc);
     
     return is_point_on_loop_boundary;
 }
 
 // --------------------------------------------------------------------------------------------------------------
 
-static CYBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *he1, struct csmhedge_t *he2)
+static CSMBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *he1, struct csmhedge_t *he2)
 {
     struct csmvertex_t *vertex0, *vertex1, *vertex2;
     double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
@@ -429,9 +429,9 @@ static CYBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *
 
     csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Wx, &Wy, &Wz);
             
-    if (csmmath_is_null_vector(Wx, Wy, Wz, csmtolerance_null_vector()) == FALSO)
+    if (csmmath_is_null_vector(Wx, Wy, Wz, csmtolerance_null_vector()) == CSMFALSE)
     {
-        return FALSO;
+        return CSMFALSE;
     }
     else
     {
@@ -440,16 +440,16 @@ static CYBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *
         dot_product = csmmath_dot_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
         
         if (dot_product < -1.e-6)
-            return CIERTO;
+            return CSMTRUE;
         else
-            return FALSO;
+            return CSMFALSE;
     }
 }
 
 // --------------------------------------------------------------------------------------------------------------
 static unsigned long i_niter = 0;
 
-CYBOOL csmloop_is_point_inside_loop(
+CSMBOOL csmloop_is_point_inside_loop(
                         const struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         double tolerance,
@@ -457,7 +457,7 @@ CYBOOL csmloop_is_point_inside_loop(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
-    CYBOOL is_point_inside_loop;
+    CSMBOOL is_point_inside_loop;
     enum csmmath_contaiment_point_loop_t type_of_containment_loc;
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
@@ -471,9 +471,9 @@ CYBOOL csmloop_is_point_inside_loop(
                         x, y, z,
                         tolerance,
                         &hit_vertex_loc,
-                        &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == CIERTO)
+                        &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == CSMTRUE)
     {
-        is_point_inside_loop = CIERTO;
+        is_point_inside_loop = CSMTRUE;
         
         if (hit_vertex_loc != NULL)
         {
@@ -492,7 +492,7 @@ CYBOOL csmloop_is_point_inside_loop(
         struct csmhedge_t *start_hedge;
         unsigned long num_iteraciones;
         
-        is_point_inside_loop = FALSO;
+        is_point_inside_loop = CSMFALSE;
         type_of_containment_loc = CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR;
         hit_vertex_loc = NULL;
         hit_hedge_loc = NULL;
@@ -512,7 +512,7 @@ CYBOOL csmloop_is_point_inside_loop(
             prev_ray_hedge = csmhedge_prev(ray_hedge);
             next_ray_hedge = csmhedge_next(ray_hedge);
             
-            if (i_are_hedges_collinear(prev_ray_hedge, ray_hedge, next_ray_hedge) == FALSO)
+            if (i_are_hedges_collinear(prev_ray_hedge, ray_hedge, next_ray_hedge) == CSMFALSE)
             {
                 start_hedge = ray_hedge;
                 break;
@@ -538,7 +538,7 @@ CYBOOL csmloop_is_point_inside_loop(
             do
             {
                 struct csmhedge_t *next_ray_hedge;
-                CYBOOL hedges_collinear;
+                CSMBOOL hedges_collinear;
                 struct csmvertex_t *vertex_i, *vertex_j;
                 double x_vertex_i, y_vertex_i, x_vertex_j, y_vertex_j;
                 
@@ -546,7 +546,7 @@ CYBOOL csmloop_is_point_inside_loop(
                 num_iteraciones++;
                 
                 next_ray_hedge = csmhedge_next(ray_hedge);
-                hedges_collinear = FALSO;
+                hedges_collinear = CSMFALSE;
                 
                 do
                 {
@@ -554,17 +554,17 @@ CYBOOL csmloop_is_point_inside_loop(
                     
                     next_next_ray_hedge = csmhedge_next(next_ray_hedge);
                     
-                    if (i_are_hedges_collinear(ray_hedge, next_ray_hedge, next_next_ray_hedge) == CIERTO)
+                    if (i_are_hedges_collinear(ray_hedge, next_ray_hedge, next_next_ray_hedge) == CSMTRUE)
                     {
-                        hedges_collinear = CIERTO;
+                        hedges_collinear = CSMTRUE;
                         next_ray_hedge = next_next_ray_hedge;
                     }
                     else
                     {
-                        hedges_collinear = FALSO;
+                        hedges_collinear = CSMFALSE;
                     }
                     
-                } while (hedges_collinear == CIERTO);
+                } while (hedges_collinear == CSMTRUE);
                 
                 vertex_i = csmhedge_vertex(next_ray_hedge);
                 csmvertex_get_coords_not_dropped(vertex_i, dropped_coord, &x_vertex_i, &y_vertex_i);
@@ -587,24 +587,24 @@ CYBOOL csmloop_is_point_inside_loop(
             } while (ray_hedge != start_hedge);
             
             if (count % 2 == 0)
-                is_point_inside_loop = FALSO;
+                is_point_inside_loop = CSMFALSE;
             else
-                is_point_inside_loop = CIERTO;
+                is_point_inside_loop = CSMTRUE;
         }
     }
     
     
-    ASIGNA_OPC(type_of_containment_opc, type_of_containment_loc);
-    ASIGNA_OPC(hit_vertex_opc, hit_vertex_loc);
-    ASIGNA_OPC(hit_hedge_opc, hit_hedge_loc);
-    ASIGNA_OPC(t_relative_to_hit_hedge_opc, t_relative_to_hit_hedge_loc);
+    ASSIGN_OPTIONAL_VALUE(type_of_containment_opc, type_of_containment_loc);
+    ASSIGN_OPTIONAL_VALUE(hit_vertex_opc, hit_vertex_loc);
+    ASSIGN_OPTIONAL_VALUE(hit_hedge_opc, hit_hedge_loc);
+    ASSIGN_OPTIONAL_VALUE(t_relative_to_hit_hedge_opc, t_relative_to_hit_hedge_loc);
     
     return is_point_inside_loop;
 }
 
 // --------------------------------------------------------------------------------------------------------------
 
-CYBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib)
+CSMBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib)
 {
     register struct csmhedge_t *iterator;
     unsigned long num_iteraciones;
@@ -623,19 +623,19 @@ CYBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loo
         
         vertex = csmhedge_vertex(iterator);
         
-        if (csmvertex_has_mask_attrib(vertex, mask_attrib) == FALSO)
-            return FALSO;
+        if (csmvertex_has_mask_attrib(vertex, mask_attrib) == CSMFALSE)
+            return CSMFALSE;
         
         iterator = csmhedge_next(iterator);
         
     } while (iterator != loop->ledge);
     
-    return CIERTO;
+    return CSMTRUE;
 }
 
 // --------------------------------------------------------------------------------------------------------------
 
-CYBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop)
+CSMBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop)
 {
     struct csmhedge_t *hedge_next;
     
@@ -644,9 +644,9 @@ CYBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop)
     hedge_next = csmhedge_next(loop->ledge);
     
     if (hedge_next == loop->ledge)
-        return CIERTO;
+        return CSMTRUE;
     else
-        return FALSO;
+        return CSMFALSE;
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -755,7 +755,7 @@ void csmloop_revert_loop_orientation(struct csmloop_t *loop)
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmloop_setop_convert_loop_in_face(const struct csmloop_t *loop)
+CSMBOOL csmloop_setop_convert_loop_in_face(const struct csmloop_t *loop)
 {
     assert_no_null(loop);
     return loop->setop_convert_loop_in_face;
@@ -763,7 +763,7 @@ CYBOOL csmloop_setop_convert_loop_in_face(const struct csmloop_t *loop)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CYBOOL setop_convert_loop_in_face)
+void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CSMBOOL setop_convert_loop_in_face)
 {
     assert_no_null(loop);
     loop->setop_convert_loop_in_face = setop_convert_loop_in_face;
@@ -771,7 +771,7 @@ void csmloop_set_setop_convert_loop_in_face(struct csmloop_t *loop, CYBOOL setop
 
 // ----------------------------------------------------------------------------------------------------
 
-CYBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop)
+CSMBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop)
 {
     assert_no_null(loop);
     return loop->setop_loop_was_a_hole;
@@ -779,7 +779,7 @@ CYBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CYBOOL setop_loop_was_a_hole)
+void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CSMBOOL setop_loop_was_a_hole)
 {
     assert_no_null(loop);
     loop->setop_loop_was_a_hole = setop_loop_was_a_hole;
@@ -791,13 +791,13 @@ void csmloop_clear_algorithm_mask(struct csmloop_t *loop)
 {
     assert_no_null(loop);
     
-    loop->setop_convert_loop_in_face = FALSO;
-    loop->setop_loop_was_a_hole = FALSO;
+    loop->setop_convert_loop_in_face = CSMFALSE;
+    loop->setop_loop_was_a_hole = CSMFALSE;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBOOL assert_si_no_es_integro)
+void csmloop_print_info_debug(struct csmloop_t *loop, CSMBOOL is_outer_loop, CSMBOOL assert_si_no_es_integro)
 {
     struct csmhedge_t *ledge;
     struct csmhedge_t *iterator;
@@ -831,7 +831,7 @@ void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBO
                 csmnode_id(CSMNODE(iterator)),
                 csmnode_id(CSMNODE(vertex)),
                 x, y, z,
-                ES_CIERTO(csmhedge_loop(iterator) == loop));
+                IS_TRUE(csmhedge_loop(iterator) == loop));
         }
         else
         {
@@ -840,10 +840,10 @@ void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBO
             struct csmhedge_t *he1, *he2;
             struct csmhedge_t *he_mate;
             
-            if (csmedge_setop_is_null_edge(edge) == CIERTO)
+            if (csmedge_setop_is_null_edge(edge) == CSMTRUE)
                 is_null_edge = copiafor_codigo1("[Null Edge: %lu]", csmedge_id(edge));
             else
-                is_null_edge = cad_copia_cadena("");
+                is_null_edge = csmstring_duplicate("");
             
             he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
             he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
@@ -860,7 +860,7 @@ void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBO
                     csmnode_id(CSMNODE(he_mate)),
                     csmnode_id(CSMNODE(vertex)),
                     x, y, z,
-                    ES_CIERTO(csmhedge_loop(iterator) == loop),
+                    IS_TRUE(csmhedge_loop(iterator) == loop),
                     is_null_edge);
             }
             else
@@ -872,19 +872,19 @@ void csmloop_print_info_debug(struct csmloop_t *loop, CYBOOL is_outer_loop, CYBO
                     csmnode_id(CSMNODE(edge)),
                     csmnode_id(CSMNODE(vertex)),
                     x, y, z,
-                    ES_CIERTO(csmhedge_loop(iterator) == loop),
+                    IS_TRUE(csmhedge_loop(iterator) == loop),
                     is_null_edge);
             }
             
-            cypestr_destruye(&is_null_edge);
+            csmstring_free(&is_null_edge);
         }
         
-        if (assert_si_no_es_integro == CIERTO)
+        if (assert_si_no_es_integro == CSMTRUE)
             assert(csmhedge_loop(iterator) == loop);
         
         next_edge = csmhedge_next(iterator);
         
-        if (assert_si_no_es_integro == CIERTO)
+        if (assert_si_no_es_integro == CSMTRUE)
             assert(csmhedge_prev(next_edge) == iterator);
                     
         iterator = next_edge;

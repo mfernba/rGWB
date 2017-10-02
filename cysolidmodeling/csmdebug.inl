@@ -12,9 +12,9 @@
 extern "C" {
 #endif
 
-void csmdebug_set_enabled_by_code(CYBOOL enabled);
+void csmdebug_set_enabled_by_code(CSMBOOL enabled);
     
-CYBOOL csmdebug_debug_enabled(void);
+CSMBOOL csmdebug_debug_enabled(void);
 
     
 void csmdebug_begin_context(const char *context);
@@ -31,7 +31,7 @@ void csmdebug_set_ouput_file(const char *file_path);
 void csmdebug_close_output_file(void);
 
 
-CYBOOL csmdebug_is_print_solid_unblocked(void);
+CSMBOOL csmdebug_is_print_solid_unblocked(void);
     
 void csmdebug_block_print_solid(void);
     

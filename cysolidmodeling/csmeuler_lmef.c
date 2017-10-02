@@ -23,8 +23,8 @@
 #include "csmsolid.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 
 // --------------------------------------------------------------------------------
 
@@ -83,9 +83,9 @@ void csmeuler_lmef(
     csmloop_set_ledge(new_loop, new_he1);
     csmloop_set_ledge(csmhedge_loop(he2), new_he2);
 
-    ASIGNA_OPC(new_face_opc, new_face);
-    ASIGNA_OPC(new_he_pos_opc, new_he2);
-    ASIGNA_OPC(new_he_neg_opc, new_he1);
+    ASSIGN_OPTIONAL_VALUE(new_face_opc, new_face);
+    ASSIGN_OPTIONAL_VALUE(new_he_pos_opc, new_he2);
+    ASSIGN_OPTIONAL_VALUE(new_he_neg_opc, new_he1);
 }
 
 

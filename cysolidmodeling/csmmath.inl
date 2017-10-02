@@ -11,7 +11,7 @@ void csmmath_select_not_dropped_coords(
                         enum csmmath_dropped_coord_t dropped_coord,
                         double *x_not_dropped, double *y_not_dropped);
 
-CYBOOL csmmath_equal_coords(
+CSMBOOL csmmath_equal_coords(
                         double x1, double y1, double z1,
                         double x2, double y2, double z2,
                         double epsilon);
@@ -42,7 +42,7 @@ void csmmath_move_point(
 						double Ux, double Uy, double Uz, double desp,
                         double *x_desp, double *y_desp, double *z_desp);
 
-CYBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance);
+CSMBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance);
 
 
 // Lines...
@@ -62,19 +62,19 @@ void csmmath_nearer_points_between_two_lines3D(
                         double *x_mas_cercano_recta1, double *y_mas_cercano_recta1, double *z_mas_cercano_recta1,
                         double *x_mas_cercano_recta2, double *y_mas_cercano_recta2, double *z_mas_cercano_recta2);
 
-CYBOOL csmmath_is_point_in_segment3D(
+CSMBOOL csmmath_is_point_in_segment3D(
 						double x, double y, double z,
 						double x1, double y1, double z1, double x2, double y2, double z2,
 						double precision, 
                         double *posicion_relativa_opc);
 
-CYBOOL csmmath_exists_intersection_between_two_lines3D(
+CSMBOOL csmmath_exists_intersection_between_two_lines3D(
 						double Xo_recta1, double Yo_recta1, double Zo_recta1, double Ux_recta1, double Uy_recta1, double Uz_recta1,
 						double Xo_recta2, double Yo_recta2, double Zo_recta2, double Ux_recta2, double Uy_recta2, double Uz_recta2,
 						double precision, 
                         double *x_corte, double *y_corte, double *z_corte);
 
-CYBOOL csmmath_exists_intersection_between_two_segments3D(
+CSMBOOL csmmath_exists_intersection_between_two_segments3D(
 						double x1_seg1, double y1_seg1, double z1_seg1, double x2_seg1, double y2_seg1, double z2_seg1, 
 						double x1_seg2, double y1_seg2, double z1_seg2, double x2_seg2, double y2_seg2, double z2_seg2, 
 						double precision, 

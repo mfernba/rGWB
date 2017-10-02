@@ -15,8 +15,8 @@
 #include "csmsolid.inl"
 #include "csmvertex.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ void csmeuler_lkev(
     
     he1_loc = ASIGNA_PUNTERO_PP_NO_NULL(he1, struct csmhedge_t);
     he2_loc = ASIGNA_PUNTERO_PP_NO_NULL(he2, struct csmhedge_t);
-    assert(csmhedge_id_igual(he1_loc, he2_loc) == FALSO);
+    assert(csmhedge_id_igual(he1_loc, he2_loc) == CSMFALSE);
     assert(he1_loc != he2_loc);
     
     hes_solid = csmopbas_solid_from_hedges(he1_loc, he2_loc);

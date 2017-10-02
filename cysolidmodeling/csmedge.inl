@@ -29,9 +29,9 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
 
 void csmedge_reverse_orientation(struct csmedge_t *edge);
 
-void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CYBOOL is_null_edge);
+void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CSMBOOL is_null_edge);
 
-CYBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge);
+CSMBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge);
 
 
 // Geometry...
@@ -42,4 +42,4 @@ void csmedge_vertex_coordinates(
 
 // Debug...
 
-void csmedge_print_debug_info(struct csmedge_t *edge, CYBOOL assert_si_no_es_integro);
+void csmedge_print_debug_info(struct csmedge_t *edge, CSMBOOL assert_si_no_es_integro);

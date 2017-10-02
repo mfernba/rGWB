@@ -31,8 +31,8 @@
 
 #include "a_punter.h"
 #include "cont2d.h"
-#include "cyassert.h"
-#include "cyassert.h"
+#include "csmassert.inl"
+#include "csmassert.inl"
 
 ArrEstructura(csmhedge_t);
 
@@ -54,7 +54,7 @@ static void i_check_compatibility_between_shapes(
     for (i = 0; i < no_of_polygons; i++)
     {
         unsigned long no_of_points_in_polygon;
-        CYBOOL is_hole_loop_top;
+        CSMBOOL is_hole_loop_top;
         
         no_of_points_in_polygon = gccontorno_num_puntos_poligono(shape2d_top, i);
         assert(no_of_points_in_polygon == gccontorno_num_puntos_poligono(shape2d_bot, i));
@@ -62,7 +62,7 @@ static void i_check_compatibility_between_shapes(
         is_hole_loop_top = gccontorno_es_poligono_hueco(shape2d_top, i);
         assert(is_hole_loop_top == gccontorno_es_poligono_hueco(shape2d_bot, i));
         
-        if (is_hole_loop_top == FALSO)
+        if (is_hole_loop_top == CSMFALSE)
         {
             assert(*idx_outer_loop == ULONG_MAX);
             *idx_outer_loop = i;
@@ -244,7 +244,7 @@ static void i_create_lateral_faces(
         hedge_next_next = csmhedge_next(csmhedge_next(scan));
         
         csmeuler_lmef(hedge_prev, hedge_next_next, NULL, NULL, NULL);
-        //csmsolid_print_debug(solid, CIERTO);
+        //csmsolid_print_debug(solid, CSMTRUE);
         
         scan = csmhedge_next(hedge_next_next);
     }
@@ -295,7 +295,7 @@ static void i_append_holes_to_solid(
     
     original_ring_loop = csmhedge_loop(he_from_ring);
     
-    //csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CSMTRUE);
     
     i_append_loop_from_hedge(
                         he_from_ring,
@@ -312,7 +312,7 @@ static void i_append_holes_to_solid(
     csmeuler_lkfmrh(bottom_face, &top_hole_face_loc);
     csmeuler_lmfkrh(original_ring_loop, &top_hole_face_loc);
     
-    //csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CSMTRUE);
 
     i_create_hedges_from_bottom_to_top_face(
                         shape2d_top,
@@ -321,15 +321,15 @@ static void i_append_holes_to_solid(
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         hedges_from_vertexs_bottom_face);
 
-    //csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CSMTRUE);
     
     i_create_lateral_faces(hedges_from_vertexs_bottom_face, solid);
  
-    //csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CSMTRUE);
     
     csmeuler_lkfmrh(top_face, &top_hole_face_loc);
     
-    //csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CSMTRUE);
 
     arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
 }
@@ -354,12 +354,12 @@ static void i_append_holes_to_solid_if_proceed(
     
     for (i = 0; i < no_of_polygons; i++)
     {
-        CYBOOL is_hole_loop;
+        CSMBOOL is_hole_loop;
         
         is_hole_loop = gccontorno_es_poligono_hueco(shape2d_top, i);
-        assert(is_hole_loop == gccontorno_es_poligono_hueco(shape2d_bot, i) == CIERTO);
+        assert(is_hole_loop == gccontorno_es_poligono_hueco(shape2d_bot, i) == CSMTRUE);
         
-        if (is_hole_loop == CIERTO)
+        if (is_hole_loop == CSMTRUE)
         {
             i_append_holes_to_solid(
                         solid,
@@ -402,7 +402,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
                         bottom_face, top_face,
                         &hedges_from_vertexs_bottom_face);
     
-    //csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CSMTRUE);
 
     i_create_hedges_from_bottom_to_top_face(
                         shape2d_top,
@@ -411,11 +411,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         hedges_from_vertexs_bottom_face);
 
-    //csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CSMTRUE);
     
     i_create_lateral_faces(hedges_from_vertexs_bottom_face, solid);
 
-    //csmsolid_print_debug(solid, CIERTO);
+    //csmsolid_print_debug(solid, CSMTRUE);
     
     arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
     

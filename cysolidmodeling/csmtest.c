@@ -28,7 +28,7 @@
 #include "csmshape3d.h"
 
 #include "copiafor.h"
-#include "cyassert.h"
+#include "csmassert.inl"
 #include "a_pto2d.h"
 #include "a_pto3d.h"
 #include <geomcomp/gccontorno.h>
@@ -36,7 +36,7 @@
 
 #include "csmdebug.inl"
 #include "csmviewer.inl"
-#include "defmath.tlh"
+#include "csmmath.tli"
 
 // ------------------------------------------------------------------------------------------
 
@@ -94,13 +94,13 @@ static void i_test_crea_lamina(void)
         
         assert(initial_face != new_face);
 
-        assert(csmface_contains_point(initial_face, 0.5, 0.5, 0.5, NULL, NULL, NULL, NULL) == CIERTO);
-        assert(csmface_contains_point(initial_face, 1., 1., 1., NULL, NULL, NULL, NULL) == CIERTO);
-        assert(csmface_contains_point(initial_face, 5., 5., 0., NULL, NULL, NULL, NULL) == FALSO);
+        assert(csmface_contains_point(initial_face, 0.5, 0.5, 0.5, NULL, NULL, NULL, NULL) == CSMTRUE);
+        assert(csmface_contains_point(initial_face, 1., 1., 1., NULL, NULL, NULL, NULL) == CSMTRUE);
+        assert(csmface_contains_point(initial_face, 5., 5., 0., NULL, NULL, NULL, NULL) == CSMFALSE);
         
-        assert(csmface_contains_point(new_face, 0.5, 0.5, 0.5, NULL, NULL, NULL, NULL) == CIERTO);
-        assert(csmface_contains_point(new_face, 1., 1., 1., NULL, NULL, NULL, NULL) == CIERTO);
-        assert(csmface_contains_point(new_face, 5., 5., 0., NULL, NULL, NULL, NULL) == FALSO);
+        assert(csmface_contains_point(new_face, 0.5, 0.5, 0.5, NULL, NULL, NULL, NULL) == CSMTRUE);
+        assert(csmface_contains_point(new_face, 1., 1., 1., NULL, NULL, NULL, NULL) == CSMTRUE);
+        assert(csmface_contains_point(new_face, 5., 5., 0., NULL, NULL, NULL, NULL) == CSMFALSE);
     }
     
     csmeuler_lkef(&he_pos, &he_neg);
@@ -197,7 +197,7 @@ static void i_test_crea_hexaedro(void)
     id_nuevo_elemento = 0;
     
     solido = csmeuler_mvfs(0., 0., 0., 0, &hei);
-    csmsolid_print_debug(solido, CIERTO);
+    csmsolid_print_debug(solido, CSMTRUE);
     
     // Cara inferior...
     {
@@ -208,7 +208,7 @@ static void i_test_crea_hexaedro(void)
         assert(csmopbas_mate(he1) == hei);
     }
 
-    csmsolid_print_debug(solido, CIERTO);
+    csmsolid_print_debug(solido, CSMTRUE);
     
     // Aristas verticales...
     {
@@ -222,7 +222,7 @@ static void i_test_crea_hexaedro(void)
         assert(csmhedge_loop(he1_top) == csmhedge_loop(he4_top));
     }
 
-    csmsolid_print_debug(solido, CIERTO);
+    csmsolid_print_debug(solido, CSMTRUE);
     
     csmeuler_lmef(he4_top, he3_top, NULL, NULL, NULL);
     csmeuler_lmef(he3_top, he2_top, NULL, NULL, NULL);
@@ -237,11 +237,11 @@ static void i_test_crea_hexaedro(void)
     he1_top_next_next_next = csmhedge_next(he1_top_next_next);
     assert(csmhedge_vertex(he1_top_next_next_next) == csmhedge_vertex(he4_top));
 
-    csmsolid_print_debug(solido, CIERTO);
+    csmsolid_print_debug(solido, CSMTRUE);
     
     csmeuler_lmef(he1_top, he1_top_next_next_next, NULL, NULL, NULL);
     
-    csmsolid_print_debug(solido, CIERTO);
+    csmsolid_print_debug(solido, CSMTRUE);
     
     csmsolid_free(&solido);
 }
@@ -297,10 +297,10 @@ static void i_test_crea_hexaedro_y_copia(void)
 
     csmeuler_lmef(he1_top, he1_top_next_next_next, NULL, NULL, NULL);
     
-    csmsolid_print_debug(solido, CIERTO);
+    csmsolid_print_debug(solido, CSMTRUE);
     
     copia_solido = csmsolid_duplicate(solido);
-    csmsolid_print_debug(copia_solido, CIERTO);
+    csmsolid_print_debug(copia_solido, CSMTRUE);
     
     csmsolid_free(&solido);
     csmsolid_free(&copia_solido);
@@ -340,7 +340,7 @@ static void i_test_tabla_hash(void)
     assert(item->id == 5);
     
     csmhashtb_remove_item(tabla_hash, 5, i_item_tabla_t);
-    assert(csmhashtb_contains_id(tabla_hash, i_item_tabla_t, 5, NULL) == FALSO);
+    assert(csmhashtb_contains_id(tabla_hash, i_item_tabla_t, 5, NULL) == CSMFALSE);
 
     csmhashtb_add_item(tabla_hash, 5, &item2, i_item_tabla_t);
     
@@ -349,7 +349,7 @@ static void i_test_tabla_hash(void)
         
         it = csmhashtb_create_iterator(tabla_hash, i_item_tabla_t);
         
-        while (csmhashtb_has_next(it, i_item_tabla_t) == CIERTO)
+        while (csmhashtb_has_next(it, i_item_tabla_t) == CSMTRUE)
         {
             unsigned long id;
             struct i_item_tabla_t *item_tabla;
@@ -377,7 +377,7 @@ static void i_test_solid_from_shape2D(void)
                                 shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
                                 shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     
-    csmsolid_print_debug(solid, CIERTO);
+    csmsolid_print_debug(solid, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid);
@@ -396,7 +396,7 @@ static void i_test_solid_from_shape2D_with_hole(void)
                                 shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
                                 shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     
-    csmsolid_print_debug(solid, CIERTO);
+    csmsolid_print_debug(solid, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid);
@@ -408,20 +408,20 @@ static void i_test_union_solidos_por_loopglue(void)
 {
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1, *solid2;
-    CYBOOL could_merge_solids;
+    CSMBOOL could_merge_solids;
     
     shape2d = gcelem2d_contorno_rectangular(0.3, 0.3);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
-    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
 
     solid2 = csmsweep_create_solid_from_shape(shape2d, 0.3, 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0.3, 0., 0., 1., 0., 0., 0., 1., 0.);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid2, CSMTRUE);
 
     csmglue_join_solid2_to_solid1_given_equal_faces(solid1, 46, &solid2, 36, &could_merge_solids);
-    assert(could_merge_solids == CIERTO);
+    assert(could_merge_solids == CSMTRUE);
 
-    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -430,7 +430,7 @@ static void i_test_union_solidos_por_loopglue(void)
 // ------------------------------------------------------------------------------------------
 
 #include "copiafor.h"
-#include "cypestr.h"
+#include "csmstring.inl"
 
 static void i_set_output_debug_file(const char *file_name)
 {
@@ -439,14 +439,14 @@ static void i_set_output_debug_file(const char *file_name)
     file_path = copiafor_codigo1("/Users/manueru/%s", file_name);
     csmdebug_set_ouput_file(file_path);
     
-    cypestr_destruye(&file_path);
+    csmstring_free(&file_path);
 }
 
 // ------------------------------------------------------------------------------------------
 
 static void i_show_split_results(
                         double A, double B, double C, double D,
-                        CYBOOL show_plane,
+                        CSMBOOL show_plane,
                         struct csmsolid_t *solid_above, struct csmsolid_t *solid_below)
 {
     double desp;
@@ -454,13 +454,13 @@ static void i_show_split_results(
     if (solid_above != NULL)
     {
         csmsolid_set_name(solid_above, "Above");
-        csmsolid_print_debug(solid_above, CIERTO);
+        csmsolid_print_debug(solid_above, CSMTRUE);
     }
     
     if (solid_below != NULL)
     {
         csmsolid_set_name(solid_below, "Below");
-        csmsolid_print_debug(solid_below, CIERTO);
+        csmsolid_print_debug(solid_below, CSMTRUE);
     }
     
     csmdebug_close_output_file();
@@ -475,7 +475,7 @@ static void i_show_split_results(
 
     if (solid_above != NULL || solid_below != NULL )
     {
-        if (show_plane == CIERTO)
+        if (show_plane == CSMTRUE)
             csmdebug_set_plane(A, B, C, D);
         else
             csmdebug_clear_plane();
@@ -492,7 +492,7 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CYBOOL splitted;
+    CSMBOOL splitted;
     struct csmsolid_t *solid_above, *solid_below;
     
     i_set_output_debug_file("split1.txt");
@@ -501,14 +501,14 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     csmsolid_set_name(solid1, "Solid to split");
-    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
     
     csmmath_implicit_plane_equation(0., 0., .5, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
     
     splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CIERTO);
+    assert(splitted == CSMTRUE);
     
-    i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
+    i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -523,7 +523,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CYBOOL splitted;
+    CSMBOOL splitted;
     struct csmsolid_t *solid_above, *solid_below;
     
     i_set_output_debug_file("split_hueco_plano_medio.txt");
@@ -531,14 +531,14 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
     shape2d = gcelem2d_contorno_rectangular_hueco(1., 1., 0.5, 0.5);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
-    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
     
     csmmath_implicit_plane_equation(0., 0., .5, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
     
     splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CIERTO);
+    assert(splitted == CSMTRUE);
     
-    i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
+    i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -553,7 +553,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CYBOOL splitted;
+    CSMBOOL splitted;
     struct csmsolid_t *solid_above, *solid_below;
     
     i_set_output_debug_file("split_hueco_plano_medio2.txt");
@@ -567,14 +567,14 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
                         shape2d,
                         0., 1., 0.,
                         1., 0., 0., 0., 0., 1.);
-    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
     
     csmmath_implicit_plane_equation(0., 0., 0., 1., 0., 0., 0., 1., 0.5, &A, &B, &C, &D);
     
     splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CIERTO);
+    assert(splitted == CSMTRUE);
 
-    i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
+    i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -589,7 +589,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CYBOOL splitted;
+    CSMBOOL splitted;
     struct csmsolid_t *solid_above, *solid_below;
     
     i_set_output_debug_file("split_rectangular_hueco_por_plano_superior.txt");
@@ -598,21 +598,21 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
     shape2d = gcelem2d_contorno_circular_hueco(1., 0.367, 32);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
-    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
     
     csmmath_implicit_plane_equation(0., 0., 1., 1., 0., 0., 0., 1., 1., &A, &B, &C, &D);
     
     splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CIERTO);
+    assert(splitted == CSMTRUE);
     
     csmsolid_free(&solid_above);
 
     csmmath_implicit_plane_equation(0., 0., 1., 1., 0., 0., 0., 1., -1., &A, &B, &C, &D);
 
     splitted = csmsplit_does_plane_split_solid(solid_below, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CIERTO);
+    assert(splitted == CSMTRUE);
     
-    i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
+    i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -625,22 +625,22 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior2(void)
     struct gccontorno_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CYBOOL splitted;
+    CSMBOOL splitted;
     struct csmsolid_t *solid_above, *solid_below;
     
     shape2d = gcelem2d_contorno_rectangular_hueco(1., 1., 0.5, 0.5);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
-    csmsolid_print_debug(solid1, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
     
     csmmath_implicit_plane_equation(0., 0., 1. - 1.5e-3, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
     
     splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CIERTO);
+    assert(splitted == CSMTRUE);
 
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid_above, CIERTO);
-    csmsolid_print_debug(solid_below, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid_above, CSMTRUE);
+    csmsolid_print_debug(solid_below, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -668,13 +668,13 @@ static void i_test_union_solidos1(struct csmviewer_t *viewer)
     //solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -702,12 +702,12 @@ static void i_test_union_solidos2(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -728,13 +728,13 @@ static void i_test_interseccion_solidos1(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -757,16 +757,16 @@ static void i_test_interseccion_solidos2(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -790,13 +790,13 @@ static void i_test_interseccion_solidos5(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 2., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 2., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -821,13 +821,13 @@ static void i_test_interseccion_solidos7(struct csmviewer_t *viewer)
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
     solid_res = csmsetop_union_A_and_B(solid1, solid2);
     solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     gccontorno_destruye(&c_shape2d);
@@ -852,7 +852,7 @@ static void i_test_union_solidos6(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 0.5, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
@@ -861,7 +861,7 @@ static void i_test_union_solidos6(struct csmviewer_t *viewer)
     solid3 = csmsweep_create_solid_from_shape_debug(shape3d, 1., 0., 1, 1., 0., 0., 0., 1., 0., shape3d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 2000);
     
     solid_res2 = csmsetop_union_A_and_B(solid3, solid_res);
-    csmsolid_print_debug(solid_res2, CIERTO);
+    csmsolid_print_debug(solid_res2, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -890,12 +890,12 @@ static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
     
     csmdebug_print_debug_info("******* Solid 1 intersect solid 2 [begin]");
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     csmdebug_print_debug_info("******* Solid 1 intersect solid 2 [end]");
 
     csmdebug_print_debug_info("******* Solid 2 intersect solid 1 [begin]");
     solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     csmdebug_print_debug_info("******* Solid 2 intersect solid 2 [end]");
     
     gccontorno_destruye(&shape2d);
@@ -922,13 +922,13 @@ static void i_test_interseccion_solidos4(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -954,13 +954,13 @@ static void i_test_resta_solidos1(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&shape2d);
     csmsolid_free(&solid1);
@@ -987,13 +987,13 @@ static void i_test_resta_solidos2(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(rshape2d, 0.5, -0.25, 0.75, 1., 0., 0., 0., 1., 0., rshape2d, 0.5, -0.25, 0., 1., 0., 0., 0., 1., 0., 1000);
     
     solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&rshape2d);
     gccontorno_destruye(&shape2d);
@@ -1030,13 +1030,13 @@ static void i_test_multiple_solidos1(struct csmviewer_t *viewer)
     solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
     solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
     solid_res = csmsetop_union_A_and_B(solid2, solid1);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1071,28 +1071,28 @@ static void i_test_multiple_solidos2(struct csmviewer_t *viewer)
                         1000);
     
     solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     
     solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     
     solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     
     solid_res = csmsetop_union_A_and_B(solid2, solid1);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
     
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1129,13 +1129,13 @@ static void i_test_multiple_solidos3(struct csmviewer_t *viewer)
     solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
     solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
     solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    csmsolid_print_debug(solid_res, CIERTO);
+    csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1198,8 +1198,8 @@ static void i_test_cilindro1(struct csmviewer_t *viewer)
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
     }
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1261,8 +1261,8 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
     }
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1317,8 +1317,8 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
     }
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1374,8 +1374,8 @@ static void i_test_cilindro6(struct csmviewer_t *viewer)
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
     }
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1442,8 +1442,8 @@ static void i_test_cilindro7(struct csmviewer_t *viewer)
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
 
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1502,7 +1502,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
         //solid_res2 = csmsetop_difference_A_minus_B(solid_res2, solid3);
         
         {
-            CYBOOL does_split;
+            CSMBOOL does_split;
             struct csmsolid_t *solid_above, *solid_below;
             double desp;
             double A, B, C, D;
@@ -1512,7 +1512,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
             D = -1.;
             
             does_split = csmsplit_does_plane_split_solid(solid_res2, A, B, C, D, &solid_above, &solid_below);
-            assert(does_split == CIERTO);
+            assert(does_split == CSMTRUE);
             
             desp = 0.5;
             csmsolid_move(solid_above, A * desp, B * desp, C * desp);
@@ -1520,7 +1520,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
             desp = -0.5;
             csmsolid_move(solid_below, A * desp, B * desp, C * desp);
             
-            i_show_split_results(A, B, C, D, CIERTO, solid_above, solid_below);
+            i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
             
             csmsolid_free(&solid_above);
             csmsolid_free(&solid_below);
@@ -1532,13 +1532,13 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
     
     //solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
     //solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    //csmsolid_print_debug(solid_res, CIERTO);
+    //csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1556,7 +1556,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
     unsigned long no_points_circle;
     
     i_set_output_debug_file("inters_cilindro2.txt");
-    csmdebug_set_enabled_by_code(FALSO);
+    csmdebug_set_enabled_by_code(CSMFALSE);
 
     no_points_circle = 32;
     
@@ -1586,7 +1586,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
         solid_res = csmsetop_difference_A_minus_B(solid_res, solid3);
         
         
-        csmdebug_set_enabled_by_code(CIERTO);
+        csmdebug_set_enabled_by_code(CSMTRUE);
         
         //cshape2d = gcelem2d_contorno_rectangular(0.75, 0.75);
 
@@ -1642,7 +1642,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
         }
         
         {
-            CYBOOL does_split;
+            CSMBOOL does_split;
             struct csmsolid_t *solid_above, *solid_below;
             double desp;
             double A, B, C, D;
@@ -1653,7 +1653,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             D = -0.55; // Falla split a -0.75
             
             does_split = csmsplit_does_plane_split_solid(solid_res, A, B, C, D, &solid_above, &solid_below);
-            assert(does_split == CIERTO);
+            assert(does_split == CSMTRUE);
             
             desp = 0.5;
             csmsolid_move(solid_above, A * desp, B * desp, C * desp);
@@ -1661,7 +1661,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             desp = -0.5;
             csmsolid_move(solid_below, A * desp, B * desp, C * desp);
             
-            i_show_split_results(A, B, C, D, FALSO, solid_above, solid_below);
+            i_show_split_results(A, B, C, D, CSMFALSE, solid_above, solid_below);
             
             csmsolid_free(&solid_above);
             csmsolid_free(&solid_below);
@@ -1672,13 +1672,13 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
     
     //solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
     //solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    //csmsolid_print_debug(solid_res, CIERTO);
+    //csmsolid_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1746,8 +1746,8 @@ static void i_test_cilindro8(struct csmviewer_t *viewer)
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
 
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1813,8 +1813,8 @@ static void i_test_cilindro9(struct csmviewer_t *viewer)
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
 
-    csmsolid_print_debug(solid1, CIERTO);
-    csmsolid_print_debug(solid2, CIERTO);
+    csmsolid_print_debug(solid1, CSMTRUE);
+    csmsolid_print_debug(solid2, CSMTRUE);
     
     gccontorno_destruye(&cshape2d);
     gccontorno_destruye(&shape2d);
@@ -1861,7 +1861,7 @@ static void i_test_mechanical_part1(void)
     ay = 0.1;
     main_part_length = 1.;
     
-    csmdebug_set_enabled_by_code(FALSO);
+    csmdebug_set_enabled_by_code(CSMFALSE);
     
     //main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
     main_part_shape = gcelem2d_contorno_circular(ax, 32);
@@ -1916,10 +1916,10 @@ static void i_test_mechanical_part1(void)
         csmsolid_free(&ring_part2);
      }
     
-    csmdebug_set_enabled_by_code(CIERTO);
+    csmdebug_set_enabled_by_code(CSMTRUE);
     csmdebug_set_viewer_results(main_part, NULL);
     csmdebug_show_viewer();
-    //csmdebug_set_enabled_by_code(FALSO);
+    //csmdebug_set_enabled_by_code(CSMFALSE);
    
     
     {
@@ -1946,7 +1946,7 @@ static void i_test_mechanical_part1(void)
         csmsolid_free(&basic_part2);
     }
 
-    csmdebug_set_enabled_by_code(CIERTO);
+    csmdebug_set_enabled_by_code(CSMTRUE);
 
     csmdebug_set_viewer_results(main_part, NULL);
     csmdebug_show_viewer();
@@ -1954,18 +1954,18 @@ static void i_test_mechanical_part1(void)
     {
         double A, B, C, D;
         struct csmsolid_t *solid_above, *solid_below;
-        CYBOOL splitted;
+        CSMBOOL splitted;
 
-        csmdebug_set_enabled_by_code(FALSO);
+        csmdebug_set_enabled_by_code(CSMFALSE);
         
         csmmath_implicit_plane_equation(0., 0., 0., 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
     
         splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CIERTO);
+        assert(splitted == CSMTRUE);
 
-        csmdebug_set_enabled_by_code(CIERTO);
+        csmdebug_set_enabled_by_code(CSMTRUE);
         
-        i_show_split_results(A, B, C, D, FALSO, solid_above, solid_below);
+        i_show_split_results(A, B, C, D, CSMFALSE, solid_above, solid_below);
     }
     
     gccontorno_destruye(&main_part_shape);
@@ -1988,7 +1988,7 @@ static void i_test_mechanical_part1_redux(void)
     ay = 0.1;
     main_part_length = 1.;
     
-    csmdebug_set_enabled_by_code(FALSO);
+    csmdebug_set_enabled_by_code(CSMFALSE);
     
     main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
     //main_part_shape = gcelem2d_contorno_circular(ax, 32);
@@ -2043,31 +2043,31 @@ static void i_test_mechanical_part1_redux(void)
         csmsolid_free(&ring_part2);
      }
     
-    csmdebug_set_enabled_by_code(CIERTO);
+    csmdebug_set_enabled_by_code(CSMTRUE);
     csmdebug_set_viewer_results(main_part, NULL);
     csmdebug_show_viewer();
-    //csmdebug_set_enabled_by_code(FALSO);
+    //csmdebug_set_enabled_by_code(CSMFALSE);
    
     
     {
         double A, B, C, D;
         struct csmsolid_t *solid_above, *solid_below;
-        CYBOOL splitted;
+        CSMBOOL splitted;
 
-        csmdebug_set_enabled_by_code(FALSO);
+        csmdebug_set_enabled_by_code(CSMFALSE);
         
         csmmath_implicit_plane_equation(0., 0., 0.5, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
     
         splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CIERTO);
+        assert(splitted == CSMTRUE);
 
-        csmdebug_set_enabled_by_code(CIERTO);
+        csmdebug_set_enabled_by_code(CSMTRUE);
         
         main_part = solid_above;
         
         csmmath_implicit_plane_equation(0., 0., 0.56, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
         splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CIERTO);
+        assert(splitted == CSMTRUE);
         
         main_part = solid_below;
         
@@ -2098,7 +2098,7 @@ static void i_test_mechanical_part1_redux(void)
         csmsolid_free(&basic_part2);
     }
 
-    csmdebug_set_enabled_by_code(CIERTO);
+    csmdebug_set_enabled_by_code(CSMTRUE);
 
     csmdebug_set_viewer_results(main_part, NULL);
     csmdebug_show_viewer();
@@ -2106,18 +2106,18 @@ static void i_test_mechanical_part1_redux(void)
     {
         double A, B, C, D;
         struct csmsolid_t *solid_above, *solid_below;
-        CYBOOL splitted;
+        CSMBOOL splitted;
 
-        csmdebug_set_enabled_by_code(FALSO);
+        csmdebug_set_enabled_by_code(CSMFALSE);
         
         csmmath_implicit_plane_equation(0., 0., 0., 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
     
         splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CIERTO);
+        assert(splitted == CSMTRUE);
 
-        csmdebug_set_enabled_by_code(CIERTO);
+        csmdebug_set_enabled_by_code(CSMTRUE);
         
-        i_show_split_results(A, B, C, D, FALSO, solid_above, solid_below);
+        i_show_split_results(A, B, C, D, CSMFALSE, solid_above, solid_below);
     }
     
     gccontorno_destruye(&main_part_shape);
@@ -2171,7 +2171,7 @@ static void i_test_mechanical_part2(void)
     
     bolt_solid = csmsetop_union_A_and_B(head_solid, body_solid);
     
-    csmdebug_set_enabled_by_code(FALSO);
+    csmdebug_set_enabled_by_code(CSMFALSE);
     {
         unsigned long i, num_divisions;
         
@@ -2185,7 +2185,7 @@ static void i_test_mechanical_part2(void)
             csmsolid_move(thread_solid, 0., 0., thread_length);
         }
     }
-    csmdebug_set_enabled_by_code(CIERTO);
+    csmdebug_set_enabled_by_code(CSMTRUE);
     
     csmdebug_set_viewer_results(bolt_solid, NULL);
     csmdebug_show_viewer();
@@ -2196,17 +2196,17 @@ static void i_test_mechanical_part2(void)
         struct csmsolid_t *block_solid;
         
         bolt_solid2 = csmsolid_duplicate(bolt_solid);
-        csmsolid_rotate(bolt_solid2, 0.6 * PI, 0., 0., 0.5 * (bolt_length + head_length), 0., 1., 0.);
+        csmsolid_rotate(bolt_solid2, 0.6 * CSMMATH_PI, 0., 0., 0.5 * (bolt_length + head_length), 0., 1., 0.);
         csmsolid_move(bolt_solid2, 0.1 - 0.2 * (bolt_length + head_length) + head_length, 0., 0.);
         
         bolt_solid3 = csmsolid_duplicate(bolt_solid);
-        csmsolid_rotate(bolt_solid3, -0.5 * PI, 0., 0., 0.5 * (bolt_length + head_length), 0., 1., 0.);
+        csmsolid_rotate(bolt_solid3, -0.5 * CSMMATH_PI, 0., 0., 0.5 * (bolt_length + head_length), 0., 1., 0.);
         csmsolid_move(bolt_solid3, -0.1 + 0.5 * (bolt_length + head_length) - head_length, 0., 0.);
 
         csmdebug_set_viewer_results(bolt_solid2, bolt_solid3);
         csmdebug_show_viewer();
         
-        csmdebug_set_enabled_by_code(FALSO);
+        csmdebug_set_enabled_by_code(CSMFALSE);
         {
             block_shape = gcelem2d_contorno_rectangular(0.2, 0.2);
         
@@ -2224,7 +2224,7 @@ static void i_test_mechanical_part2(void)
             block_solid = csmsetop_difference_A_minus_B(block_solid, bolt_solid2);
             block_solid = csmsetop_difference_A_minus_B(block_solid, bolt_solid3);
         }
-        csmdebug_set_enabled_by_code(CIERTO);
+        csmdebug_set_enabled_by_code(CSMTRUE);
         
         csmdebug_set_viewer_results(block_solid, NULL);
         csmdebug_show_viewer();
@@ -2232,18 +2232,18 @@ static void i_test_mechanical_part2(void)
         {
             double A, B, C, D;
             struct csmsolid_t *solid_above, *solid_below;
-            CYBOOL splitted;
+            CSMBOOL splitted;
 
-            csmdebug_set_enabled_by_code(FALSO);
+            csmdebug_set_enabled_by_code(CSMFALSE);
             
             csmmath_implicit_plane_equation(0., 0., 0., 0., 0., 1., 1., 0., 0., &A, &B, &C, &D);
         
             splitted = csmsplit_does_plane_split_solid(block_solid, A, B, C, D, &solid_above, &solid_below);
-            assert(splitted == CIERTO);
+            assert(splitted == CSMTRUE);
 
-            csmdebug_set_enabled_by_code(CIERTO);
+            csmdebug_set_enabled_by_code(CSMTRUE);
             
-            i_show_split_results(A, B, C, D, FALSO, solid_above, NULL);
+            i_show_split_results(A, B, C, D, CSMFALSE, solid_above, NULL);
         }
     }
 }
@@ -2422,7 +2422,7 @@ static void i_test_sphere2(void)
     res = csmsetop_difference_A_minus_B(sphere, torus);
     res = csmsetop_difference_A_minus_B(res, torus2);
     res = csmsetop_difference_A_minus_B(res, cone);
-    csmsolid_set_draw_only_border_edges(res, FALSO);
+    csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -2480,7 +2480,7 @@ static void i_test_sphere3(void)
     
     res = csmsetop_union_A_and_B(sphere, torus);
     res = csmsetop_difference_A_minus_B(res, torus2);
-    csmsolid_set_draw_only_border_edges(res, FALSO);
+    csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();

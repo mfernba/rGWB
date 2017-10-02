@@ -11,12 +11,12 @@
 extern "C"
 {
     #include "csmmath.inl"
+    #include "csmstring.inl"
 }
 
 #include <basicSystem/bsassert.h>
 #include <basicSystem/bsmaterial.h>
 #include "standarc.h"
-#include "cypestr.h"
 #include "a_punter.h"
 
 #include <stdio.h>
@@ -45,7 +45,7 @@ struct i_debug_point_t
 static struct i_debug_point_t g_Debug_points[i_MAX_NUM_POINTS];
 static unsigned long g_no_debug_points = 0;
 
-static CYBOOL g_Draw_plane = FALSO;
+static CSMBOOL g_Draw_plane = CSMFALSE;
 static double g_A = 0., g_B = 0., g_C = 0., g_D = 0.;
 
 typedef void (*i_FPtr_show_viewer)(struct csmviewer_t *);
@@ -67,9 +67,9 @@ static FILE *g_output_file = NULL;
 
 // --------------------------------------------------------------------------------
 
-void csmdebug_set_enabled_by_code(CYBOOL enabled)
+void csmdebug_set_enabled_by_code(CSMBOOL enabled)
 {
-    if (enabled == CIERTO)
+    if (enabled == CSMTRUE)
         i_DEBUG_IS_DISABLED_BY_CODE = 0;
     else
         i_DEBUG_IS_DISABLED_BY_CODE = 1;
@@ -77,12 +77,12 @@ void csmdebug_set_enabled_by_code(CYBOOL enabled)
 
 // --------------------------------------------------------------------------------
 
-CYBOOL csmdebug_debug_enabled(void)
+CSMBOOL csmdebug_debug_enabled(void)
 {
     if (i_DEBUG_IS_DISABLED_BY_CODE == 1)
-        return FALSO;
+        return CSMFALSE;
     else
-        return ES_CIERTO(i_DEBUG_SCREEN == 1 || g_output_file != NULL);
+        return IS_TRUE(i_DEBUG_SCREEN == 1 || g_output_file != NULL);
 }
 
 // --------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ static void i_init(void)
         buffer[sizeof(buffer) - 1] = '\0';\
         va_end(argptr);\
         \
-        if (i_DEBUG_SCREEN == CIERTO) fprintf(stdout, "%s", buffer);\
+        if (i_DEBUG_SCREEN == CSMTRUE) fprintf(stdout, "%s", buffer);\
         if (g_output_file != NULL) fprintf(g_output_file, "%s", buffer);\
     }\
 )
@@ -144,7 +144,7 @@ static void i_print_tab_level(unsigned long no_tabs)
 
 void csmdebug_begin_context(const char *context)
 {
-    if (csmdebug_debug_enabled() == CIERTO)
+    if (csmdebug_debug_enabled() == CSMTRUE)
     {
         bsassert(i_NO_STACKED_CONTEXTS < i_MAX_NUM_CONTEXTS);
     
@@ -163,7 +163,7 @@ void csmdebug_begin_context(const char *context)
 
 void csmdebug_end_context(void)
 {
-    if (csmdebug_debug_enabled() == CIERTO)
+    if (csmdebug_debug_enabled() == CSMTRUE)
     {
         bsassert(i_NO_STACKED_CONTEXTS > 0);
         csmdebug_print_debug_info("END CONTEXT\n", NULL);
@@ -177,7 +177,7 @@ void csmdebug_end_context(void)
 
 void csmdebug_print_debug_info(const char *format, ...)
 {
-    if (csmdebug_debug_enabled() == CIERTO)
+    if (csmdebug_debug_enabled() == CSMTRUE)
     {
         if (i_NO_STACKED_CONTEXTS > 0)
             i_print_tab_level(i_NO_STACKED_CONTEXTS);
@@ -216,7 +216,7 @@ void csmdebug_close_output_file(void)
 
 // --------------------------------------------------------------------------------
 
-CYBOOL csmdebug_is_print_solid_unblocked(void)
+CSMBOOL csmdebug_is_print_solid_unblocked(void)
 {
     return !i_DEBUG_PRINT_SOLID_BLOCKED;
 }
@@ -225,14 +225,14 @@ CYBOOL csmdebug_is_print_solid_unblocked(void)
 
 void csmdebug_block_print_solid(void)
 {
-    i_DEBUG_PRINT_SOLID_BLOCKED = CIERTO;
+    i_DEBUG_PRINT_SOLID_BLOCKED = CSMTRUE;
 }
     
 // --------------------------------------------------------------------------------
 
 void csmdebug_unblock_print_solid(void)
 {
-    i_DEBUG_PRINT_SOLID_BLOCKED = FALSO;
+    i_DEBUG_PRINT_SOLID_BLOCKED = CSMFALSE;
 }
 
 // --------------------------------------------------------------------------------
@@ -269,7 +269,7 @@ void csmdebug_set_viewer_results(struct csmsolid_t *solid1, struct csmsolid_t *s
 
 void csmdebug_show_viewer(void)
 {
-    if (i_DEBUG_IS_DISABLED_BY_CODE == FALSO && i_DEBUG_VISUAL == CIERTO && g_func_show_viewer != NULL)
+    if (i_DEBUG_IS_DISABLED_BY_CODE == CSMFALSE && i_DEBUG_VISUAL == CSMTRUE && g_func_show_viewer != NULL)
     {
         bsassert(g_Viewer != NULL);
         g_func_show_viewer(g_Viewer);
@@ -280,7 +280,7 @@ void csmdebug_show_viewer(void)
 
 void csmdebug_clear_debug_points(void)
 {
-    g_Draw_plane = FALSO;
+    g_Draw_plane = CSMFALSE;
     g_no_debug_points = 0;
 }
 
@@ -302,21 +302,21 @@ void csmdebug_append_debug_point(double x, double y, double z, char **descriptio
         g_no_debug_points++;
     }
     
-    cypestr_destruye(description);
+    csmstring_free(description);
 }
 
 // --------------------------------------------------------------------------------
 
 void csmdebug_clear_plane(void)
 {
-    g_Draw_plane = FALSO;
+    g_Draw_plane = CSMFALSE;
 }
 
 // --------------------------------------------------------------------------------
 
 void csmdebug_set_plane(double A, double B, double C, double D)
 {
-    g_Draw_plane = CIERTO;
+    g_Draw_plane = CSMTRUE;
     g_A = A;
     g_B = B;
     g_C = C;
@@ -396,7 +396,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
         }
     }
     
-    if (g_Draw_plane == CIERTO)
+    if (g_Draw_plane == CSMTRUE)
     {
         double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
         double desp;

@@ -9,8 +9,8 @@
 #include "csmloop.inl"
 #include "csmsolid.inl"
 
-#include "cyassert.h"
-#include "cypespy.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
 
 // --------------------------------------------------------------------------------
 
@@ -28,5 +28,5 @@ void csmeuler_lmfkrh(struct csmloop_t *loop, struct csmface_t **new_face_opc)
     csmsolid_append_new_face(solid, &new_face_loc);
     csmface_add_loop_while_removing_from_old(new_face_loc, loop);
     
-    ASIGNA_OPC(new_face_opc, new_face_loc);
+    ASSIGN_OPTIONAL_VALUE(new_face_opc, new_face_loc);
 }
