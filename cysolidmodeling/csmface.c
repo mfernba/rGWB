@@ -13,10 +13,10 @@
 #include "csmassert.inl"
 #include "csmid.inl"
 #include "csmmem.inl"
+#include "csmmath.inl"
 #include "csmmath.tli"
 
 #include "cont2d.h"
-#include "standarc.h"
 
 struct csmface_t
 {
@@ -99,7 +99,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     B = 0.;
     C = 0.;
     D = 0.;
-    fuzzy_epsilon = 1.e-6;
+    fuzzy_epsilon = csmtolerance_coplanarity();
     dropped_coord = (enum csmmath_dropped_coord_t)USHRT_MAX;
     
     bbox = csmbbox_create_empty_box();
@@ -268,6 +268,8 @@ static void i_compute_bounding_box(struct csmloop_t *floops, struct csmbbox_t *b
         iterator = csmloop_next(iterator);
         
     } while (iterator != NULL);
+    
+    csmbbox_add_margin(bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -322,19 +324,47 @@ void csmface_redo_geometric_generated_data(struct csmface_t *face)
 
 // ------------------------------------------------------------------------------------------
 
+CSMBOOL csmface_should_analyze_intersections_between_faces(const struct csmface_t *face1, const struct csmface_t *face2)
+{
+    assert_no_null(face1);
+    assert_no_null(face2);
+    
+    return csmbbox_intersects_with_other_bbox(face1->bbox, face2->bbox);
+}
+
+// ------------------------------------------------------------------------------------------
+
+CSMBOOL csmface_should_analyze_intersections_with_segment(
+                        const struct csmface_t *face,
+                        double x1, double y1, double z1, double x2, double y2, double z2)
+{
+    assert_no_null(face);
+    return csmbbox_intersects_with_segment(face->bbox, x1, y1, z1, x2, y2, z2);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static CSMBOOL i_is_point_on_face_plane(
                         double x, double y, double z,
                         double A, double B, double C, double D,
-                        double fuzzy_epsilon)
+                        double fuzzy_epsilon,
+                        const struct csmbbox_t *bbox)
 {
-    double distance;
-    
-    distance = csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D);
-    
-    if (fabs(distance) < fuzzy_epsilon)
-        return CSMTRUE;
-    else
+    if (csmbbox_contains_point(bbox, x, y, z) == CSMFALSE)
+    {
         return CSMFALSE;
+    }
+    else
+    {
+        double distance;
+    
+        distance = csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D);
+    
+        if (csmmath_fabs(distance) < fuzzy_epsilon)
+            return CSMTRUE;
+        else
+            return CSMFALSE;
+    }
 }
 
 // ------------------------------------------------------------------------------------------
@@ -380,7 +410,8 @@ CSMBOOL csmface_contains_point(
     if (i_is_point_on_face_plane(
                         x, y, z,
                         face->A, face->B, face->C, face->D,
-                        face->fuzzy_epsilon) == CSMFALSE)
+                        face->fuzzy_epsilon,
+                        face->bbox) == CSMFALSE)
     {
         containts_point = CSMFALSE;
         
@@ -408,9 +439,12 @@ CSMBOOL csmface_contains_point(
             else
             {
                 struct csmloop_t *loop_iterator;
-            
+                double tolerance;
+                
                 loop_iterator = face->floops;
                 containts_point = CSMTRUE;
+                
+                tolerance = csmtolerance_point_in_loop_boundary();
             
                 while (loop_iterator != NULL)
                 {
@@ -424,7 +458,7 @@ CSMBOOL csmface_contains_point(
                         if (csmloop_is_point_inside_loop(
                                 loop_iterator,
                                 x, y, z, face->dropped_coord,
-                                csmtolerance_point_in_loop_boundary(),
+                                tolerance,
                                 &type_of_containment_hole, &hit_vertex_hole, &hit_hedge_hole, &t_relative_to_hit_hedge_hole) == CSMTRUE)
                         {
                             if (type_of_containment_hole == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
@@ -469,7 +503,8 @@ CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x
     if (i_is_point_on_face_plane(
                         x, y, z,
                         face->A, face->B, face->C, face->D,
-                        face->fuzzy_epsilon) == CSMFALSE)
+                        face->fuzzy_epsilon,
+                        face->bbox) == CSMFALSE)
     {
         return CSMFALSE;
     }
@@ -492,9 +527,12 @@ CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x
         else
         {
             struct csmloop_t *loop_iterator;
+            double tolerance;
             
             loop_iterator = face->floops;
             is_interior_to_face = CSMTRUE;
+            
+            tolerance = csmtolerance_point_in_loop_boundary();
             
             while (loop_iterator != NULL)
             {
@@ -503,7 +541,7 @@ CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x
                     if (csmloop_is_point_inside_loop(
                             loop_iterator,
                             x, y, z, face->dropped_coord,
-                            csmtolerance_point_in_loop_boundary(),
+                            tolerance,
                             &type_of_containment, NULL, NULL, NULL) == CSMTRUE)
                     {
                         if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
@@ -719,7 +757,7 @@ CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface
     d1 = csmmath_signed_distance_point_to_plane(Xo1, Yo1, Zo1, face2->A, face2->B, face2->C, face2->D);
     d2 = csmmath_signed_distance_point_to_plane(Xo2, Yo2, Zo2, face1->A, face1->B, face1->C, face1->D);
     
-    if (fabs(d1) > face2->fuzzy_epsilon || fabs(d2) > face1->fuzzy_epsilon)
+    if (csmmath_fabs(d1) > face2->fuzzy_epsilon || csmmath_fabs(d2) > face1->fuzzy_epsilon)
     {
         return CSMFALSE;
     }
@@ -729,7 +767,7 @@ CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface
         
         dot = csmmath_dot_product3D(face1->A, face1->B, face1->C, face2->A, face2->B, face2->C);
         
-        if (fabs(1. - fabs(dot)) > 1.e-5)
+        if (csmmath_fabs(1. - csmmath_fabs(dot)) > 1.e-5)
             return CSMFALSE;
         else
             return CSMTRUE;
@@ -747,7 +785,7 @@ CSMBOOL csmface_faces_define_border_edge(struct csmface_t *face1, const struct c
     
     dot = csmmath_dot_product3D(face1->A, face1->B, face1->C, face2->A, face2->B, face2->C);
     
-    if (fabs(dot) > i_COS_15_DEGREES)
+    if (csmmath_fabs(dot) > i_COS_15_DEGREES)
         return CSMFALSE;
     else
         return CSMTRUE;
@@ -776,7 +814,7 @@ void csmface_face_equation(
     assert_no_null(B);
     assert_no_null(C);
     assert_no_null(D);
-    assert(fabs(face->A) > 0. || fabs(face->B) > 0. || fabs(face->C) > 0.);
+    assert(csmmath_fabs(face->A) > 0. || csmmath_fabs(face->B) > 0. || csmmath_fabs(face->C) > 0.);
     
     *A = face->A;
     *B = face->B;

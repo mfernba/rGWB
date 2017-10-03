@@ -16,15 +16,15 @@
 #include "csmsetopcom.inl"
 #include "csmsetop.tli"
 #include "csmsolid.tli"
+#include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
-
-#include "a_punter.h"
-#include "copiafor.h"
 #include "csmassert.inl"
 #include "csmmem.inl"
 #include "csmmath.tli"
+
+#include "a_punter.h"
 
 ArrEstructura(csmvertex_t);
 ArrEstructura(csmedge_t);

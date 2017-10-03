@@ -30,8 +30,6 @@ enum csmmath_comparac_t
     CSMMATH_COMPARAC_PRIMERO_MAYOR = 1
 };
 
-#define CSMMATH_ABS(A) (((A) >= 0.0) ? (A): (-A))
-
 #define CSMMATH_MIN(A, B) ((A) < (B)) ? (A): (B)
 #define CSMMATH_MAX(A, B) ((A) > (B)) ? (A): (B)
 

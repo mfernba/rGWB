@@ -942,19 +942,25 @@ CSMBOOL csmsplit_does_plane_split_solid(
     csmdebug_set_viewer_results(NULL, NULL);
     csmdebug_set_viewer_parameters(work_solid, NULL);
     csmdebug_set_plane(A, B, C, D);
-    csmdebug_show_viewer();
+    //csmdebug_show_viewer();
     
     set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D);
     
-    csmdebug_print_debug_info("---->WORK SOLID BEFORE INSERTING NULL EDGES\n");
-    csmsolid_print_debug(work_solid, CSMTRUE);
-    csmdebug_print_debug_info("<----WORK SOLID BEFORE INSERTING NULL EDGES\n");
+    if (csmdebug_debug_enabled() == CSMTRUE)
+    {
+        csmdebug_print_debug_info("---->WORK SOLID BEFORE INSERTING NULL EDGES\n");
+        csmsolid_print_debug(work_solid, CSMTRUE);
+        csmdebug_print_debug_info("<----WORK SOLID BEFORE INSERTING NULL EDGES\n");
+    }
 
     set_of_null_edges = i_insert_nulledges_to_split_solid(A, B, C, D, set_of_on_vertices);
 
-    csmdebug_print_debug_info("---->WORK SOLID AFTER INSERTING NULL EDGES\n");
-    csmsolid_print_debug(work_solid, CSMTRUE);
-    csmdebug_print_debug_info("<----WORK SOLID AFTER INSERTING NULL EDGES\n");
+    if (csmdebug_debug_enabled() == CSMTRUE)
+    {
+        csmdebug_print_debug_info("---->WORK SOLID AFTER INSERTING NULL EDGES\n");
+        csmsolid_print_debug(work_solid, CSMTRUE);
+        csmdebug_print_debug_info("<----WORK SOLID AFTER INSERTING NULL EDGES\n");
+    }
 
     //csmdebug_show_viewer();
     

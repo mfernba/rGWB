@@ -30,9 +30,10 @@
 #include "csmeuler_lmfkrh.inl"
 
 #include "a_punter.h"
-#include "cont2d.h"
 #include "csmassert.inl"
 #include "csmassert.inl"
+
+#include <geomcomp/gccontorno.h>
 
 ArrEstructura(csmhedge_t);
 

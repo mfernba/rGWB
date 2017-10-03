@@ -21,10 +21,9 @@
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmvertex.inl"
-
 #include "csmassert.inl"
+#include "csmmath.inl"
 #include "csmmath.tli"
-#include "standarc.h"
 
 // --------------------------------------------------------------------------------
 
@@ -38,9 +37,9 @@ static void i_compute_point_on_torus(
     assert_no_null(y);
     assert_no_null(z);
     
-    *x = (R + r * cos(alfa_rad)) * cos(beta_rad);
-    *y = (R + r * cos(alfa_rad)) * sin(beta_rad);
-    *z = r * sin(alfa_rad);
+    *x = (R + r * csmmath_cos(alfa_rad)) * csmmath_cos(beta_rad);
+    *y = (R + r * csmmath_cos(alfa_rad)) * csmmath_sin(beta_rad);
+    *z = r * csmmath_sin(alfa_rad);
 }
 
 // --------------------------------------------------------------------------------
@@ -188,8 +187,8 @@ static void i_compute_point_on_cone_base(
     assert_no_null(y);
     assert_no_null(z);
     
-    *x = r * cos(beta_rad);
-    *y = r * sin(beta_rad);
+    *x = r * csmmath_cos(beta_rad);
+    *y = r * csmmath_sin(beta_rad);
     *z = 0.;
 }
 
@@ -321,9 +320,9 @@ static void i_extrude_sphere_hedge(
     incr_beta_rad = 2. * CSMMATH_PI / no_points_circle_radius_meridians;
     beta_rad = 2. * CSMMATH_PI - incr_beta_rad * circle_point_idx;
     
-    x = r_sphere * cos(beta_rad) * cos(alfa_rad);
-    y = r_sphere * sin(beta_rad) * cos(alfa_rad);
-    z = direction_sign * r_sphere * sin(alfa_rad);
+    x = r_sphere * csmmath_cos(beta_rad) * csmmath_cos(alfa_rad);
+    y = r_sphere * csmmath_sin(beta_rad) * csmmath_cos(alfa_rad);
+    z = direction_sign * r_sphere * csmmath_sin(alfa_rad);
     
     csmeuler_lmev_strut_edge(hedge, x, y, z, &new_hedge);
     csmvertex_set_mask_attrib(csmhedge_vertex(new_hedge), (csmvertex_mask_t)circle_point_idx);

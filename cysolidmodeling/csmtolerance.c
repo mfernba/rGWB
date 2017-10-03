@@ -45,3 +45,9 @@ double csmtolerance_point_in_loop_boundary(void)
     return 1.e-6;
 }
 
+// --------------------------------------------------------------------------------
+
+double csmtolerance_bbox_absolute_tolerance(void)
+{
+    return 0.01;
+}

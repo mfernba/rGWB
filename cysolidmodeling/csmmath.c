@@ -221,7 +221,7 @@ CSMBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance
     
     squared_norm = CSMMATH_CUAD(Ux) + CSMMATH_CUAD(Uy) + CSMMATH_CUAD(Uz);
     
-    if (fabs(squared_norm) < CSMMATH_CUAD(tolerance))
+    if (csmmath_fabs(squared_norm) < CSMMATH_CUAD(tolerance))
         return CSMTRUE;
     else
         return CSMFALSE;
@@ -589,7 +589,7 @@ static void i_anula_valores_despreciables(double *valor)
 {
 	assert_no_null(valor);
 	
-	if (CSMMATH_ABS(*valor) < 1.e-20)
+	if (csmmath_fabs(*valor) < 1.e-20)
 		*valor = 0.;
 }
 
@@ -609,7 +609,7 @@ void csmmath_plane_axis_from_implicit_plane_equation(
 	assert_no_null(Vy);
 	assert_no_null(Vz);
 	
-	if (CSMMATH_ABS(A) < 1.e-6 && CSMMATH_ABS(B) < 1.e-6 && CSMMATH_ABS(C) > 1.e-6)
+	if (fabs(A) < 1.e-6 && fabs(B) < 1.e-6 && fabs(C) > 1.e-6)
 	{	
 		Ux1 = 1.;
 		Uy1 = 0.;
@@ -635,3 +635,30 @@ void csmmath_plane_axis_from_implicit_plane_equation(
 	*Vz = Uz2;
 }
 
+//-------------------------------------------------------------------------------------------
+
+double csmmath_fabs(double value)
+{
+    return fabs(value);
+}
+
+//-------------------------------------------------------------------------------------------
+
+double csmmath_atan2(double y, double x)
+{
+    return atan2(y, x);
+}
+
+//-------------------------------------------------------------------------------------------
+
+double csmmath_cos(double angle)
+{
+    return cos(angle);
+}
+
+//-------------------------------------------------------------------------------------------
+
+double csmmath_sin(double angle)
+{
+    return sin(angle);
+}

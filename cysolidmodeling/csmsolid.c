@@ -21,8 +21,6 @@
 #include "csmmath.inl"
 #include "csmtransform.inl"
 #include "csmvertex.inl"
-
-#include "copiafor.h"
 #include "csmassert.inl"
 #include "csmid.inl"
 #include "csmmem.inl"

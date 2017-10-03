@@ -11,3 +11,5 @@ double csmtolerance_relative_position_over_edge(void);
 double csmtolerance_null_vector(void);
 
 double csmtolerance_point_in_loop_boundary(void);
+
+double csmtolerance_bbox_absolute_tolerance(void);

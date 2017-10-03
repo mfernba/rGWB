@@ -22,6 +22,12 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
 
 void csmface_redo_geometric_generated_data(struct csmface_t *face);
 
+CSMBOOL csmface_should_analyze_intersections_between_faces(const struct csmface_t *face1, const struct csmface_t *face2);
+
+CSMBOOL csmface_should_analyze_intersections_with_segment(
+	                    const struct csmface_t *face,
+                        double x1, double y1, double z1, double x2, double y2, double z2);
+
 CSMBOOL csmface_contains_vertex(
                         const struct csmface_t *face,
                         const struct csmvertex_t *vertex,

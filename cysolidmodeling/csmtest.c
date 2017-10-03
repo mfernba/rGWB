@@ -26,9 +26,9 @@
 #include "csmsweep.h"
 #include "csmsplit.h"
 #include "csmshape3d.h"
-
-#include "copiafor.h"
 #include "csmassert.inl"
+#include "csmstring.inl"
+
 #include "a_pto2d.h"
 #include "a_pto3d.h"
 #include <geomcomp/gccontorno.h>
@@ -429,7 +429,6 @@ static void i_test_union_solidos_por_loopglue(void)
 
 // ------------------------------------------------------------------------------------------
 
-#include "copiafor.h"
 #include "csmstring.inl"
 
 static void i_set_output_debug_file(const char *file_name)
@@ -2545,17 +2544,15 @@ void csmtest_test(void)
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                               // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
+    */
     
     i_test_mechanical_part1_redux();
     i_test_mechanical_part1();
     i_test_mechanical_part2();
-    */
     
-    /*
     i_test_toroide();
     i_test_cono();
     i_test_sphere();
-    */
 
     i_test_sphere2();
     i_test_sphere3();

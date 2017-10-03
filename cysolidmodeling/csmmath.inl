@@ -95,3 +95,14 @@ void csmmath_plane_axis_from_implicit_plane_equation(
 						double A, double B, double C, double D,
 						double *Xo, double *Yo, double *Zo, 
                         double *Ux, double *Uy, double *Uz, double *Vx, double *Vy, double *Vz);
+
+
+// Trigonometry...
+
+double csmmath_fabs(double value);
+
+double csmmath_atan2(double y, double x);
+
+double csmmath_cos(double angle);
+
+double csmmath_sin(double angle);

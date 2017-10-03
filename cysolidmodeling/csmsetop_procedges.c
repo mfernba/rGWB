@@ -30,7 +30,6 @@
 #include "csmstring.inl"
 
 #include "a_punter.h"
-#include "copiafor.h"
 
 enum i_intersection_position_t
 {
@@ -387,76 +386,80 @@ static void i_append_intersections_between_A_edge_and_B_face(
 {
     struct csmhedge_t *hedge_pos, *hedge_neg;
     struct csmvertex_t *vertex_pos, *vertex_neg;
-    enum csmmath_double_relation_t classification_vertex_pos, classification_vertex_neg;
+    double x1, y1, z1, x2, y2, z2;
     
     hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_POS);
     vertex_pos = csmhedge_vertex(hedge_pos);
-    classification_vertex_pos = csmface_classify_vertex_relative_to_face(face_B, vertex_pos);
-
+    csmvertex_get_coordenadas(vertex_pos, &x1, &y1, &z1);
+    
     hedge_neg = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_NEG);
     vertex_neg = csmhedge_vertex(hedge_neg);
-    classification_vertex_neg = csmface_classify_vertex_relative_to_face(face_B, vertex_neg);
+    csmvertex_get_coordenadas(vertex_neg, &x2, &y2, &z2);
     
-    if (classification_vertex_pos == CSMMATH_EQUAL_VALUES || classification_vertex_neg == CSMMATH_EQUAL_VALUES)
+    if (csmface_should_analyze_intersections_with_segment(face_B, x1, y1, z1, x2, y2, z2) == CSMTRUE)
     {
-        if (classification_vertex_pos == CSMMATH_EQUAL_VALUES)
-            i_append_intersection_between_vertex_A_and_face_B(vertex_pos, face_B, 0., edge_intersections);
-
-        if (classification_vertex_neg == CSMMATH_EQUAL_VALUES)
-            i_append_intersection_between_vertex_A_and_face_B(vertex_neg, face_B, 1., edge_intersections);
-    }
-    else
-    {
-        double x1, y1, z1, x2, y2, z2;
-        double x_inters, y_inters, z_inters, t;
-    
-        csmvertex_get_coordenadas(vertex_pos, &x1, &y1, &z1);
-        csmvertex_get_coordenadas(vertex_neg, &x2, &y2, &z2);
-    
-        if (csmface_exists_intersection_between_line_and_face_plane(
-                        face_B,
-                        x1, y1, z1, x2, y2, z2,
-                        &x_inters, &y_inters, &z_inters, &t) == CSMTRUE)
+        enum csmmath_double_relation_t classification_vertex_pos, classification_vertex_neg;
+        
+        classification_vertex_pos = csmface_classify_vertex_relative_to_face(face_B, vertex_pos);
+        classification_vertex_neg = csmface_classify_vertex_relative_to_face(face_B, vertex_neg);
+        
+        if (classification_vertex_pos == CSMMATH_EQUAL_VALUES || classification_vertex_neg == CSMMATH_EQUAL_VALUES)
         {
-            enum csmmath_contaiment_point_loop_t type_of_containment_at_face;
-            struct csmvertex_t *hit_vertex_at_face;
-            struct csmhedge_t *hit_hedge_at_face;
-            double t_relative_to_hit_hedge_at_face;
-            
-            hit_vertex_at_face = NULL;
-            hit_hedge_at_face = NULL;
-            
-            if (csmface_contains_point(
-                        face_B,
-                        x_inters, y_inters, z_inters,
-                        &type_of_containment_at_face,
-                        &hit_vertex_at_face,
-                        &hit_hedge_at_face, &t_relative_to_hit_hedge_at_face) == CSMTRUE)
+            if (classification_vertex_pos == CSMMATH_EQUAL_VALUES)
+                i_append_intersection_between_vertex_A_and_face_B(vertex_pos, face_B, 0., edge_intersections);
+
+            if (classification_vertex_neg == CSMMATH_EQUAL_VALUES)
+                i_append_intersection_between_vertex_A_and_face_B(vertex_neg, face_B, 1., edge_intersections);
+        }
+        else
+        {
+            double x_inters, y_inters, z_inters, t;
+        
+            if (csmface_exists_intersection_between_line_and_face_plane(
+                            face_B,
+                            x1, y1, z1, x2, y2, z2,
+                            &x_inters, &y_inters, &z_inters, &t) == CSMTRUE)
             {
-                enum i_intersection_position_t intersection_position_at_edge;
-                struct csmvertex_t *edge_vertex;
-                double x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face;
+                enum csmmath_contaiment_point_loop_t type_of_containment_at_face;
+                struct csmvertex_t *hit_vertex_at_face;
+                struct csmhedge_t *hit_hedge_at_face;
+                double t_relative_to_hit_hedge_at_face;
                 
-                intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_INTERIOR;
-                edge_vertex = NULL;
+                hit_vertex_at_face = NULL;
+                hit_hedge_at_face = NULL;
                 
-                i_intersection_coords_at_hedge(
-                        type_of_containment_at_face,
-                        hit_hedge_at_face,
-                        t_relative_to_hit_hedge_at_face,
-                        &x_edge_interior_hedge_at_face, &y_edge_interior_hedge_at_face, &z_edge_interior_hedge_at_face);
-                
-                i_append_new_edge_intersection(
-                        intersection_position_at_edge,
-                        edge_vertex,
-                        x_inters, y_inters, z_inters,
-                        t,
-                        face_B,
-                        type_of_containment_at_face,
-                        hit_vertex_at_face,
-                        hit_hedge_at_face,
-                        x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face,
-                        edge_intersections);
+                if (csmface_contains_point(
+                            face_B,
+                            x_inters, y_inters, z_inters,
+                            &type_of_containment_at_face,
+                            &hit_vertex_at_face,
+                            &hit_hedge_at_face, &t_relative_to_hit_hedge_at_face) == CSMTRUE)
+                {
+                    enum i_intersection_position_t intersection_position_at_edge;
+                    struct csmvertex_t *edge_vertex;
+                    double x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face;
+                    
+                    intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_INTERIOR;
+                    edge_vertex = NULL;
+                    
+                    i_intersection_coords_at_hedge(
+                            type_of_containment_at_face,
+                            hit_hedge_at_face,
+                            t_relative_to_hit_hedge_at_face,
+                            &x_edge_interior_hedge_at_face, &y_edge_interior_hedge_at_face, &z_edge_interior_hedge_at_face);
+                    
+                    i_append_new_edge_intersection(
+                            intersection_position_at_edge,
+                            edge_vertex,
+                            x_inters, y_inters, z_inters,
+                            t,
+                            face_B,
+                            type_of_containment_at_face,
+                            hit_vertex_at_face,
+                            hit_hedge_at_face,
+                            x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face,
+                            edge_intersections);
+                }
             }
         }
     }

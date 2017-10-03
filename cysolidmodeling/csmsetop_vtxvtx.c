@@ -16,11 +16,11 @@
 #include "csmvertex.inl"
 #include "csmassert.inl"
 #include "csmmem.inl"
+#include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmstring.inl"
 
 #include "a_punter.h"
-#include "standarc.h"
 
 ArrEstructura(i_neighborhood_t);
 ArrEstructura(i_inters_sectors_t);
@@ -397,7 +397,7 @@ static double i_angle_of_vector_relative_to_plane(
     Ux_vector_2d = csmmath_dot_product3D(Ux_plane, Uy_plane, Uz_plane, Ux_vector, Uy_vector, Uz_vector);
     Uy_vector_2d = csmmath_dot_product3D(Vx_plane, Vy_plane, Vz_plane, Ux_vector, Uy_vector, Uz_vector);
     
-    return atan2(Uy_vector_2d, Ux_vector_2d);
+    return csmmath_atan2(Uy_vector_2d, Ux_vector_2d);
 }
 
 // ------------------------------------------------------------------------------------------

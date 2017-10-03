@@ -3,8 +3,8 @@
 #include "csmtransform.inl"
 
 #include "csmassert.inl"
+#include "csmmath.inl"
 #include "csmmem.inl"
-#include "standarc.h"
 
 struct csmtransform_t
 {
@@ -102,8 +102,8 @@ struct csmtransform_t *csmtransform_make_arbitrary_axis_rotation(
     v2 = v * v;
     w2 = w * w;
     
-    seno = sin(angulo_rotacion_rad);
-    coseno = cos(angulo_rotacion_rad);
+    seno = csmmath_sin(angulo_rotacion_rad);
+    coseno = csmmath_cos(angulo_rotacion_rad);
     uno_menos_coseno = 1. - coseno;
     
     transform->data[0][0] = u2 + (v2  + w2) * coseno;

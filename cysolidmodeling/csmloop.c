@@ -17,12 +17,11 @@
 #include "csmid.inl"
 #include "csmmem.inl"
 #include "csmstring.inl"
+#include "csmmath.inl"
+#include "csmmath.tli"
 
 #include "a_pto2d.h"
 #include "cont2d.h"
-#include "copiafor.h"
-#include "csmmath.tli"
-#include "standarc.h"
 
 struct csmloop_t
 {
@@ -319,7 +318,7 @@ double csmloop_max_distance_to_plane(
         vertex = csmhedge_vertex(iterator);
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
         
-        distance = fabs(csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D));
+        distance = csmmath_fabs(csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D));
         max_distance_to_plane = CSMMATH_MAX(max_distance_to_plane, distance);
 
         iterator = csmhedge_next(iterator);
@@ -935,7 +934,7 @@ void csmloop_append_loop_to_shape(
         
     } while (iterator != loop->ledge);
     
-    if (arr_NumElemsPunto2D(points) >= 3 && fabs(arr_CalcularAreaPunto2D(points)) > 0.)
+    if (arr_NumElemsPunto2D(points) >= 3 && csmmath_fabs(arr_CalcularAreaPunto2D(points)) > 0.)
     {
         arr_InvertirPunto2D(points);
         gccontorno_append_array_puntos(shape, &points);
