@@ -563,7 +563,7 @@ CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x
 
 // ------------------------------------------------------------------------------------------
 
-enum csmmath_double_relation_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex)
+enum csmcompare_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex)
 {
     double x, y, z;
     double dist;
@@ -586,7 +586,7 @@ CSMBOOL csmface_exists_intersection_between_line_and_face_plane(
     CSMBOOL exists_intersection;
     double x_inters_loc, y_inters_loc, z_inters_loc, t_inters_loc;
     double dist1, dist2;
-    enum csmmath_double_relation_t relation1, relation2;
+    enum csmcompare_t relation1, relation2;
     
     assert_no_null(face);
     
@@ -596,8 +596,8 @@ CSMBOOL csmface_exists_intersection_between_line_and_face_plane(
     dist2 = csmmath_signed_distance_point_to_plane(x2, y2, z2, face->A, face->B, face->C, face->D);
     relation2 = csmmath_compare_doubles(dist2, 0., face->fuzzy_epsilon);
     
-    if ((relation1 == CSMMATH_VALUE1_LESS_THAN_VALUE2 && relation2 == CSMMATH_VALUE1_GREATER_THAN_VALUE2)
-            || (relation1 == CSMMATH_VALUE1_GREATER_THAN_VALUE2 && relation2 == CSMMATH_VALUE1_LESS_THAN_VALUE2))
+    if ((relation1 == CSMCOMPARE_FIRST_LESS && relation2 == CSMCOMPARE_FIRST_GREATER)
+            || (relation1 == CSMCOMPARE_FIRST_GREATER && relation2 == CSMCOMPARE_FIRST_LESS))
     {
         exists_intersection = CSMTRUE;
         
@@ -607,7 +607,7 @@ CSMBOOL csmface_exists_intersection_between_line_and_face_plane(
         y_inters_loc = y1 + t_inters_loc * (y2 - y1);
         z_inters_loc = z1 + t_inters_loc * (z2 - z1);
     }
-    else if (relation1 == CSMMATH_EQUAL_VALUES && relation2 != CSMMATH_EQUAL_VALUES)
+    else if (relation1 == CSMCOMPARE_EQUAL && relation2 != CSMCOMPARE_EQUAL)
     {
         exists_intersection = CSMTRUE;
         
@@ -617,7 +617,7 @@ CSMBOOL csmface_exists_intersection_between_line_and_face_plane(
         y_inters_loc = y1;
         z_inters_loc = z1;
     }
-    else if (relation1 != CSMMATH_EQUAL_VALUES && relation2 == CSMMATH_EQUAL_VALUES)
+    else if (relation1 != CSMCOMPARE_EQUAL && relation2 == CSMCOMPARE_EQUAL)
     {
         exists_intersection = CSMTRUE;
         
@@ -711,13 +711,13 @@ CSMBOOL csmface_is_coplanar_to_plane(
     csmmath_cross_product3D(face->A, face->B, face->C, A, B, C, &Wx, &Wy, &Wz);
     dot = csmmath_dot_product3D(Wx, Wy, Wz, Wx, Wy, Wz);
     
-    if (csmmath_compare_doubles(dot, 0., tolerance * tolerance) == CSMMATH_EQUAL_VALUES)
+    if (csmmath_compare_doubles(dot, 0., tolerance * tolerance) == CSMCOMPARE_EQUAL)
     {
         is_coplanar = CSMTRUE;
         
         dot = csmmath_dot_product3D(face->A, face->B, face->C, A, B, C);
 
-        if (csmmath_compare_doubles(dot, 0., tolerance) == CSMMATH_VALUE1_GREATER_THAN_VALUE2)
+        if (csmmath_compare_doubles(dot, 0., tolerance) == CSMCOMPARE_FIRST_GREATER)
             same_orientation_loc = CSMTRUE;
         else
             same_orientation_loc = CSMFALSE;

@@ -379,13 +379,13 @@ static CSMBOOL i_is_point_on_loop_boundary(
         {
             is_point_on_loop_boundary = CSMTRUE;
             
-            if (csmmath_compare_doubles(t, 0.0, tolerance) == CSMMATH_EQUAL_VALUES)
+            if (csmmath_compare_doubles(t, 0.0, tolerance) == CSMCOMPARE_EQUAL)
             {
                 hit_vertex_loc = vertex;
                 hit_hedge_loc = NULL;
                 t_relative_to_hit_hedge_loc = 0.0;
             }
-            else if (csmmath_compare_doubles(t, 1.0, tolerance) == CSMMATH_EQUAL_VALUES)
+            else if (csmmath_compare_doubles(t, 1.0, tolerance) == CSMCOMPARE_EQUAL)
             {
                 hit_vertex_loc = next_vertex;
                 hit_hedge_loc = NULL;

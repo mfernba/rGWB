@@ -2,13 +2,6 @@
 #ifndef csmmath_hxx
 #define csmmath_hxx
 
-enum csmmath_double_relation_t
-{
-    CSMMATH_VALUE1_LESS_THAN_VALUE2,
-    CSMMATH_EQUAL_VALUES,
-    CSMMATH_VALUE1_GREATER_THAN_VALUE2
-};
-
 enum csmmath_contaiment_point_loop_t
 {
     CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR,
@@ -21,13 +14,6 @@ enum csmmath_dropped_coord_t
     CSMMATH_DROPPED_COORD_X,
     CSMMATH_DROPPED_COORD_Y,
     CSMMATH_DROPPED_COORD_Z
-};
-
-enum csmmath_comparac_t
-{
-    CSMMATH_COMPARAC_PRIMERO_MENOR = -1,
-    CSMMATH_COMPARAC_IGUALES = 0,
-    CSMMATH_COMPARAC_PRIMERO_MAYOR = 1
 };
 
 #define CSMMATH_MIN(A, B) ((A) < (B)) ? (A): (B)

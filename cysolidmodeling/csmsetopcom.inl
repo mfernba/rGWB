@@ -2,15 +2,9 @@
 
 #include "csmfwddecl.hxx"
 
-#include "a_punter.h"
-ArrEstructura(csmvertex_t);
-ArrEstructura(csmedge_t);
-ArrEstructura(csmface_t);
-ArrEstructura(csmhedge_t);
-
 // Vertexs...
 
-void csmsetopcom_append_vertex_if_not_exists(struct csmvertex_t *vertex, ArrEstructura(csmvertex_t) *set_of_on_vertices);
+void csmsetopcom_append_vertex_if_not_exists(struct csmvertex_t *vertex, csmArrayStruct(csmvertex_t) *set_of_on_vertices);
 
 
 // Hedges...
@@ -22,34 +16,34 @@ CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge
 
 // Edges...
 
-void csmsetopcom_sort_edges_lexicographically_by_xyz(ArrEstructura(csmedge_t) *set_of_null_edges);
+void csmsetopcom_sort_edges_lexicographically_by_xyz(csmArrayStruct(csmedge_t) *set_of_null_edges);
 
-void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_null_edges, ArrEstructura(csmhedge_t) *loose_ends);
+void csmsetopcom_print_set_of_null_edges(const csmArrayStruct(csmedge_t) *set_of_null_edges, csmArrayStruct(csmhedge_t) *loose_ends);
 
-CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends);
+CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, csmArrayStruct(csmhedge_t) *loose_ends);
 
-void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose_ends);
+void csmsetopcom_print_debug_info_loose_ends(const csmArrayStruct(csmhedge_t) *loose_ends);
 
 void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2);
 
 void csmsetopcom_cut_he(
                     struct csmhedge_t *hedge,
-                    ArrEstructura(csmedge_t) *set_of_null_edges,
-                    ArrEstructura(csmface_t) *set_of_null_faces,
+                    csmArrayStruct(csmedge_t) *set_of_null_edges,
+                    csmArrayStruct(csmface_t) *set_of_null_faces,
                     unsigned long *no_null_edges_deleted,
                     CSMBOOL *null_face_created_opt);
 
 void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid);
 
-void csmsetopcom_remove_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges);
+void csmsetopcom_remove_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges);
 
 // Faces...
 
-CONSTRUCTOR(ArrEstructura(csmface_t) *, csmsetopcom_convert_inner_loops_of_null_faces_to_faces, (ArrEstructura(csmface_t) *set_of_null_faces));
+CONSTRUCTOR(csmArrayStruct(csmface_t) *, csmsetopcom_convert_inner_loops_of_null_faces_to_faces, (csmArrayStruct(csmface_t) *set_of_null_faces));
 
-void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_t) *set_of_null_faces);
+void csmsetopcom_reintroduce_holes_in_corresponding_faces(csmArrayStruct(csmface_t) *set_of_null_faces);
 
-void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, ArrEstructura(csmface_t) *set_of_null_faces);
+void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, csmArrayStruct(csmface_t) *set_of_null_faces);
 
 void csmsetopcom_move_face_to_solid(
                         unsigned long recursion_level,

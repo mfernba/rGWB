@@ -9,6 +9,8 @@
 #ifndef csmfwddecl_hxx
 #define csmfwddecl_hxx
 
+#include "csmtypes.hxx"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,18 +18,6 @@ extern "C" {
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
-
-#ifndef __cplusplus
-#define CSMBOOL char
-#define CSMTRUE 1
-#define CSMFALSE 0
-#endif
-
-#ifdef __cplusplus
-#define CSMBOOL bool
-#define CSMTRUE true
-#define CSMFALSE false
-#endif
 
 #define CONSTRUCTOR(type, name, params) type name params
 
@@ -37,15 +27,7 @@ extern "C" {
 
 #define DLL_CYSOLIDMODELING
 
-#define comparac_t ecomparacion_t
-
 #define INVERT_BOOLEAN(valor) (((valor) == CSMTRUE) ? CSMFALSE: CSMTRUE)
-
-#ifndef __cplusplus
-#define comparac_IGUALES ECOMPARACION_IGUALES
-#define comparac_PRIMERO_MENOR ECOMPARACION_PRIMERO_MENOR
-#define comparac_PRIMERO_MAYOR ECOMPARACION_PRIMERO_MAYOR
-#endif
 
 struct csmnode_t;
 struct csmvertex_t;
@@ -80,6 +62,17 @@ struct csmhashtb(csmedge_t);
 struct csmhashtb(csmvertex_t);
 struct csmhashtb(csmhedge_t);
 
+
+#include "csmarrayc.hxx"
+csmArrayStruct(csmvertex_t);
+csmArrayStruct(csmedge_t);
+csmArrayStruct(csmface_t);
+csmArrayStruct(csmhedge_t);
+csmArrayStruct(csmsetop_vtxvtx_inters_t);
+csmArrayStruct(csmedge_t);
+csmArrayStruct(csmsetop_vtxvtx_inters_t);
+csmArrayStruct(csmsetop_vtxfacc_inters_t);
+csmArrayStruct(csmedge_t);
 
 struct gccontorno_t;
 struct bsmaterial_t;

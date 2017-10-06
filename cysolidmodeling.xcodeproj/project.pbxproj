@@ -39,13 +39,15 @@
 		5507A6EA1E7B40B4008B9F73 /* cypearrays.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5507A6D41E7B400D008B9F73 /* cypearrays.framework */; };
 		5507A6EC1E7B40BA008B9F73 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5507A6EB1E7B40BA008B9F73 /* Cocoa.framework */; };
 		5507A6EE1E7B40C1008B9F73 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5507A6ED1E7B40C1008B9F73 /* Foundation.framework */; };
-		5507A6EF1E7B42C8008B9F73 /* a_punter.h in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6E01E7B402D008B9F73 /* a_punter.h */; };
 		5507A6F21E7B450C008B9F73 /* csmhashtb.c in Sources */ = {isa = PBXBuildFile; fileRef = 5507A6F01E7B450C008B9F73 /* csmhashtb.c */; };
 		5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F11E7B450C008B9F73 /* csmhashtb.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		5507A6F51E7B451E008B9F73 /* csmhashtb.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F41E7B451E008B9F73 /* csmhashtb.inl */; };
 		5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6FA1E7B47CB008B9F73 /* csmuthash.hxx */; };
 		55089F4E1E8996B500B9570B /* csmglue.c in Sources */ = {isa = PBXBuildFile; fileRef = 55089F4C1E8996B500B9570B /* csmglue.c */; };
 		55089F4F1E8996B500B9570B /* csmglue.h in Headers */ = {isa = PBXBuildFile; fileRef = 55089F4D1E8996B500B9570B /* csmglue.h */; };
+		550E55AB1F876AB90033864A /* csmarrayc.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 550E55AA1F876AB90033864A /* csmarrayc.hxx */; };
+		550E55AF1F87A9440033864A /* csmarqsort.c in Sources */ = {isa = PBXBuildFile; fileRef = 550E55AD1F87A9440033864A /* csmarqsort.c */; };
+		550E55B01F87A9440033864A /* csmarqsort.inl in Headers */ = {isa = PBXBuildFile; fileRef = 550E55AE1F87A9440033864A /* csmarqsort.inl */; };
 		551327701EC3AF1100F2B04D /* csmvertex.tli in Headers */ = {isa = PBXBuildFile; fileRef = 5513276F1EC3AF1100F2B04D /* csmvertex.tli */; };
 		551327771ECB9A6000F2B04D /* csmsetopcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 551327751ECB9A6000F2B04D /* csmsetopcom.c */; };
 		551327781ECB9A6000F2B04D /* csmsetopcom.inl in Headers */ = {isa = PBXBuildFile; fileRef = 551327761ECB9A6000F2B04D /* csmsetopcom.inl */; };
@@ -345,7 +347,6 @@
 		5507A6871E736714008B9F73 /* csmeuler_lringmv.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmeuler_lringmv.inl; sourceTree = "<group>"; };
 		5507A6CE1E7B400D008B9F73 /* cypearrays.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cypearrays.xcodeproj; path = ../cypearrays/cypearrays.xcodeproj; sourceTree = "<group>"; };
 		5507A6D71E7B4011008B9F73 /* basicSystem.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = basicSystem.xcodeproj; path = ../basicSystem/basicSystem.xcodeproj; sourceTree = "<group>"; };
-		5507A6E01E7B402D008B9F73 /* a_punter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = a_punter.h; sourceTree = "<group>"; };
 		5507A6E11E7B405D008B9F73 /* a_pto3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = a_pto3d.h; sourceTree = "<group>"; };
 		5507A6E31E7B4077008B9F73 /* a_pto2d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = a_pto2d.h; sourceTree = "<group>"; };
 		5507A6EB1E7B40BA008B9F73 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -356,6 +357,10 @@
 		5507A6FA1E7B47CB008B9F73 /* csmuthash.hxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = csmuthash.hxx; sourceTree = "<group>"; };
 		55089F4C1E8996B500B9570B /* csmglue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmglue.c; sourceTree = "<group>"; };
 		55089F4D1E8996B500B9570B /* csmglue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = csmglue.h; sourceTree = "<group>"; };
+		550E55AA1F876AB90033864A /* csmarrayc.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmarrayc.hxx; sourceTree = "<group>"; };
+		550E55AC1F87811A0033864A /* csmtypes.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmtypes.hxx; sourceTree = "<group>"; };
+		550E55AD1F87A9440033864A /* csmarqsort.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmarqsort.c; sourceTree = "<group>"; };
+		550E55AE1F87A9440033864A /* csmarqsort.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmarqsort.inl; sourceTree = "<group>"; };
 		5513276F1EC3AF1100F2B04D /* csmvertex.tli */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmvertex.tli; sourceTree = "<group>"; };
 		551327741EC3B06800F2B04D /* csmvertex.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmvertex.hxx; sourceTree = "<group>"; };
 		551327751ECB9A6000F2B04D /* csmsetopcom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetopcom.c; sourceTree = "<group>"; };
@@ -590,6 +595,7 @@
 			children = (
 				5579545B1E5DB074000FC91E /* cysolidmodeling.h */,
 				5579545C1E5DB074000FC91E /* Info.plist */,
+				550E55AC1F87811A0033864A /* csmtypes.hxx */,
 				557954711E5DB275000FC91E /* csmfwddecl.hxx */,
 				5579546B1E5DB209000FC91E /* Cype Wrapper */,
 				5579549B1E5E4823000FC91E /* Utility */,
@@ -604,7 +610,6 @@
 		5579546B1E5DB209000FC91E /* Cype Wrapper */ = {
 			isa = PBXGroup;
 			children = (
-				5507A6E01E7B402D008B9F73 /* a_punter.h */,
 				5507A6E11E7B405D008B9F73 /* a_pto3d.h */,
 				5507A6E31E7B4077008B9F73 /* a_pto2d.h */,
 			);
@@ -652,7 +657,10 @@
 				557954861E5E2DCB000FC91E /* csmstring.inl */,
 				557954851E5E2DCB000FC91E /* csmstring.c */,
 				55161B201F82DC3000FF0F24 /* csmarrayc.inl */,
+				550E55AA1F876AB90033864A /* csmarrayc.hxx */,
 				55161B2A1F82DC3000FF0F24 /* csmarrayc.c */,
+				550E55AE1F87A9440033864A /* csmarqsort.inl */,
+				550E55AD1F87A9440033864A /* csmarqsort.c */,
 				557954981E5E4811000FC91E /* csmbbox.inl */,
 				557954971E5E4811000FC91E /* csmbbox.c */,
 				557012BF1E832F9600DFC490 /* csmmath.inl */,
@@ -815,9 +823,10 @@
 				5507A6891E736714008B9F73 /* csmeuler_lringmv.inl in Headers */,
 				5507A6851E736565008B9F73 /* csmeuler_lmfkrh.inl in Headers */,
 				55EA99241ED38FCD006C063C /* csmsetop_procedges.inl in Headers */,
-				5507A6EF1E7B42C8008B9F73 /* a_punter.h in Headers */,
+				550E55AB1F876AB90033864A /* csmarrayc.hxx in Headers */,
 				5507A6511E705618008B9F73 /* csmeuler_kvfs.inl in Headers */,
 				557954821E5E1AA9000FC91E /* csmnode.inl in Headers */,
+				550E55B01F87A9440033864A /* csmarqsort.inl in Headers */,
 				557954A61E60D0EF000FC91E /* csmeuler_mvfs.inl in Headers */,
 				557954A01E5F942E000FC91E /* csmsolid.inl in Headers */,
 				557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */,
@@ -1094,6 +1103,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				55089F4E1E8996B500B9570B /* csmglue.c in Sources */,
+				550E55AF1F87A9440033864A /* csmarqsort.c in Sources */,
 				557012C01E832F9600DFC490 /* csmmath.c in Sources */,
 				557954951E5E4742000FC91E /* csmface.c in Sources */,
 				5507A6291E700F7C008B9F73 /* csmeuler_lmef.c in Sources */,
@@ -1301,6 +1311,7 @@
 		557954611E5DB074000FC91E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
@@ -1320,6 +1331,7 @@
 		557954621E5DB074000FC91E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;

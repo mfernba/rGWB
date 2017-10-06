@@ -15,18 +15,18 @@
 
 // ------------------------------------------------------------------------------------------
 
-enum csmmath_double_relation_t csmmath_compare_doubles(double value1, double value2, double epsilon)
+enum csmcompare_t csmmath_compare_doubles(double value1, double value2, double epsilon)
 {
     double diff;
     
     diff = fabs(value1 - value2);
     
     if (diff < epsilon)
-        return CSMMATH_EQUAL_VALUES;
+        return CSMCOMPARE_EQUAL;
     else if (value1 < value2)
-        return CSMMATH_VALUE1_LESS_THAN_VALUE2;
+        return CSMCOMPARE_FIRST_LESS;
     else
-        return CSMMATH_VALUE1_GREATER_THAN_VALUE2;
+        return CSMCOMPARE_FIRST_GREATER;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ CSMBOOL csmmath_equal_coords(
     
     diff = CSMMATH_CUAD(x1 - x2) + CSMMATH_CUAD(y1 - y2) + CSMMATH_CUAD(z1 - z2);
 
-    if (csmmath_compare_doubles(diff, 0.0, CSMMATH_CUAD(epsilon)) == CSMMATH_EQUAL_VALUES)
+    if (csmmath_compare_doubles(diff, 0.0, CSMMATH_CUAD(epsilon)) == CSMCOMPARE_EQUAL)
         return CSMTRUE;
     else
         return CSMFALSE;
@@ -229,43 +229,21 @@ CSMBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance
 
 // ----------------------------------------------------------------------------------------------------
 
-static enum csmmath_comparac_t i_compare_coords(double coord1, double coord2, double tolerance)
-{
-    switch (csmmath_compare_doubles(coord1, coord2, tolerance))
-    {
-        case CSMMATH_VALUE1_LESS_THAN_VALUE2:
-            
-            return CSMMATH_COMPARAC_PRIMERO_MENOR;
-            
-        case CSMMATH_EQUAL_VALUES:
-            
-            return CSMMATH_COMPARAC_IGUALES;
-            
-        case CSMMATH_VALUE1_GREATER_THAN_VALUE2:
-            
-            return CSMMATH_COMPARAC_PRIMERO_MAYOR;
-            
-        default_error();
-    }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-enum csmmath_comparac_t csmmath_compare_coords_xyz(
+enum csmcompare_t csmmath_compare_coords_xyz(
                         double x1, double y1, double z1,
                         double x2, double y2, double z2,
                         double tolerance)
 {
-    enum csmmath_comparac_t comparacion;
+    enum csmcompare_t comparacion;
     
-    comparacion = i_compare_coords(x1, x2, tolerance);
+    comparacion = csmmath_compare_doubles(x1, x2, tolerance);
     
-    if (comparacion == CSMMATH_COMPARAC_IGUALES)
+    if (comparacion == CSMCOMPARE_EQUAL)
     {
-        comparacion = i_compare_coords(y1, y2, tolerance);
+        comparacion = csmmath_compare_doubles(y1, y2, tolerance);
         
-        if (comparacion == CSMMATH_COMPARAC_IGUALES)
-            comparacion = i_compare_coords(z1, z2, tolerance);
+        if (comparacion == CSMCOMPARE_EQUAL)
+            comparacion = csmmath_compare_doubles(z1, z2, tolerance);
     }
     
     return comparacion;

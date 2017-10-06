@@ -2,7 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-enum csmmath_double_relation_t csmmath_compare_doubles(double value1, double value2, double epsilon);
+enum csmcompare_t csmmath_compare_doubles(double value1, double value2, double epsilon);
 
 enum csmmath_dropped_coord_t csmmath_dropped_coord(double x, double y, double z);
 
@@ -47,7 +47,7 @@ CSMBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance
 
 // Lines...
 
-enum csmmath_comparac_t csmmath_compare_coords_xyz(
+enum csmcompare_t csmmath_compare_coords_xyz(
                         double x1, double y1, double z1,
                         double x2, double y2, double z2,
                         double tolerance);

@@ -3,6 +3,7 @@
 #include "csmsetop.h"
 #include "csmsetop.tli"
 
+#include "csmarrayc.inl"
 #include "csmdebug.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
@@ -29,26 +30,20 @@
 #include "csmmem.inl"
 #include "csmstring.inl"
 
-#include "a_punter.h"
-
-ArrEstructura(csmsetop_vtxvtx_inters_t);
-ArrEstructura(csmsetop_vtxfacc_inters_t);
-ArrEstructura(csmhedge_t);
-
 // ------------------------------------------------------------------------------------------
 
 static CSMBOOL i_can_join(
                         struct csmhedge_t *hea, struct csmhedge_t *heb,
-                        ArrEstructura(csmhedge_t) *loose_ends_A,
-                        ArrEstructura(csmhedge_t) *loose_ends_B,
+                        csmArrayStruct(csmhedge_t) *loose_ends_A,
+                        csmArrayStruct(csmhedge_t) *loose_ends_B,
                         struct csmhedge_t **matching_loose_end_hea, struct csmhedge_t **matching_loose_end_heb)
 {
     CSMBOOL can_join;
     struct csmhedge_t *matching_loose_end_hea_loc, *matching_loose_end_heb_loc;
     unsigned long i, num_loose_ends;
     
-    num_loose_ends = arr_NumElemsPunteroST(loose_ends_A, csmhedge_t);
-    assert(num_loose_ends == arr_NumElemsPunteroST(loose_ends_B, csmhedge_t));
+    num_loose_ends = csmarrayc_count_st(loose_ends_A, csmhedge_t);
+    assert(num_loose_ends == csmarrayc_count_st(loose_ends_B, csmhedge_t));
     assert_no_null(matching_loose_end_hea);
     assert_no_null(matching_loose_end_heb);
     
@@ -60,8 +55,8 @@ static CSMBOOL i_can_join(
     {
         struct csmhedge_t *loose_end_a, *loose_end_b;
         
-        loose_end_a = arr_GetPunteroST(loose_ends_A, i, csmhedge_t);
-        loose_end_b = arr_GetPunteroST(loose_ends_B, i, csmhedge_t);
+        loose_end_a = csmarrayc_get_st(loose_ends_A, i, csmhedge_t);
+        loose_end_b = csmarrayc_get_st(loose_ends_B, i, csmhedge_t);
         
         if (csmsetopcom_hedges_are_neighbors(hea, loose_end_a) == CSMTRUE
                 && csmsetopcom_hedges_are_neighbors(heb, loose_end_b) == CSMTRUE)
@@ -71,8 +66,8 @@ static CSMBOOL i_can_join(
             matching_loose_end_hea_loc = loose_end_a;
             matching_loose_end_heb_loc = loose_end_b;
             
-            arr_BorrarEstructuraST(loose_ends_A, i, NULL, csmhedge_t);
-            arr_BorrarEstructuraST(loose_ends_B, i, NULL, csmhedge_t);
+            csmarrayc_delete_element_st(loose_ends_A, i, csmhedge_t, NULL);
+            csmarrayc_delete_element_st(loose_ends_B, i, csmhedge_t, NULL);
             break;
         }
     }
@@ -82,8 +77,8 @@ static CSMBOOL i_can_join(
         matching_loose_end_hea_loc = NULL;
         matching_loose_end_heb_loc = NULL;
         
-        arr_AppendPunteroST(loose_ends_A, hea, csmhedge_t);
-        arr_AppendPunteroST(loose_ends_B, heb, csmhedge_t);
+        csmarrayc_append_element_st(loose_ends_A, hea, csmhedge_t);
+        csmarrayc_append_element_st(loose_ends_B, heb, csmhedge_t);
         
         if (csmdebug_debug_enabled() == CSMTRUE)
             csmdebug_print_debug_info("Pushed loose end pair: (%lu, %lu)\n", csmhedge_id(hea), csmhedge_id(heb));
@@ -97,11 +92,11 @@ static CSMBOOL i_can_join(
 
 // ----------------------------------------------------------------------------------------------------
 
-static CSMBOOL i_there_are_only_null_edges_that_cannot_be_matched(ArrEstructura(csmedge_t) *set_of_null_edges)
+static CSMBOOL i_there_are_only_null_edges_that_cannot_be_matched(csmArrayStruct(csmedge_t) *set_of_null_edges)
 {
     unsigned long i, no_null_edges;
     
-    no_null_edges = arr_NumElemsPunteroST(set_of_null_edges, csmedge_t);
+    no_null_edges = csmarrayc_count_st(set_of_null_edges, csmedge_t);
     
     for (i = 0; i < no_null_edges; i++)
     {
@@ -109,7 +104,7 @@ static CSMBOOL i_there_are_only_null_edges_that_cannot_be_matched(ArrEstructura(
         struct csmedge_t *edge_i;
         struct csmhedge_t *he1;
         
-        edge_i = arr_GetPunteroST(set_of_null_edges, i, csmedge_t);
+        edge_i = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
         he1 = csmedge_hedge_lado(edge_i, CSMEDGE_LADO_HEDGE_POS);
         
         for (j = 0; j < no_null_edges; j++)
@@ -117,7 +112,7 @@ static CSMBOOL i_there_are_only_null_edges_that_cannot_be_matched(ArrEstructura(
             struct csmedge_t *edge_j;
             struct csmhedge_t *he2;
             
-            edge_j = arr_GetPunteroST(set_of_null_edges, j, csmedge_t);
+            edge_j = csmarrayc_get_st(set_of_null_edges, j, csmedge_t);
             he2 = csmedge_hedge_lado(edge_i, CSMEDGE_LADO_HEDGE_NEG);
             
             if (csmsetopcom_hedges_are_neighbors(he1, he2) == CSMTRUE)
@@ -131,11 +126,11 @@ static CSMBOOL i_there_are_only_null_edges_that_cannot_be_matched(ArrEstructura(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_print_null_faces(const struct csmsolid_t *solid, const ArrEstructura(csmface_t) *set_of_null_faces)
+static void i_print_null_faces(const struct csmsolid_t *solid, const csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long i, no_null_faces;
     
-    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
     
     csmdebug_print_debug_info("***Null faces solid: %s\n", csmsolid_get_name(solid));
                               
@@ -143,7 +138,7 @@ static void i_print_null_faces(const struct csmsolid_t *solid, const ArrEstructu
     {
         const struct csmface_t *null_face;
         
-        null_face = arr_GetPunteroConstST(set_of_null_faces, i, csmface_t);
+        null_face = csmarrayc_get_const_st(set_of_null_faces, i, csmface_t);
         csmdebug_print_debug_info("Null face: %lu\n", csmface_id(null_face));
     }
 }
@@ -152,8 +147,8 @@ static void i_print_null_faces(const struct csmsolid_t *solid, const ArrEstructu
 
 static void i_cut_he(
                     struct csmhedge_t *hedge,
-                    ArrEstructura(csmedge_t) *set_of_null_edges,
-                    ArrEstructura(csmface_t) *set_of_null_faces,
+                    csmArrayStruct(csmedge_t) *set_of_null_edges,
+                    csmArrayStruct(csmface_t) *set_of_null_faces,
                     CSMBOOL is_solid_A,
                     unsigned long *no_null_edges_deleted,
                     CSMBOOL *null_face_created_opt)
@@ -167,22 +162,22 @@ static void i_cut_he(
         unsigned long no_null_faces;
         struct csmface_t *null_face;
         
-        no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+        no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
         assert(no_null_faces > 0);
         
-        null_face = arr_GetPunteroST(set_of_null_faces, no_null_faces - 1, csmface_t);
+        null_face = csmarrayc_get_st(set_of_null_faces, no_null_faces - 1, csmface_t);
         csmface_mark_setop_null_face(null_face);
     }
     
-    ASIGN_OPT(null_face_created_opt, null_face_created_loc);
+    ASSIGN_OPTIONAL_VALUE(null_face_created_opt, null_face_created_loc);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 static void i_cut_he_solid_A(
                     struct csmhedge_t *hedge,
-                    ArrEstructura(csmedge_t) *set_of_null_edges,
-                    ArrEstructura(csmface_t) *set_of_null_faces,
+                    csmArrayStruct(csmedge_t) *set_of_null_edges,
+                    csmArrayStruct(csmface_t) *set_of_null_faces,
                     unsigned long *no_null_edges_deleted,
                     CSMBOOL *null_face_created_opt)
 {
@@ -196,8 +191,8 @@ static void i_cut_he_solid_A(
 
 static void i_cut_he_solid_B(
                     struct csmhedge_t *hedge,
-                    ArrEstructura(csmedge_t) *set_of_null_edges,
-                    ArrEstructura(csmface_t) *set_of_null_faces,
+                    csmArrayStruct(csmedge_t) *set_of_null_edges,
+                    csmArrayStruct(csmface_t) *set_of_null_faces,
                     unsigned long *no_null_edges_deleted,
                     CSMBOOL *null_face_created_opt)
 {
@@ -209,11 +204,11 @@ static void i_cut_he_solid_B(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_append_null_edges_to_debug_view(ArrEstructura(csmedge_t) *set_of_null_edges)
+static void i_append_null_edges_to_debug_view(csmArrayStruct(csmedge_t) *set_of_null_edges)
 {
     unsigned long i, no_null_edges;
     
-    no_null_edges = arr_NumElemsPunteroST(set_of_null_edges, csmedge_t);
+    no_null_edges = csmarrayc_count_st(set_of_null_edges, csmedge_t);
     
     csmdebug_clear_debug_points();
     
@@ -223,7 +218,7 @@ static void i_append_null_edges_to_debug_view(ArrEstructura(csmedge_t) *set_of_n
         double x1, y1, z1, x2, y2, z2;
         char *description;
         
-        null_edge = arr_GetPunteroST(set_of_null_edges, i, csmedge_t);
+        null_edge = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
         csmedge_vertex_coordinates(null_edge, &x1, &y1, &z1, &x2, &y2, &z2);
         
         description = csmstring_duplicate("");
@@ -234,30 +229,30 @@ static void i_append_null_edges_to_debug_view(ArrEstructura(csmedge_t) *set_of_n
 // ----------------------------------------------------------------------------------------------------
 
 static void i_join_null_edges(
-                        struct csmsolid_t *solid_A, ArrEstructura(csmedge_t) *set_of_null_edges_A,
-                        struct csmsolid_t *solid_B, ArrEstructura(csmedge_t) *set_of_null_edges_B,
-                        ArrEstructura(csmface_t) **set_of_null_faces_A,
-                        ArrEstructura(csmface_t) **set_of_null_faces_B)
+                        struct csmsolid_t *solid_A, csmArrayStruct(csmedge_t) *set_of_null_edges_A,
+                        struct csmsolid_t *solid_B, csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        csmArrayStruct(csmface_t) **set_of_null_faces_A,
+                        csmArrayStruct(csmface_t) **set_of_null_faces_B)
 {
-    ArrEstructura(csmface_t) *set_of_null_faces_A_loc, *set_of_null_faces_B_loc;
-    ArrEstructura(csmhedge_t) *loose_ends_A, *loose_ends_B;
+    csmArrayStruct(csmface_t) *set_of_null_faces_A_loc, *set_of_null_faces_B_loc;
+    csmArrayStruct(csmhedge_t) *loose_ends_A, *loose_ends_B;
     unsigned long i, no_null_edges;
     unsigned long no_null_edges_deleted_A, no_null_edges_deleted_B;
     unsigned long no_null_edges_pendant;
     
     csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_A);
     csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_B);
-    no_null_edges = arr_NumElemsPunteroST(set_of_null_edges_A, csmedge_t);
-    assert(no_null_edges == arr_NumElemsPunteroST(set_of_null_edges_B, csmedge_t));
+    no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
+    assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
     assert(no_null_edges > 0);
     assert_no_null(set_of_null_faces_A);
     assert_no_null(set_of_null_faces_B);
     
-    set_of_null_faces_A_loc = arr_CreaPunteroST(0, csmface_t);
-    set_of_null_faces_B_loc = arr_CreaPunteroST(0, csmface_t);
+    set_of_null_faces_A_loc = csmarrayc_new_st_array(0, csmface_t);
+    set_of_null_faces_B_loc = csmarrayc_new_st_array(0, csmface_t);
     
-    loose_ends_A = arr_CreaPunteroST(0, csmhedge_t);
-    loose_ends_B = arr_CreaPunteroST(0, csmhedge_t);
+    loose_ends_A = csmarrayc_new_st_array(0, csmhedge_t);
+    loose_ends_B = csmarrayc_new_st_array(0, csmhedge_t);
     
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
@@ -303,8 +298,8 @@ static void i_join_null_edges(
         null_face_created_h12a = CSMFALSE;
         null_face_created_h12b = CSMFALSE;
         
-        next_edge_A = arr_GetPunteroST(set_of_null_edges_A, i - no_null_edges_deleted_A, csmedge_t);
-        next_edge_B = arr_GetPunteroST(set_of_null_edges_B, i - no_null_edges_deleted_B, csmedge_t);
+        next_edge_A = csmarrayc_get_st(set_of_null_edges_A, i - no_null_edges_deleted_A, csmedge_t);
+        next_edge_B = csmarrayc_get_st(set_of_null_edges_B, i - no_null_edges_deleted_B, csmedge_t);
         
         he1_next_edge_A = csmedge_hedge_lado(next_edge_A, CSMEDGE_LADO_HEDGE_POS);
         he2_next_edge_B = csmedge_hedge_lado(next_edge_B, CSMEDGE_LADO_HEDGE_NEG);
@@ -402,13 +397,13 @@ static void i_join_null_edges(
     *set_of_null_faces_A = set_of_null_faces_A_loc;
     *set_of_null_faces_B = set_of_null_faces_B_loc;
     
-    no_null_edges_pendant = arr_NumElemsPunteroST(set_of_null_edges_A, csmedge_t);
-    assert(no_null_edges_pendant == arr_NumElemsPunteroST(set_of_null_edges_B, csmedge_t));
+    no_null_edges_pendant = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
+    assert(no_null_edges_pendant == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
     
     if (no_null_edges_pendant == 0)
     {
-        assert(arr_NumElemsPunteroST(loose_ends_A, csmhedge_t) == 0);
-        assert(arr_NumElemsPunteroST(loose_ends_B, csmhedge_t) == 0);
+        assert(csmarrayc_count_st(loose_ends_A, csmhedge_t) == 0);
+        assert(csmarrayc_count_st(loose_ends_B, csmhedge_t) == 0);
     }
     else
     {
@@ -436,8 +431,8 @@ static void i_join_null_edges(
         assert(null_edges_that_cannot_be_matched_A == CSMTRUE || null_edges_that_cannot_be_matched_B == CSMTRUE);
     }
     
-    arr_DestruyeEstructurasST(&loose_ends_A, NULL, csmhedge_t);
-    arr_DestruyeEstructurasST(&loose_ends_B, NULL, csmhedge_t);
+    csmarrayc_free_st(&loose_ends_A, csmhedge_t, NULL);
+    csmarrayc_free_st(&loose_ends_B, csmhedge_t, NULL);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -508,17 +503,17 @@ static void i_convert_holes_attached_to_in_componente_in_faces(struct csmface_t 
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_convert_holes_attached_to_in_component_of_null_faces_in_faces(ArrEstructura(csmface_t) *set_of_null_faces)
+static void i_convert_holes_attached_to_in_component_of_null_faces_in_faces(csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long i, num_null_faces;
     
-    num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    num_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
     
     for (i = 0; i < num_null_faces; i++)
     {
         struct csmface_t *null_face;
         
-        null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+        null_face = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
         i_convert_holes_attached_to_in_componente_in_faces(null_face);
     }
 }
@@ -587,7 +582,7 @@ static CSMBOOL i_is_out_component_of_null_face_attached_to_itself(struct csmface
 
 // ----------------------------------------------------------------------------------------------------
 
-static bool i_is_same_face_ptr(const struct csmface_t *face1, const struct csmface_t *face2)
+static CSMBOOL i_is_same_face_ptr(const struct csmface_t *face1, const struct csmface_t *face2)
 {
     if (face1 == face2)
         return CSMTRUE;
@@ -599,18 +594,18 @@ static bool i_is_same_face_ptr(const struct csmface_t *face1, const struct csmfa
 
 static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(
                         struct csmsolid_t *solid,
-                        ArrEstructura(csmface_t) *set_of_null_faces)
+                        csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long i, num_null_faces;
     
-    num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    num_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
     
     for (i = 0; i < num_null_faces; i++)
     {
         struct csmface_t *null_face;
         struct csmloop_t *loop_attached_to_out_component;
         
-        null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+        null_face = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
 
         if (i_is_out_component_of_null_face_attached_to_itself(null_face, &loop_attached_to_out_component) == CSMTRUE)
         {
@@ -635,7 +630,7 @@ static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_
                     csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
                     
                     if (face != loop_attached_to_out_component_face
-                            && arr_ExisteEstructuraST(set_of_null_faces, csmface_t, face, struct csmface_t, i_is_same_face_ptr, NULL) == CSMFALSE)
+                            && csmarrayc_contains_element_st(set_of_null_faces, csmface_t, face, struct csmface_t, i_is_same_face_ptr, NULL) == CSMFALSE)
                     {
                         csmface_redo_geometric_generated_data(face);
                         
@@ -657,41 +652,41 @@ static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_convert_inner_loops_of_null_faces_to_faces(ArrEstructura(csmface_t) *set_of_null_faces)
+static void i_convert_inner_loops_of_null_faces_to_faces(csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long i, no_null_faces;
-    ArrEstructura(csmface_t) *inner_loops_as_faces;
+    csmArrayStruct(csmface_t) *inner_loops_as_faces;
     
-    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
     assert(no_null_faces > 0);
     
     inner_loops_as_faces = csmsetopcom_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces);
-    assert(no_null_faces == arr_NumElemsPunteroST(inner_loops_as_faces, csmface_t));
+    assert(no_null_faces == csmarrayc_count_st(inner_loops_as_faces, csmface_t));
 
     for (i = 0; i < no_null_faces; i++)
     {
         struct csmface_t *face;
         
-        face = arr_GetPunteroST(inner_loops_as_faces, i, csmface_t);
-        arr_AppendPunteroST(set_of_null_faces, face, csmface_t);
+        face = csmarrayc_get_st(inner_loops_as_faces, i, csmface_t);
+        csmarrayc_append_element_st(set_of_null_faces, face, csmface_t);
     }
     
-    arr_DestruyeEstructurasST(&inner_loops_as_faces, NULL, csmface_t);
+    csmarrayc_free_st(&inner_loops_as_faces, csmface_t, NULL);
 }
 
 // ------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
                         enum csmsetop_operation_t set_operation,
-                        struct csmsolid_t *solid_A, ArrEstructura(csmface_t) *set_of_null_faces_A,
-                        struct csmsolid_t *solid_B, ArrEstructura(csmface_t) *set_of_null_faces_B))
+                        struct csmsolid_t *solid_A, csmArrayStruct(csmface_t) *set_of_null_faces_A,
+                        struct csmsolid_t *solid_B, csmArrayStruct(csmface_t) *set_of_null_faces_B))
 {
     struct csmsolid_t *result;
     unsigned long i, no_null_faces, half_no_null_faces;
     unsigned long face_desp_a, face_desp_b;
     
-    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces_A, csmface_t);
-    assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));
+    no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
+    assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
     assert(no_null_faces > 0);
     
     i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_A);
@@ -704,8 +699,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_A);
     i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_B);
-    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces_A, csmface_t);
-    assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));
+    no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
+    assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
     assert(no_null_faces % 2 == 0);
     
     csmsolid_redo_geometric_generated_data(solid_A);
@@ -716,8 +711,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_B);
     csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_B, set_of_null_faces_B);
 
-    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces_A, csmface_t);
-    assert(no_null_faces == arr_NumElemsPunteroST(set_of_null_faces_B, csmface_t));
+    no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
+    assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
     assert(no_null_faces > 0);
     assert(no_null_faces % 2 == 0);
     
@@ -761,10 +756,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     {
         struct csmface_t *face_from_solid_A, *face_from_solid_B;
         
-        face_from_solid_A = arr_GetPunteroST(set_of_null_faces_A, i + face_desp_a, csmface_t);
+        face_from_solid_A = csmarrayc_get_st(set_of_null_faces_A, i + face_desp_a, csmface_t);
         csmsetopcom_move_face_to_solid(0, face_from_solid_A, solid_A, result);
         
-        face_from_solid_B = arr_GetPunteroST(set_of_null_faces_B, i + face_desp_b, csmface_t);
+        face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
         csmsetopcom_move_face_to_solid(0, face_from_solid_B, solid_B, result);
     }
     
@@ -781,8 +776,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     {
         struct csmface_t *face_from_solid_A, *face_from_solid_B;
         
-        face_from_solid_A = arr_GetPunteroST(set_of_null_faces_A, i + face_desp_a, csmface_t);
-        face_from_solid_B = arr_GetPunteroST(set_of_null_faces_B, i + face_desp_b, csmface_t);
+        face_from_solid_A = csmarrayc_get_st(set_of_null_faces_A, i + face_desp_a, csmface_t);
+        face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
         
         csmeuler_lkfmrh(face_from_solid_A, &face_from_solid_B);
         csmloopglue_merge_face_loops(face_from_solid_A);
@@ -805,10 +800,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
                         struct csmsolid_t *solid_A, struct csmsolid_t *solid_B))
 {
     struct csmsolid_t *result;
-    ArrEstructura(csmsetop_vtxvtx_inters_t) *vv_intersections;
-    ArrEstructura(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
-    ArrEstructura(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
-    ArrEstructura(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
+    csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections;
+    csmArrayStruct(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
+    csmArrayStruct(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
+    csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
     unsigned long no_null_edges;
     
     csmdebug_begin_context("SETOP");
@@ -836,8 +831,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
                         &vv_intersections,
                         &vf_intersections_A, &vf_intersections_B);
     
-    set_of_null_edges_A = arr_CreaPunteroST(0, csmedge_t);
-    set_of_null_edges_B = arr_CreaPunteroST(0, csmedge_t);
+    set_of_null_edges_A = csmarrayc_new_st_array(0, csmedge_t);
+    set_of_null_edges_B = csmarrayc_new_st_array(0, csmedge_t);
     
     csmdebug_print_debug_info("***vf_intersections_A [BEGIN]\n");
     csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, set_of_null_edges_A, set_of_null_edges_B);
@@ -851,8 +846,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     
     csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, set_of_null_edges_A, set_of_null_edges_B);
     
-    no_null_edges = arr_NumElemsPunteroST(set_of_null_edges_A, csmedge_t);
-    assert(no_null_edges == arr_NumElemsPunteroST(set_of_null_edges_B, csmedge_t));
+    no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
+    assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
     
     if (no_null_edges == 0)
     {
@@ -876,9 +871,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     
     csmdebug_end_context();
     
-    arr_DestruyeEstructurasST(&vv_intersections, csmsetop_vtxvtx_free_inters, csmsetop_vtxvtx_inters_t);
-    arr_DestruyeEstructurasST(&vf_intersections_A, csmsetop_vtxfacc_free_inters, csmsetop_vtxfacc_inters_t);
-    arr_DestruyeEstructurasST(&vf_intersections_B, csmsetop_vtxfacc_free_inters, csmsetop_vtxfacc_inters_t);
+    csmarrayc_free_st(&vv_intersections, csmsetop_vtxvtx_inters_t, csmsetop_vtxvtx_free_inters);
+    csmarrayc_free_st(&vf_intersections_A, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
+    csmarrayc_free_st(&vf_intersections_B, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
     
     return result;
 }

@@ -16,6 +16,8 @@
 
 #include "csmsweep.h"
 
+#include "csmarrayc.inl"
+#include "csmassert.inl"
 #include "csmgeom.inl"
 #include "csmloop.inl"
 #include "csmface.inl"
@@ -29,13 +31,9 @@
 #include "csmeuler_lkfmrh.inl"
 #include "csmeuler_lmfkrh.inl"
 
-#include "a_punter.h"
-#include "csmassert.inl"
-#include "csmassert.inl"
-
 #include <geomcomp/gccontorno.h>
 
-ArrEstructura(csmhedge_t);
+csmArrayStruct(csmhedge_t);
 
 // --------------------------------------------------------------------------------
 
@@ -99,10 +97,10 @@ static void i_append_loop_from_hedge(
                         double Xo, double Yo, double Zo,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         struct csmface_t **new_face,
-                        ArrEstructura(csmhedge_t) **hedges_from_vertexs)
+                        csmArrayStruct(csmhedge_t) **hedges_from_vertexs)
 {
     struct csmface_t *new_face_loc;
-    ArrEstructura(csmhedge_t) *hedges_from_vertexs_loc;
+    csmArrayStruct(csmhedge_t) *hedges_from_vertexs_loc;
     unsigned long i, no_of_points_outer_loop;
     struct csmhedge_t *last_hedge, *he_from_first_vertex;
     
@@ -112,7 +110,7 @@ static void i_append_loop_from_hedge(
     assert_no_null(hedges_from_vertexs);
 
     last_hedge = first_hedge;
-    hedges_from_vertexs_loc = arr_CreaPunteroST(no_of_points_outer_loop, csmhedge_t);
+    hedges_from_vertexs_loc = csmarrayc_new_st_array(no_of_points_outer_loop, csmhedge_t);
     
     for (i = 1; i < no_of_points_outer_loop; i++)
     {
@@ -128,12 +126,12 @@ static void i_append_loop_from_hedge(
         
         csmeuler_lmev_strut_edge(last_hedge, x, y, z, &hedge_from_new_vertex);
         
-        arr_SetPunteroST(hedges_from_vertexs_loc, i, hedge_from_new_vertex, csmhedge_t);
+        csmarrayc_set_st(hedges_from_vertexs_loc, i, hedge_from_new_vertex, csmhedge_t);
         last_hedge = hedge_from_new_vertex;
     }
     
     csmeuler_lmef(first_hedge, last_hedge, &new_face_loc, &he_from_first_vertex, NULL);
-    arr_SetPunteroST(hedges_from_vertexs_loc, 0, he_from_first_vertex, csmhedge_t);
+    csmarrayc_set_st(hedges_from_vertexs_loc, 0, he_from_first_vertex, csmhedge_t);
     
     *new_face = new_face_loc;
     *hedges_from_vertexs = hedges_from_vertexs_loc;
@@ -148,11 +146,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_face, (
                         double Xo, double Yo, double Zo,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         struct csmface_t **bottom_face, struct csmface_t **top_face,
-                        ArrEstructura(csmhedge_t) **hedges_from_vertexs))
+                        csmArrayStruct(csmhedge_t) **hedges_from_vertexs))
 {
     struct csmsolid_t *solid;
     struct csmface_t *bottom_face_loc, *top_face_loc;
-    ArrEstructura(csmhedge_t) *hedges_from_vertexs_loc;
+    csmArrayStruct(csmhedge_t) *hedges_from_vertexs_loc;
     double x, y, z;
     struct csmhedge_t *first_hedge;
     
@@ -192,13 +190,13 @@ static void i_create_hedges_from_bottom_to_top_face(
                         unsigned long idx_outer_loop,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
-                        ArrEstructura(csmhedge_t) *hedges_from_vertexs_bottom_face)
+                        csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face)
 {
     unsigned long i, no_of_points_outer_loop;
     
     no_of_points_outer_loop = gccontorno_num_puntos_poligono(shape2d_top, idx_outer_loop);
     assert(no_of_points_outer_loop >= 3);
-    assert(no_of_points_outer_loop == arr_NumElemsPunteroST(hedges_from_vertexs_bottom_face, csmhedge_t));
+    assert(no_of_points_outer_loop == csmarrayc_count_st(hedges_from_vertexs_bottom_face, csmhedge_t));
     
     for (i = 0; i < no_of_points_outer_loop; i++)
     {
@@ -213,7 +211,7 @@ static void i_create_hedges_from_bottom_to_top_face(
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         &x, &y, &z);
         
-        hedge_from_vertex_in_bottom_face = arr_GetPunteroST(hedges_from_vertexs_bottom_face, i, csmhedge_t);
+        hedge_from_vertex_in_bottom_face = csmarrayc_get_st(hedges_from_vertexs_bottom_face, i, csmhedge_t);
         csmeuler_lmev_strut_edge(hedge_from_vertex_in_bottom_face, x, y, z, &hedge_from_new_vertex_bottom_to_top);
     }
 }
@@ -221,7 +219,7 @@ static void i_create_hedges_from_bottom_to_top_face(
 // --------------------------------------------------------------------------------
 
 static void i_create_lateral_faces(
-                        ArrEstructura(csmhedge_t) *hedges_from_vertexs_bottom_face,
+                        csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face,
                         struct csmsolid_t *solid)
 {
     unsigned long num_hedges;
@@ -229,10 +227,10 @@ static void i_create_lateral_faces(
     struct csmhedge_t *scan, *stop_hedge;
     struct csmhedge_t *hedge_prev, *hedge_next_next;
     
-    num_hedges = arr_NumElemsPunteroST(hedges_from_vertexs_bottom_face, csmhedge_t);
+    num_hedges = csmarrayc_count_st(hedges_from_vertexs_bottom_face, csmhedge_t);
     assert(num_hedges >= 3);
     
-    scan = arr_GetPunteroST(hedges_from_vertexs_bottom_face, 0, csmhedge_t);
+    scan = csmarrayc_get_st(hedges_from_vertexs_bottom_face, 0, csmhedge_t);
     stop_hedge = csmhedge_prev(csmhedge_prev(scan));
     num_iters = 0;
     
@@ -276,7 +274,7 @@ static void i_append_holes_to_solid(
     struct csmhedge_t *he_from_vertex, *he_to_vertex, *he_from_ring;
     struct csmloop_t *original_ring_loop;
     struct csmface_t *top_hole_face_loc;
-    ArrEstructura(csmhedge_t) *hedges_from_vertexs_bottom_face;
+    csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face;
     
     no_of_points = gccontorno_num_puntos_poligono(shape2d_bot, idx_hole_loop);
     assert(no_of_points == gccontorno_num_puntos_poligono(shape2d_top, idx_hole_loop));
@@ -332,7 +330,7 @@ static void i_append_holes_to_solid(
     
     //csmsolid_print_debug(solid, CSMTRUE);
 
-    arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
+    csmarrayc_free_st(&hedges_from_vertexs_bottom_face, csmhedge_t, NULL);
 }
 
 // --------------------------------------------------------------------------------
@@ -390,7 +388,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
 {
     struct csmsolid_t *solid;
     unsigned long idx_outer_loop;
-    ArrEstructura(csmhedge_t) *hedges_from_vertexs_bottom_face;
+    csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face;
     
     i_check_compatibility_between_shapes(shape2d_top, shape2d_bot, &idx_outer_loop);
 
@@ -418,7 +416,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
 
     //csmsolid_print_debug(solid, CSMTRUE);
     
-    arr_DestruyeEstructurasST(&hedges_from_vertexs_bottom_face, NULL, csmhedge_t);
+    csmarrayc_free_st(&hedges_from_vertexs_bottom_face, csmhedge_t, NULL);
     
     return solid;
 }

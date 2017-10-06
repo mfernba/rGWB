@@ -2,6 +2,8 @@
 
 #include "csmsetopcom.inl"
 
+#include "csmassert.inl"
+#include "csmarrayc.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -26,8 +28,6 @@
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
-#include "csmassert.inl"
-#include "a_punter.h"
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -41,17 +41,10 @@ static CSMBOOL i_equals_vertices(const struct csmvertex_t *vertex1, const struct
 
 // ----------------------------------------------------------------------------------------------------
 
-static bool i_equals_vertices2(const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2)
+void csmsetopcom_append_vertex_if_not_exists(struct csmvertex_t *vertex, csmArrayStruct(csmvertex_t) *set_of_on_vertices)
 {
-    return i_equals_vertices(vertex1, vertex2) == CSMTRUE ? true: false;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmsetopcom_append_vertex_if_not_exists(struct csmvertex_t *vertex, ArrEstructura(csmvertex_t) *set_of_on_vertices)
-{
-    if (arr_ExisteEstructuraST(set_of_on_vertices, csmvertex_t, vertex, struct csmvertex_t, i_equals_vertices2, NULL) == CSMFALSE)
-        arr_AppendPunteroST(set_of_on_vertices, vertex, csmvertex_t);
+    if (csmarrayc_contains_element_st(set_of_on_vertices, csmvertex_t, vertex, struct csmvertex_t, i_equals_vertices, NULL) == CSMFALSE)
+        csmarrayc_append_element_st(set_of_on_vertices, vertex, csmvertex_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -157,7 +150,7 @@ CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge
 
 // ----------------------------------------------------------------------------------------------------
 
-static enum comparac_t i_compare_edges_by_coord(const struct csmedge_t *edge1, const struct csmedge_t *edge2)
+static enum csmcompare_t i_compare_edges_by_coord(const struct csmedge_t *edge1, const struct csmedge_t *edge2)
 {
     const struct csmhedge_t *he1_edge1, *he1_edge2;
     const struct csmvertex_t *vertex1, *vertex2;
@@ -179,18 +172,18 @@ static enum comparac_t i_compare_edges_by_coord(const struct csmedge_t *edge1, c
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_sort_edges_lexicographically_by_xyz(ArrEstructura(csmedge_t) *set_of_null_edges)
+void csmsetopcom_sort_edges_lexicographically_by_xyz(csmArrayStruct(csmedge_t) *set_of_null_edges)
 {
-    arr_QSortPunteroST(set_of_null_edges, i_compare_edges_by_coord, csmedge_t);
+    csmarrayc_qsort_st(set_of_null_edges, csmedge_t, i_compare_edges_by_coord);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_null_edges, ArrEstructura(csmhedge_t) *loose_ends)
+void csmsetopcom_print_set_of_null_edges(const csmArrayStruct(csmedge_t) *set_of_null_edges, csmArrayStruct(csmhedge_t) *loose_ends)
 {
     unsigned long i, num_null_edges;
     
-    num_null_edges = arr_NumElemsPunteroST(set_of_null_edges, csmedge_t);
+    num_null_edges = csmarrayc_count_st(set_of_null_edges, csmedge_t);
     
     csmdebug_print_debug_info("Set of null edges:\n");
     
@@ -202,7 +195,7 @@ void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_
         double x, y, z;
         CSMBOOL is_loose_he1, is_loose_he2;
         
-        edge = arr_GetPunteroST(set_of_null_edges, i, csmedge_t);
+        edge = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
         assert_no_null(edge);
         
         he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
@@ -247,15 +240,15 @@ void csmsetopcom_print_set_of_null_edges(const ArrEstructura(csmedge_t) *set_of_
 
 // ----------------------------------------------------------------------------------------------------
 
-CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedge_t) *loose_ends)
+CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, csmArrayStruct(csmhedge_t) *loose_ends)
 {
     unsigned long i, no_loose_end;
     
-    no_loose_end = arr_NumElemsPunteroST(loose_ends, csmhedge_t);
+    no_loose_end = csmarrayc_count_st(loose_ends, csmhedge_t);
     
     for (i = 0; i < no_loose_end; i++)
     {
-        if (arr_GetPunteroST(loose_ends, i, csmhedge_t) == hedge)
+        if (csmarrayc_get_st(loose_ends, i, csmhedge_t) == hedge)
             return CSMTRUE;
     }
     
@@ -264,19 +257,19 @@ CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, ArrEstructura(csmhedg
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *loose_ends)
+void csmsetopcom_print_debug_info_loose_ends(const csmArrayStruct(csmhedge_t) *loose_ends)
 {
     unsigned long i, no_loose_end;
     
     csmdebug_print_debug_info("Loose ends [");
     
-    no_loose_end = arr_NumElemsPunteroST(loose_ends, csmhedge_t);
+    no_loose_end = csmarrayc_count_st(loose_ends, csmhedge_t);
     
     for (i = 0; i < no_loose_end; i++)
     {
         const struct csmhedge_t *hedge;
         
-        hedge = arr_GetPunteroConstST(loose_ends, i, csmhedge_t);
+        hedge = csmarrayc_get_const_st(loose_ends, i, csmhedge_t);
         assert_no_null(hedge);
         
         if (i > 0)
@@ -290,9 +283,12 @@ void csmsetopcom_print_debug_info_loose_ends(const ArrEstructura(csmhedge_t) *lo
 
 // ----------------------------------------------------------------------------------------------------
 
-static bool i_is_same_edge_by_ptr(const struct csmedge_t *edge1, const struct csmedge_t *edge2)
+static CSMBOOL i_is_same_edge_by_ptr(const struct csmedge_t *edge1, const struct csmedge_t *edge2)
 {
-    return edge1 == edge2;
+    if (edge1 == edge2)
+        return CSMTRUE;
+    else
+        return CSMFALSE;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -436,12 +432,13 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
 
 void csmsetopcom_cut_he(
                     struct csmhedge_t *hedge,
-                    ArrEstructura(csmedge_t) *set_of_null_edges,
-                    ArrEstructura(csmface_t) *set_of_null_faces,
+                    csmArrayStruct(csmedge_t) *set_of_null_edges,
+                    csmArrayStruct(csmface_t) *set_of_null_faces,
                     unsigned long *no_null_edges_deleted,
                     CSMBOOL *null_face_created_opt)
 {
     CSMBOOL null_face_created_loc;
+    CSMBOOL contains_element;
     unsigned long idx;
     struct csmsolid_t *solid;
     struct csmedge_t *edge;
@@ -456,9 +453,9 @@ void csmsetopcom_cut_he(
     he1_edge = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
     he2_edge = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
 
-    idx = arr_BuscarEstructuraST(set_of_null_edges, csmedge_t, edge, struct csmedge_t, i_is_same_edge_by_ptr);
-    assert(idx != ULONG_MAX);
-    arr_BorrarEstructuraST(set_of_null_edges, idx, NULL, csmedge_t);
+    contains_element = csmarrayc_contains_element_st(set_of_null_edges, csmedge_t, edge, struct csmedge_t, i_is_same_edge_by_ptr, &idx);
+    assert(contains_element == CSMTRUE);
+    csmarrayc_delete_element_st(set_of_null_edges, idx, csmedge_t, NULL);
     (*no_null_edges_deleted)++;
     
     he1_loop = csmhedge_loop(he1_edge);
@@ -469,7 +466,7 @@ void csmsetopcom_cut_he(
         struct csmface_t *null_face;
         
         null_face = csmopbas_face_from_hedge(hedge);
-        arr_AppendPunteroST(set_of_null_faces, null_face, csmface_t);
+        csmarrayc_append_element_st(set_of_null_faces, null_face, csmface_t);
         
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
@@ -560,12 +557,12 @@ void csmsetopcom_postprocess_join_edges(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_remove_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges)
+void csmsetopcom_remove_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges)
 {
     unsigned long i, no_null_edges;
     unsigned long no_deleted;
     
-    no_null_edges = arr_NumElemsPunteroST(set_of_null_edges, csmedge_t);
+    no_null_edges = csmarrayc_count_st(set_of_null_edges, csmedge_t);
     no_deleted = 0;
     
     for (i = 0; i < no_null_edges; i++)
@@ -575,7 +572,7 @@ void csmsetopcom_remove_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges)
         struct csmhedge_t *he1, *he2;
         
         idx = i - no_deleted;
-        null_edge = arr_GetPunteroST(set_of_null_edges, idx, csmedge_t);
+        null_edge = csmarrayc_get_st(set_of_null_edges, idx, csmedge_t);
         
         he1 = csmedge_hedge_lado(null_edge, CSMEDGE_LADO_HEDGE_POS);
         he2 = csmedge_hedge_lado(null_edge, CSMEDGE_LADO_HEDGE_NEG);
@@ -584,7 +581,7 @@ void csmsetopcom_remove_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges)
         {
             csmeuler_lkev(&he2, &he1, NULL, NULL, NULL, NULL);
             
-            arr_BorrarEstructuraST(set_of_null_edges, idx, NULL, csmedge_t);
+            csmarrayc_delete_element_st(set_of_null_edges, idx, csmedge_t, NULL);
             no_deleted++;
         }
     }
@@ -592,15 +589,15 @@ void csmsetopcom_remove_null_edges(ArrEstructura(csmedge_t) *set_of_null_edges)
 
 // ----------------------------------------------------------------------------------------------------
 
-ArrEstructura(csmface_t) *csmsetopcom_convert_inner_loops_of_null_faces_to_faces(ArrEstructura(csmface_t) *set_of_null_faces)
+csmArrayStruct(csmface_t) *csmsetopcom_convert_inner_loops_of_null_faces_to_faces(csmArrayStruct(csmface_t) *set_of_null_faces)
 {
-    ArrEstructura(csmface_t) *set_of_null_faces_below;
+    csmArrayStruct(csmface_t) *set_of_null_faces_below;
     unsigned long i, no_null_faces;
     
-    no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
     assert(no_null_faces > 0);
     
-    set_of_null_faces_below = arr_CreaPunteroST(0, csmface_t);
+    set_of_null_faces_below = csmarrayc_new_st_array(0, csmface_t);
     
     for (i = 0; i < no_null_faces; i++)
     {
@@ -608,7 +605,7 @@ ArrEstructura(csmface_t) *csmsetopcom_convert_inner_loops_of_null_faces_to_faces
         struct csmloop_t *floops, *loop_to_move;
         struct csmface_t *new_face;
         
-        null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+        null_face = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
         
         floops = csmface_floops(null_face);
         loop_to_move = floops;
@@ -622,7 +619,7 @@ ArrEstructura(csmface_t) *csmsetopcom_convert_inner_loops_of_null_faces_to_faces
             if (loop_to_move != csmface_flout(null_face))
             {
                 csmeuler_lmfkrh(loop_to_move, &new_face);
-                arr_AppendPunteroST(set_of_null_faces_below, new_face, csmface_t);
+                csmarrayc_append_element_st(set_of_null_faces_below, new_face, csmface_t);
             }
             
             loop_to_move = next_loop;
@@ -674,7 +671,7 @@ static CSMBOOL i_is_face_originated_by_hole(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_t) *set_of_null_faces)
+void csmsetopcom_reintroduce_holes_in_corresponding_faces(csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long no_iters;
     CSMBOOL did_delete_faces;
@@ -688,7 +685,7 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
         assert(no_iters < 1000000);
         no_iters++;
         
-        no_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+        no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
         assert(no_null_faces > 0);
         
         did_delete_faces = CSMFALSE;
@@ -697,7 +694,7 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
         {
             struct csmface_t *face_i;
             
-            face_i = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+            face_i = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
             
             if (i_is_face_originated_by_hole(face_i) == CSMTRUE)
             {
@@ -712,14 +709,14 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
                     {
                         struct csmface_t *face_j;
                     
-                        face_j = arr_GetPunteroST(set_of_null_faces, j, csmface_t);
+                        face_j = csmarrayc_get_st(set_of_null_faces, j, csmface_t);
                     
                         if (csmface_is_loop_contained_in_face(face_j, floops_face_i) == CSMTRUE)
                         {
                             did_delete_faces = CSMTRUE;
                             
                             csmeuler_lkfmrh(face_j, &face_i);
-                            arr_BorrarEstructuraST(set_of_null_faces, i, NULL, csmface_t);
+                            csmarrayc_delete_element_st(set_of_null_faces, i, csmface_t, NULL);
                         }
                     }
                 }
@@ -731,7 +728,7 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(ArrEstructura(csmface_
 
 // ----------------------------------------------------------------------------------------------------
 
-static bool i_face_equal_ptr(const struct csmface_t *face1, const struct csmface_t *face2)
+static CSMBOOL i_face_equal_ptr(const struct csmface_t *face1, const struct csmface_t *face2)
 {
     if (face1 == face2)
         return CSMTRUE;
@@ -741,12 +738,12 @@ static bool i_face_equal_ptr(const struct csmface_t *face1, const struct csmface
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, ArrEstructura(csmface_t) *set_of_null_faces)
+void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long num_null_faces;
     CSMBOOL there_are_changes;
     
-    num_null_faces = arr_NumElemsPunteroST(set_of_null_faces, csmface_t);
+    num_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
     assert(num_null_faces > 0);
     assert(num_null_faces % 2 == 0);
 
@@ -769,7 +766,7 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct cs
             
             if (csmloop_next(face_floops) == NULL
                     && csmloop_setop_loop_was_a_hole(face_floops) == CSMTRUE
-                    && arr_ExisteEstructuraST(set_of_null_faces, csmface_t, face, struct csmface_t, i_face_equal_ptr, NULL) == CSMFALSE)
+                    && csmarrayc_contains_element_st(set_of_null_faces, csmface_t, face, struct csmface_t, i_face_equal_ptr, NULL) == CSMFALSE)
             {
                 unsigned long idx_first_in_face, i;
                 CSMBOOL did_remove_face;
@@ -781,7 +778,7 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct cs
                 {
                     struct csmface_t *null_face;
                     
-                    null_face = arr_GetPunteroST(set_of_null_faces, i, csmface_t);
+                    null_face = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
                     
                     if (csmface_are_coplanar_faces(face, null_face) == CSMTRUE)
                     {
@@ -879,15 +876,15 @@ enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(
 {
     switch (csmmath_compare_doubles(value, 0., tolerance))
     {
-        case CSMMATH_VALUE1_LESS_THAN_VALUE2:
+        case CSMCOMPARE_FIRST_LESS:
             
             return CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
             
-        case CSMMATH_EQUAL_VALUES:
+        case CSMCOMPARE_EQUAL:
             
             return CSMSETOP_CLASSIFY_RESP_SOLID_ON;
             
-        case CSMMATH_VALUE1_GREATER_THAN_VALUE2:
+        case CSMCOMPARE_FIRST_GREATER:
             
             return CSMSETOP_CLASSIFY_RESP_SOLID_IN;
             

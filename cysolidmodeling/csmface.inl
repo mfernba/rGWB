@@ -44,7 +44,7 @@ CSMBOOL csmface_contains_point(
 
 CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x, double y, double z);
 
-enum csmmath_double_relation_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex);
+enum csmcompare_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex);
 
 CSMBOOL csmface_exists_intersection_between_line_and_face_plane(
                         const struct csmface_t *face,

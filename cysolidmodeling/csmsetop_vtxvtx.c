@@ -2,6 +2,7 @@
 
 #include "csmsetop_vtxvtx.inl"
 
+#include "csmarrayc.inl"
 #include "csmmath.inl"
 #include "csmhedge.inl"
 #include "csmdebug.inl"
@@ -20,10 +21,8 @@
 #include "csmmath.tli"
 #include "csmstring.inl"
 
-#include "a_punter.h"
-
-ArrEstructura(i_neighborhood_t);
-ArrEstructura(i_inters_sectors_t);
+csmArrayStruct(i_neighborhood_t);
+csmArrayStruct(i_inters_sectors_t);
 
 struct csmsetop_vtxvtx_inters_t
 {
@@ -216,14 +215,14 @@ static void i_vector_to_he(struct csmhedge_t *he, const struct csmvertex_t *vert
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_preprocess_neighborhood, (struct csmvertex_t *vertex))
+CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood, (struct csmvertex_t *vertex))
 {
-    ArrEstructura(i_neighborhood_t) *neighborhoods;
+    csmArrayStruct(i_neighborhood_t) *neighborhoods;
     register struct csmhedge_t *vhedge, *he_iterator;
     unsigned long num_iters;
     double null_vector_tolerance;
     
-    neighborhoods = arr_CreaPunteroST(0, i_neighborhood_t);
+    neighborhoods = csmarrayc_new_st_array(0, i_neighborhood_t);
     
     vhedge = csmvertex_hedge(vertex);
     he_iterator = vhedge;
@@ -261,7 +260,7 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_preprocess_neighborhood,
         is_oriented_in_direction = csmface_is_oriented_in_direction(he_iterator_face, Ux12, Uy12, Uz12);
         
         neigborhood = i_create_neighborhood(he_iterator, Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, Ux12, Uy12, Uz12, A, B, C);
-        arr_AppendPunteroST(neighborhoods, neigborhood, i_neighborhood_t);
+        csmarrayc_append_element_st(neighborhoods, neigborhood, i_neighborhood_t);
         
         if (is_null_vector == CSMTRUE || is_oriented_in_direction == CSMTRUE)
         {
@@ -283,7 +282,7 @@ CONSTRUCTOR(static ArrEstructura(i_neighborhood_t) *, i_preprocess_neighborhood,
             
             csmmath_cross_product3D(Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, &Ux12_bisec, &Uy12_bisec, &Uz12_bisec);
             neigborhood_bisec = i_create_neighborhood(he_iterator, Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, Ux12_bisec, Uy12_bisec, Uz12_bisec, A, B, C);
-            arr_AppendPunteroST(neighborhoods, neigborhood_bisec, i_neighborhood_t);
+            csmarrayc_append_element_st(neighborhoods, neigborhood_bisec, i_neighborhood_t);
             
             neigborhood->Ux2 = Ux_bisec;
             neigborhood->Uy2 = Uy_bisec;
@@ -366,7 +365,7 @@ static CSMBOOL i_is_intersection_within_sector(const struct i_neighborhood_t *ne
         else
         {
             double dot_product1, dot_product2;
-            enum csmmath_double_relation_t t1, t2;
+            enum csmcompare_t t1, t2;
             
             csmmath_make_unit_vector3D(&Wx1, &Wy1, &Wz1);
             csmmath_make_unit_vector3D(&Wx2, &Wy2, &Wz2);
@@ -377,7 +376,7 @@ static CSMBOOL i_is_intersection_within_sector(const struct i_neighborhood_t *ne
             dot_product2 = csmmath_dot_product3D(Wx2, Wy2, Wz2, neighborhood->Ux12_u, neighborhood->Uy12_u, neighborhood->Uz12_u);
             t2 = csmmath_compare_doubles(dot_product2, 0.0, tolerance_null_vector);
             
-            if (t1 == CSMMATH_VALUE1_LESS_THAN_VALUE2 && t2 == CSMMATH_VALUE1_LESS_THAN_VALUE2)
+            if (t1 == CSMCOMPARE_FIRST_LESS && t2 == CSMCOMPARE_FIRST_LESS)
                 return CSMTRUE;
             else
                 return CSMFALSE;
@@ -511,7 +510,7 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_print_debug_info_vertex_neighborhood(const char *description, const struct csmvertex_t *vertex, ArrEstructura(i_neighborhood_t) *vertex_neighborhood)
+static void i_print_debug_info_vertex_neighborhood(const char *description, const struct csmvertex_t *vertex, csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
@@ -521,13 +520,13 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
         csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g): \n", description, csmvertex_id(vertex), x, y, z);
         
-        num_sectors = arr_NumElemsPunteroST(vertex_neighborhood, i_neighborhood_t);
+        num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
         
         for (i = 0; i < num_sectors; i++)
         {
             struct i_neighborhood_t *hedge_neighborhood;
             
-            hedge_neighborhood = arr_GetPunteroST(vertex_neighborhood, i, i_neighborhood_t);
+            hedge_neighborhood = csmarrayc_get_st(vertex_neighborhood, i, i_neighborhood_t);
             assert_no_null(hedge_neighborhood);
             
             csmdebug_print_debug_info("He: %lu\n", csmhedge_id(hedge_neighborhood->he));
@@ -558,12 +557,12 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
 
 static void i_generate_neighboorhoods(
                         struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b,
-                        ArrEstructura(i_neighborhood_t) **neighborhood_A,
-                        ArrEstructura(i_neighborhood_t) **neighborhood_B,
-                        ArrEstructura(i_inters_sectors_t) **neighborhood_intersections)
+                        csmArrayStruct(i_neighborhood_t) **neighborhood_A,
+                        csmArrayStruct(i_neighborhood_t) **neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) **neighborhood_intersections)
 {
-    ArrEstructura(i_neighborhood_t) *neighborhood_A_loc, *neighborhood_B_loc;
-    ArrEstructura(i_inters_sectors_t) *neighborhood_intersections_loc;
+    csmArrayStruct(i_neighborhood_t) *neighborhood_A_loc, *neighborhood_B_loc;
+    csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections_loc;
     unsigned long i, num_neighborhoods_a, num_neighborhoods_b;
 
     assert(csmvertex_equal_coords(vertex_a, vertex_b, csmtolerance_equal_coords()) == CSMTRUE);
@@ -577,30 +576,30 @@ static void i_generate_neighboorhoods(
     i_print_debug_info_vertex_neighborhood("nba", vertex_a, neighborhood_A_loc);
     i_print_debug_info_vertex_neighborhood("nbb", vertex_b, neighborhood_B_loc);
     
-    neighborhood_intersections_loc = arr_CreaPunteroST(0, i_inters_sectors_t);
+    neighborhood_intersections_loc = csmarrayc_new_st_array(0, i_inters_sectors_t);
     
-    num_neighborhoods_a = arr_NumElemsPunteroST(neighborhood_A_loc, i_neighborhood_t);
-    num_neighborhoods_b = arr_NumElemsPunteroST(neighborhood_B_loc, i_neighborhood_t);
+    num_neighborhoods_a = csmarrayc_count_st(neighborhood_A_loc, i_neighborhood_t);
+    num_neighborhoods_b = csmarrayc_count_st(neighborhood_B_loc, i_neighborhood_t);
     
     for (i = 0; i < num_neighborhoods_a; i++)
     {
         const struct i_neighborhood_t *neighborhood_a;
         unsigned long j;
         
-        neighborhood_a = arr_GetPunteroConstST(neighborhood_A_loc, i, i_neighborhood_t);
+        neighborhood_a = csmarrayc_get_const_st(neighborhood_A_loc, i, i_neighborhood_t);
         
         for (j = 0; j < num_neighborhoods_b; j++)
         {
             const struct i_neighborhood_t *neighborhood_b;
             
-            neighborhood_b = arr_GetPunteroConstST(neighborhood_B_loc, j, i_neighborhood_t);
+            neighborhood_b = csmarrayc_get_const_st(neighborhood_B_loc, j, i_neighborhood_t);
             
             if (i_exists_intersection_between_sectors(neighborhood_a, neighborhood_b) == CSMTRUE)
             {
                 struct i_inters_sectors_t *inters_sectors;
                 
                 inters_sectors = i_create_intersection_between_sectors(neighborhood_a, i, neighborhood_b, j);
-                arr_AppendPunteroST(neighborhood_intersections_loc, inters_sectors, i_inters_sectors_t);
+                csmarrayc_append_element_st(neighborhood_intersections_loc, inters_sectors, i_inters_sectors_t);
             }
         }
     }
@@ -683,12 +682,12 @@ static CSMBOOL i_match_non_manifold_intersection(
 // ------------------------------------------------------------------------------------------
 
 static void i_discard_non_manifold_intersections(
-                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
-                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
 {
     unsigned long i, num_sectors;
     
-    num_sectors = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -696,13 +695,13 @@ static void i_discard_non_manifold_intersections(
         struct i_neighborhood_t *nba_i, *nbb_i;
         enum i_nonmanifold_intersect_sequence_t nonmanifold_intersection_sequence;
 
-        sector_i = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
         assert_no_null(sector_i);
         
-        nba_i = arr_GetPunteroST(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+        nba_i = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
         assert_no_null(nba_i);
         
-        nbb_i = arr_GetPunteroST(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+        nbb_i = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
         assert_no_null(nbb_i);
             
         if (sector_i->intersect == CSMTRUE
@@ -723,10 +722,10 @@ static void i_discard_non_manifold_intersections(
                 struct i_inters_sectors_t *sector_j;
                 struct i_neighborhood_t *nbb_j;
                 
-                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
                 assert_no_null(sector_j);
                 
-                nbb_j = arr_GetPunteroST(neighborhood_B, sector_j->idx_nbb, i_neighborhood_t);
+                nbb_j = csmarrayc_get_st(neighborhood_B, sector_j->idx_nbb, i_neighborhood_t);
                 assert_no_null(nbb_j);
                 
                 if (sector_j->idx_nba == sector_i->idx_nba
@@ -760,10 +759,10 @@ static void i_discard_non_manifold_intersections(
                 struct i_inters_sectors_t *sector_j;
                 struct i_neighborhood_t *nba_j;
                 
-                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
                 assert_no_null(sector_j);
                 
-                nba_j = arr_GetPunteroST(neighborhood_A, sector_j->idx_nba, i_neighborhood_t);
+                nba_j = csmarrayc_get_st(neighborhood_A, sector_j->idx_nba, i_neighborhood_t);
                 assert_no_null(nba_j);
                 
                 if (sector_j->idx_nbb == sector_i->idx_nbb
@@ -785,22 +784,22 @@ static void i_discard_non_manifold_intersections(
 
 static void i_reclassify_on_sectors(
                         enum csmsetop_operation_t set_operation,
-                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
-                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
 {
     unsigned long num_sectors_a, num_sectors_b;
     unsigned long i, num_sectors;
     
-    num_sectors_a = arr_NumElemsPunteroST(neighborhood_A, i_neighborhood_t);
-    num_sectors_b = arr_NumElemsPunteroST(neighborhood_B, i_neighborhood_t);
+    num_sectors_a = csmarrayc_count_st(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = csmarrayc_count_st(neighborhood_B, i_neighborhood_t);
     
-    num_sectors = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
     
     for (i = 0; i < num_sectors; i++)
     {
         struct i_inters_sectors_t *sector_i;
         
-        sector_i = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
         assert_no_null(sector_i);
         
         if (sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
@@ -815,10 +814,10 @@ static void i_reclassify_on_sectors(
             enum csmsetop_classify_resp_solid_t newsa, newsb;
             unsigned long j;
             
-            nba = arr_GetPunteroST(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+            nba = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
             assert_no_null(nba);
 
-            nbb = arr_GetPunteroST(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+            nbb = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
             assert_no_null(nbb);
             
             idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
@@ -846,7 +845,7 @@ static void i_reclassify_on_sectors(
             {
                 struct i_inters_sectors_t *sector_j;
                 
-                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
                 assert_no_null(sector_j);
                 
                 if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
@@ -899,22 +898,22 @@ static void i_reclassify_on_sectors(
 
 static void i_reclasssify_double_on_edges(
                         enum csmsetop_operation_t set_operation,
-                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
-                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
 {
     unsigned long num_sectors_a, num_sectors_b;
     unsigned long i, num_sectors;
     
-    num_sectors_a = arr_NumElemsPunteroST(neighborhood_A, i_neighborhood_t);
-    num_sectors_b = arr_NumElemsPunteroST(neighborhood_B, i_neighborhood_t);
+    num_sectors_a = csmarrayc_count_st(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = csmarrayc_count_st(neighborhood_B, i_neighborhood_t);
     
-    num_sectors = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
     
     for (i = 0; i < num_sectors; i++)
     {
         struct i_inters_sectors_t *sector_i;
         
-        sector_i = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
         assert_no_null(sector_i);
         
         if(sector_i->intersect == CSMTRUE
@@ -926,10 +925,10 @@ static void i_reclasssify_double_on_edges(
             enum csmsetop_classify_resp_solid_t newsa, newsb;
             unsigned long j;
             
-            nba = arr_GetPunteroST(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+            nba = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
             assert_no_null(nba);
 
-            nbb = arr_GetPunteroST(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+            nbb = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
             assert_no_null(nbb);
             
             idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
@@ -942,7 +941,7 @@ static void i_reclasssify_double_on_edges(
             {
                 struct i_inters_sectors_t *sector_j;
                 
-                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
                 assert_no_null(sector_j);
                 
                 if (sector_j->intersect == CSMTRUE)
@@ -992,16 +991,16 @@ static void i_reclasssify_double_on_edges(
 
 static void i_reclasssify_single_on_edges(
                         enum csmsetop_operation_t set_operation,
-                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
-                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
 {
     unsigned long num_sectors_a, num_sectors_b;
     unsigned long i, num_sectors;
     
-    num_sectors_a = arr_NumElemsPunteroST(neighborhood_A, i_neighborhood_t);
-    num_sectors_b = arr_NumElemsPunteroST(neighborhood_B, i_neighborhood_t);
+    num_sectors_a = csmarrayc_count_st(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = csmarrayc_count_st(neighborhood_B, i_neighborhood_t);
     
-    num_sectors = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
 
     for (i = 0; i < num_sectors; i++)
     {
@@ -1009,13 +1008,13 @@ static void i_reclasssify_single_on_edges(
         struct i_neighborhood_t *nba, *nbb;
         unsigned long idx_prev_sector_a, idx_prev_sector_b;
         
-        sector_i = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
         assert_no_null(sector_i);
 
-        nba = arr_GetPunteroST(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+        nba = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
         assert_no_null(nba);
 
-        nbb = arr_GetPunteroST(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+        nbb = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
         assert_no_null(nbb);
         
         idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
@@ -1032,7 +1031,7 @@ static void i_reclasssify_single_on_edges(
             {
                 struct i_inters_sectors_t *sector_j;
                 
-                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
                 assert_no_null(sector_j);
                 
                 if (sector_j->intersect == CSMTRUE)
@@ -1062,7 +1061,7 @@ static void i_reclasssify_single_on_edges(
             {
                 struct i_inters_sectors_t *sector_j;
                 
-                sector_j = arr_GetPunteroST(neighborhood_intersections, j, i_inters_sectors_t);
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
                 assert_no_null(sector_j);
                 
                 if (sector_j->intersect == CSMTRUE)
@@ -1112,8 +1111,8 @@ CONSTRUCTOR(static char *, i_debug_text_for_sector_classification, (enum csmseto
 // ------------------------------------------------------------------------------------------
 
 static void i_print_neighborhood_intersections(
-                        const ArrEstructura(i_inters_sectors_t) *neighborhood_intersections,
-                        const ArrEstructura(i_neighborhood_t) *neighborhood_A, const ArrEstructura(i_neighborhood_t) *neighborhood_B)
+                        const csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections,
+                        const csmArrayStruct(i_neighborhood_t) *neighborhood_A, const csmArrayStruct(i_neighborhood_t) *neighborhood_B)
 {
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
@@ -1121,7 +1120,7 @@ static void i_print_neighborhood_intersections(
         
         csmdebug_print_debug_info("\n");
         
-        no_inters = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+        no_inters = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
         
         for (i = 0; i < no_inters; i++)
         {
@@ -1129,13 +1128,13 @@ static void i_print_neighborhood_intersections(
             const struct i_neighborhood_t *nba, *nbb;
             char *text_cla, *text_clb;
             
-            inters_sectors = arr_GetPunteroST(neighborhood_intersections, i, i_inters_sectors_t);
+            inters_sectors = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
             assert_no_null(inters_sectors);
             
-            nba = arr_GetPunteroST(neighborhood_A, inters_sectors->idx_nba, i_neighborhood_t);
+            nba = csmarrayc_get_st(neighborhood_A, inters_sectors->idx_nba, i_neighborhood_t);
             assert_no_null(nba);
 
-            nbb = arr_GetPunteroST(neighborhood_B, inters_sectors->idx_nbb, i_neighborhood_t);
+            nbb = csmarrayc_get_st(neighborhood_B, inters_sectors->idx_nbb, i_neighborhood_t);
             assert_no_null(nbb);
             
             text_cla = i_debug_text_for_sector_classification(inters_sectors->s1a, inters_sectors->s2a);
@@ -1158,8 +1157,8 @@ static void i_print_neighborhood_intersections(
 
 static void i_reclasssify_on_edges(
                         enum csmsetop_operation_t set_operation,
-                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
-                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections)
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
 {
     i_reclasssify_double_on_edges(
                         set_operation,
@@ -1177,19 +1176,19 @@ static void i_reclasssify_on_edges(
 
 // ------------------------------------------------------------------------------------------
 
-static struct i_inters_sectors_t *i_get_next_sector(ArrEstructura(i_inters_sectors_t) *neighborhood_intersections, unsigned long *last_idx)
+static struct i_inters_sectors_t *i_get_next_sector(csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections, unsigned long *last_idx)
 {
     struct i_inters_sectors_t *intersection;
     unsigned long num_intersections;
     
-    num_intersections = arr_NumElemsPunteroST(neighborhood_intersections, i_inters_sectors_t);
+    num_intersections = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
     assert_no_null(last_idx);
     
     intersection = NULL;
     
     while (*last_idx < num_intersections)
     {
-        intersection = arr_GetPunteroST(neighborhood_intersections, *last_idx, i_inters_sectors_t);
+        intersection = csmarrayc_get_st(neighborhood_intersections, *last_idx, i_inters_sectors_t);
         assert_no_null(intersection);
         
         if (intersection->intersect == CSMFALSE)
@@ -1349,7 +1348,7 @@ static CSMBOOL i_get_orient(struct csmhedge_t *ref, struct csmhedge_t *he1, stru
 
 static void i_separateEdgeSequence(
                         struct csmhedge_t *from, struct csmhedge_t *to,
-                        ArrEstructura(csmedge_t) *set_of_null_edges)
+                        csmArrayStruct(csmedge_t) *set_of_null_edges)
 {
     struct csmhedge_t *from_prv, *to_prv;
     struct csmvertex_t *split_vertex;
@@ -1420,7 +1419,7 @@ static void i_separateEdgeSequence(
     }
     
     csmeuler_lmev(from, to, x, y, z, NULL, &null_edge, NULL, NULL);
-    arr_AppendPunteroST(set_of_null_edges, null_edge, csmedge_t);
+    csmarrayc_append_element_st(set_of_null_edges, null_edge, csmedge_t);
     csmedge_setop_set_is_null_edge(null_edge, CSMTRUE);
     
     if (csmdebug_debug_enabled() == CSMTRUE)
@@ -1435,7 +1434,7 @@ static void i_separateEdgeSequence(
 static void i_separateInteriorHedge(
                         struct csmhedge_t *he,
                         CSMBOOL orient,
-                        ArrEstructura(csmedge_t) *set_of_null_edges)
+                        csmArrayStruct(csmedge_t) *set_of_null_edges)
 {
     struct csmhedge_t *he_prv;
     struct csmvertex_t *split_vertex;
@@ -1491,17 +1490,17 @@ static void i_separateInteriorHedge(
     
     null_edge2 = csmhedge_edge(csmhedge_prev(he));
     assert(null_edge1 == null_edge2);
-    arr_AppendPunteroST(set_of_null_edges, null_edge2, csmedge_t);
+    csmarrayc_append_element_st(set_of_null_edges, null_edge2, csmedge_t);
     csmedge_setop_set_is_null_edge(null_edge2, CSMTRUE);
 }
 
 // ------------------------------------------------------------------------------------------
 
 static void i_insert_null_edges(
-                        ArrEstructura(i_neighborhood_t) *neighborhood_A, ArrEstructura(i_neighborhood_t) *neighborhood_B,
-                        ArrEstructura(i_inters_sectors_t) *neighborhood_intersections,
-                        ArrEstructura(csmedge_t) *set_of_null_edges_A,
-                        ArrEstructura(csmedge_t) *set_of_null_edges_B)
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections,
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_A,
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_B)
 {
     struct csmhedge_t *ha1, *ha2, *hb1, *hb2;
     unsigned long num_iters;
@@ -1533,10 +1532,10 @@ static void i_insert_null_edges(
             hb1 = NULL;
             hb2 = NULL;
             
-            nba = arr_GetPunteroST(neighborhood_A, sector->idx_nba, i_neighborhood_t);
+            nba = csmarrayc_get_st(neighborhood_A, sector->idx_nba, i_neighborhood_t);
             assert_no_null(nba);
 
-            nbb = arr_GetPunteroST(neighborhood_B, sector->idx_nbb, i_neighborhood_t);
+            nbb = csmarrayc_get_st(neighborhood_B, sector->idx_nbb, i_neighborhood_t);
             assert_no_null(nbb);
             
             if (sector->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
@@ -1558,10 +1557,10 @@ static void i_insert_null_edges(
             }
             else
             {
-                nba = arr_GetPunteroST(neighborhood_A, sector->idx_nba, i_neighborhood_t);
+                nba = csmarrayc_get_st(neighborhood_A, sector->idx_nba, i_neighborhood_t);
                 assert_no_null(nba);
 
-                nbb = arr_GetPunteroST(neighborhood_B, sector->idx_nbb, i_neighborhood_t);
+                nbb = csmarrayc_get_st(neighborhood_B, sector->idx_nbb, i_neighborhood_t);
                 assert_no_null(nbb);
                 
                 if (sector->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
@@ -1638,11 +1637,11 @@ static void i_insert_null_edges(
 static void i_vtxvtx_append_null_edges(
                         const struct csmsetop_vtxvtx_inters_t *vv_intersection,
                         enum csmsetop_operation_t set_operation,
-                        ArrEstructura(csmedge_t) *set_of_null_edges_A,
-                        ArrEstructura(csmedge_t) *set_of_null_edges_B)
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_A,
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_B)
 {
-    ArrEstructura(i_neighborhood_t) *neighborhood_A, *neighborhood_B;
-    ArrEstructura(i_inters_sectors_t) *neighborhood_intersections;
+    csmArrayStruct(i_neighborhood_t) *neighborhood_A, *neighborhood_B;
+    csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections;
     
     assert_no_null(vv_intersection);
     
@@ -1693,22 +1692,22 @@ static void i_vtxvtx_append_null_edges(
     
     csmdebug_end_context();
     
-    arr_DestruyeEstructurasST(&neighborhood_A, i_free_neighborhood, i_neighborhood_t);
-    arr_DestruyeEstructurasST(&neighborhood_B, i_free_neighborhood, i_neighborhood_t);
-    arr_DestruyeEstructurasST(&neighborhood_intersections, i_free_inters_sectors, i_inters_sectors_t);
+    csmarrayc_free_st(&neighborhood_A, i_neighborhood_t, i_free_neighborhood);
+    csmarrayc_free_st(&neighborhood_B, i_neighborhood_t, i_free_neighborhood);
+    csmarrayc_free_st(&neighborhood_intersections, i_inters_sectors_t, i_free_inters_sectors);
 }
 
 // ------------------------------------------------------------------------------------------
 
 void csmsetop_vtxvtx_append_null_edges(
-                        const ArrEstructura(csmsetop_vtxvtx_inters_t) *vv_intersections,
+                        const csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
                         enum csmsetop_operation_t set_operation,
-                        ArrEstructura(csmedge_t) *set_of_null_edges_A,
-                        ArrEstructura(csmedge_t) *set_of_null_edges_B)
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_A,
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_B)
 {
     unsigned long i, num_intersections;
     
-    num_intersections = arr_NumElemsPunteroST(vv_intersections, csmsetop_vtxvtx_inters_t);
+    num_intersections = csmarrayc_count_st(vv_intersections, csmsetop_vtxvtx_inters_t);
     
     csmdebug_clear_debug_points();
     
@@ -1716,7 +1715,7 @@ void csmsetop_vtxvtx_append_null_edges(
     {
         const struct csmsetop_vtxvtx_inters_t *vv_intersection;
         
-        vv_intersection = arr_GetPunteroConstST(vv_intersections, i, csmsetop_vtxvtx_inters_t);
+        vv_intersection = csmarrayc_get_const_st(vv_intersections, i, csmsetop_vtxvtx_inters_t);
         i_vtxvtx_append_null_edges(vv_intersection, set_operation, set_of_null_edges_A, set_of_null_edges_B);
     }
     

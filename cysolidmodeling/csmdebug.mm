@@ -16,7 +16,6 @@ extern "C"
 
 #include <basicSystem/bsassert.h>
 #include <basicSystem/bsmaterial.h>
-#include "a_punter.h"
 
 #include <math.h>
 #include <stdio.h>
