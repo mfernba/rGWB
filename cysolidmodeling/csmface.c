@@ -7,6 +7,7 @@
 #include "csmloop.inl"
 #include "csmhedge.inl"
 #include "csmmath.inl"
+#include "csmmaterial.inl"
 #include "csmnode.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
@@ -25,6 +26,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         struct csmsolid_t *fsolid, struct csmsolid_t *fsolid_aux,
                         struct csmloop_t *flout,
                         struct csmloop_t *floops,
+                        struct csmmaterial_t **visz_material_opt,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         struct csmbbox_t **bbox,
                         CSMBOOL setop_is_null_face))
@@ -40,6 +42,8 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     
     face->flout = flout;
     face->floops = floops;
+    
+    face->visz_material_opt = ASIGNA_PUNTERO_PP(visz_material_opt, struct csmmaterial_t);
     
     face->A = A;
     face->B = B;
@@ -63,6 +67,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     struct csmsolid_t *fsolid, *fsolid_aux;
     struct csmloop_t *flout;
     struct csmloop_t *floops;
+    struct csmmaterial_t *visz_material_opt;
     double A, B, C, D, fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;
     struct csmbbox_t *bbox;
@@ -74,6 +79,8 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     fsolid_aux = NULL;
     flout = NULL;
     floops = NULL;
+    
+    visz_material_opt = NULL;
     
     A = 0.;
     B = 0.;
@@ -92,6 +99,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
                 fsolid_aux,
                 flout,
                 floops,
+                &visz_material_opt,
                 A, B, C, D,
                 fuzzy_epsilon,
                 dropped_coord,
@@ -103,6 +111,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
 
 CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                         struct csmsolid_t *fsolid,
+	                    struct csmmaterial_t **visz_material_opt,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         unsigned long *id_nuevo_elemento))
 {
@@ -123,6 +132,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                 NULL,
                 flout,
                 floops,
+                visz_material_opt,
                 A, B, C, D,
                 fuzzy_epsilon,
                 dropped_coord,
@@ -140,11 +150,21 @@ struct csmface_t *csmface_duplicate(
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
 {
     struct csmface_t *new_face;
+    struct csmmaterial_t *visz_material_opt;
     struct csmloop_t *iterator, *last_loop;
     
     assert_no_null(face);
+    
+    if (face->visz_material_opt != NULL)
+        visz_material_opt = csmmaterial_copy(face->visz_material_opt);
+    else
+        visz_material_opt = NULL;
 
-    new_face = i_duplicate_face(fsolid, face->A, face->B, face->C, face->D, face->fuzzy_epsilon, face->dropped_coord, id_nuevo_elemento);
+    new_face = i_duplicate_face(
+                        fsolid,
+                        &visz_material_opt,
+                        face->A, face->B, face->C, face->D, face->fuzzy_epsilon, face->dropped_coord,
+                        id_nuevo_elemento);
     assert_no_null(new_face);
     
     iterator = face->floops;
@@ -188,6 +208,9 @@ void csmface_destruye(struct csmface_t **face)
 
     if ((*face)->floops != NULL)
         csmnode_free_node_list(&(*face)->floops, csmloop_t);
+
+    if ((*face)->visz_material_opt != NULL)
+        csmmaterial_free(&(*face)->visz_material_opt);
     
     csmbbox_free(&(*face)->bbox);
     
@@ -225,6 +248,19 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
         iterator = csmloop_next(iterator);
         
     } while (iterator != NULL);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_assign_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt)
+{
+    assert_no_null(face);
+    
+    if (face->visz_material_opt != NULL)
+        csmmaterial_free(&face->visz_material_opt);
+    
+    if (visz_material_opt != NULL)
+        face->visz_material_opt = csmmaterial_copy(visz_material_opt);
 }
 
 // ----------------------------------------------------------------------------------------------------

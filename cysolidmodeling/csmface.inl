@@ -17,6 +17,8 @@ unsigned long csmface_id(const struct csmface_t *face);
 
 void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
 
+void csmface_assign_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt);
+
 
 // Geometry...
 

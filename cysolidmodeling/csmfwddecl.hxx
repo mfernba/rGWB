@@ -37,6 +37,7 @@ struct csmloop_t;
 struct csmface_t;
 struct csmsolid_t;
 struct csmtransform_t;
+struct csmmaterial_t;
     
 #ifdef __cplusplus
 enum csmedge_lado_hedge_t: int;

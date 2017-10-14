@@ -37,6 +37,7 @@
 #include "csmdebug.inl"
 #include "csmviewer.inl"
 #include "csmmath.tli"
+#include "csmmaterial.h"
 
 #include "csmtest_array.inl"
 
@@ -2489,6 +2490,16 @@ static void i_test_sphere3(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_assign_flat_material_to_solid(float r, float g, float b, struct csmsolid_t *solid)
+{
+    struct csmmaterial_t *material;
+    
+    material = csmmaterial_new_flat_material(r, g, b, 100);
+    csmsolid_assign_visualization_material(solid, &material);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_sphere4(void)
 {
     struct csmsolid_t *sphere1, *sphere2, *sphere3, *sphere4;
@@ -2534,6 +2545,11 @@ static void i_test_sphere4(void)
                         0., 1., 0.,
                         1);
     
+    i_assign_flat_material_to_solid(1., 0., 0., sphere1);
+    i_assign_flat_material_to_solid(1., 0., 0., sphere2);
+    i_assign_flat_material_to_solid(1., 0., 0., sphere3);
+    i_assign_flat_material_to_solid(1., 0., 0., sphere4);
+    
     res = csmsetop_union_A_and_B(sphere1, sphere2);
     res = csmsetop_union_A_and_B(res, sphere3);
     res = csmsetop_union_A_and_B(res, sphere4);
@@ -2553,12 +2569,15 @@ static void i_test_sphere4(void)
                         block_shape,
                         1.4, 1.4, -2.8, 1., 0., 0., 0., 1., 0.,
                         10000);
+        
+        i_assign_flat_material_to_solid(0., 1., 0., block);
     }
     
     res = csmsetop_difference_A_minus_B(block, res);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
+    i_assign_flat_material_to_solid(0., 0., 1., res);
     
     res = csmsetop_difference_A_minus_B(block, res);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
@@ -2572,6 +2591,8 @@ static void i_test_sphere4(void)
                         1., 0., 0.,
                         0., 1., 0.,
                         1);
+    
+    i_assign_flat_material_to_solid(1., 1., 1., torus);
     
     res = csmsetop_difference_A_minus_B(res, torus);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);

@@ -13,6 +13,8 @@ struct csmface_t
     struct csmloop_t *flout;
     struct csmloop_t *floops;
     
+    struct csmmaterial_t *visz_material_opt;
+    
     double A, B, C, D;
     double fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;

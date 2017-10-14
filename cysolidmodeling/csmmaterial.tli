@@ -1,0 +1,13 @@
+//
+//  csmmaterial.tli.h
+//  cysolidmodeling
+//
+//  Created by Manuel Fernandez on 14/10/17.
+//  Copyright © 2017 Manuel Fernández. All rights reserved.
+//
+
+struct csmmaterial_t
+{
+    float r, g, b, a;
+};
+

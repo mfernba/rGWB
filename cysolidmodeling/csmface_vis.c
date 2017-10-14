@@ -22,7 +22,9 @@
 #include "csmmem.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
+#include "csmmaterial.tli"
 
+#include <basicSystem/bsmaterial.h>
 #include <basicGraphics/bsgraphics2.h>
 #include <geomcomp/gccontorno.h>
 
@@ -60,7 +62,20 @@ void csmface_vis_draw_solid(
         
         if (gccontorno_num_poligonos(shape) > 0)
         {
-            bsgraphics2_escr_color(graphics, face_material);
+            if (face->visz_material_opt != NULL)
+            {
+                struct bsmaterial_t *bsmaterial;
+                
+                bsmaterial = bsmaterial_crea_rgba(face->visz_material_opt->r, face->visz_material_opt->g, face->visz_material_opt->b, face->visz_material_opt->a);
+                bsgraphics2_escr_color(graphics, bsmaterial);
+                
+                bsmaterial_destruye(&bsmaterial);
+            }
+            else
+            {
+                bsgraphics2_escr_color(graphics, face_material);
+            }
+            
             gccontorno_dibuja_3d_ex(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMFALSE, graphics);
         }
         
