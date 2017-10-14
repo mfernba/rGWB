@@ -785,17 +785,12 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     
     csmsolid_clear_algorithm_data(result);
     
-    csmdebug_clear_debug_points();
-    csmsolid_print_debug(result, CSMTRUE);
-    csmdebug_set_viewer_results(result, NULL);
-    csmdebug_show_viewer();
-    
     return result;
 }
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
+CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_internal, (
                         enum csmsetop_operation_t set_operation,
                         struct csmsolid_t *solid_A, struct csmsolid_t *solid_B))
 {
@@ -805,14 +800,6 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     csmArrayStruct(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
     csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
     unsigned long no_null_edges;
-    
-    csmdebug_begin_context("SETOP");
-    csmsolid_set_name(solid_A, "Solid A");
-    csmsolid_set_name(solid_B, "Solid B");
-    
-    csmdebug_set_viewer_results(NULL, NULL);
-    csmdebug_set_viewer_parameters(solid_A, solid_B);
-    csmdebug_show_viewer();
     
     csmsolid_redo_geometric_generated_data(solid_A);
     csmsolid_clear_algorithm_data(solid_A);
@@ -874,6 +861,32 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     csmarrayc_free_st(&vv_intersections, csmsetop_vtxvtx_inters_t, csmsetop_vtxvtx_free_inters);
     csmarrayc_free_st(&vf_intersections_A, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
     csmarrayc_free_st(&vf_intersections_B, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
+    
+    return result;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
+                        enum csmsetop_operation_t set_operation,
+                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B))
+{
+    struct csmsolid_t *result;
+    
+    csmdebug_begin_context("SETOP");
+    csmsolid_set_name(solid_A, "Solid A");
+    csmsolid_set_name(solid_B, "Solid B");
+    
+    csmdebug_set_viewer_results(NULL, NULL);
+    csmdebug_set_viewer_parameters(solid_A, solid_B);
+    csmdebug_show_viewer();
+    
+    result = i_set_operation_modifying_solids_internal(set_operation, solid_A, solid_B);
+    
+    csmdebug_clear_debug_points();
+    csmsolid_print_debug(result, CSMTRUE);
+    csmdebug_set_viewer_results(result, NULL);
+    csmdebug_show_viewer();
     
     return result;
 }

@@ -30,7 +30,6 @@
 #include "csmstring.inl"
 
 #include "a_pto2d.h"
-#include "a_pto3d.h"
 #include <geomcomp/gccontorno.h>
 #include <geomcomp/gcelem2d.h>
 
@@ -2718,7 +2717,6 @@ void csmtest_test(void)
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
     i_test_divide_solido_rectangular_hueco_por_plano_superior2();
-    */
 
     i_test_union_solidos1(viewer);
     i_test_union_solidos2(viewer);
@@ -2760,6 +2758,9 @@ void csmtest_test(void)
 
     i_test_sphere2();
     i_test_sphere3();
+    */
+
+    i_test_mechanical_part2();
     
     csmviewer_free(&viewer);
 }
