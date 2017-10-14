@@ -860,7 +860,7 @@ static void i_assign_result_material(const struct csmsolid_t *solid, struct csms
         struct csmmaterial_t *material_copy;
         
         material_copy = csmmaterial_copy(material);
-        csmsolid_assign_visualization_material(result, &material_copy);
+        csmsolid_set_visualization_material(result, &material_copy);
     }
 }
 

@@ -265,7 +265,7 @@ static void i_set_visualization_material(const struct csmmaterial_t *visz_materi
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmface_assign_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt)
+void csmface_set_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt)
 {
     assert_no_null(face);
     i_set_visualization_material(visz_material_opt, &face->visz_material_opt);

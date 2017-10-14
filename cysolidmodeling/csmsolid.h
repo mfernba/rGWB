@@ -31,7 +31,7 @@ DLL_CYSOLIDMODELING void csmsolid_general_transform(
 
 DLL_CYSOLIDMODELING double csmsolid_volume(const struct csmsolid_t *solid);
 
-DLL_CYSOLIDMODELING void csmsolid_assign_visualization_material(struct csmsolid_t *solid, struct csmmaterial_t **visz_material);
+DLL_CYSOLIDMODELING void csmsolid_set_visualization_material(struct csmsolid_t *solid, struct csmmaterial_t **visz_material);
 
 #ifdef __cplusplus
 }

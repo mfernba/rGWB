@@ -578,7 +578,7 @@ void csmsolid_append_new_face(struct csmsolid_t *solido, struct csmface_t **face
     csmhashtb_add_item(solido->sfaces, csmface_id(face_loc), face_loc, csmface_t);
     
     if (solido->visz_material_opt != NULL)
-        csmface_assign_visualization_material(face_loc, solido->visz_material_opt);
+        csmface_set_visualization_material(face_loc, solido->visz_material_opt);
     
     *face = face_loc;
 }
@@ -935,7 +935,7 @@ double csmsolid_volume(const struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_assign_visualization_material(struct csmsolid_t *solid, struct csmmaterial_t **visz_material)
+void csmsolid_set_visualization_material(struct csmsolid_t *solid, struct csmmaterial_t **visz_material)
 {
     struct csmhashtb_iterator(csmface_t) *face_iterator;
     
@@ -953,7 +953,7 @@ void csmsolid_assign_visualization_material(struct csmsolid_t *solid, struct csm
         struct csmface_t *face;
         
         csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
-        csmface_assign_visualization_material(face, solid->visz_material_opt);
+        csmface_set_visualization_material(face, solid->visz_material_opt);
     }
     
     csmhashtb_free_iterator(&face_iterator, csmface_t);
