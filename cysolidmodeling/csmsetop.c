@@ -880,14 +880,14 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     
     csmdebug_set_viewer_results(NULL, NULL);
     csmdebug_set_viewer_parameters(solid_A, solid_B);
-    csmdebug_show_viewer();
+    //csmdebug_show_viewer();
     
     result = i_set_operation_modifying_solids_internal(set_operation, solid_A, solid_B);
     
     csmdebug_clear_debug_points();
     csmsolid_debug_print_debug(result, CSMTRUE);
     csmdebug_set_viewer_results(result, NULL);
-    csmdebug_show_viewer();
+    //csmdebug_show_viewer();
     
     return result;
 }

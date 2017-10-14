@@ -38,6 +38,8 @@
 #include "csmviewer.inl"
 #include "csmmath.tli"
 
+#include "csmtest_array.inl"
+
 // ------------------------------------------------------------------------------------------
 
 static void i_test_crea_destruye_solido_vacio(void)
@@ -2487,205 +2489,130 @@ static void i_test_sphere3(void)
 
 // ------------------------------------------------------------------------------------------
 
-#include "csmarrayc.inl"
-#include "csmmem.inl"
-#include "csmmath.inl"
-
-csmArrayStruct(i_element_t);
-
-struct i_element_t
+static void i_test_sphere4(void)
 {
-    unsigned long element_id;
-    double value2;
-};
-
-struct i_element_t *i_element_new(unsigned long element_id, double value2)
-{
-    struct i_element_t *element;
+    struct csmsolid_t *sphere1, *sphere2, *sphere3, *sphere4;
+    struct csmsolid_t *res;
+    struct csmsolid_t *block;
+    struct csmsolid_t *torus;
+    struct csmsolid_t *cylinder;
     
-    element = MALLOC(struct i_element_t);
+    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    sphere1 = csmshape3d_create_sphere(
+                        2.8,
+                        8,
+                        16,
+                        0., 0., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+
+    sphere2 = csmshape3d_create_sphere(
+                        2.8,
+                        8,
+                        16,
+                        2.8, 0., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+
+    sphere3 = csmshape3d_create_sphere(
+                        2.8,
+                        8,
+                        16,
+                        2.8, 2.8, 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+
+    sphere4 = csmshape3d_create_sphere(
+                        2.8,
+                        8,
+                        16,
+                        0.0, 2.8, 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
     
-    element->element_id = element_id;
-    element->value2 = value2;
+    res = csmsetop_union_A_and_B(sphere1, sphere2);
+    res = csmsetop_union_A_and_B(res, sphere3);
+    res = csmsetop_union_A_and_B(res, sphere4);
     
-    return element;
-}
-
-static void i_free_element(struct i_element_t **element)
-{
-    FREE_PP(element, struct i_element_t);
-}
-
-static enum csmcompare_t i_compare_element(const struct i_element_t *element1, const struct i_element_t *element2)
-{
-    if (element1->element_id == element2->element_id)
-        return CSMCOMPARE_EQUAL;
-    else if (element1->element_id < element2->element_id)
-        return CSMCOMPARE_FIRST_LESS;
-    else
-        return CSMCOMPARE_FIRST_GREATER;
-}
-
-static void i_append_element(csmArrayStruct(i_element_t) *elements, unsigned long element_id, double value)
-{
-    struct i_element_t *element;
-    
-    element = i_element_new(element_id, value);
-    csmarrayc_append_element_st(elements, element, i_element_t);
-}
-
-static void i_set_element(csmArrayStruct(i_element_t) *elements, unsigned long idx, unsigned long element_id, double value)
-{
-    struct i_element_t *element;
-    
-    element = i_element_new(element_id, value);
-    csmarrayc_set_st(elements, idx, element, i_element_t);
-}
-
-static void i_print_array_elements(csmArrayStruct(i_element_t) *elements)
-{
-    unsigned long i, num_elements;
-    
-    num_elements = csmarrayc_count_st(elements, i_element_t);
-    
-    if (num_elements == 0)
-        fprintf(stdout, "Empty array\n");
-    else
-        fprintf(stdout, "Array:\n");
-    
-    for (i = 0; i < num_elements; i++)
-    {
-        const struct i_element_t *element;
-        
-        element = csmarrayc_get_st(elements, i, i_element_t);
-        fprintf(stdout, "E: %lu, %lf\n", element->element_id, element->value2);
-    }
-}
-
-static enum csmcompare_t i_compare_elements(const struct i_element_t *e1, const struct i_element_t *e2)
-{
-    assert_no_null(e1);
-    assert_no_null(e2);
-    
-    if (e1->element_id == e2->element_id)
-        return CSMCOMPARE_EQUAL;
-    else if (e1->element_id < e2->element_id)
-        return CSMCOMPARE_FIRST_LESS;
-    else
-        return CSMCOMPARE_FIRST_GREATER;
-}
-
-// ------------------------------------------------------------------------------------------
-
-static CSMBOOL i_is_element_with_id(const struct i_element_t *e1, const unsigned long *searched_id)
-{
-    assert_no_null(e1);
-    assert_no_null(searched_id);
-    
-    return IS_TRUE(e1->element_id == *searched_id);
-}
-
-// ------------------------------------------------------------------------------------------
-
-static void i_test_array(void)
-{
-    csmArrayStruct(i_element_t) *elements;
-    unsigned long searched_id;
+    csmsolid_set_draw_only_border_edges(res, CSMFALSE);
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
     
     {
-        elements = csmarrayc_new_st_array(0, i_element_t);
-        i_append_element(elements, 5, 2.5);
-        i_append_element(elements, 3, 33.);
-        i_append_element(elements, 7, 23.11);
-        i_append_element(elements, 6, 1.2);
+        struct gccontorno_t *block_shape;
         
-        fprintf(stdout, "Initial array: \n");
-        i_print_array_elements(elements);
+        block_shape = gcelem2d_contorno_rectangular(2.9, 2.9);
         
-        csmarrayc_qsort_st(elements, i_element_t, i_compare_elements);
-        fprintf(stdout, "After qsort: \n");
-        i_print_array_elements(elements);
-        
-        searched_id = 7;
-        
-        if (csmarrayc_contains_element_st(elements, i_element_t, &searched_id, unsigned long, i_is_element_with_id, NULL) == CSMTRUE)
-            fprintf(stdout, "Containts element %lu\n", searched_id);
-        else
-            fprintf(stdout, "Doesn't containts element %lu\n", searched_id);
-
-        fprintf(stdout, "Deleting idx 1, 2: \n");
-        csmarrayc_delete_element_st(elements, 1, i_element_t, i_free_element);
-        i_print_array_elements(elements);
-        csmarrayc_delete_element_st(elements, 1, i_element_t, i_free_element);
-        i_print_array_elements(elements);
-
-        searched_id = 5;
-        
-        if (csmarrayc_contains_element_st(elements, i_element_t, &searched_id, unsigned long, i_is_element_with_id, NULL) == CSMTRUE)
-            fprintf(stdout, "Containts element %lu\n", searched_id);
-        else
-            fprintf(stdout, "Doesn't containts element %lu\n", searched_id);
-
-        csmarrayc_delete_element_st(elements, 0, i_element_t, i_free_element);
-        csmarrayc_delete_element_st(elements, 0, i_element_t, i_free_element);
-        i_print_array_elements(elements);
-        
-        csmarrayc_free_st(&elements, i_element_t, i_free_element);
+        block = csmsweep_create_solid_from_shape_debug(
+                        block_shape,
+                        1.4, 1.4,  0.5, 1., 0., 0., 0., 1., 0.,
+                        block_shape,
+                        1.4, 1.4, -2.8, 1., 0., 0., 0., 1., 0.,
+                        10000);
     }
-
+    
+    res = csmsetop_difference_A_minus_B(block, res);
+    csmsolid_set_draw_only_border_edges(res, CSMFALSE);
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+    
+    res = csmsetop_difference_A_minus_B(block, res);
+    csmsolid_set_draw_only_border_edges(res, CSMFALSE);
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+    
+    torus = csmshape3d_create_torus(
+                        1.5,  16,
+                        1., 16,
+                        1.4, 1.4, -.6,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+    
+    res = csmsetop_difference_A_minus_B(res, torus);
+    csmsolid_set_draw_only_border_edges(res, CSMFALSE);
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+    
     {
-        elements = csmarrayc_new_st_array(2, i_element_t);
-        i_set_element(elements, 1, 300, 1.25);
-        i_set_element(elements, 0, 100, 33.25);
-        i_print_array_elements(elements);
+        struct gccontorno_t *cylinder_shape;
         
-        i_append_element(elements, 6, 1.2);
-        i_append_element(elements, 7, 1.2);
-        i_print_array_elements(elements);
+        cylinder_shape = gcelem2d_contorno_circular(0.3, 32);
         
-        csmarrayc_free_st(&elements, i_element_t, i_free_element);
+        cylinder = csmsweep_create_solid_from_shape_debug(
+                        cylinder_shape,
+                        1.5, 1.4, 0.0, 0., 1., 0., 0., 0., 1.,
+                        cylinder_shape,
+                        -1.5, 1.4, 0.0, 0., 1., 0., 0., 0., 1.,
+                        10000);
     }
-}
-
-// ------------------------------------------------------------------------------------------
-
-#include <stdlib.h>
-#include <string.h>
-
-static void i_append_element2(void *ptr_datos, struct i_element_t *e, size_t element_size)
-{
-    memcpy(ptr_datos, &e, element_size);
-}
-
-static void *i_make_array(size_t *element_size)
-{
-    void *ptr_datos;
-    struct i_element_t *e1, *e2;
     
-    ptr_datos = (void *)malloc(sizeof(struct i_element_t *) * 2);
-    *element_size = sizeof(struct i_element_t *);
+    res = csmsetop_difference_A_minus_B(res, cylinder);
+    csmsolid_set_draw_only_border_edges(res, CSMFALSE);
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
     
-    e1 = i_element_new(100, 220.0);
-    i_append_element2(ptr_datos, e1, *element_size);
+    {
+        struct gccontorno_t *cylinder_shape;
+        
+        cylinder_shape = gcelem2d_contorno_circular(0.6, 32);
+        
+        cylinder = csmsweep_create_solid_from_shape_debug(
+                        cylinder_shape,
+                        2.5, 1.4, -1.8, 0., 1., 0., 0., 0., 1.,
+                        cylinder_shape,
+                        -2.5, 1.4, -1.8, 0., 1., 0., 0., 0., 1.,
+                        10000);
+    }
     
-    e2 = i_element_new(200, 220.0);
-    i_append_element2(ptr_datos + *element_size, e2, *element_size);
-    
-    return ptr_datos;
-}
-
-static void i_test_memoria(void)
-{
-    void *ptr_datos;
-    size_t element_size;
-    struct i_element_t *ve1, *ve2;
-    
-    ptr_datos = i_make_array(&element_size);
-    
-    ve1 = *((struct i_element_t **)(ptr_datos));
-    ve2 = *((struct i_element_t **)(ptr_datos + element_size));
-    
-    free(ptr_datos);
+    res = csmsetop_difference_A_minus_B(res, cylinder);
+    csmsolid_set_draw_only_border_edges(res, CSMFALSE);
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
 }
 
 // ------------------------------------------------------------------------------------------
@@ -2697,8 +2624,8 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_set_parameters, csmviewer_set_results);
     
-    //i_test_memoria();
-    //i_test_array();
+    //csmtest_array_test1();
+    //csmtest_array_test2();
     
     /*
     i_test_crea_destruye_solido_vacio();
@@ -2713,6 +2640,7 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
     
+    /*
     i_test_divide_solido_rectangular_hueco_por_plano_medio();
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -2758,8 +2686,10 @@ void csmtest_test(void)
 
     i_test_sphere2();
     i_test_sphere3();
-    
+    */
     //i_test_mechanical_part2();
+
+    i_test_sphere4();
     
     csmviewer_free(&viewer);
 }

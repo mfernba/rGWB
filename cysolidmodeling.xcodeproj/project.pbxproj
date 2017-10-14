@@ -76,6 +76,8 @@
 		55308C2B1F92122500353A68 /* csmedge_debug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C291F92122500353A68 /* csmedge_debug.inl */; };
 		55308C331F92161F00353A68 /* csmvertex_debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C311F92161F00353A68 /* csmvertex_debug.c */; };
 		55308C341F92161F00353A68 /* csmvertex_debug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C321F92161F00353A68 /* csmvertex_debug.inl */; };
+		55308C371F921A5600353A68 /* csmtest_array.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C351F921A5600353A68 /* csmtest_array.c */; };
+		55308C381F921A5600353A68 /* csmtest_array.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C361F921A5600353A68 /* csmtest_array.inl */; };
 		5532DDB81E8FFE810047B9DF /* csmloopglue.c in Sources */ = {isa = PBXBuildFile; fileRef = 5532DDB61E8FFE810047B9DF /* csmloopglue.c */; };
 		5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5532DDB71E8FFE810047B9DF /* csmloopglue.inl */; };
 		5532DDBF1E9001390047B9DF /* csmtolerance.c in Sources */ = {isa = PBXBuildFile; fileRef = 5532DDBD1E9001390047B9DF /* csmtolerance.c */; };
@@ -409,6 +411,8 @@
 		55308C2C1F92158300353A68 /* csmhedge.tli */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmhedge.tli; sourceTree = "<group>"; };
 		55308C311F92161F00353A68 /* csmvertex_debug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmvertex_debug.c; sourceTree = "<group>"; };
 		55308C321F92161F00353A68 /* csmvertex_debug.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmvertex_debug.inl; sourceTree = "<group>"; };
+		55308C351F921A5600353A68 /* csmtest_array.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmtest_array.c; sourceTree = "<group>"; };
+		55308C361F921A5600353A68 /* csmtest_array.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmtest_array.inl; sourceTree = "<group>"; };
 		5532DDB61E8FFE810047B9DF /* csmloopglue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmloopglue.c; sourceTree = "<group>"; };
 		5532DDB71E8FFE810047B9DF /* csmloopglue.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmloopglue.inl; sourceTree = "<group>"; };
 		5532DDBD1E9001390047B9DF /* csmtolerance.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmtolerance.c; sourceTree = "<group>"; };
@@ -565,6 +569,8 @@
 			children = (
 				5507A6231E6B8714008B9F73 /* csmtest.h */,
 				5507A6221E6B8714008B9F73 /* csmtest.c */,
+				55308C351F921A5600353A68 /* csmtest_array.c */,
+				55308C361F921A5600353A68 /* csmtest_array.inl */,
 				557954591E5DB074000FC91E /* Products */,
 			);
 			name = Test;
@@ -930,6 +936,7 @@
 				557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */,
 				557954A21E60D064000FC91E /* csmsolid.tli in Headers */,
 				557954781E5E0694000FC91E /* csmid.inl in Headers */,
+				55308C381F921A5600353A68 /* csmtest_array.inl in Headers */,
 				5507A5C71E6624E7008B9F73 /* csmopbas.inl in Headers */,
 				5507A67D1E73484D008B9F73 /* csmeuler_lmekr.inl in Headers */,
 				55EA99201ED38E66006C063C /* csmsetop_vtxvtx.inl in Headers */,
@@ -1211,6 +1218,7 @@
 				5507A5CA1E662758008B9F73 /* csmeuler_lmev.c in Sources */,
 				55EA991F1ED38E66006C063C /* csmsetop_vtxvtx.c in Sources */,
 				55308C151F92075200353A68 /* csmloop_debug.c in Sources */,
+				55308C371F921A5600353A68 /* csmtest_array.c in Sources */,
 				5507A6241E6B8714008B9F73 /* csmtest.c in Sources */,
 				55E30FA91F24BAB300EDE74F /* csmdebug.mm in Sources */,
 				55308C1E1F920A8000353A68 /* csmface_debug.c in Sources */,
