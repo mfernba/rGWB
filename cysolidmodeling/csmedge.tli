@@ -1,7 +1,19 @@
 // Edge...
 
+#include "csmfwddecl.hxx"
+
 enum csmedge_lado_hedge_t
 {
     CSMEDGE_LADO_HEDGE_POS,
     CSMEDGE_LADO_HEDGE_NEG
+};
+
+struct csmedge_t
+{
+    unsigned long id;
+
+    struct csmhedge_t *he1;
+    struct csmhedge_t *he2;
+
+    CSMBOOL setop_is_null_edge;
 };

@@ -7,6 +7,7 @@
 #include "csmhedge.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
+#include "csmedge_debug.inl"
 #include "csmedge.tli"
 #include "csmeuler_lmev.inl"
 #include "csmface.inl"
@@ -1425,7 +1426,7 @@ static void i_separateEdgeSequence(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("Edge sequence. Null edge from he %lu to he %lu", csmhedge_id(from), csmhedge_id(to));
-        csmedge_print_debug_info(null_edge, CSMTRUE);
+        csmedge_debug_print_debug_info(null_edge, CSMTRUE);
     }
 }
 
@@ -1469,7 +1470,7 @@ static void i_separateInteriorHedge(
         char *description;
         
         csmdebug_print_debug_info("Interior Edge. Null edge from he %lu to he %lu", csmhedge_id(he), csmhedge_id(he));
-        csmedge_print_debug_info(null_edge1, CSMTRUE);
+        csmedge_debug_print_debug_info(null_edge1, CSMTRUE);
         
         description = copiafor_codigo4("NE %lu (%g, %g, %g)", csmvertex_id(split_vertex), x, y, z);
         csmdebug_append_debug_point(x, y, z, &description);
@@ -1485,7 +1486,7 @@ static void i_separateInteriorHedge(
         csmedge_reverse_orientation(he_prv_edge);
         
         csmdebug_print_debug_info("Interior Edge reversed: ");
-        csmedge_print_debug_info(he_prv_edge, CSMTRUE);
+        csmedge_debug_print_debug_info(he_prv_edge, CSMTRUE);
     }
     
     null_edge2 = csmhedge_edge(csmhedge_prev(he));

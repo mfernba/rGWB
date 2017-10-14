@@ -23,6 +23,7 @@
 #include "csmsetop_vtxvtx.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
+#include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
@@ -257,10 +258,10 @@ static void i_join_null_edges(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmsolid_redo_geometric_generated_data(solid_A);
-        csmsolid_print_debug(solid_A, CSMTRUE);
+        csmsolid_debug_print_debug(solid_A, CSMTRUE);
         
         csmsolid_redo_geometric_generated_data(solid_B);
-        csmsolid_print_debug(solid_B, CSMTRUE);
+        csmsolid_debug_print_debug(solid_B, CSMTRUE);
     }
     
     no_null_edges_deleted_A = 0;
@@ -365,8 +366,8 @@ static void i_join_null_edges(
         {
             csmdebug_unblock_print_solid();
                 csmdebug_print_debug_info("*** AFTER NULL FACES\n");
-                csmsolid_print_debug(solid_A, CSMTRUE);
-                csmsolid_print_debug(solid_B, CSMTRUE);
+                csmsolid_debug_print_debug(solid_A, CSMTRUE);
+                csmsolid_debug_print_debug(solid_B, CSMTRUE);
             csmdebug_block_print_solid();
             
             csmsetopcom_print_set_of_null_edges(set_of_null_edges_A, loose_ends_A);
@@ -390,8 +391,8 @@ static void i_join_null_edges(
     csmsetopcom_postprocess_join_edges(solid_B);
     
     csmdebug_print_debug_info("*** AFTER JOINING NULL EDGES\n");
-    csmsolid_print_debug(solid_A, CSMTRUE);
-    csmsolid_print_debug(solid_B, CSMTRUE);
+    csmsolid_debug_print_debug(solid_A, CSMTRUE);
+    csmsolid_debug_print_debug(solid_B, CSMTRUE);
     //csmdebug_show_viewer();
     
     *set_of_null_faces_A = set_of_null_faces_A_loc;
@@ -743,8 +744,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         default_error();
     }
     
-    csmsolid_print_debug(solid_A, CSMFALSE);
-    csmsolid_print_debug(solid_B, CSMFALSE);
+    csmsolid_debug_print_debug(solid_A, CSMFALSE);
+    csmsolid_debug_print_debug(solid_B, CSMFALSE);
 
     csmsolid_prepare_for_cleanup(solid_A);
     csmsolid_prepare_for_cleanup(solid_B);
@@ -768,9 +769,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     csmsolid_finish_cleanup(solid_B);
     csmsolid_finish_cleanup(result);    
     
-    csmsolid_print_debug(result, CSMFALSE);
-    //csmsolid_print_debug(solid_A, CSMFALSE);
-    //csmsolid_print_debug(solid_B, CSMFALSE);
+    csmsolid_debug_print_debug(result, CSMFALSE);
+    //csmsolid_debug_print_debug(solid_A, CSMFALSE);
+    //csmsolid_debug_print_debug(solid_B, CSMFALSE);
 
     for (i = 0; i < half_no_null_faces; i++)
     {
@@ -809,8 +810,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
 
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
-        csmsolid_print_debug(solid_A, CSMTRUE);
-        csmsolid_print_debug(solid_B, CSMTRUE);
+        csmsolid_debug_print_debug(solid_A, CSMTRUE);
+        csmsolid_debug_print_debug(solid_B, CSMTRUE);
     }
     
     csmsetop_procedges_generate_intersections_on_both_solids(
@@ -829,7 +830,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
     csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, set_of_null_edges_B, set_of_null_edges_A);
     csmdebug_print_debug_info("***vf_intersections_B [END]\n");
     
-    csmsolid_print_debug(solid_A, CSMTRUE);
+    csmsolid_debug_print_debug(solid_A, CSMTRUE);
     
     csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, set_of_null_edges_A, set_of_null_edges_B);
     
@@ -884,7 +885,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     result = i_set_operation_modifying_solids_internal(set_operation, solid_A, solid_B);
     
     csmdebug_clear_debug_points();
-    csmsolid_print_debug(result, CSMTRUE);
+    csmsolid_debug_print_debug(result, CSMTRUE);
     csmdebug_set_viewer_results(result, NULL);
     csmdebug_show_viewer();
     

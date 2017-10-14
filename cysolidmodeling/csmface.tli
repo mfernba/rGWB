@@ -1,0 +1,23 @@
+// This file should only be accessed from csmface_*.c
+// It has been created only for extension purposes
+
+#include "csmfwddecl.hxx"
+
+struct csmface_t
+{
+    unsigned long id;
+
+    struct csmsolid_t *fsolid;
+    struct csmsolid_t *fsolid_aux;
+    
+    struct csmloop_t *flout;
+    struct csmloop_t *floops;
+    
+    double A, B, C, D;
+    double fuzzy_epsilon;
+    enum csmmath_dropped_coord_t dropped_coord;
+    struct csmbbox_t *bbox;
+    
+    CSMBOOL setop_is_null_face;
+};
+

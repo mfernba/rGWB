@@ -8,6 +8,7 @@
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
+#include "csmface_debug.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmeuler_laringmv.inl"
@@ -23,6 +24,7 @@
 #include "csmopbas.inl"
 #include "csmsetop.tli"
 #include "csmsolid.inl"
+#include "csmsolid_debug.inl"
 #include "csmsolid.tli"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
@@ -309,7 +311,7 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
                         csmhedge_id(he1), csmedge_id(csmhedge_edge(he1)),
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)));
         
-        csmsolid_print_debug(he1_solid, CSMTRUE);
+        csmsolid_debug_print_debug(he1_solid, CSMTRUE);
     }
     
     if (csmhedge_loop(he1) == csmhedge_loop(he2))
@@ -344,8 +346,8 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)),
                         csmface_id(new_face));
                 
-                csmface_print_info_debug(new_face, CSMTRUE, NULL);
-                csmsolid_print_debug(he1_solid, CSMTRUE);
+                csmface_debug_print_info_debug(new_face, CSMTRUE, NULL);
+                csmsolid_debug_print_debug(he1_solid, CSMTRUE);
             }
         }
         else
@@ -398,17 +400,17 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)),
                         csmhedge_id(he2), csmhedge_id(he1_next));
             
-            csmsolid_print_debug(he1_solid, CSMTRUE);
+            csmsolid_debug_print_debug(he1_solid, CSMTRUE);
         }
         
         csmeuler_lmef(he2, he1_next, &second_new_face, NULL, NULL);
 
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
-            csmface_print_info_debug(second_new_face, CSMTRUE, NULL);
+            csmface_debug_print_info_debug(second_new_face, CSMTRUE, NULL);
 
             csmdebug_print_debug_info("\tFace %lu created\n", csmface_id(second_new_face));
-            csmsolid_print_debug(csmface_fsolid(second_new_face), CSMTRUE);
+            csmsolid_debug_print_debug(csmface_fsolid(second_new_face), CSMTRUE);
         }
         
         old_face_floops = csmface_floops(old_face);
@@ -471,16 +473,16 @@ void csmsetopcom_cut_he(
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmdebug_print_debug_info("***NULL FACE***\n");
-            csmface_print_info_debug(null_face, CSMTRUE, NULL);
+            csmface_debug_print_info_debug(null_face, CSMTRUE, NULL);
             
             csmdebug_print_debug_info("(CUTTING HE)  (%lu, %lu) with LKEMR\n", csmhedge_id(he1_edge), csmhedge_id(he2_edge));
-            csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
+            csmsolid_debug_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
         }
         
         csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL);
         
         if (csmdebug_debug_enabled() == CSMTRUE)
-            csmsolid_print_debug(solid, CSMTRUE);
+            csmsolid_debug_print_debug(solid, CSMTRUE);
         
         null_face_created_loc = CSMTRUE;
     }
@@ -496,7 +498,7 @@ void csmsetopcom_cut_he(
         null_face_created_loc = CSMFALSE;
         
         if (csmdebug_debug_enabled() == CSMTRUE)
-            csmsolid_print_debug(solid, CSMTRUE);
+            csmsolid_debug_print_debug(solid, CSMTRUE);
     }
     
     ASSIGN_OPTIONAL_VALUE(null_face_created_opt, null_face_created_loc);

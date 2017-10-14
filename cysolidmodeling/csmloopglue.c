@@ -17,7 +17,7 @@
 #include "csmeuler_lkev.inl"
 #include "csmloop.inl"
 #include "csmopbas.inl"
-#include "csmsolid.inl"
+#include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 
@@ -206,10 +206,10 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
     unsigned long num_iters;
     struct csmhedge_t *he_iterator_mate;
     
-    csmsolid_print_debug(csmface_fsolid(csmopbas_face_from_hedge(common_hedge_face1)), CSMTRUE);
+    csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(common_hedge_face1)), CSMTRUE);
 
     csmeuler_lmekr(common_hedge_face1, common_hedge_face2, &he_prev_common_edge_face1, &he_prev_common_edge_face2);
-    csmsolid_print_debug(csmface_fsolid(csmopbas_face_from_hedge(common_hedge_face1)), CSMTRUE);
+    csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(common_hedge_face1)), CSMTRUE);
     csmeuler_lkev(&he_prev_common_edge_face1, &he_prev_common_edge_face2, NULL, &he1_next, NULL, &he2_next);
     assert(he1_next == common_hedge_face1);
     assert(he2_next == common_hedge_face2);
@@ -217,7 +217,7 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
     he_iterator = common_hedge_face1;
     num_iters = 0;
     
-    csmsolid_print_debug(csmface_fsolid(csmopbas_face_from_hedge(common_hedge_face1)), CSMTRUE);
+    csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(common_hedge_face1)), CSMTRUE);
 
     while (csmhedge_next(he_iterator) != common_hedge_face2)
     {
@@ -231,7 +231,7 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
         he_prev = csmhedge_prev(he_iterator);
 
         csmeuler_lmef(he_next, he_prev, NULL, NULL, NULL);
-        csmsolid_print_debug(csmface_fsolid(csmopbas_face_from_hedge(he_iterator)), CSMTRUE);
+        csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(he_iterator)), CSMTRUE);
         
         he_iterator_next = csmhedge_next(he_iterator);
         he_iterator_next_mate = csmopbas_mate(he_iterator_next);
@@ -240,12 +240,12 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
         he_iterator_mate = csmopbas_mate(he_iterator);
         csmeuler_lkef(&he_iterator_mate, &he_iterator);
 
-        //csmsolid_print_debug(csmopbas_solid_from_hedge(he_iterator), CSMTRUE);
+        //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(he_iterator), CSMTRUE);
         
         he_iterator = he_next;
     }
 
-    //csmsolid_print_debug(csmopbas_solid_from_hedge(he_iterator), CSMTRUE);
+    //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(he_iterator), CSMTRUE);
     
     he_iterator_mate = csmopbas_mate(he_iterator);
     csmeuler_lkef(&he_iterator_mate, &he_iterator);

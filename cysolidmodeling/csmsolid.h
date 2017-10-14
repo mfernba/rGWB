@@ -30,20 +30,6 @@ DLL_CYSOLIDMODELING void csmsolid_general_transform(
 // Properties...
 
 DLL_CYSOLIDMODELING double csmsolid_volume(const struct csmsolid_t *solid);
-
-
-// Debug...
-
-DLL_CYSOLIDMODELING void csmsolid_draw_debug_info(struct csmsolid_t *solido, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics);
-
-DLL_CYSOLIDMODELING void csmsolid_draw(
-                            struct csmsolid_t *solido,
-                            CSMBOOL draw_solid_face,
-                            CSMBOOL draw_face_normal,
-                            const struct bsmaterial_t *face_material,
-                            const struct bsmaterial_t *normal_material,
-                            const struct bsmaterial_t *border_edges_material,
-                            struct bsgraphics2_t *graphics);
     
 #ifdef __cplusplus
 }

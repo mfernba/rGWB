@@ -11,6 +11,7 @@
 extern "C"
 {
     #include "csmsolid.h"
+    #include "csmsolid_vis.h"
     #include "csmsolid.inl"
     #include "csmdebug.inl"
 }
@@ -95,7 +96,7 @@ static void i_draw_solid_with_material(
         if (draw_debug_info == CSMTRUE)
         {
             bsgraphics2_escr_color(graphics, *material);
-            csmsolid_draw_debug_info(solid, draw_edge_info, graphics);
+            csmsolid_vis_draw_debug_info(solid, draw_edge_info, graphics);
         }
         else
         {
@@ -107,7 +108,7 @@ static void i_draw_solid_with_material(
             draw_face_normal = CSMFALSE;
             border_edges_color = bsmaterial_crea_rgb(0., 0., 0.);
             
-            csmsolid_draw(solid, draw_solid_face, draw_face_normal, *material, border_edges_color, border_edges_color, graphics);
+            csmsolid_vis_draw(solid, draw_solid_face, draw_face_normal, *material, border_edges_color, border_edges_color, graphics);
             
             bsmaterial_destruye(&border_edges_color);
         }

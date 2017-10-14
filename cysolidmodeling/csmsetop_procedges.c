@@ -14,6 +14,7 @@
 #include "csmsetop.tli"
 #include "csmdebug.inl"
 #include "csmedge.inl"
+#include "csmedge_debug.inl"
 #include "csmedge.tli"
 #include "csmeuler_lmev.inl"
 #include "csmface.inl"
@@ -23,6 +24,7 @@
 #include "csmmath.tli"
 #include "csmopbas.inl"
 #include "csmsolid.inl"
+#include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
@@ -672,7 +674,7 @@ static void i_process_edge_intersections(
                     char *description;
                     
                     csmdebug_print_debug_info("-->Splitted hedge, new vertex: %lu\n", csmvertex_id(new_vertex_on_hit_hedge));
-                    csmedge_print_debug_info(new_edge_other_solid, CSMTRUE);
+                    csmedge_debug_print_debug_info(new_edge_other_solid, CSMTRUE);
                     csmdebug_print_debug_info("Added VV intersection (%lu, %lu)\n", csmvertex_id(edge_vertex_intersection), csmvertex_id(new_vertex_on_hit_hedge));
                     
                     description = copiafor_codigo4(
@@ -803,8 +805,8 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
             
             i_generate_edge_intersections_solid_A_with_solid_B(solid_A, solid_B, vv_intersections_loc, vf_intersections_A_loc);
             
-            csmsolid_print_debug(solid_A, CSMTRUE);
-            csmsolid_print_debug(solid_B, CSMTRUE);
+            csmsolid_debug_print_debug(solid_A, CSMTRUE);
+            csmsolid_debug_print_debug(solid_B, CSMTRUE);
         }
         csmdebug_end_context();
     
@@ -815,8 +817,8 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
             csmdebug_clear_debug_points();
             i_generate_edge_intersections_solid_A_with_solid_B(solid_B, solid_A, vv_intersections_loc, vf_intersections_B_loc);
             
-            csmsolid_print_debug(solid_A, CSMTRUE);
-            csmsolid_print_debug(solid_B, CSMTRUE);
+            csmsolid_debug_print_debug(solid_A, CSMTRUE);
+            csmsolid_debug_print_debug(solid_B, CSMTRUE);
         }
         csmdebug_end_context();
 

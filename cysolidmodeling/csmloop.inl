@@ -42,6 +42,8 @@ CSMBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *lo
 
 CSMBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop);
 
+void csmloop_geometric_center_3d(struct csmloop_t *loop, double *x, double *y, double *z);
+
 
 // Topology...
 
@@ -63,19 +65,6 @@ CSMBOOL csmloop_setop_loop_was_a_hole(const struct csmloop_t *loop);
 void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CSMBOOL setop_loop_was_a_hole);
 
 void csmloop_clear_algorithm_mask(struct csmloop_t *loop);
-
-
-// Debug...
-
-void csmloop_print_info_debug(struct csmloop_t *loop, CSMBOOL is_outer_loop, CSMBOOL assert_si_no_es_integro);
-
-void csmloop_append_loop_to_shape(
-                        struct csmloop_t *loop,
-                        double Xo, double Yo, double Zo,
-                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
-                        struct gccontorno_t *shape);
-
-void csmloop_geometric_center_3d(struct csmloop_t *loop, double *x, double *y, double *z);
 
 
 

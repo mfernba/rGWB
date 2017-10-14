@@ -1,6 +1,7 @@
 // Half-Edge...
 
 #include "csmhedge.inl"
+#include "csmhedge.tli"
 
 #include "csmhashtb.inl"
 #include "csmnode.inl"
@@ -9,15 +10,6 @@
 #include "csmassert.inl"
 #include "csmid.inl"
 #include "csmmem.inl"
-
-struct csmhedge_t
-{
-    struct csmnode_t clase_base;
-    
-    struct csmedge_t *edge;
-    struct csmvertex_t *vertex;
-    struct csmloop_t *loop;
-};
 
 // --------------------------------------------------------------------------------------------------------------
 

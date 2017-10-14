@@ -3,24 +3,13 @@
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
+#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmhashtb.inl"
-#include "csmmath.inl"
-#include "csmtransform.inl"
-
-#include "csmassert.inl"
 #include "csmid.inl"
+#include "csmmath.inl"
 #include "csmmem.inl"
-
-struct csmvertex_t
-{
-    unsigned long id;
-    
-    double x, y, z;
-    struct csmhedge_t *hedge;
-    
-    csmvertex_mask_t algorithm_attrib_mask;
-};
+#include "csmtransform.inl"
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -247,26 +236,3 @@ void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtrans
     assert_no_null(vertex);
     csmtransform_transform_point(transform, vertex->x, vertex->y, vertex->z, &vertex->x, &vertex->y, &vertex->z);
 }
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmvertex_print_debug_info(struct csmvertex_t *vertex)
-{
-    assert_no_null(vertex);
-    
-    csmdebug_print_debug_info("\tVertex %6lu\t%6.3lf\t%6.3lf\t%6.3lf [%lu]", vertex->id, vertex->x, vertex->y, vertex->z, vertex->algorithm_attrib_mask);
-    
-    if (vertex->algorithm_attrib_mask & CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP)
-        csmdebug_print_debug_info(" [H] ");
-    
-    if (vertex->algorithm_attrib_mask & CSMVERTEX_MASK_SETOP_COMMON_VERTEX)
-        csmdebug_print_debug_info(" [CV] ");
-    
-    if (vertex->algorithm_attrib_mask &     CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS)
-        csmdebug_print_debug_info(" [VTXFACC] ");
-}
-
-
-
-
-

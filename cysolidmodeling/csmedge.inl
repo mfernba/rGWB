@@ -39,7 +39,3 @@ CSMBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge);
 void csmedge_vertex_coordinates(
                         const struct csmedge_t *edge,
                         double *x1, double *y1, double *z1, double *x2, double *y2, double *z2);
-
-// Debug...
-
-void csmedge_print_debug_info(struct csmedge_t *edge, CSMBOOL assert_si_no_es_integro);

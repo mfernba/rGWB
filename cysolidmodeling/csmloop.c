@@ -1,9 +1,9 @@
 // Loop...
 
 #include "csmloop.inl"
+#include "csmloop.tli"
 
 #include "csmbbox.inl"
-#include "csmdebug.inl"
 #include "csmgeom.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
@@ -19,20 +19,6 @@
 #include "csmstring.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-
-#include "a_pto2d.h"
-#include "cont2d.h"
-
-struct csmloop_t
-{
-    struct csmnode_t clase_base;
-    
-    struct csmhedge_t *ledge;
-    struct csmface_t *lface;
-    
-    CSMBOOL setop_convert_loop_in_face;
-    CSMBOOL setop_loop_was_a_hole;
-};
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -648,6 +634,55 @@ CSMBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop)
         return CSMFALSE;
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+void csmloop_geometric_center_3d(struct csmloop_t *loop, double *x, double *y, double *z)
+{
+    struct csmhedge_t *iterator;
+    unsigned long no_iters;
+    unsigned long no_vertex;
+    
+    assert_no_null(loop);
+    assert_no_null(x);
+    assert_no_null(y);
+    assert_no_null(z);
+    
+    *x = 0.;
+    *y = 0.;
+    *z = 0.;
+    no_vertex = 0;
+    
+    iterator = loop->ledge;
+    no_iters = 0;
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x_3d, y_3d, z_3d;
+        
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
+        
+        *x += x_3d;
+        *y += y_3d;
+        *z += z_3d;
+        
+        no_vertex++;
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != loop->ledge);
+    
+    assert(no_vertex > 0);
+    
+    *x /= no_vertex;
+    *y /= no_vertex;
+    *z /= no_vertex;
+}
+
 // --------------------------------------------------------------------------------------------------------------
 
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop)
@@ -793,207 +828,6 @@ void csmloop_clear_algorithm_mask(struct csmloop_t *loop)
     loop->setop_convert_loop_in_face = CSMFALSE;
     loop->setop_loop_was_a_hole = CSMFALSE;
 }
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmloop_print_info_debug(struct csmloop_t *loop, CSMBOOL is_outer_loop, CSMBOOL assert_si_no_es_integro)
-{
-    struct csmhedge_t *ledge;
-    struct csmhedge_t *iterator;
-    unsigned long num_iters;
-    
-    ledge = csmloop_ledge(loop);
-    iterator = ledge;
-    csmdebug_print_debug_info("\tLoop %4lu: Outer = %d\n", csmnode_id(CSMNODE(loop)), is_outer_loop);
-    
-    num_iters = 0;
-    
-    do
-    {
-        struct csmvertex_t *vertex;
-        double x, y, z;
-        struct csmedge_t *edge;
-        struct csmhedge_t *next_edge;
-        
-        assert(num_iters < 10000);
-        num_iters++;
-        
-        vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x, &y, &z);
-        
-        edge = csmhedge_edge(iterator);
-        
-        if (edge == NULL)
-        {
-            csmdebug_print_debug_info(
-                "\t\t(He %4lu [edge (null)], %4lu, %6.3f, %6.3f, %6.3f, %d)\n",
-                csmnode_id(CSMNODE(iterator)),
-                csmnode_id(CSMNODE(vertex)),
-                x, y, z,
-                IS_TRUE(csmhedge_loop(iterator) == loop));
-        }
-        else
-        {
-            char *is_null_edge;
-            const char *he_position;
-            struct csmhedge_t *he1, *he2;
-            struct csmhedge_t *he_mate;
-            
-            if (csmedge_setop_is_null_edge(edge) == CSMTRUE)
-                is_null_edge = copiafor_codigo1("[Null Edge: %lu]", csmedge_id(edge));
-            else
-                is_null_edge = csmstring_duplicate("");
-            
-            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
-            he_mate = (iterator == he1) ? he2: he1;
-            he_position = (iterator == he1) ? "HE1": "HE2";
-            
-            if (he_mate != NULL)
-            {
-                csmdebug_print_debug_info(
-                    "\t\t(%3s %4lu [edge %6lu. Mate: %4lu], %4lu, %6.3f, %6.3f, %6.3f, %d) %s\n",
-                    he_position,
-                    csmnode_id(CSMNODE(iterator)),
-                    csmnode_id(CSMNODE(edge)),
-                    csmnode_id(CSMNODE(he_mate)),
-                    csmnode_id(CSMNODE(vertex)),
-                    x, y, z,
-                    IS_TRUE(csmhedge_loop(iterator) == loop),
-                    is_null_edge);
-            }
-            else
-            {
-                csmdebug_print_debug_info(
-                    "\t\t(%3s %4lu [edge %6lu. Mate: ----], %4lu, %6.3f, %6.3f, %6.3f, %d) %s\n",
-                    he_position,
-                    csmnode_id(CSMNODE(iterator)),
-                    csmnode_id(CSMNODE(edge)),
-                    csmnode_id(CSMNODE(vertex)),
-                    x, y, z,
-                    IS_TRUE(csmhedge_loop(iterator) == loop),
-                    is_null_edge);
-            }
-            
-            csmstring_free(&is_null_edge);
-        }
-        
-        if (assert_si_no_es_integro == CSMTRUE)
-            assert(csmhedge_loop(iterator) == loop);
-        
-        next_edge = csmhedge_next(iterator);
-        
-        if (assert_si_no_es_integro == CSMTRUE)
-            assert(csmhedge_prev(next_edge) == iterator);
-                    
-        iterator = next_edge;
-    }
-    while (iterator != ledge);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmloop_append_loop_to_shape(
-                        struct csmloop_t *loop,
-                        double Xo, double Yo, double Zo,
-                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
-                        struct gccontorno_t *shape)
-{
-    struct csmhedge_t *iterator;
-    unsigned long num_iteraciones;
-    ArrPunto2D *points;
-    
-    assert_no_null(loop);
-    
-    iterator = loop->ledge;
-    num_iteraciones = 0;
-    
-    points = arr_CreaPunto2D(0);
-    
-    do
-    {
-        struct csmvertex_t *vertex;
-        double x_3d, y_3d, z_3d;
-        double x_2d, y_2d;
-        
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
-        
-        vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
-        
-        csmgeom_project_coords_3d_to_2d(
-                        Xo, Yo, Zo,
-                        Ux, Uy, Uz, Vx, Vy, Vz,
-                        x_3d, y_3d, z_3d,
-                        &x_2d, &y_2d);
-        
-        arr_AppendPunto2D(points, x_2d, y_2d);
-        
-        iterator = csmhedge_next(iterator);
-        
-    } while (iterator != loop->ledge);
-    
-    if (arr_NumElemsPunto2D(points) >= 3 && csmmath_fabs(arr_CalcularAreaPunto2D(points)) > 0.)
-    {
-        arr_InvertirPunto2D(points);
-        gccontorno_append_array_puntos(shape, &points);
-    }
-    else
-    {
-        arr_DestruyePunto2D(&points);
-    }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmloop_geometric_center_3d(struct csmloop_t *loop, double *x, double *y, double *z)
-{
-    struct csmhedge_t *iterator;
-    unsigned long no_iters;
-    unsigned long no_vertex;
-    
-    assert_no_null(loop);
-    assert_no_null(x);
-    assert_no_null(y);
-    assert_no_null(z);
-    
-    *x = 0.;
-    *y = 0.;
-    *z = 0.;
-    no_vertex = 0;
-    
-    iterator = loop->ledge;
-    no_iters = 0;
-    
-    do
-    {
-        struct csmvertex_t *vertex;
-        double x_3d, y_3d, z_3d;
-        
-        assert(no_iters < 10000);
-        no_iters++;
-        
-        vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
-        
-        *x += x_3d;
-        *y += y_3d;
-        *z += z_3d;
-        
-        no_vertex++;
-        
-        iterator = csmhedge_next(iterator);
-        
-    } while (iterator != loop->ledge);
-    
-    assert(no_vertex > 0);
-    
-    *x /= no_vertex;
-    *y /= no_vertex;
-    *z /= no_vertex;
-}
-
 
 
 

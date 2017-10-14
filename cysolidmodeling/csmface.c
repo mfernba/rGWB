@@ -1,9 +1,9 @@
 // Face...
 
 #include "csmface.inl"
+#include "csmface.tli"
 
 #include "csmbbox.inl"
-#include "csmdebug.inl"
 #include "csmloop.inl"
 #include "csmhedge.inl"
 #include "csmmath.inl"
@@ -15,26 +15,6 @@
 #include "csmmem.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-
-#include "cont2d.h"
-
-struct csmface_t
-{
-    unsigned long id;
-
-    struct csmsolid_t *fsolid;
-    struct csmsolid_t *fsolid_aux;
-    
-    struct csmloop_t *flout;
-    struct csmloop_t *floops;
-    
-    double A, B, C, D;
-    double fuzzy_epsilon;
-    enum csmmath_dropped_coord_t dropped_coord;
-    struct csmbbox_t *bbox;
-    
-    CSMBOOL setop_is_null_face;
-};
 
 static const double i_COS_15_DEGREES = 0.9659358;
 
@@ -1023,124 +1003,3 @@ void csmface_mark_setop_null_face(struct csmface_t *face)
     assert_no_null(face);
     face->setop_is_null_face = CSMTRUE;
 }
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmface_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no_es_integro, unsigned long *num_holes_opc)
-{
-    unsigned long num_holes_loc;
-    struct csmloop_t *loop_iterator;
-    double A, B, C, D;
-    
-    csmface_face_equation_info(face, &A, &B, &C, &D);
-    csmdebug_print_debug_info("\tFace %lu (%g, %g, %g, %g) Setop Null face: %lu\n", face->id, A, B, C, D, face->setop_is_null_face);
-    
-    loop_iterator = csmface_floops(face);
-    num_holes_loc = 0;
-    
-    while (loop_iterator != NULL)
-    {
-        struct csmloop_t *next_loop;
-        CSMBOOL is_outer_loop;
-        
-        is_outer_loop = IS_TRUE(csmface_flout(face) == loop_iterator);
-        csmloop_print_info_debug(loop_iterator, is_outer_loop, assert_si_no_es_integro);
-        
-        if (is_outer_loop == CSMFALSE)
-            num_holes_loc++;
-        
-        next_loop = csmloop_next(loop_iterator);
-        
-        if (assert_si_no_es_integro == CSMTRUE)
-        {
-            assert(csmloop_lface(loop_iterator) == face);
-            
-            if (next_loop != NULL)
-                assert(csmloop_prev(next_loop) == loop_iterator);
-        }
-        
-        loop_iterator = next_loop;
-    }
-    
-    ASSIGN_OPTIONAL_VALUE(num_holes_opc, num_holes_loc);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-#include <basicGraphics/bsgraphics2.h>
-
-void csmface_draw_solid(
-                    struct csmface_t *face,
-                    CSMBOOL draw_solid_face,
-                    CSMBOOL draw_face_normal,
-                    const struct bsmaterial_t *face_material,
-                    const struct bsmaterial_t *normal_material,
-                    struct bsgraphics2_t *graphics)
-{
-    assert_no_null(face);
-    
-    if (draw_solid_face == CSMTRUE)
-    {
-        double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
-        struct csmloop_t *loop_iterator;
-        struct gccontorno_t *shape;
-    
-        csmmath_plane_axis_from_implicit_plane_equation(
-						face->A, face->B, face->C, face->D,
-                        &Xo, &Yo, &Zo,
-                        &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
-    
-        loop_iterator = csmface_floops(face);
-        shape = gccontorno_crea_vacio();
-        
-        while (loop_iterator != NULL)
-        {
-            csmloop_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, shape);
-            loop_iterator = csmloop_next(loop_iterator);
-        }
-        
-        if (gccontorno_num_poligonos(shape) > 0)
-        {
-            bsgraphics2_escr_color(graphics, face_material);
-            gccontorno_dibuja_3d_ex(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMFALSE, graphics);
-        }
-        
-        gccontorno_destruye(&shape);
-    }
-
-    if (draw_face_normal == CSMTRUE)
-    {
-        double x_geometric_center, y_geometric_center, z_geometric_center;
-        double disp;
-        
-        bsgraphics2_escr_color(graphics, normal_material);
-        csmloop_geometric_center_3d(face->flout, &x_geometric_center, &y_geometric_center, &z_geometric_center);
-    
-        disp = 0.1;
-        bsgraphics2_escr_linea3D(
-                        graphics,
-                        x_geometric_center, y_geometric_center, z_geometric_center,
-                        x_geometric_center + disp * face->A, y_geometric_center + disp * face->B, z_geometric_center + disp * face->C);
-    }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmface_draw_normal(struct csmface_t *face, struct bsgraphics2_t *graphics)
-{
-    double x_geometric_center, y_geometric_center, z_geometric_center;
-    double disp;
-
-    assert_no_null(face);
-    
-    csmloop_geometric_center_3d(face->flout, &x_geometric_center, &y_geometric_center, &z_geometric_center);
-    
-    disp = 0.10;
-    bsgraphics2_escr_linea3D(
-                        graphics,
-                        x_geometric_center, y_geometric_center, z_geometric_center,
-                        x_geometric_center + disp * face->A, y_geometric_center + disp * face->B, z_geometric_center + disp * face->C);
-}
-
-
-

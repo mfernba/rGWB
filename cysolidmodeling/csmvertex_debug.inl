@@ -1,14 +1,11 @@
 //
-//  csmloop_vis.h
+//  csmvertex_debug.h
 //  cysolidmodeling
 //
 //  Created by Manuel Fernandez on 14/10/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.
 //
 
-#ifndef csmloop_vis_h
-#define csmloop_vis_h
+#include "csmfwddecl.hxx"
 
-#include <stdio.h>
-
-#endif /* csmloop_vis_h */
+void csmvertex_debug_print_debug_info(struct csmvertex_t *vertex);

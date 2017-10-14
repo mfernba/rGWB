@@ -5,6 +5,7 @@
 #include "csmarrayc.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
+#include "csmedge_debug.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
 #include "csmloop.inl"
@@ -23,6 +24,7 @@
 #include "csmopbas.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
+#include "csmsolid_debug.inl"
 #include "csmsolid.tli"
 #include "csmsetopcom.inl"
 #include "csmtolerance.inl"
@@ -669,7 +671,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
             csmarrayc_append_element_st(set_of_null_edges, null_edge, csmedge_t);
             
             if (csmdebug_debug_enabled() == CSMTRUE)
-                csmedge_print_debug_info(null_edge, CSMTRUE);
+                csmedge_debug_print_debug_info(null_edge, CSMTRUE);
             
             csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             
@@ -831,7 +833,7 @@ static void i_join_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges, csmA
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmsetopcom_print_debug_info_loose_ends(loose_ends);
-            //csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge), CSMTRUE);
+            //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(he1_next_edge), CSMTRUE);
         }
     }
     
@@ -862,7 +864,7 @@ static void i_finish_split(
     csmdebug_begin_context("********FINISH SPLIT");
 
     if (csmdebug_debug_enabled() == CSMTRUE)
-        csmsolid_print_debug(work_solid, CSMTRUE);
+        csmsolid_debug_print_debug(work_solid, CSMTRUE);
 
     set_of_null_faces_above = csmsetopcom_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces);
     set_of_null_faces_below = set_of_null_faces;
@@ -876,7 +878,7 @@ static void i_finish_split(
     assert(no_null_faces > 0);
     
     if (csmdebug_debug_enabled() == CSMTRUE)
-        csmsolid_print_debug(work_solid, CSMTRUE);
+        csmsolid_debug_print_debug(work_solid, CSMTRUE);
     
     solid_above_loc = csmsolid_crea_vacio(0);
     solid_below_loc = csmsolid_crea_vacio(0);
@@ -898,9 +900,9 @@ static void i_finish_split(
 
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
-        csmsolid_print_debug(work_solid, CSMTRUE);
-        csmsolid_print_debug(solid_above_loc, CSMTRUE);
-        csmsolid_print_debug(solid_below_loc, CSMTRUE);
+        csmsolid_debug_print_debug(work_solid, CSMTRUE);
+        csmsolid_debug_print_debug(solid_above_loc, CSMTRUE);
+        csmsolid_debug_print_debug(solid_below_loc, CSMTRUE);
     }
  
     csmdebug_end_context();
@@ -943,7 +945,7 @@ CSMBOOL csmsplit_does_plane_split_solid(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("---->WORK SOLID BEFORE INSERTING NULL EDGES\n");
-        csmsolid_print_debug(work_solid, CSMTRUE);
+        csmsolid_debug_print_debug(work_solid, CSMTRUE);
         csmdebug_print_debug_info("<----WORK SOLID BEFORE INSERTING NULL EDGES\n");
     }
 
@@ -952,7 +954,7 @@ CSMBOOL csmsplit_does_plane_split_solid(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("---->WORK SOLID AFTER INSERTING NULL EDGES\n");
-        csmsolid_print_debug(work_solid, CSMTRUE);
+        csmsolid_debug_print_debug(work_solid, CSMTRUE);
         csmdebug_print_debug_info("<----WORK SOLID AFTER INSERTING NULL EDGES\n");
     }
 

@@ -104,19 +104,3 @@ void csmface_clear_algorithm_mask(struct csmface_t *face);
 
 CSMBOOL csmface_is_setop_null_face(struct csmface_t *face);
 void csmface_mark_setop_null_face(struct csmface_t *face);
-
-
-// Debug...
-
-void csmface_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no_es_integro, unsigned long *num_holes_opc);
-
-void csmface_draw_solid(
-                    struct csmface_t *face,
-                    CSMBOOL draw_solid_face,
-                    CSMBOOL draw_face_normal,
-                    const struct bsmaterial_t *face_material,
-                    const struct bsmaterial_t *normal_material,
-                    struct bsgraphics2_t *graphics);
-
-void csmface_draw_normal(struct csmface_t *face, struct bsgraphics2_t *graphics);
-

@@ -39,7 +39,6 @@ void csmvertex_clear_mask_attrib(struct csmvertex_t *vertex, csmvertex_mask_t ma
 void csmvertex_clear_mask(struct csmvertex_t *vertex);
 
 
-
 // Geometry...
 
 void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, double *y, double *z);

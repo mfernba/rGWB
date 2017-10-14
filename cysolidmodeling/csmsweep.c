@@ -243,7 +243,7 @@ static void i_create_lateral_faces(
         hedge_next_next = csmhedge_next(csmhedge_next(scan));
         
         csmeuler_lmef(hedge_prev, hedge_next_next, NULL, NULL, NULL);
-        //csmsolid_print_debug(solid, CSMTRUE);
+        //csmsolid_debug_print_debug(solid, CSMTRUE);
         
         scan = csmhedge_next(hedge_next_next);
     }
@@ -294,7 +294,7 @@ static void i_append_holes_to_solid(
     
     original_ring_loop = csmhedge_loop(he_from_ring);
     
-    //csmsolid_print_debug(solid, CSMTRUE);
+    //csmsolid_debug_print_debug(solid, CSMTRUE);
     
     i_append_loop_from_hedge(
                         he_from_ring,
@@ -311,7 +311,7 @@ static void i_append_holes_to_solid(
     csmeuler_lkfmrh(bottom_face, &top_hole_face_loc);
     csmeuler_lmfkrh(original_ring_loop, &top_hole_face_loc);
     
-    //csmsolid_print_debug(solid, CSMTRUE);
+    //csmsolid_debug_print_debug(solid, CSMTRUE);
 
     i_create_hedges_from_bottom_to_top_face(
                         shape2d_top,
@@ -320,15 +320,15 @@ static void i_append_holes_to_solid(
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         hedges_from_vertexs_bottom_face);
 
-    //csmsolid_print_debug(solid, CSMTRUE);
+    //csmsolid_debug_print_debug(solid, CSMTRUE);
     
     i_create_lateral_faces(hedges_from_vertexs_bottom_face, solid);
  
-    //csmsolid_print_debug(solid, CSMTRUE);
+    //csmsolid_debug_print_debug(solid, CSMTRUE);
     
     csmeuler_lkfmrh(top_face, &top_hole_face_loc);
     
-    //csmsolid_print_debug(solid, CSMTRUE);
+    //csmsolid_debug_print_debug(solid, CSMTRUE);
 
     csmarrayc_free_st(&hedges_from_vertexs_bottom_face, csmhedge_t, NULL);
 }
@@ -401,7 +401,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
                         bottom_face, top_face,
                         &hedges_from_vertexs_bottom_face);
     
-    //csmsolid_print_debug(solid, CSMTRUE);
+    //csmsolid_debug_print_debug(solid, CSMTRUE);
 
     i_create_hedges_from_bottom_to_top_face(
                         shape2d_top,
@@ -410,11 +410,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         hedges_from_vertexs_bottom_face);
 
-    //csmsolid_print_debug(solid, CSMTRUE);
+    //csmsolid_debug_print_debug(solid, CSMTRUE);
     
     i_create_lateral_faces(hedges_from_vertexs_bottom_face, solid);
 
-    //csmsolid_print_debug(solid, CSMTRUE);
+    //csmsolid_debug_print_debug(solid, CSMTRUE);
     
     csmarrayc_free_st(&hedges_from_vertexs_bottom_face, csmhedge_t, NULL);
     

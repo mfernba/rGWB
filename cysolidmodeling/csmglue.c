@@ -45,7 +45,7 @@ void csmglue_join_solid2_to_solid1_given_equal_faces(
         solid2_loc = ASIGNA_PUNTERO_PP_NO_NULL(solid2, struct csmsolid_t);
         
         csmsolid_merge_solids(solid1, solid2_loc);
-        //csmsolid_print_debug(solid1, CSMTRUE);
+        //csmsolid_debug_print_debug(solid1, CSMTRUE);
         
         csmloopglue_merge_faces(face1, &face2);
                         

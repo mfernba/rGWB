@@ -5,6 +5,7 @@
 #include "csmarrayc.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
+#include "csmedge_debug.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
 #include "csmhashtb.inl"
@@ -707,7 +708,7 @@ static void i_process_vf_inters(
             csmedge_setop_set_is_null_edge(null_edge, CSMTRUE);
             csmarrayc_append_element_st(set_of_null_edges, null_edge, csmedge_t);
             
-            csmedge_print_debug_info(null_edge, CSMTRUE);
+            csmedge_debug_print_debug_info(null_edge, CSMTRUE);
 
             csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             
