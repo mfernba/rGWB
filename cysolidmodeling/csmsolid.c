@@ -110,6 +110,14 @@ const char *csmsolid_get_name(const struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
+const struct csmmaterial_t *csmsolid_get_material(const struct csmsolid_t *solido)
+{
+    assert_no_null(solido);
+    return solido->visz_material_opt;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (
 	                    const char *name,
                         unsigned long id_nuevo_elemento,

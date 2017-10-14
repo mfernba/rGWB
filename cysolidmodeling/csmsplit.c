@@ -33,6 +33,7 @@
 #include "csmassert.inl"
 #include "csmmem.inl"
 #include "csmmath.tli"
+#include "csmmaterial.inl"
 
 enum i_position_t
 {
@@ -846,6 +847,23 @@ static void i_join_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges, csmA
     csmarrayc_free_st(&loose_ends, csmhedge_t, NULL);
 }
 
+// ------------------------------------------------------------------------------------------
+
+static void i_assign_result_material(const struct csmsolid_t *solid, struct csmsolid_t *result)
+{
+    const struct csmmaterial_t *material;
+    
+    material = csmsolid_get_material(solid);
+    
+    if (material != NULL)
+    {
+        struct csmmaterial_t *material_copy;
+        
+        material_copy = csmmaterial_copy(material);
+        csmsolid_assign_visualization_material(result, &material_copy);
+    }
+}
+
 // ----------------------------------------------------------------------------------------------------
 
 static void i_finish_split(
@@ -881,7 +899,10 @@ static void i_finish_split(
         csmsolid_debug_print_debug(work_solid, CSMTRUE);
     
     solid_above_loc = csmsolid_crea_vacio(0);
+    i_assign_result_material(work_solid, solid_above_loc);
+    
     solid_below_loc = csmsolid_crea_vacio(0);
+    i_assign_result_material(work_solid, solid_below_loc);
     
     for (i = 0; i < no_null_faces; i++)
     {

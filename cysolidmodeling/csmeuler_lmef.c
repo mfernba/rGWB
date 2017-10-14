@@ -52,6 +52,8 @@ void csmeuler_lmef(
     csmsolid_append_new_face(he1_solid, &new_face);
     csmsolid_append_new_edge(he1_solid, &new_edge);
     
+    csmface_copy_visualization_material_from_face1(csmopbas_face_from_hedge(he1), new_face);
+
     id_nuevo_elemento = csmsolid_id_new_element(he1_solid);
     new_loop = csmloop_crea(new_face, id_nuevo_elemento);
     csmface_set_flout(new_face, new_loop);

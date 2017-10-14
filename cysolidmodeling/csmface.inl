@@ -19,6 +19,8 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
 
 void csmface_assign_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt);
 
+void csmface_copy_visualization_material_from_face1(const struct csmface_t *face1, struct csmface_t *face2);
+
 
 // Geometry...
 

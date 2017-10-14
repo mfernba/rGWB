@@ -8,6 +8,8 @@ void csmsolid_set_name(struct csmsolid_t *solido, const char *name);
 
 const char *csmsolid_get_name(const struct csmsolid_t *solido);
 
+const struct csmmaterial_t *csmsolid_get_material(const struct csmsolid_t *solido);
+
 
 // General...
 

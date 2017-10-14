@@ -30,6 +30,7 @@
 #include "csmassert.inl"
 #include "csmmem.inl"
 #include "csmstring.inl"
+#include "csmmaterial.inl"
 
 // ------------------------------------------------------------------------------------------
 
@@ -677,6 +678,32 @@ static void i_convert_inner_loops_of_null_faces_to_faces(csmArrayStruct(csmface_
 
 // ------------------------------------------------------------------------------------------
 
+static void i_assign_result_material(
+                        const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B,
+                        struct csmsolid_t *result)
+{
+    const struct csmmaterial_t *material_A, *material_B;
+    const struct csmmaterial_t *material;
+    
+    material_A = csmsolid_get_material(solid_A);
+    material_B = csmsolid_get_material(solid_B);
+
+    if (material_A != NULL)
+        material = material_A;
+    else
+        material = material_B;
+    
+    if (material != NULL)
+    {
+        struct csmmaterial_t *material_copy;
+        
+        material_copy = csmmaterial_copy(material);
+        csmsolid_assign_visualization_material(result, &material_copy);
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
                         enum csmsetop_operation_t set_operation,
                         struct csmsolid_t *solid_A, csmArrayStruct(csmface_t) *set_of_null_faces_A,
@@ -751,6 +778,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     csmsolid_prepare_for_cleanup(solid_B);
     
     result = csmsolid_crea_vacio(0);
+    i_assign_result_material(solid_A, solid_B, result);
     csmsolid_set_name(result, "Result");
     
     for (i = 0; i < half_no_null_faces; i++)
@@ -887,7 +915,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     csmdebug_clear_debug_points();
     csmsolid_debug_print_debug(result, CSMTRUE);
     csmdebug_set_viewer_results(result, NULL);
-    //csmdebug_show_viewer();
+    csmdebug_show_viewer();
     
     return result;
 }

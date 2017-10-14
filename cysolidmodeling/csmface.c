@@ -252,15 +252,33 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_set_visualization_material(const struct csmmaterial_t *visz_material_opt, struct csmmaterial_t **face_visz_material_opt)
+{
+    assert_no_null(face_visz_material_opt);
+    
+    if (*face_visz_material_opt != NULL)
+        csmmaterial_free(face_visz_material_opt);
+    
+    if (visz_material_opt != NULL)
+        *face_visz_material_opt = csmmaterial_copy(visz_material_opt);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmface_assign_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt)
 {
     assert_no_null(face);
+    i_set_visualization_material(visz_material_opt, &face->visz_material_opt);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_copy_visualization_material_from_face1(const struct csmface_t *face1, struct csmface_t *face2)
+{
+    assert_no_null(face1);
+    assert_no_null(face2);
     
-    if (face->visz_material_opt != NULL)
-        csmmaterial_free(&face->visz_material_opt);
-    
-    if (visz_material_opt != NULL)
-        face->visz_material_opt = csmmaterial_copy(visz_material_opt);
+    i_set_visualization_material(face1->visz_material_opt, &face2->visz_material_opt);
 }
 
 // ----------------------------------------------------------------------------------------------------
