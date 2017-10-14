@@ -1,0 +1,19 @@
+// Loop...
+// This file should only be accessed from csmloop_*.c
+// It has been created only for extension purposes
+
+#include "csmfwddecl.hxx"
+#include "csmnode.hxx"
+
+struct csmloop_t
+{
+    struct csmnode_t clase_base;
+    
+    struct csmhedge_t *ledge;
+    struct csmface_t *lface;
+    
+    CSMBOOL setop_convert_loop_in_face;
+    CSMBOOL setop_loop_was_a_hole;
+};
+
+
