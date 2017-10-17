@@ -203,48 +203,45 @@ CSMBOOL csmbbox_intersects_with_other_bbox(const struct csmbbox_t *bbox1, const 
 
 // ------------------------------------------------------------------------------------------
 
-static CSMBOOL i_exists_intersection_between_segment_and_bbbox(
-                        double x_min1, double y_min1, double z_min1, double x_max1, double y_max1, double z_max1,
-                        double x_min2, double y_min2, double z_min2, double x_max2, double y_max2, double z_max2)
-{
-    assert(x_min2 < x_max2);
-    assert(y_min2 < y_max2);
-    assert(z_min2 < z_max2);
-    
-    if (x_max1 < x_min2 || x_min1 > x_max2)
-        return CSMFALSE;
-    
-    if (y_max1 < y_min2 || y_min1 > y_max2)
-        return CSMFALSE;
-    
-    if (z_max1 < z_min2 || z_min1 > z_max2)
-        return CSMFALSE;
-    
-    return CSMTRUE;
-}
-
-// ------------------------------------------------------------------------------------------
-
 CSMBOOL csmbbox_intersects_with_segment(
 	                    const struct csmbbox_t *bbox,
                         double x1, double y1, double z1, double x2, double y2, double z2)
 {
-    double x_min, y_min, z_min, x_max, y_max, z_max;
+    double x_min1, x_max1;
     
     assert_no_null(bbox);
     
-    x_min = CSMMATH_MIN(x1, x2);
-    x_max = CSMMATH_MAX(x1, x2);
+    x_min1 = CSMMATH_MIN(x1, x2);
+    x_max1 = CSMMATH_MAX(x1, x2);
 
-    y_min = CSMMATH_MIN(y1, y2);
-    y_max = CSMMATH_MAX(y1, y2);
-
-    z_min = CSMMATH_MIN(z1, z2);
-    z_max = CSMMATH_MAX(z1, z2);
-    
-    return i_exists_intersection_between_segment_and_bbbox(
-                        x_min, y_min, z_min, x_max, y_max, z_max,
-                        bbox->x_min, bbox->y_min, bbox->z_min, bbox->x_max, bbox->y_max, bbox->z_max);
+    if (x_max1 < bbox->x_min || x_min1 > bbox->x_max)
+    {
+        return CSMFALSE;
+    }
+    else
+    {
+        double y_min1, y_max1;
+        
+        y_min1 = CSMMATH_MIN(y1, y2);
+        y_max1 = CSMMATH_MAX(y1, y2);
+        
+        if (y_max1 < bbox->y_min || y_min1 > bbox->y_max)
+        {
+            return CSMFALSE;
+        }
+        else
+        {
+            double z_min1, z_max1;
+            
+            z_min1 = CSMMATH_MIN(z1, z2);
+            z_max1 = CSMMATH_MAX(z1, z2);
+            
+            if (z_max1 < bbox->z_min || z_min1 > bbox->z_max)
+                return CSMFALSE;
+            else
+                return CSMTRUE;
+        }
+    }
 }
 
 

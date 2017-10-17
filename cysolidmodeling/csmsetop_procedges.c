@@ -59,6 +59,12 @@ struct i_edge_intersection_t
     double x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face;
 };
 
+struct i_optimized_edge_data_t
+{
+    struct csmvertex_t *vertex_pos, *vertex_neg;
+    double x1, y1, z1, x2, y2, z2;
+};
+
 csmArrayStruct(i_edge_intersection_t);
 
 // ------------------------------------------------------------------------------------------
@@ -159,7 +165,7 @@ static void i_append_common_vertices_solid_A_on_solid_B(
             
             i_append_new_vv_inters(vertex_A, vertex_B, vv_intersections, &did_add_intersection);
             
-            if (did_add_intersection == CSMTRUE)
+            if (did_add_intersection == CSMTRUE && csmdebug_debug_enabled() == CSMTRUE)
             {
                 char *description;
                 double x, y, z;
@@ -382,35 +388,29 @@ static void i_append_intersection_between_vertex_A_and_face_B(
 // ------------------------------------------------------------------------------------------
 
 static void i_append_intersections_between_A_edge_and_B_face(
-                        struct csmedge_t *edge_A, struct csmface_t *face_B,
+                        const struct i_optimized_edge_data_t *optimized_edge_data,
+                        struct csmface_t *face_B,
                         csmArrayStruct(i_edge_intersection_t) *edge_intersections)
 {
-    struct csmhedge_t *hedge_pos, *hedge_neg;
-    struct csmvertex_t *vertex_pos, *vertex_neg;
-    double x1, y1, z1, x2, y2, z2;
+    assert_no_null(optimized_edge_data);
     
-    hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_POS);
-    vertex_pos = csmhedge_vertex(hedge_pos);
-    csmvertex_get_coordenadas(vertex_pos, &x1, &y1, &z1);
-    
-    hedge_neg = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_NEG);
-    vertex_neg = csmhedge_vertex(hedge_neg);
-    csmvertex_get_coordenadas(vertex_neg, &x2, &y2, &z2);
-    
-    if (csmface_should_analyze_intersections_with_segment(face_B, x1, y1, z1, x2, y2, z2) == CSMTRUE)
+    if (csmface_should_analyze_intersections_with_segment(
+	                    face_B,
+                        optimized_edge_data->x1, optimized_edge_data->y1, optimized_edge_data->z1,
+                        optimized_edge_data->x2, optimized_edge_data->y2, optimized_edge_data->z2) == CSMTRUE)
     {
         enum csmcompare_t classification_vertex_pos, classification_vertex_neg;
         
-        classification_vertex_pos = csmface_classify_vertex_relative_to_face(face_B, vertex_pos);
-        classification_vertex_neg = csmface_classify_vertex_relative_to_face(face_B, vertex_neg);
+        classification_vertex_pos = csmface_classify_vertex_relative_to_face(face_B, optimized_edge_data->vertex_pos);
+        classification_vertex_neg = csmface_classify_vertex_relative_to_face(face_B, optimized_edge_data->vertex_neg);
         
         if (classification_vertex_pos == CSMCOMPARE_EQUAL || classification_vertex_neg == CSMCOMPARE_EQUAL)
         {
             if (classification_vertex_pos == CSMCOMPARE_EQUAL)
-                i_append_intersection_between_vertex_A_and_face_B(vertex_pos, face_B, 0., edge_intersections);
+                i_append_intersection_between_vertex_A_and_face_B(optimized_edge_data->vertex_pos, face_B, 0., edge_intersections);
 
             if (classification_vertex_neg == CSMCOMPARE_EQUAL)
-                i_append_intersection_between_vertex_A_and_face_B(vertex_neg, face_B, 1., edge_intersections);
+                i_append_intersection_between_vertex_A_and_face_B(optimized_edge_data->vertex_neg, face_B, 1., edge_intersections);
         }
         else
         {
@@ -418,7 +418,8 @@ static void i_append_intersections_between_A_edge_and_B_face(
         
             if (csmface_exists_intersection_between_line_and_face_plane(
                             face_B,
-                            x1, y1, z1, x2, y2, z2,
+                            optimized_edge_data->x1, optimized_edge_data->y1, optimized_edge_data->z1,
+                            optimized_edge_data->x2, optimized_edge_data->y2, optimized_edge_data->z2,
                             &x_inters, &y_inters, &z_inters, &t) == CSMTRUE)
             {
                 enum csmmath_contaiment_point_loop_t type_of_containment_at_face;
@@ -732,8 +733,18 @@ static void i_generate_intersections_edge_with_solid_faces(
                         csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
                         csmArrayStruct(csmsetop_vtxfacc_inters_t) *vertex_face_neighborhood)
 {
+    struct i_optimized_edge_data_t optimized_edge_data;
+    struct csmhedge_t *hedge_pos, *hedge_neg;
     csmArrayStruct(i_edge_intersection_t) *edge_intersecctions;
     struct csmhashtb_iterator(csmface_t) *face_iterator_B;
+    
+    hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_POS);
+    optimized_edge_data.vertex_pos = csmhedge_vertex(hedge_pos);
+    csmvertex_get_coordenadas(optimized_edge_data.vertex_pos, &optimized_edge_data.x1, &optimized_edge_data.y1, &optimized_edge_data.z1);
+    
+    hedge_neg = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_NEG);
+    optimized_edge_data.vertex_neg = csmhedge_vertex(hedge_neg);
+    csmvertex_get_coordenadas(optimized_edge_data.vertex_neg, &optimized_edge_data.x2, &optimized_edge_data.y2, &optimized_edge_data.z2);
     
     edge_intersecctions = csmarrayc_new_st_array(0, i_edge_intersection_t);
     face_iterator_B = csmsolid_face_iterator(solid_B);
@@ -743,7 +754,7 @@ static void i_generate_intersections_edge_with_solid_faces(
         struct csmface_t *face_B;
     
         csmhashtb_next_pair(face_iterator_B, NULL, &face_B, csmface_t);
-        i_append_intersections_between_A_edge_and_B_face(edge_A, face_B, edge_intersecctions);
+        i_append_intersections_between_A_edge_and_B_face(&optimized_edge_data, face_B, edge_intersecctions);
     }
     
     if (csmarrayc_count_st(edge_intersecctions, i_edge_intersection_t) > 0)
