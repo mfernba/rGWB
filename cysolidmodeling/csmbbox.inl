@@ -2,7 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-struct csmbbox_t *csmbbox_create_empty_box(void);
+CONSTRUCTOR(struct csmbbox_t *, csmbbox_create_empty_box, (void));
 
 void csmbbox_free(struct csmbbox_t **bbox);
 
