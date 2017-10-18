@@ -8,8 +8,6 @@ void csmsolid_set_name(struct csmsolid_t *solido, const char *name);
 
 const char *csmsolid_get_name(const struct csmsolid_t *solido);
 
-const struct csmmaterial_t *csmsolid_get_material(const struct csmsolid_t *solido);
-
 
 // General...
 
@@ -28,6 +26,11 @@ void csmsolid_revert(struct csmsolid_t *solid);
 void csmsolid_prepare_for_cleanup(struct csmsolid_t *solid);
 
 void csmsolid_finish_cleanup(struct csmsolid_t *solid);
+
+
+const struct csmmaterial_t *csmsolid_get_material(const struct csmsolid_t *solido);
+
+const struct csmbbox_t *csmsolid_get_bbox(const struct csmsolid_t *solido);
 
 
 // Faces...

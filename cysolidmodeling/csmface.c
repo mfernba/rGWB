@@ -876,6 +876,14 @@ void csmface_face_equation_info(
 
 // ------------------------------------------------------------------------------------------
 
+const struct csmbbox_t *csmface_bbox(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->bbox;
+}
+
+// ------------------------------------------------------------------------------------------
+
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face)
 {
     assert_no_null(face);

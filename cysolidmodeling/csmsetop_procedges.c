@@ -791,6 +791,8 @@ static void i_generate_edge_intersections_solid_A_with_solid_B(
 
 // ------------------------------------------------------------------------------------------
 
+//#include "csmoctgrid.inl"
+
 void csmsetop_procedges_generate_intersections_on_both_solids(
                         struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
                         csmArrayStruct(csmsetop_vtxvtx_inters_t) **vv_intersections,
@@ -803,6 +805,15 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
     assert_no_null(vv_intersections);
     assert_no_null(vf_intersections_A);
     assert_no_null(vf_intersections_B);
+
+    /*
+    {
+        struct csmoctgrid_t *octgrid;
+        
+        octgrid = csmoctgrid_build(solid_A, solid_B);
+        csmoctgrid_free(&octgrid);
+    }
+    */
 
     vv_intersections_loc = csmarrayc_new_st_array(0, csmsetop_vtxvtx_inters_t);
     vf_intersections_A_loc = csmarrayc_new_st_array(0, csmsetop_vtxfacc_inters_t);

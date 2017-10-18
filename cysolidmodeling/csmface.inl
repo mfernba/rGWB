@@ -79,6 +79,9 @@ void csmface_face_equation_info(
                         const struct csmface_t *face,
                         double *A, double *B, double *C, double *D);
 
+const struct csmbbox_t *csmface_bbox(const struct csmface_t *face);
+
+
 // Topology...
 
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face);

@@ -10,6 +10,7 @@
 #include "csmsolid.inl"
 #include "csmsolid.tli"
 
+#include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -42,7 +43,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
                         struct csmhashtb(csmedge_t) **sedges,
                         struct csmhashtb(csmvertex_t) **svertexs,
                         struct csmmaterial_t **visz_material_opt,
-                        CSMBOOL draw_only_border_edges))
+                        CSMBOOL draw_only_border_edges,
+                        struct csmbbox_t **bbox))
 {
     struct csmsolid_t *solido;
     
@@ -59,6 +61,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
     solido->visz_material_opt = ASIGNA_PUNTERO_PP(visz_material_opt, struct csmmaterial_t);
     solido->draw_only_border_edges = draw_only_border_edges;
     
+    solido->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
+    
     return solido;
 }
 
@@ -73,6 +77,7 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
     struct csmhashtb(csmvertex_t) *svertexs;
     struct csmmaterial_t *visz_material_opt;
     CSMBOOL draw_only_border_edges;
+    struct csmbbox_t *bbox;
     
     name = NULL;
     
@@ -85,7 +90,9 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
     visz_material_opt = NULL;
     draw_only_border_edges = CSMTRUE;
     
-    return i_crea(&name, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges);
+    bbox = csmbbox_create_empty_box();
+    
+    return i_crea(&name, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -118,17 +125,27 @@ const struct csmmaterial_t *csmsolid_get_material(const struct csmsolid_t *solid
 
 // ----------------------------------------------------------------------------------------------------
 
+const struct csmbbox_t *csmsolid_get_bbox(const struct csmsolid_t *solido)
+{
+    assert_no_null(solido);
+    return solido->bbox;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (
 	                    const char *name,
                         unsigned long id_nuevo_elemento,
                         const struct csmmaterial_t *solid_visz_material_opt,
-                        CSMBOOL draw_only_border_edges))
+                        CSMBOOL draw_only_border_edges,
+                        const struct csmbbox_t *bbox))
 {
     char *name_copy;
     struct csmhashtb(csmface_t) *sfaces;
     struct csmhashtb(csmedge_t) *sedges;
     struct csmhashtb(csmvertex_t) *svertexs;
     struct csmmaterial_t *visz_material_opt;
+    struct csmbbox_t *bbox_copy;
     
     if (name != NULL)
         name_copy = csmstring_duplicate(name);
@@ -144,7 +161,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (
     else
         visz_material_opt = NULL;
     
-    return i_crea(&name_copy, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges);
+    bbox_copy = csmbbox_copy(bbox);
+    
+    return i_crea(&name_copy, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox_copy);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -251,7 +270,12 @@ struct csmsolid_t *csmsolid_duplicate(const struct csmsolid_t *solid)
     
     assert_no_null(solid);
     
-    new_solid = i_duplicate_solid(solid->name, solid->id_nuevo_elemento, solid->visz_material_opt, solid->draw_only_border_edges);
+    new_solid = i_duplicate_solid(
+                        solid->name,
+                        solid->id_nuevo_elemento,
+                        solid->visz_material_opt,
+                        solid->draw_only_border_edges,
+                        solid->bbox);
     assert_no_null(new_solid);
 
     i_duplicate_vertexs_table(solid->svertexs, &new_solid->id_nuevo_elemento, new_solid->svertexs, &relation_svertexs_old_to_new);
@@ -260,7 +284,6 @@ struct csmsolid_t *csmsolid_duplicate(const struct csmsolid_t *solid)
     
     csmhashtb_free(&relation_svertexs_old_to_new, csmvertex_t, NULL);
     csmhashtb_free(&relation_shedges_old_to_new, csmhedge_t, NULL);
-    
     
     return new_solid;
 }
@@ -381,18 +404,25 @@ void csmsolid_clear_algorithm_data(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_redo_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces)
+static void i_redo_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *bbox)
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
+    
+    csmbbox_reset(bbox);
     
     iterator = csmhashtb_create_iterator(sfaces, csmface_t);
     
     while (csmhashtb_has_next(iterator, csmface_t) == CSMTRUE)
     {
         struct csmface_t *face;
+        const struct csmbbox_t *face_bbox;
         
         csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        
         csmface_redo_geometric_generated_data(face);
+        
+        face_bbox = csmface_bbox(face);
+        csmbbox_maximize_bbox(bbox, face_bbox);
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
@@ -403,7 +433,7 @@ static void i_redo_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces)
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
-    i_redo_geometric_generated_data(solid->sfaces);
+    i_redo_geometric_generated_data(solid->sfaces, solid->bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -793,7 +823,8 @@ CSMBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
 static void i_apply_transformation_to_vertexs(
                         struct csmhashtb(csmface_t) *sfaces,
                         struct csmhashtb(csmvertex_t) *svertexs,
-                        const struct csmtransform_t *transform)
+                        const struct csmtransform_t *transform,
+                        struct csmbbox_t *bbox)
 {
     struct csmhashtb_iterator(csmvertex_t) *iterator;
     
@@ -809,7 +840,7 @@ static void i_apply_transformation_to_vertexs(
     
     csmhashtb_free_iterator(&iterator, csmvertex_t);
     
-    i_redo_geometric_generated_data(sfaces);
+    i_redo_geometric_generated_data(sfaces, bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -821,7 +852,7 @@ void csmsolid_move(struct csmsolid_t *solid, double dx, double dy, double dz)
     assert_no_null(solid);
     
     transform = csmtransform_make_displacement(dx, dy, dz);
-    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform);
+    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform, solid->bbox);
     
     csmtransform_free(&transform);
 }
@@ -838,7 +869,7 @@ void csmsolid_rotate(
     assert_no_null(solid);
     
     transform = csmtransform_make_arbitrary_axis_rotation(angulo_rotacion_rad, Xo, Yo, Zo, Ux, Uy, Uz);
-    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform);
+    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform, solid->bbox);
     
     csmtransform_free(&transform);
 }
@@ -860,7 +891,7 @@ void csmsolid_general_transform(
                     Vx, Vy, Vz, Dy,
                     Wx, Wy, Wz, Dz);
     
-    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform);
+    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform, solid->bbox);
     
     csmtransform_free(&transform);
 }
@@ -875,7 +906,7 @@ double csmsolid_volume(const struct csmsolid_t *solid)
     
     assert_no_null(solid);
 
-    i_redo_geometric_generated_data(solid->sfaces);
+    i_redo_geometric_generated_data(solid->sfaces, solid->bbox);
     
     volume = 0.;
     face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);

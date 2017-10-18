@@ -21,5 +21,7 @@ struct csmsolid_t
 
     struct csmmaterial_t *visz_material_opt;
     CSMBOOL draw_only_border_edges;
+    
+    struct csmbbox_t *bbox;
 };
 
