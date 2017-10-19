@@ -2646,7 +2646,7 @@ static void i_test_sphere4(void)
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
-
+    
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_set_parameters, csmviewer_set_results);
     

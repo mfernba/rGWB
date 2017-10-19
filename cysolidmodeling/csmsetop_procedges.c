@@ -9,6 +9,7 @@
 #include "csmsetop_procedges.inl"
 
 #include "csmarrayc.inl"
+#include "csmbbox.inl"
 #include "csmsetop_vtxfacc.inl"
 #include "csmsetop_vtxvtx.inl"
 #include "csmsetop.tli"
@@ -735,8 +736,7 @@ static void i_generate_intersections_edge_with_solid_faces(
 {
     struct i_optimized_edge_data_t optimized_edge_data;
     struct csmhedge_t *hedge_pos, *hedge_neg;
-    csmArrayStruct(i_edge_intersection_t) *edge_intersecctions;
-    struct csmhashtb_iterator(csmface_t) *face_iterator_B;
+    const struct csmbbox_t *solid_b_bbox;
     
     hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_POS);
     optimized_edge_data.vertex_pos = csmhedge_vertex(hedge_pos);
@@ -746,25 +746,36 @@ static void i_generate_intersections_edge_with_solid_faces(
     optimized_edge_data.vertex_neg = csmhedge_vertex(hedge_neg);
     csmvertex_get_coordenadas(optimized_edge_data.vertex_neg, &optimized_edge_data.x2, &optimized_edge_data.y2, &optimized_edge_data.z2);
     
-    edge_intersecctions = csmarrayc_new_st_array(0, i_edge_intersection_t);
-    face_iterator_B = csmsolid_face_iterator(solid_B);
+    solid_b_bbox = csmsolid_get_bbox(solid_B);
+    
+    if (csmbbox_intersects_with_segment(
+                        solid_b_bbox,
+                        optimized_edge_data.x1, optimized_edge_data.y1, optimized_edge_data.z1,
+                        optimized_edge_data.x2, optimized_edge_data.y2, optimized_edge_data.z2) == CSMTRUE)
+    {
+        csmArrayStruct(i_edge_intersection_t) *edge_intersecctions;
+        struct csmhashtb_iterator(csmface_t) *face_iterator_B;
+        
+        edge_intersecctions = csmarrayc_new_st_array(0, i_edge_intersection_t);
+        face_iterator_B = csmsolid_face_iterator(solid_B);
 
-    while (csmhashtb_has_next(face_iterator_B, csmface_t) == CSMTRUE)
-    {
-        struct csmface_t *face_B;
-    
-        csmhashtb_next_pair(face_iterator_B, NULL, &face_B, csmface_t);
-        i_append_intersections_between_A_edge_and_B_face(&optimized_edge_data, face_B, edge_intersecctions);
+        while (csmhashtb_has_next(face_iterator_B, csmface_t) == CSMTRUE)
+        {
+            struct csmface_t *face_B;
+        
+            csmhashtb_next_pair(face_iterator_B, NULL, &face_B, csmface_t);
+            i_append_intersections_between_A_edge_and_B_face(&optimized_edge_data, face_B, edge_intersecctions);
+        }
+        
+        if (csmarrayc_count_st(edge_intersecctions, i_edge_intersection_t) > 0)
+        {
+            csmarrayc_qsort_st(edge_intersecctions, i_edge_intersection_t, i_compara_edge_intersection);
+            i_process_edge_intersections(edge_A, edge_intersecctions, vv_intersections, vertex_face_neighborhood);
+        }
+        
+        csmhashtb_free_iterator(&face_iterator_B, csmface_t);
+        csmarrayc_free_st(&edge_intersecctions, i_edge_intersection_t, i_free_edge_intersection);
     }
-    
-    if (csmarrayc_count_st(edge_intersecctions, i_edge_intersection_t) > 0)
-    {
-        csmarrayc_qsort_st(edge_intersecctions, i_edge_intersection_t, i_compara_edge_intersection);
-        i_process_edge_intersections(edge_A, edge_intersecctions, vv_intersections, vertex_face_neighborhood);
-    }
-    
-    csmhashtb_free_iterator(&face_iterator_B, csmface_t);
-    csmarrayc_free_st(&edge_intersecctions, i_edge_intersection_t, i_free_edge_intersection);
 }
 
 // ------------------------------------------------------------------------------------------

@@ -15,23 +15,13 @@
 
 // ---------------------------------------------------------------------------------
 
-void csmassert_dontuse_assertion_failed(CSMBOOL condition, const char *file, int line, const char *assertion)
+void csmassert_dontuse_assertion_failed(const char *file, int line, const char *assertion)
 {
-    if (condition == CSMFALSE)
-    {
-        csmdebug_print_debug_info("Solid modeler assertion failed: (%s)\nFILE: %s\nLINE: %d\n", assertion, file, line);
-        csmdebug_close_output_file();
-        
-        fprintf(stderr, "Solid modeler assertion failed: (%s)\nFILE: %s\nLINE: %d\n", assertion, file, line);
-        _Exit(-1);
-    }
-}
-
-// ---------------------------------------------------------------------------------
-
-void csmassert_dontuse_assertion_not_null_failed(const void *ptr, const char *file, int line, const char *assertion)
-{
-    csmassert_dontuse_assertion_failed(ptr != NULL, file, line, assertion);
+    csmdebug_print_debug_info("Solid modeler assertion failed: (%s)\nFILE: %s\nLINE: %d\n", assertion, file, line);
+    csmdebug_close_output_file();
+    
+    fprintf(stderr, "Solid modeler assertion failed: (%s)\nFILE: %s\nLINE: %d\n", assertion, file, line);
+    _Exit(-1);
 }
 
 // ---------------------------------------------------------------------------------
