@@ -15,4 +15,6 @@ struct csmvertex_t
     struct csmhedge_t *hedge;
 
     csmvertex_mask_t algorithm_attrib_mask;
+
+    double Nx, Ny, Nz;
 };

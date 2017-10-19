@@ -60,6 +60,11 @@ CSMBOOL csmvertex_equal_coords(const struct csmvertex_t *vertex1, const struct c
 void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtransform_t *transform);
 
 
+void csmvertex_get_normal(struct csmvertex_t *vertex, double *Nx, double *Ny, double *Nz);
+
+void csmvertex_set_normal(struct csmvertex_t *vertex, double Nx, double Ny, double Nz);
+
+
 // Debug...
 
 void csmvertex_print_debug_info(struct csmvertex_t *vertex);

@@ -18,6 +18,7 @@ extern "C"
 
 #include <basicSystem/bsmaterial.h>
 #include <basicGraphics/bsgraphics2.h>
+#include <basicGraphics/bsgbibluz.h>
 #include <basicSystem/bsassert.h>
 #include <basicSystem/bsmem.h>
 #include <cypearrays/a_punter.h>
@@ -121,7 +122,14 @@ static void i_draw_solid_with_material(
 
 static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graphics)
 {
+    struct bsgluz_abs_t *conf_iluminacion;
+    
     bsassert_not_null(viewer);
+    
+    bsgraphics2_escr_se_dibuja_con_test_profundidad(graphics, true);
+    
+    conf_iluminacion = bsgbibluz_crea_luz_blanca_sin_reflejos_con_color_en_zonas_no_iluminadas();
+    bsgraphics2_append_luz_puntual(graphics, -5., -5., 5., true, &conf_iluminacion);
     
     if (viewer->solid_res1 != NULL || viewer->solid_res2 != NULL)
     {

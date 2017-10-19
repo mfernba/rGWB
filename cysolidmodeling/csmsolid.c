@@ -404,7 +404,7 @@ void csmsolid_clear_algorithm_data(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_redo_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *bbox)
+static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *bbox)
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
     
@@ -428,12 +428,95 @@ static void i_redo_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces,
     csmhashtb_free_iterator(&iterator, csmface_t);
 }
 
+// ------------------------------------------------------------------------------------------
+
+static struct csmhedge_t *i_he_mate(struct csmhedge_t *hedge)
+{
+    struct csmedge_t *edge;
+    
+    edge = csmhedge_edge(hedge);
+    return csmedge_mate(edge, hedge);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
+{
+    struct csmloop_t *loop;
+    
+    loop = csmhedge_loop(hedge);
+    return csmloop_lface(loop);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_redo_vertex_normals(struct csmhashtb(csmvertex_t) *svertexs)
+{
+    struct csmhashtb_iterator(csmvertex_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(svertexs, csmvertex_t);
+    
+    while (csmhashtb_has_next(iterator, csmvertex_t) == CSMTRUE)
+    {
+        struct csmvertex_t *vertex;
+        struct csmhedge_t *he_vertex, *he_iterator;
+        double Nx, Ny, Nz;
+        unsigned long num_faces;
+        
+        csmhashtb_next_pair(iterator, NULL, &vertex, csmvertex_t);
+        
+        he_vertex = csmvertex_hedge(vertex);
+        he_iterator = he_vertex;
+        
+        Nx = 0.;
+        Ny = 0.;
+        Nz = 0.;
+        num_faces = 0;
+        
+        do
+        {
+            struct csmface_t *face;
+            double A, B, C, D;
+            
+            face = i_face_from_hedge(he_iterator);
+            csmface_face_equation(face, &A, &B, &C, &D);
+            
+            Nx += A;
+            Ny += B;
+            Nz += C;
+            num_faces++;
+            
+            he_iterator = csmhedge_next(i_he_mate(he_iterator));
+            
+        } while (he_iterator != he_vertex);
+        
+        assert(num_faces > 0);
+        
+        Nx /= num_faces;
+        Ny /= num_faces;
+        Nz /= num_faces;
+        
+        csmmath_make_unit_vector3D(&Nx, &Ny, &Nz);
+        csmvertex_set_normal(vertex, Nx, Ny, Nz);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_redo_geometric_generated_data(struct csmhashtb(csmvertex_t) *svertexs, struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *bbox)
+{
+    i_redo_faces_geometric_generated_data(sfaces, bbox);
+    i_redo_vertex_normals(svertexs);
+}
+
 // ----------------------------------------------------------------------------------------------------
 
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
-    i_redo_geometric_generated_data(solid->sfaces, solid->bbox);
+    i_redo_geometric_generated_data(solid->svertexs, solid->sfaces, solid->bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -786,34 +869,41 @@ CSMBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
                         struct csmvertex_t **coincident_vertex)
 {
     CSMBOOL contains_vertex;
+    double x, y, z;
     struct csmvertex_t *coincident_vertex_loc;
-    struct csmhashtb_iterator(csmvertex_t) *iterator;
     
     assert_no_null(solid);
     assert_no_null(coincident_vertex);
-
+    
     contains_vertex = CSMFALSE;
     coincident_vertex_loc = NULL;
     
-    iterator = csmhashtb_create_iterator(solid->svertexs, csmvertex_t);
+    csmvertex_get_coordenadas(vertex, &x, &y, &z);
     
-    while (csmhashtb_has_next(iterator, csmvertex_t) == CSMTRUE)
+    if (csmbbox_contains_point(solid->bbox, x, y, z) == CSMTRUE)
     {
-        struct csmvertex_t *vertex_i;
+        struct csmhashtb_iterator(csmvertex_t) *iterator;
         
-        csmhashtb_next_pair(iterator, NULL, &vertex_i, csmvertex_t);
+        iterator = csmhashtb_create_iterator(solid->svertexs, csmvertex_t);
         
-        if (csmvertex_equal_coords(vertex, vertex_i, tolerance) == CSMTRUE)
+        while (csmhashtb_has_next(iterator, csmvertex_t) == CSMTRUE)
         {
-            contains_vertex = CSMTRUE;
-            coincident_vertex_loc = vertex_i;
-            break;
+            struct csmvertex_t *vertex_i;
+            
+            csmhashtb_next_pair(iterator, NULL, &vertex_i, csmvertex_t);
+            
+            if (csmvertex_equal_coords(vertex, vertex_i, tolerance) == CSMTRUE)
+            {
+                contains_vertex = CSMTRUE;
+                coincident_vertex_loc = vertex_i;
+                break;
+            }
         }
+        
+        csmhashtb_free_iterator(&iterator, csmvertex_t);
     }
     
     *coincident_vertex = coincident_vertex_loc;
-    
-    csmhashtb_free_iterator(&iterator, csmvertex_t);
     
     return contains_vertex;
 }
@@ -840,7 +930,7 @@ static void i_apply_transformation_to_vertexs(
     
     csmhashtb_free_iterator(&iterator, csmvertex_t);
     
-    i_redo_geometric_generated_data(sfaces, bbox);
+    i_redo_geometric_generated_data(svertexs, sfaces, bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -906,7 +996,7 @@ double csmsolid_volume(const struct csmsolid_t *solid)
     
     assert_no_null(solid);
 
-    i_redo_geometric_generated_data(solid->sfaces, solid->bbox);
+    i_redo_geometric_generated_data(solid->svertexs, solid->sfaces, solid->bbox);
     
     volume = 0.;
     face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);

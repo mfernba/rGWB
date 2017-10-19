@@ -2494,7 +2494,7 @@ static void i_assign_flat_material_to_solid(float r, float g, float b, struct cs
 {
     struct csmmaterial_t *material;
     
-    material = csmmaterial_new_flat_material(r, g, b, 100);
+    material = csmmaterial_new_flat_material(r, g, b, 1.);
     csmsolid_set_visualization_material(solid, &material);
 }
 
@@ -2714,9 +2714,9 @@ void csmtest_test(void)
     i_test_sphere3();
     */
     
-    i_test_mechanical_part2();
+    //i_test_mechanical_part2();
 
-    //i_test_sphere4();
+    i_test_sphere4();
     
     csmviewer_free(&viewer);
 }
