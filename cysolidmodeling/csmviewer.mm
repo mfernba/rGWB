@@ -94,6 +94,8 @@ static void i_draw_solid_with_material(
     
     if (solid != NULL)
     {
+        csmsolid_redo_geometric_generated_data(solid);
+
         if (draw_debug_info == CSMTRUE)
         {
             bsgraphics2_escr_color(graphics, *material);
@@ -105,8 +107,8 @@ static void i_draw_solid_with_material(
             CSMBOOL draw_face_normal;
             struct bsmaterial_t *border_edges_color;
             
-            draw_solid_face = CSMTRUE;
-            draw_face_normal = CSMFALSE;
+            draw_solid_face =  CSMTRUE; //CSMFALSE;
+            draw_face_normal = CSMFALSE; //CSMFALSE;
             border_edges_color = bsmaterial_crea_rgb(0., 0., 0.);
             
             csmsolid_vis_draw(solid, draw_solid_face, draw_face_normal, *material, border_edges_color, border_edges_color, graphics);
@@ -129,8 +131,8 @@ static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graph
     bsgraphics2_escr_se_dibuja_con_test_profundidad(graphics, true);
     
     conf_iluminacion = bsgbibluz_crea_luz_blanca_sin_reflejos_con_color_en_zonas_no_iluminadas();
-    bsgraphics2_append_luz_puntual(graphics, -5., -5., 5., true, &conf_iluminacion);
-    
+    bsgraphics2_append_luz_puntual(graphics, -10., -10., 10., true, &conf_iluminacion);
+
     if (viewer->solid_res1 != NULL || viewer->solid_res2 != NULL)
     {
         struct bsmaterial_t *material;

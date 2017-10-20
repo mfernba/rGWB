@@ -17,6 +17,8 @@ CSMBOOL csmsolid_is_empty(const struct csmsolid_t *solido);
 
 void csmsolid_clear_algorithm_data(struct csmsolid_t *solid);
 
+void csmsolid_redo_geometric_face_data(struct csmsolid_t *solid);
+
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid);
 
 void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to_merge);

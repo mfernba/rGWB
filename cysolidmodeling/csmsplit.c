@@ -887,7 +887,7 @@ static void i_finish_split(
     set_of_null_faces_above = csmsetopcom_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces);
     set_of_null_faces_below = set_of_null_faces;
     
-    csmsolid_redo_geometric_generated_data(work_solid);
+    csmsolid_redo_geometric_face_data(work_solid);
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_above);
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_below);
 
@@ -953,7 +953,7 @@ CSMBOOL csmsplit_does_plane_split_solid(
     csmdebug_begin_context("Split");
     
     work_solid = csmsolid_duplicate(solid);
-    csmsolid_redo_geometric_generated_data(work_solid);
+    csmsolid_redo_geometric_face_data(work_solid);
     csmsolid_clear_algorithm_data(work_solid);
     
     csmdebug_set_viewer_results(NULL, NULL);
@@ -1001,10 +1001,10 @@ CSMBOOL csmsplit_does_plane_split_solid(
         
         assert(csmsolid_is_empty(work_solid) == CSMTRUE);
         
-        csmsolid_redo_geometric_generated_data(solid_above_loc);
+        csmsolid_redo_geometric_face_data(solid_above_loc);
         volume_above = csmsolid_volume(solid_above_loc);
         
-        csmsolid_redo_geometric_generated_data(solid_below_loc);
+        csmsolid_redo_geometric_face_data(solid_below_loc);
         volume_below = csmsolid_volume(solid_below_loc);
         
         if (volume_above > 1.e-6 && volume_below > 1.e-6)

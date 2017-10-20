@@ -450,6 +450,27 @@ static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_add_he_face_normal(struct csmhedge_t *he, double *Nx, double *Ny, double *Nz, unsigned long *num_faces)
+{
+    struct csmface_t *face;
+    double A, B, C, D;
+    
+    assert_no_null(Nx);
+    assert_no_null(Ny);
+    assert_no_null(Nz);
+    assert_no_null(num_faces);
+    
+    face = i_face_from_hedge(he);
+    csmface_face_equation(face, &A, &B, &C, &D);
+    
+    *Nx += A;
+    *Ny += B;
+    *Nz += C;
+    (*num_faces)++;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_redo_vertex_normals(struct csmhashtb(csmvertex_t) *svertexs)
 {
     struct csmhashtb_iterator(csmvertex_t) *iterator;
@@ -475,18 +496,14 @@ static void i_redo_vertex_normals(struct csmhashtb(csmvertex_t) *svertexs)
         
         do
         {
-            struct csmface_t *face;
-            double A, B, C, D;
+            struct csmhedge_t *he_iterator_mate;
             
-            face = i_face_from_hedge(he_iterator);
-            csmface_face_equation(face, &A, &B, &C, &D);
+            i_add_he_face_normal(he_iterator, &Nx, &Ny, &Nz, &num_faces);
             
-            Nx += A;
-            Ny += B;
-            Nz += C;
-            num_faces++;
+            he_iterator_mate = i_he_mate(he_iterator);
+            i_add_he_face_normal(he_iterator_mate, &Nx, &Ny, &Nz, &num_faces);
             
-            he_iterator = csmhedge_next(i_he_mate(he_iterator));
+            he_iterator = csmhedge_next(he_iterator_mate);
             
         } while (he_iterator != he_vertex);
         
@@ -501,6 +518,14 @@ static void i_redo_vertex_normals(struct csmhashtb(csmvertex_t) *svertexs)
     }
     
     csmhashtb_free_iterator(&iterator, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_redo_geometric_face_data(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    i_redo_faces_geometric_generated_data(solid->sfaces, solid->bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------

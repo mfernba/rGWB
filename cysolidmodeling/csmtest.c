@@ -2665,7 +2665,7 @@ void csmtest_test(void)
     i_test_solid_from_shape2D_with_hole();
     i_test_union_solidos_por_loopglue();
     */
-    
+
     /*
     i_test_divide_solido_rectangular_hueco_por_plano_medio();
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();

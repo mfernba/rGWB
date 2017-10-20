@@ -14,8 +14,8 @@
 #include "csmfwddecl.hxx"
 
 void csmassert_dontuse_assertion_failed(const char *file, int line, const char *assertion);
-#define assert(condition) if (!(condition)) csmassert_dontuse_assertion_failed(__FILE__, __LINE__, #condition)
-#define assert_no_null(condition) if (condition == NULL) csmassert_dontuse_assertion_failed(__FILE__, __LINE__, #condition)
+#define assert(condition) ( (condition)? (void)0: csmassert_dontuse_assertion_failed(__FILE__, __LINE__, #condition))
+#define assert_no_null(condition) assert(condition != NULL)
 
 void csmassert_dontuse_default_error(const char *file, int line) __attribute__ ((noreturn));
 #define default_error() csmassert_dontuse_default_error(__FILE__, __LINE__)

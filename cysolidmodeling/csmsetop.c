@@ -258,10 +258,10 @@ static void i_join_null_edges(
     
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
-        csmsolid_redo_geometric_generated_data(solid_A);
+        csmsolid_redo_geometric_face_data(solid_A);
         csmsolid_debug_print_debug(solid_A, CSMTRUE);
         
-        csmsolid_redo_geometric_generated_data(solid_B);
+        csmsolid_redo_geometric_face_data(solid_B);
         csmsolid_debug_print_debug(solid_B, CSMTRUE);
     }
     
@@ -731,11 +731,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
     assert(no_null_faces % 2 == 0);
     
-    csmsolid_redo_geometric_generated_data(solid_A);
+    csmsolid_redo_geometric_face_data(solid_A);
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_A);
     csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_A, set_of_null_faces_A);
     
-    csmsolid_redo_geometric_generated_data(solid_B);
+    csmsolid_redo_geometric_face_data(solid_B);
     csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_B);
     csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_B, set_of_null_faces_B);
 
@@ -830,10 +830,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
     csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
     unsigned long no_null_edges;
     
-    csmsolid_redo_geometric_generated_data(solid_A);
+    csmsolid_redo_geometric_face_data(solid_A);
     csmsolid_clear_algorithm_data(solid_A);
     
-    csmsolid_redo_geometric_generated_data(solid_B);
+    csmsolid_redo_geometric_face_data(solid_B);
     csmsolid_clear_algorithm_data(solid_B);
 
     if (csmdebug_debug_enabled() == CSMTRUE)
