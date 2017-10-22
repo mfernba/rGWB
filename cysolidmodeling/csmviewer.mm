@@ -94,8 +94,6 @@ static void i_draw_solid_with_material(
     
     if (solid != NULL)
     {
-        csmsolid_redo_geometric_generated_data(solid);
-
         if (draw_debug_info == CSMTRUE)
         {
             bsgraphics2_escr_color(graphics, *material);
@@ -191,6 +189,12 @@ void csmviewer_set_parameters(struct csmviewer_t *viewer, struct csmsolid_t *sol
     
     viewer->solid1 = solid1;
     viewer->solid2 = solid2;
+    
+    if (viewer->solid1 != NULL)
+        csmsolid_redo_geometric_generated_data(viewer->solid1);
+
+    if (viewer->solid2 != NULL)
+        csmsolid_redo_geometric_generated_data(viewer->solid2);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -201,6 +205,12 @@ void csmviewer_set_results(struct csmviewer_t *viewer, struct csmsolid_t *solid1
     
     viewer->solid_res1 = solid1;
     viewer->solid_res2 = solid2;
+    
+    if (viewer->solid_res1 != NULL)
+        csmsolid_redo_geometric_generated_data(viewer->solid_res1);
+
+    if (viewer->solid_res2 != NULL)
+        csmsolid_redo_geometric_generated_data(viewer->solid_res2);
 }
 
 // ------------------------------------------------------------------------------------------

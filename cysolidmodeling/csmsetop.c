@@ -256,6 +256,9 @@ static void i_join_null_edges(
     loose_ends_A = csmarrayc_new_st_array(0, csmhedge_t);
     loose_ends_B = csmarrayc_new_st_array(0, csmhedge_t);
     
+    no_null_edges_deleted_A = 0;
+    no_null_edges_deleted_B = 0;
+    
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmsolid_redo_geometric_face_data(solid_A);
@@ -263,13 +266,10 @@ static void i_join_null_edges(
         
         csmsolid_redo_geometric_face_data(solid_B);
         csmsolid_debug_print_debug(solid_B, CSMTRUE);
+        
+        i_append_null_edges_to_debug_view(set_of_null_edges_A);
+        csmdebug_show_viewer();
     }
-    
-    no_null_edges_deleted_A = 0;
-    no_null_edges_deleted_B = 0;
-
-    i_append_null_edges_to_debug_view(set_of_null_edges_A);
-    //csmdebug_show_viewer();
     
     csmdebug_block_print_solid();
     
@@ -394,7 +394,7 @@ static void i_join_null_edges(
     csmdebug_print_debug_info("*** AFTER JOINING NULL EDGES\n");
     csmsolid_debug_print_debug(solid_A, CSMTRUE);
     csmsolid_debug_print_debug(solid_B, CSMTRUE);
-    //csmdebug_show_viewer();
+    csmdebug_show_viewer();
     
     *set_of_null_faces_A = set_of_null_faces_A_loc;
     *set_of_null_faces_B = set_of_null_faces_B_loc;
@@ -908,7 +908,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     
     csmdebug_set_viewer_results(NULL, NULL);
     csmdebug_set_viewer_parameters(solid_A, solid_B);
-    //csmdebug_show_viewer();
+    csmdebug_show_viewer();
     
     result = i_set_operation_modifying_solids_internal(set_operation, solid_A, solid_B);
     

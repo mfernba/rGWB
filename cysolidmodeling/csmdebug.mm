@@ -56,9 +56,9 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 0;
+static int i_DEBUG_SCREEN = 1;
 static int i_DEBUG_VISUAL = 1;
-static int i_DEBUG_FILE = 0;
+static int i_DEBUG_FILE = 1;
 
 static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
 
@@ -376,7 +376,8 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
         bsgraphics2_escr_color(graphics, debug_point_material);
         bsgraphics2_escr_punto3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
         
-        if (fabs(fabs(g_Debug_points[i].z) - 0.05) < 1.e-3)
+        /*
+         if (fabs(fabs(g_Debug_points[i].z) - 0.05) < 1.e-3)
         {
             bsgraphics2_append_desplazamiento_3D(graphics, g_Debug_points[i].x, g_Debug_points[i].y, g_Debug_points[i].z);
             bsgraphics2_append_ejes_plano_pantalla(graphics);
@@ -393,9 +394,10 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
             bsgraphics2_desapila_transformacion(graphics);
             bsgraphics2_desapila_transformacion(graphics);
         }
+        */
     }
     
-    if (g_Draw_plane == CSMTRUE)
+    /*if (g_Draw_plane == CSMTRUE)
     {
         double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
         double desp;
@@ -429,7 +431,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
                         x4, y4, z4, true, g_A, g_B, g_C);
         
         bsmaterial_destruye(&material);
-    }
+    }*/
     
     bsmaterial_destruye(&debug_point_material);
 }

@@ -109,7 +109,7 @@ void csmface_vis_draw_normal(struct csmface_t *face, struct bsgraphics2_t *graph
     
     csmloop_geometric_center_3d(face->flout, &x_geometric_center, &y_geometric_center, &z_geometric_center);
     
-    disp = 0.10;
+    disp = 0.005;
     bsgraphics2_escr_linea3D(
                         graphics,
                         x_geometric_center, y_geometric_center, z_geometric_center,

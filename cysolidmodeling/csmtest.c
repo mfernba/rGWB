@@ -2643,6 +2643,124 @@ static void i_test_sphere4(void)
 
 // ------------------------------------------------------------------------------------------
 
+CONSTRUCTOR(static struct csmsolid_t *, i_split_solid_ang_get_division, (
+	                    const struct csmsolid_t *solid,
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        CSMBOOL get_top))
+{
+    CSMBOOL split;
+    double A, B, C, D;
+    struct csmsolid_t *above, *below;
+    
+    csmmath_implicit_plane_equation(
+                        Xo, Yo, Zo,
+                        Ux, Uy, Uz, Vx, Vy, Vz,
+                        &A, &B, &C, &D);
+    
+    split = csmsplit_does_plane_split_solid(solid, A, B, C, D, &above, &below);
+    assert(split == CSMTRUE);
+    
+    if (get_top == CSMTRUE)
+    {
+        csmsolid_free(&below);
+        return above;
+    }
+    else
+    {
+        csmsolid_free(&above);
+        return below;
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_semisphere_at_origin, (double radius, double thickness, unsigned long no_points_circle))
+{
+    struct csmsolid_t *hollow_sphere;
+    struct csmsolid_t *solid_sphere, *solid_above_sphere, *inner_sphere;
+    CSMBOOL split;
+    
+    assert(radius > 0.);
+    assert(thickness > 0.);
+    assert(thickness < radius);
+    
+    solid_sphere = csmshape3d_create_sphere(radius, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    solid_above_sphere = i_split_solid_ang_get_division(solid_sphere, 0., 0., 0., 1., 0., 0., 0., 1., 0., CSMTRUE);
+    csmsolid_free(&solid_sphere);
+    
+    inner_sphere = csmshape3d_create_sphere(radius - thickness, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    hollow_sphere = csmsetop_difference_A_minus_B(solid_above_sphere, inner_sphere);
+    csmsolid_free(&inner_sphere);
+    
+    i_assign_flat_material_to_solid(.5, .5, .5, hollow_sphere);
+    
+    return hollow_sphere;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_cylinder, (double radius, double thickness, double height, unsigned long no_points_circle))
+{
+    struct csmsolid_t *hollow_cylinder;
+    struct gccontorno_t *shape;
+    
+    assert(radius > 0.);
+    assert(thickness > 0.);
+    assert(thickness < radius);
+    assert(height > 0.);
+    
+    shape = gcelem2d_contorno_circular_hueco(radius, radius - thickness, no_points_circle);
+    
+    hollow_cylinder = csmsweep_create_solid_from_shape_debug(
+	                    shape, 0., 0.,  0.5 * height, 1., 0., 0., 0., 1., 0.,
+                        shape, 0., 0., -0.5 * height, 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    i_assign_flat_material_to_solid(.5, .5, .5, hollow_cylinder);
+    
+    gccontorno_destruye(&shape);
+    
+    return hollow_cylinder;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_mechanical5(void)
+{
+    struct csmsolid_t *solid;
+    double radius, thickness, body_height;
+    unsigned long no_points_circle;
+    struct csmsolid_t *top_part, *hollow_cylinder;
+    
+    radius = 10. * 0.025;
+    thickness = 10. * 0.0025;
+    no_points_circle = 4;
+
+    body_height = 10. * 0.1;
+    
+    csmdebug_set_enabled_by_code(CSMFALSE);
+    
+    top_part = i_make_hollow_semisphere_at_origin(radius, thickness, no_points_circle);
+    csmsolid_move(top_part, 0., 0., 0.5 * body_height);
+    
+    hollow_cylinder = i_make_hollow_cylinder(radius, thickness, body_height, no_points_circle);
+
+    csmdebug_set_enabled_by_code(CSMTRUE);
+    
+    solid = csmsetop_union_A_and_B(top_part, hollow_cylinder);
+    
+    csmsolid_set_draw_only_border_edges(solid, CSMFALSE);
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    csmsolid_free(&top_part);
+    csmsolid_free(&hollow_cylinder);
+    csmsolid_free(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -2716,7 +2834,9 @@ void csmtest_test(void)
     
     //i_test_mechanical_part2();
 
-    i_test_sphere4();
+    //i_test_sphere4();
+    
+    i_test_mechanical5();
     
     csmviewer_free(&viewer);
 }
