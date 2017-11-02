@@ -54,7 +54,6 @@ enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(
 
 struct csmface_t *csmsetopcom_face_for_hedge_sector(struct csmhedge_t *hedge, struct csmhedge_t *hedge_next);
 
-
 // Finish algorithm...
 
 void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_t *destination_solid);

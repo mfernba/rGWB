@@ -182,7 +182,6 @@ CSMBOOL csmopbas_is_wide_hedge(
     const struct csmvertex_t *vertex_prev, *vertex, *vertex_next;
     double Ux_to_prev, Uy_to_prev, Uz_to_prev;
     double Ux_to_next, Uy_to_next, Uz_to_next;
-    double Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next;
     struct csmface_t *face;
     double A, B, C, D;
 
@@ -199,24 +198,23 @@ CSMBOOL csmopbas_is_wide_hedge(
     csmmath_make_unit_vector3D(&Ux_to_prev, &Uy_to_prev, &Uz_to_prev);
     csmmath_make_unit_vector3D(&Ux_to_next, &Uy_to_next, &Uz_to_next);
 
-    csmmath_cross_product3D(
-                        Ux_to_prev, Uy_to_prev, Uz_to_prev, Ux_to_next, Uy_to_next, Uz_to_next,
-                        &Ux_cross_prev_next, &Uy_cross_prev_next, &Uz_cross_prev_next);
-    
     face = csmopbas_face_from_hedge(hedge);
     csmface_face_equation(face, &A, &B, &C, &D);
     
-    if (csmmath_is_null_vector(
-                        Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next,
-                        csmtolerance_null_vector()) == CSMTRUE)
+    if (csmmath_vectors_are_parallel(Ux_to_prev, Uy_to_prev, Uz_to_prev, Ux_to_next, Uy_to_next, Uz_to_next) == CSMTRUE)
     {
         is_wide = CSMTRUE;
         csmmath_cross_product3D(A, B, C, Ux_to_next, Uy_to_next, Uz_to_next, &Ux_bisec_loc, &Uy_bisec_loc, &Uz_bisec_loc);
     }
     else
     {
+        double Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next;
         double dot_product;
 
+        csmmath_cross_product3D(
+                        Ux_to_prev, Uy_to_prev, Uz_to_prev, Ux_to_next, Uy_to_next, Uz_to_next,
+                        &Ux_cross_prev_next, &Uy_cross_prev_next, &Uz_cross_prev_next);
+        
         dot_product = csmmath_dot_product3D(Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next, A, B, C);
         is_wide = IS_TRUE(dot_product > 0.);
         

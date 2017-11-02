@@ -11,6 +11,7 @@
 
 #include "csmassert.inl"
 #include "csmmath.tli"
+#include "csmtolerance.inl"
 #include <math.h>
 
 // ------------------------------------------------------------------------------------------
@@ -222,6 +223,23 @@ CSMBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance
     squared_norm = CSMMATH_CUAD(Ux) + CSMMATH_CUAD(Uy) + CSMMATH_CUAD(Uz);
     
     if (csmmath_fabs(squared_norm) < CSMMATH_CUAD(tolerance))
+        return CSMTRUE;
+    else
+        return CSMFALSE;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CSMBOOL csmmath_vectors_are_parallel(double Ux1, double Uy1, double Uz1, double Ux2, double Uy2, double Uz2)
+{
+    double dot_product;
+    
+    csmmath_make_unit_vector3D(&Ux1, &Uy1, &Uz1);
+    csmmath_make_unit_vector3D(&Ux2, &Uy2, &Uz2);
+    
+    dot_product = csmmath_dot_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
+    
+    if (csmmath_fabs(1. - csmmath_fabs(dot_product)) < csmtolerance_dot_product_parallel_vectors())
         return CSMTRUE;
     else
         return CSMFALSE;

@@ -13,12 +13,16 @@
 #include "csmdebug.inl"
 #include "csmloop.inl"
 #include "csmloop_debug.inl"
+#include "csmmath.inl"
+#include "csmmath.tli"
 
 // ----------------------------------------------------------------------------------------------------
 
 void csmface_debug_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no_es_integro, unsigned long *num_holes_opc)
 {
     unsigned long num_holes_loc;
+    CSMBOOL compute_loop_area;
+    double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
     struct csmloop_t *loop_iterator;
     
     assert_no_null(face);
@@ -29,6 +33,20 @@ void csmface_debug_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no
                         face->A, face->B, face->C, face->D,
                         face->setop_is_null_face);
     
+    if (csmmath_fabs(face->A) > 0. || csmmath_fabs(face->B) > 0. || csmmath_fabs(face->C) > 0.)
+    {
+        compute_loop_area = CSMTRUE;
+
+        csmmath_plane_axis_from_implicit_plane_equation(
+                        face->A, face->B, face->C, face->D,
+                        &Xo, &Yo, &Zo,
+                        &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
+    }
+    else
+    {
+        compute_loop_area = CSMFALSE;
+    }
+    
     loop_iterator = face->floops;
     num_holes_loc = 0;
     
@@ -36,9 +54,27 @@ void csmface_debug_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no
     {
         struct csmloop_t *next_loop;
         CSMBOOL is_outer_loop;
+        double loop_area;
         
         is_outer_loop = IS_TRUE(face->flout == loop_iterator);
-        csmloop_debug_print_info_debug(loop_iterator, is_outer_loop, assert_si_no_es_integro);
+        
+        if (compute_loop_area == CSMTRUE)
+        {
+            loop_area = csmloop_compute_area(
+                    loop_iterator,
+                    Xo, Yo, Zo,
+                    Ux, Uy, Uz, Vx, Vy, Vz);
+        }
+        else
+        {
+            loop_area = 0.;
+        }
+        
+        csmloop_debug_print_info_debug(
+	                    loop_iterator,
+                        is_outer_loop,
+                        compute_loop_area, loop_area,
+                        assert_si_no_es_integro);
         
         if (is_outer_loop == CSMFALSE)
             num_holes_loc++;

@@ -45,11 +45,29 @@ struct i_neighborhood_t
     double Ux12_u, Uy12_u, Uz12_u;
 };
 
+enum i_sector_edge_overlap_t
+{
+    i_SECTOR_EDGE_OVERLAP_NO,
+    i_SECTOR_EDGE_OVERLAP_S1,
+    i_SECTOR_EDGE_OVERLAP_S2
+};
+
 struct i_inters_sectors_t
 {
     unsigned long idx_nba, idx_nbb;
-    enum csmsetop_classify_resp_solid_t s1a, s2a;
-    enum csmsetop_classify_resp_solid_t s1b, s2b;
+    
+    enum csmsetop_classify_resp_solid_t s1a;
+    enum i_sector_edge_overlap_t o1a;
+    
+    enum csmsetop_classify_resp_solid_t s2a;
+    enum i_sector_edge_overlap_t o2a;
+    
+    enum csmsetop_classify_resp_solid_t s1b;
+    enum i_sector_edge_overlap_t o1b;
+    
+    enum csmsetop_classify_resp_solid_t s2b;
+    enum i_sector_edge_overlap_t o2b;
+    
     CSMBOOL intersect;
 };
 
@@ -164,8 +182,10 @@ static void i_free_neighborhood(struct i_neighborhood_t **neighborhood)
 
 CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_inters_sectors, (
                         unsigned long idx_nba, unsigned long idx_nbb,
-                        enum csmsetop_classify_resp_solid_t s1a, enum csmsetop_classify_resp_solid_t s2a,
-                        enum csmsetop_classify_resp_solid_t s1b, enum csmsetop_classify_resp_solid_t s2b,
+                        enum csmsetop_classify_resp_solid_t s1a, enum i_sector_edge_overlap_t o1a,
+                        enum csmsetop_classify_resp_solid_t s2a, enum i_sector_edge_overlap_t o2a,
+                        enum csmsetop_classify_resp_solid_t s1b, enum i_sector_edge_overlap_t o1b,
+                        enum csmsetop_classify_resp_solid_t s2b, enum i_sector_edge_overlap_t o2b,
                         CSMBOOL intersect))
 {
     struct i_inters_sectors_t *inters;
@@ -176,10 +196,16 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_inters_sectors, (
     inters->idx_nbb = idx_nbb;
     
     inters->s1a = s1a;
+    inters->o1a = o1a;
+    
     inters->s2a = s2a;
-
+    inters->o2a = o2a;
+    
     inters->s1b = s1b;
+    inters->o1b = o1b;
+    
     inters->s2b = s2b;
+    inters->o2b = o2b;
     
     inters->intersect = intersect;
     
@@ -257,7 +283,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
 
         csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Ux12, &Uy12, &Uz12);
         
-        is_null_vector = csmmath_is_null_vector(Ux12, Uy12, Uz12, null_vector_tolerance);
+        is_null_vector = csmmath_vectors_are_parallel(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
         is_oriented_in_direction = csmface_is_oriented_in_direction(he_iterator_face, Ux12, Uy12, Uz12);
         
         neigborhood = i_create_neighborhood(he_iterator, Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, Ux12, Uy12, Uz12, A, B, C);
@@ -311,16 +337,41 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
 
 // ------------------------------------------------------------------------------------------
 
+static enum i_sector_edge_overlap_t i_classify_overlap(
+                        double Ux, double Uy, double Uz,
+                        double Ux1, double Uy1, double Uz1,
+                        double Ux2, double Uy2, double Uz2)
+{
+    if (csmmath_vectors_are_parallel(Ux, Uy, Uz, Ux1, Uy1, Uz1) == CSMTRUE)
+    {
+        assert(csmmath_vectors_are_parallel(Ux, Uy, Uz, Ux2, Uy2, Uz2) == CSMFALSE);
+        return i_SECTOR_EDGE_OVERLAP_S1;
+    }
+    else if (csmmath_vectors_are_parallel(Ux, Uy, Uz, Ux1, Uy1, Uz1) == CSMTRUE)
+    {
+        return i_SECTOR_EDGE_OVERLAP_S2;
+    }
+    else
+    {
+        return i_SECTOR_EDGE_OVERLAP_NO;
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 static enum csmsetop_classify_resp_solid_t i_classify_vector_resp_sector(
                         const struct i_neighborhood_t *neighborhood,
-                        double Ux, double Uy, double Uz)
+                        double Ux, double Uy, double Uz,
+                        enum i_sector_edge_overlap_t *overlap)
 {
+    enum csmsetop_classify_resp_solid_t cl;
     struct csmface_t *neighborhood_face;
     double A, B, C, D;
     double tolerance;
     double dot_product;
     
     assert_no_null(neighborhood);
+    assert_no_null(overlap);
     
     neighborhood_face = csmopbas_face_from_hedge(neighborhood->he);
     
@@ -328,22 +379,37 @@ static enum csmsetop_classify_resp_solid_t i_classify_vector_resp_sector(
     tolerance = csmface_tolerace(neighborhood_face);
     
     dot_product = csmmath_dot_product3D(A, B, C, Ux, Uy, Uz);
-    return csmsetopcom_classify_value_respect_to_plane(dot_product, tolerance);
+    cl = csmsetopcom_classify_value_respect_to_plane(dot_product, tolerance);
+    
+    *overlap = i_classify_overlap(
+                        Ux, Uy, Uz,
+                        neighborhood->Ux1_u, neighborhood->Uy1_u, neighborhood->Uz1_u,
+                        neighborhood->Ux2_u, neighborhood->Uy2_u, neighborhood->Uz2_u);
+    
+    return cl;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CSMBOOL i_vectors_are_parallel(double Ux1, double Uy1, double Uz1, double Ux2, double Uy2, double Uz2)
+{
+    double dot_product;
+    
+    dot_product = csmmath_dot_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
+    
+    if (csmmath_fabs(1. - csmmath_fabs(dot_product)) < csmtolerance_dot_product_parallel_vectors())
+        return CSMTRUE;
+    else
+        return CSMFALSE;
 }
 
 // ------------------------------------------------------------------------------------------
 
 static CSMBOOL i_is_intersection_within_sector(const struct i_neighborhood_t *neighborhood, double Wx_inters, double Wy_inters, double Wz_inters)
 {
-    double Wx1, Wy1, Wz1;
-    double tolerance_null_vector;
-    
     assert_no_null(neighborhood);
     
-    csmmath_cross_product3D(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux1_u, neighborhood->Uy1_u, neighborhood->Uz1_u, &Wx1, &Wy1, &Wz1);
-    tolerance_null_vector = csmtolerance_null_vector();
-    
-    if (csmmath_is_null_vector(Wx1, Wy1, Wz1, tolerance_null_vector) == CSMTRUE)
+    if (i_vectors_are_parallel(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux1_u, neighborhood->Uy1_u, neighborhood->Uz1_u) == CSMTRUE)
     {
         double dot_product;
         
@@ -352,11 +418,7 @@ static CSMBOOL i_is_intersection_within_sector(const struct i_neighborhood_t *ne
     }
     else
     {
-        double Wx2, Wy2, Wz2;
-        
-        csmmath_cross_product3D(neighborhood->Ux2_u, neighborhood->Uy2_u, neighborhood->Uz2_u, Wx_inters, Wy_inters, Wz_inters, &Wx2, &Wy2, &Wz2);
-
-        if (csmmath_is_null_vector(Wx2, Wy2, Wz2, tolerance_null_vector) == CSMTRUE)
+        if (i_vectors_are_parallel(neighborhood->Ux2_u, neighborhood->Uy2_u, neighborhood->Uz2_u, Wx_inters, Wy_inters, Wz_inters) == CSMTRUE)
         {
             double dot_product;
             
@@ -365,10 +427,18 @@ static CSMBOOL i_is_intersection_within_sector(const struct i_neighborhood_t *ne
         }
         else
         {
+            double tolerance_null_vector;
+            double Wx1, Wy1, Wz1;
+            double Wx2, Wy2, Wz2;
             double dot_product1, dot_product2;
             enum csmcompare_t t1, t2;
             
+            tolerance_null_vector = csmtolerance_null_vector();
+            
+            csmmath_cross_product3D(Wx_inters, Wy_inters, Wz_inters, neighborhood->Ux1_u, neighborhood->Uy1_u, neighborhood->Uz1_u, &Wx1, &Wy1, &Wz1);
             csmmath_make_unit_vector3D(&Wx1, &Wy1, &Wz1);
+            
+            csmmath_cross_product3D(neighborhood->Ux2_u, neighborhood->Uy2_u, neighborhood->Uz2_u, Wx_inters, Wy_inters, Wz_inters, &Wx2, &Wy2, &Wz2);
             csmmath_make_unit_vector3D(&Wx2, &Wy2, &Wz2);
             
             dot_product1 = csmmath_dot_product3D(Wx1, Wy1, Wz1, neighborhood->Ux12_u, neighborhood->Uy12_u, neighborhood->Uz12_u);
@@ -444,25 +514,24 @@ static CSMBOOL i_sectors_overlap(const struct i_neighborhood_t *neighborhood_a, 
 static CSMBOOL i_exists_intersection_between_sectors(const struct i_neighborhood_t *neighborhood_a, const struct i_neighborhood_t *neighborhood_b)
 {
     double Wx_inters, Wy_inters, Wz_inters;
-    double tolerance_null_vector;
     
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
     
-    csmmath_cross_product3D(
+    if (i_vectors_are_parallel(
                         neighborhood_a->A_face, neighborhood_a->B_face, neighborhood_a->C_face,
-                        neighborhood_b->A_face, neighborhood_b->B_face, neighborhood_b->C_face,
-                        &Wx_inters, &Wy_inters, &Wz_inters);
-    
-    tolerance_null_vector = csmtolerance_null_vector();
-
-    if (csmmath_is_null_vector(Wx_inters, Wy_inters, Wz_inters, tolerance_null_vector) == CSMTRUE)
+                        neighborhood_b->A_face, neighborhood_b->B_face, neighborhood_b->C_face) == CSMTRUE)
     {
         return i_sectors_overlap(neighborhood_a, neighborhood_b);
     }
     else
     {
         CSMBOOL is_within_a, is_within_b;
+        
+        csmmath_cross_product3D(
+                        neighborhood_a->A_face, neighborhood_a->B_face, neighborhood_a->C_face,
+                        neighborhood_b->A_face, neighborhood_b->B_face, neighborhood_b->C_face,
+                        &Wx_inters, &Wy_inters, &Wz_inters);
         
         csmmath_make_unit_vector3D(&Wx_inters, &Wy_inters, &Wz_inters);
         
@@ -493,20 +562,27 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
                         const struct i_neighborhood_t *neighborhood_b, unsigned long idx_nbb))
 {
     enum csmsetop_classify_resp_solid_t s1a, s2a, s1b, s2b;
+    enum i_sector_edge_overlap_t o1a, o2a, o1b, o2b;
     CSMBOOL intersect;
     
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
     
-    s1a = i_classify_vector_resp_sector(neighborhood_b, neighborhood_a->Ux1, neighborhood_a->Uy1, neighborhood_a->Uz1);
-    s2a = i_classify_vector_resp_sector(neighborhood_b, neighborhood_a->Ux2, neighborhood_a->Uy2, neighborhood_a->Uz2);
+    s1a = i_classify_vector_resp_sector(neighborhood_b, neighborhood_a->Ux1, neighborhood_a->Uy1, neighborhood_a->Uz1, &o1a);
+    s2a = i_classify_vector_resp_sector(neighborhood_b, neighborhood_a->Ux2, neighborhood_a->Uy2, neighborhood_a->Uz2, &o2a);
     
-    s1b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1);
-    s2b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2);
+    s1b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1, &o1b);
+    s2b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2, &o2b);
     
     intersect = CSMTRUE;
     
-    return i_create_inters_sectors(idx_nba, idx_nbb, s1a, s2a, s1b, s2b, intersect);
+    return i_create_inters_sectors(
+                       idx_nba, idx_nbb,
+                       s1a, o1a,
+                       s2a, o2a,
+                       s1b, o1b,
+                       s2b, o1b,
+                       intersect);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -897,7 +973,7 @@ static void i_reclassify_on_sectors(
 
 // ------------------------------------------------------------------------------------------
 
-static void i_reclasssify_double_on_edges(
+static void i_reclasssify_double_on_edges_s1a_s1b(
                         enum csmsetop_operation_t set_operation,
                         csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
                         csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
@@ -990,6 +1066,298 @@ static void i_reclasssify_double_on_edges(
 
 // ------------------------------------------------------------------------------------------
 
+static void i_reclasssify_double_on_edges_s1a_s2b(
+                        enum csmsetop_operation_t set_operation,
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
+{
+    unsigned long num_sectors_a, num_sectors_b;
+    unsigned long i, num_sectors;
+    
+    num_sectors_a = csmarrayc_count_st(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = csmarrayc_count_st(neighborhood_B, i_neighborhood_t);
+    
+    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
+    
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_inters_sectors_t *sector_i;
+        
+        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
+        assert_no_null(sector_i);
+        
+        if(sector_i->intersect == CSMTRUE
+                && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            struct i_neighborhood_t *nba, *nbb;
+            unsigned long idx_prev_sector_a, idx_next_sector_b;
+            enum csmsetop_classify_resp_solid_t newsa, newsb;
+            unsigned long j;
+            
+            nba = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+            assert_no_null(nba);
+
+            nbb = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+            assert_no_null(nbb);
+            
+            idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
+            idx_next_sector_b = csmmath_next_idx(sector_i->idx_nbb, num_sectors_b);
+            
+            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CSMTRUE)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
+                        sector_j->s1a = newsa;
+                        sector_j->s2b = newsb;
+                    }
+
+                    if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
+                        sector_j->s2a = newsa;
+                        sector_j->s2b = newsb;
+                    }
+
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
+                    {
+                        sector_j->s1a = newsa;
+                        sector_j->s1b = newsb;
+                    }
+                    
+                    if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == idx_next_sector_b)
+                    {
+                        sector_j->s2a = newsa;
+                        sector_j->s1b = newsb;
+                    }
+                    
+                    if (sector_j->s1a == sector_j->s2a
+                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+
+                    if (sector_j->s1b == sector_j->s2b
+                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_reclasssify_double_on_edges_s2a_s1b(
+                        enum csmsetop_operation_t set_operation,
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
+{
+    unsigned long num_sectors_a, num_sectors_b;
+    unsigned long i, num_sectors;
+    
+    num_sectors_a = csmarrayc_count_st(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = csmarrayc_count_st(neighborhood_B, i_neighborhood_t);
+    
+    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
+    
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_inters_sectors_t *sector_i;
+        
+        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
+        assert_no_null(sector_i);
+        
+        if(sector_i->intersect == CSMTRUE
+                && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            struct i_neighborhood_t *nba, *nbb;
+            unsigned long idx_next_sector_a, idx_prev_sector_b;
+            enum csmsetop_classify_resp_solid_t newsa, newsb;
+            unsigned long j;
+            
+            nba = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+            assert_no_null(nba);
+
+            nbb = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+            assert_no_null(nbb);
+            
+            idx_next_sector_a = csmmath_next_idx(sector_i->idx_nba, num_sectors_a);
+            idx_prev_sector_b = csmmath_prev_idx(sector_i->idx_nbb, num_sectors_b);
+            
+            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CSMTRUE)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
+                        sector_j->s2a = newsa;
+                        sector_j->s1b = newsb;
+                    }
+
+                    if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
+                        sector_j->s1a = newsa;
+                        sector_j->s1b = newsb;
+                    }
+
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
+                    {
+                        sector_j->s2a = newsa;
+                        sector_j->s2b = newsb;
+                    }
+                    
+                    if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == idx_prev_sector_b)
+                    {
+                        sector_j->s1a = newsa;
+                        sector_j->s2b = newsb;
+                    }
+                    
+                    if (sector_j->s1a == sector_j->s2a
+                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+
+                    if (sector_j->s1b == sector_j->s2b
+                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_reclasssify_double_on_edges_s2a_s2b(
+                        enum csmsetop_operation_t set_operation,
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
+{
+    unsigned long num_sectors_a, num_sectors_b;
+    unsigned long i, num_sectors;
+    
+    num_sectors_a = csmarrayc_count_st(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = csmarrayc_count_st(neighborhood_B, i_neighborhood_t);
+    
+    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
+    
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_inters_sectors_t *sector_i;
+        
+        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
+        assert_no_null(sector_i);
+        
+        if(sector_i->intersect == CSMTRUE
+                && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            struct i_neighborhood_t *nba, *nbb;
+            unsigned long idx_next_sector_a, idx_next_sector_b;
+            enum csmsetop_classify_resp_solid_t newsa, newsb;
+            unsigned long j;
+            
+            nba = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+            assert_no_null(nba);
+
+            nbb = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+            assert_no_null(nbb);
+            
+            idx_next_sector_a = csmmath_next_idx(sector_i->idx_nba, num_sectors_a);
+            idx_next_sector_b = csmmath_next_idx(sector_i->idx_nbb, num_sectors_b);
+            
+            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CSMTRUE)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
+                        sector_j->s2a = newsa;
+                        sector_j->s2b = newsb;
+                    }
+
+                    if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
+                        sector_j->s1a = newsa;
+                        sector_j->s2b = newsb;
+                    }
+
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
+                    {
+                        sector_j->s2a = newsa;
+                        sector_j->s1b = newsb;
+                    }
+                    
+                    if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == idx_next_sector_b)
+                    {
+                        sector_j->s1a = newsa;
+                        sector_j->s1b = newsb;
+                    }
+                    
+                    if (sector_j->s1a == sector_j->s2a
+                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+
+                    if (sector_j->s1b == sector_j->s2b
+                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_reclasssify_double_on_edges(
+                        enum csmsetop_operation_t set_operation,
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
+{
+    i_reclasssify_double_on_edges_s1a_s1b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
+    i_reclasssify_double_on_edges_s1a_s2b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
+    i_reclasssify_double_on_edges_s2a_s1b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
+    i_reclasssify_double_on_edges_s2a_s2b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_reclasssify_single_on_edges(
                         enum csmsetop_operation_t set_operation,
                         csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
@@ -1021,7 +1389,7 @@ static void i_reclasssify_single_on_edges(
         idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
         idx_prev_sector_b = csmmath_prev_idx(sector_i->idx_nbb, num_sectors_b);
         
-        if(sector_i->intersect == CSMTRUE && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        if (sector_i->intersect == CSMTRUE && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             enum csmsetop_classify_resp_solid_t newsa;
             unsigned long j;
@@ -1051,12 +1419,14 @@ static void i_reclasssify_single_on_edges(
                 }
             }
         }
-        else if(sector_i->intersect == CSMTRUE && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        
+        if(sector_i->intersect == CSMTRUE && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             enum csmsetop_classify_resp_solid_t newsb;
             unsigned long j;
             
             newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            //newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
     
             for(j = 0; j < num_sectors; j++)
             {
@@ -1250,26 +1620,26 @@ static CSMBOOL i_is_convex_edge(struct csmhedge_t *he)
     double A_he, B1_he, C_he;
     struct csmhedge_t *mate_he;
     double A_mate_he, B1_mate_he, C_mate_he;
-    double Wx, Wy, Wz;
 
     i_face_normal_of_he_face(he, &A_he, &B1_he, &C_he);
     
     mate_he = csmopbas_mate(he);
     i_face_normal_of_he_face(mate_he, &A_mate_he, &B1_mate_he, &C_mate_he);
     
-    csmmath_cross_product3D(A_he, B1_he, C_he, A_mate_he, B1_mate_he, C_mate_he, &Wx, &Wy, &Wz);
-    
-    if (csmmath_is_null_vector(Wx, Wy, Wz, csmtolerance_null_vector()) == CSMTRUE)
+    if (csmmath_vectors_are_parallel(A_he, B1_he, C_he, A_mate_he, B1_mate_he, C_mate_he) == CSMTRUE)
     {
         return CSMTRUE;
     }
     else
     {
+        double Wx, Wy, Wz;
         struct csmhedge_t *he2;
         struct csmvertex_t *vertex_he, *vertex_he2;
         double Ux, Uy, Uz;
         double dot_product;
     
+        csmmath_cross_product3D(A_he, B1_he, C_he, A_mate_he, B1_mate_he, C_mate_he, &Wx, &Wy, &Wz);
+
         he2 = csmhedge_next(he);
     
         if (i_is_null_edge(he2) == CSMTRUE)
@@ -1293,34 +1663,46 @@ static CSMBOOL i_is_convex_edge(struct csmhedge_t *he)
 static CSMBOOL i_is_wide_sector(struct csmhedge_t *he)
 {
     struct csmvertex_t *vertex, *vertex_prv, *vertex_nxt;
-    double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
-    double Ux12, Uy12, Uz12;
+    double tolerance_equal_coords;
     
     vertex = csmhedge_vertex(he);
     vertex_prv = csmhedge_vertex(csmhedge_prev(he));
     vertex_nxt = csmhedge_vertex(csmhedge_next(he));
     
-    csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_prv, &Ux1, &Uy1, &Uz1);
-    csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_nxt, &Ux2, &Uy2, &Uz2);
+    tolerance_equal_coords = csmtolerance_equal_coords();
     
-    csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Ux12, &Uy12, &Uz12);
-    
-    if (csmmath_is_null_vector(Ux12, Uy12, Uz12, csmtolerance_null_vector()))
+    if (csmvertex_equal_coords(vertex, vertex_prv, tolerance_equal_coords) == CSMTRUE
+            || csmvertex_equal_coords(vertex, vertex_nxt, tolerance_equal_coords) == CSMTRUE)
     {
         return CSMTRUE;
     }
     else
     {
-        double A, B, C;
-        double dot_product;
+        double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
         
-        i_face_normal_of_he_face(he, &A, &B, &C);
-        dot_product = csmmath_dot_product3D(A, B, C, Ux12, Uy12, Uz12);
-        
-        if (dot_product > 0.)
-            return CSMFALSE;
-        else
+        csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_prv, &Ux1, &Uy1, &Uz1);
+        csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_nxt, &Ux2, &Uy2, &Uz2);
+    
+        if (csmmath_vectors_are_parallel(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2) == CSMTRUE)
+        {
             return CSMTRUE;
+        }
+        else
+        {
+            double Ux12, Uy12, Uz12;
+            double A, B, C;
+            double dot_product;
+            
+            csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Ux12, &Uy12, &Uz12);
+            
+            i_face_normal_of_he_face(he, &A, &B, &C);
+            dot_product = csmmath_dot_product3D(A, B, C, Ux12, Uy12, Uz12);
+            
+            if (dot_product > 0.)
+                return CSMFALSE;
+            else
+                return CSMTRUE;
+        }
     }
 }
 
@@ -1646,10 +2028,14 @@ static void i_vtxvtx_append_null_edges(
     
     assert_no_null(vv_intersection);
     
+    if (csmdebug_debug_enabled() == CSMTRUE)
     {
         char *description;
+        double x, y, z;
         
-        description = copiafor_codigo2("VV Intersection. Va %lu - Vb %lu", csmvertex_id(vv_intersection->vertex_a), csmvertex_id(vv_intersection->vertex_b));
+        csmvertex_get_coordenadas(vv_intersection->vertex_a, &x, &y, &z);
+        
+        description = copiafor_codigo5("VV Intersection (%lf, %lf, %lf). Va %lu - Vb %lu", x, y, z, csmvertex_id(vv_intersection->vertex_a), csmvertex_id(vv_intersection->vertex_b));
         csmdebug_begin_context(description);
         csmstring_free(&description);
     }

@@ -44,6 +44,8 @@ void csmmath_move_point(
 
 CSMBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance);
 
+CSMBOOL csmmath_vectors_are_parallel(double Ux1, double Uy1, double Uz1, double Ux2, double Uy2, double Uz2);
+
 
 // Lines...
 

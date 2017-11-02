@@ -20,7 +20,11 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmloop_debug_print_info_debug(struct csmloop_t *loop, CSMBOOL is_outer_loop, CSMBOOL assert_si_no_es_integro)
+void csmloop_debug_print_info_debug(
+	                    struct csmloop_t *loop,
+                        CSMBOOL is_outer_loop,
+                        CSMBOOL with_loop_area, double loop_area,
+                        CSMBOOL assert_si_no_es_integro)
 {
     struct csmhedge_t *ledge;
     struct csmhedge_t *iterator;
@@ -30,7 +34,11 @@ void csmloop_debug_print_info_debug(struct csmloop_t *loop, CSMBOOL is_outer_loo
     
     ledge = loop->ledge;
     iterator = ledge;
-    csmdebug_print_debug_info("\tLoop %4lu: Outer = %d\n", csmnode_id(CSMNODE(loop)), is_outer_loop);
+    
+    if (with_loop_area == CSMTRUE)
+        csmdebug_print_debug_info("\tLoop %4lu: Outer = %d Area = %lf\n", csmnode_id(CSMNODE(loop)), is_outer_loop, loop_area);
+    else
+        csmdebug_print_debug_info("\tLoop %4lu: Outer = %d\n", csmnode_id(CSMNODE(loop)), is_outer_loop);
     
     num_iters = 0;
     

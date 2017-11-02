@@ -8,4 +8,9 @@
 
 #include "csmfwddecl.hxx"
 
-void csmloop_debug_print_info_debug(struct csmloop_t *loop, CSMBOOL is_outer_loop, CSMBOOL assert_si_no_es_integro);
+void csmloop_debug_print_info_debug(
+                        struct csmloop_t *loop,
+                        CSMBOOL is_outer_loop,
+                        CSMBOOL with_loop_area, double loop_area,
+                        CSMBOOL assert_si_no_es_integro);
+

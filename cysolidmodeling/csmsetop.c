@@ -268,7 +268,7 @@ static void i_join_null_edges(
         csmsolid_debug_print_debug(solid_B, CSMTRUE);
         
         i_append_null_edges_to_debug_view(set_of_null_edges_A);
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
     }
     
     csmdebug_block_print_solid();
@@ -394,7 +394,7 @@ static void i_join_null_edges(
     csmdebug_print_debug_info("*** AFTER JOINING NULL EDGES\n");
     csmsolid_debug_print_debug(solid_A, CSMTRUE);
     csmsolid_debug_print_debug(solid_B, CSMTRUE);
-    csmdebug_show_viewer();
+    //csmdebug_show_viewer();
     
     *set_of_null_faces_A = set_of_null_faces_A_loc;
     *set_of_null_faces_B = set_of_null_faces_B_loc;
@@ -813,6 +813,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     }
     
     csmsolid_clear_algorithm_data(result);
+    
+    csmsolid_redo_geometric_face_data(result);
+    //csmsetopcom_reorient_hole_loops_if_needed(result);
     
     return result;
 }

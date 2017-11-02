@@ -2735,7 +2735,7 @@ static void i_test_mechanical5(void)
     
     radius = 10. * 0.025;
     thickness = 10. * 0.0025;
-    no_points_circle = 4;
+    no_points_circle = 16;
 
     body_height = 10. * 0.1;
     
@@ -2757,6 +2757,92 @@ static void i_test_mechanical5(void)
     csmsolid_free(&top_part);
     csmsolid_free(&hollow_cylinder);
     csmsolid_free(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_mechanical6bis(void)
+{
+    unsigned long no_points_circle;
+    struct gccontorno_t *shape1, *shape2_redux, *shape2;
+    struct csmsolid_t *s1, *s2, *s3;
+    
+    i_set_output_debug_file("test_mechanical7_redux.txt");
+    
+    no_points_circle = 4;
+    
+    shape1 = gcelem2d_contorno_circular_hueco(1., 0.6, no_points_circle);
+    shape2 = gcelem2d_contorno_circular_hueco(1., 0.6, no_points_circle);
+    shape2_redux = gcelem2d_contorno_circular_hueco(0.75, 0.6, no_points_circle);
+    
+    s1 = csmsweep_create_solid_from_shape_debug(
+                        shape1, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                        shape1, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+
+    s2 = csmsweep_create_solid_from_shape_debug(
+                        shape2_redux, 0., 0., 2., 1., 0., 0., 0., 1., 0.,
+                        shape2, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                        1000);
+    
+    csmdebug_print_debug_info("***MAIN_JOIN_OPERATION");
+    s3 = csmsetop_union_A_and_B(s1, s2);
+    
+    csmsolid_set_draw_only_border_edges(s3, CSMFALSE);
+    csmdebug_set_viewer_results(s3, NULL);
+    csmdebug_show_viewer();
+    
+    gccontorno_destruye(&shape1);
+    gccontorno_destruye(&shape2_redux);
+    gccontorno_destruye(&shape2);
+    csmsolid_free(&s1);
+    csmsolid_free(&s2);
+    csmsolid_free(&s3);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_mechanical6(void)
+{
+    struct gccontorno_t *shape1, *shape2, *shape3;
+    struct csmsolid_t *s1, *s1_aux, *s2, *s3;
+    
+    i_set_output_debug_file("test_mechanical6.txt");
+    
+    //shape = gcelem2d_contorno_rectangular_hueco(1., 1., 0.5, 0.5);
+    shape1 = gcelem2d_contorno_circular(1., 16);
+    shape3 = gcelem2d_contorno_circular(.6, 16);
+    shape2 = gcelem2d_contorno_circular_hueco(1., 0.6, 16);
+    
+    s1 = csmsweep_create_solid_from_shape_debug(
+	                    shape1, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                        shape1, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    s1_aux = csmsweep_create_solid_from_shape_debug(
+                        shape3, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                        shape3, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    s1 = csmsetop_difference_A_minus_B(s1, s1_aux);
+
+    s2 = csmsweep_create_solid_from_shape_debug(
+                        shape2, 0., 0., 2., 1., 0., 0., 0., 1., 0.,
+                        shape2, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                        1000);
+    
+    csmdebug_print_debug_info("***MAIN_JOIN_OPERATION");
+    s3 = csmsetop_union_A_and_B(s1, s2);
+    
+    csmsolid_set_draw_only_border_edges(s3, CSMFALSE);
+    csmdebug_set_viewer_results(s3, NULL);
+    csmdebug_show_viewer();
+    
+    gccontorno_destruye(&shape1);
+    gccontorno_destruye(&shape2);
+    csmsolid_free(&s1);
+    csmsolid_free(&s2);
+    csmsolid_free(&s3);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -2837,6 +2923,8 @@ void csmtest_test(void)
     //i_test_sphere4();
     
     i_test_mechanical5();
+    //i_test_mechanical6bis();
+    //i_test_mechanical6();
     
     csmviewer_free(&viewer);
 }

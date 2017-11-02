@@ -1021,7 +1021,7 @@ double csmsolid_volume(const struct csmsolid_t *solid)
     
     assert_no_null(solid);
 
-    i_redo_geometric_generated_data(solid->svertexs, solid->sfaces, solid->bbox);
+    i_redo_faces_geometric_generated_data(solid->sfaces, solid->bbox);
     
     volume = 0.;
     face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);

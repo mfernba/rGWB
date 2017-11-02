@@ -97,7 +97,7 @@ static void i_draw_debug_info_hedge(
             if (length > 0.)
             {
                 bsgraphics2_append_ejes_2D(graphics, x1, y1, z1, Ux, Uy, Uz, Vx, Vy, Vz);
-                bsgraphics2_escr_texto_mts(graphics, "***", 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.002);
+                bsgraphics2_escr_texto_mts(graphics, "***", 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.02);
                 bsgraphics2_desapila_transformacion(graphics);
             }
            
@@ -119,7 +119,7 @@ static void i_draw_debug_info_hedge(
                 else
                     bsgraphics2_append_ejes_plano_pantalla(graphics);
                 
-                bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.0025);
+                bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.025);
                 
                 bsgraphics2_desapila_transformacion(graphics);
             }

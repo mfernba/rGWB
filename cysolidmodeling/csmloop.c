@@ -314,6 +314,51 @@ double csmloop_max_distance_to_plane(
     return CSMMATH_MAX(max_distance_to_plane, csmtolerance_coplanarity());
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+double csmloop_compute_area(
+                        struct csmloop_t *loop,
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz)
+{
+    double area;
+    struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    
+    assert_no_null(loop);
+    
+    iterator = loop->ledge;
+    num_iteraciones = 0;
+    
+    area = 0.0;
+    
+    do
+    {
+        struct csmvertex_t *vertex_i, *vertex_i_1;
+        double x_3d, y_3d, z_3d;
+        double x_i, y_i, x_i_1, y_i_1;
+        double area_i;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        vertex_i = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex_i, &x_3d, &y_3d, &z_3d);
+        csmgeom_project_coords_3d_to_2d(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, x_3d, y_3d, z_3d, &x_i, &y_i);
+        
+        iterator = csmhedge_next(iterator);
+        vertex_i_1 = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex_i_1, &x_3d, &y_3d, &z_3d);
+        csmgeom_project_coords_3d_to_2d(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, x_3d, y_3d, z_3d, &x_i_1, &y_i_1);
+        
+        area_i = x_i * y_i_1 - y_i * x_i_1;
+        area += area_i;
+        
+    } while (iterator != loop->ledge);
+    
+    return 0.5 * area;
+}
+
 // --------------------------------------------------------------------------------------------------------------
 
 static CSMBOOL i_is_point_on_loop_boundary(
@@ -402,32 +447,41 @@ static CSMBOOL i_is_point_on_loop_boundary(
 static CSMBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *he1, struct csmhedge_t *he2)
 {
     struct csmvertex_t *vertex0, *vertex1, *vertex2;
-    double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
-    double Wx, Wy, Wz;
+    double tolerance_equal_coords;
     
     vertex0 = csmhedge_vertex(he0);
     vertex1 = csmhedge_vertex(he1);
     vertex2 = csmhedge_vertex(he2);
     
-    csmvertex_vector_from_vertex1_to_vertex2(vertex0, vertex1, &Ux1, &Uy1, &Uz1);
-    csmvertex_vector_from_vertex1_to_vertex2(vertex1, vertex2, &Ux2, &Uy2, &Uz2);
-
-    csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Wx, &Wy, &Wz);
-            
-    if (csmmath_is_null_vector(Wx, Wy, Wz, csmtolerance_null_vector()) == CSMFALSE)
+    tolerance_equal_coords = csmtolerance_equal_coords();
+    
+    if (csmvertex_equal_coords(vertex0, vertex1, tolerance_equal_coords) == CSMTRUE
+            || csmvertex_equal_coords(vertex1, vertex2, tolerance_equal_coords) == CSMTRUE)
     {
         return CSMFALSE;
     }
     else
     {
-        double dot_product;
+        double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
         
-        dot_product = csmmath_dot_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
+        csmvertex_vector_from_vertex1_to_vertex2(vertex0, vertex1, &Ux1, &Uy1, &Uz1);
+        csmvertex_vector_from_vertex1_to_vertex2(vertex1, vertex2, &Ux2, &Uy2, &Uz2);
         
-        if (dot_product < -1.e-6)
-            return CSMTRUE;
-        else
+        if (csmmath_vectors_are_parallel(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2) == CSMFALSE)
+        {
             return CSMFALSE;
+        }
+        else
+        {
+            double dot_product;
+            
+            dot_product = csmmath_dot_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
+            
+            if (dot_product < -1.e-6)
+                return CSMTRUE;
+            else
+                return CSMFALSE;
+        }
     }
 }
 

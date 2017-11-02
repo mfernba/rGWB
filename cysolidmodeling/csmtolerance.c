@@ -18,6 +18,13 @@ double csmtolerance_angle_rad(void)
 
 // --------------------------------------------------------------------------------
 
+double csmtolerance_dot_product_parallel_vectors(void)
+{
+    return 1.e-6;
+}
+
+// --------------------------------------------------------------------------------
+
 double csmtolerance_coplanarity(void)
 {
     return 1.e-6;
