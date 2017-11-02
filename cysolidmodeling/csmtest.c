@@ -21,6 +21,7 @@
 #include "csmglue.h"
 #include "csmface.inl"
 #include "csmmath.inl"
+#include "csmmath.tli"
 #include "csmsetop.h"
 #include "csmsolid.h"
 #include "csmsolid_debug.inl"
@@ -2726,18 +2727,70 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_cylinder, (double radius, 
 
 // ------------------------------------------------------------------------------------------
 
+CONSTRUCTOR(static struct csmsolid_t *, i_make_horizontal_hole_cylinder, (double radius, double x1, double x2, double z, unsigned long no_points_circle))
+{
+    struct csmsolid_t *hollow_cylinder;
+    struct gccontorno_t *shape;
+    
+    assert(radius > 0.);
+    
+    shape = gcelem2d_contorno_circular(radius, no_points_circle);
+    
+    hollow_cylinder = csmsweep_create_solid_from_shape_debug(
+                        shape, x2, 0., z, 0., 1., 0., 0., 0., 1.,
+	                    shape, x1, 0., z, 0., 1., 0., 0., 0., 1.,
+                        0);
+    
+    i_assign_flat_material_to_solid(.5, .5, .5, hollow_cylinder);
+    
+    gccontorno_destruye(&shape);
+    
+    return hollow_cylinder;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmsolid_t *, i_make_horizontal_hollow_hole_cylinder, (double radius, double thickness, double x1, double x2, double z, unsigned long no_points_circle))
+{
+    struct csmsolid_t *hollow_cylinder;
+    struct gccontorno_t *shape;
+    
+    assert(radius > 0.);
+    
+    shape = gcelem2d_contorno_circular_hueco(radius, radius - thickness, no_points_circle);
+    
+    hollow_cylinder = csmsweep_create_solid_from_shape_debug(
+                        shape, x2, 0., z, 0., 1., 0., 0., 0., 1.,
+	                    shape, x1, 0., z, 0., 1., 0., 0., 0., 1.,
+                        0);
+    
+    i_assign_flat_material_to_solid(1., .3, .3, hollow_cylinder);
+    
+    gccontorno_destruye(&shape);
+    
+    return hollow_cylinder;
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_mechanical5(void)
 {
     struct csmsolid_t *solid;
+    struct csmsolid_t *solid_aux;
     double radius, thickness, body_height;
     unsigned long no_points_circle;
     struct csmsolid_t *top_part, *hollow_cylinder;
+    double hole_radius;
+    struct csmsolid_t *hole_cylinder;
+    double outer_hole_radius, hollow_hole_cylinder_thickness;
+    struct csmsolid_t *hollow_hole_cylinder_left, *hollow_hole_cylinder_right;
+    struct csmsolid_t *torus;
     
-    radius = 10. * 0.025;
-    thickness = 10. * 0.0025;
-    no_points_circle = 16;
+    radius = 0.025;
+    thickness = 0.0025;
+    no_points_circle = 32;
 
-    body_height = 10. * 0.1;
+    body_height = 0.1;
     
     csmdebug_set_enabled_by_code(CSMFALSE);
     
@@ -2746,9 +2799,136 @@ static void i_test_mechanical5(void)
     
     hollow_cylinder = i_make_hollow_cylinder(radius, thickness, body_height, no_points_circle);
 
-    csmdebug_set_enabled_by_code(CSMTRUE);
+    hole_radius = 0.01;
+    hole_cylinder = i_make_horizontal_hole_cylinder(hole_radius, -radius, radius, 0., no_points_circle);
     
     solid = csmsetop_union_A_and_B(top_part, hollow_cylinder);
+    
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hole_cylinder);
+        csmsolid_free(&solid_aux);
+    }
+
+    csmsolid_move(hole_cylinder, 0., 0., 0.045);
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hole_cylinder);
+        csmsolid_free(&solid_aux);
+    }
+    
+    hollow_hole_cylinder_thickness = 0.0015;
+    outer_hole_radius = hole_radius + hollow_hole_cylinder_thickness;
+    hollow_hole_cylinder_left = i_make_horizontal_hollow_hole_cylinder(outer_hole_radius, hollow_hole_cylinder_thickness, -1.5 * radius, -radius + 3. * thickness, 0., no_points_circle);
+    {
+        solid_aux = hollow_hole_cylinder_left;
+        hollow_hole_cylinder_left = csmsetop_difference_A_minus_B(hollow_hole_cylinder_left, solid);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_move(hollow_hole_cylinder_left, 0.5 * thickness, 0., 0.);
+        i_assign_flat_material_to_solid(1., .3, .3, hollow_hole_cylinder_left);
+    }
+    
+    hollow_hole_cylinder_right = i_make_horizontal_hollow_hole_cylinder(outer_hole_radius, hollow_hole_cylinder_thickness, radius - 3. * thickness, 1.25 * radius, 0., no_points_circle);
+    {
+        solid_aux = hollow_hole_cylinder_right;
+        hollow_hole_cylinder_right = csmsetop_difference_A_minus_B(hollow_hole_cylinder_right, solid);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_move(hollow_hole_cylinder_right, -0.5 * thickness, 0., 0.);
+        i_assign_flat_material_to_solid(1., .3, .3, hollow_hole_cylinder_right);
+    }
+
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_move(hollow_hole_cylinder_left, 0., 0., 0.045);
+        
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left);
+        csmsolid_free(&solid_aux);
+    }
+
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_move(hollow_hole_cylinder_right, 0., 0., 0.045);
+        
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right);
+        csmsolid_free(&solid_aux);
+    }
+    
+    csmsolid_rotate(hole_cylinder, .5 * CSMMATH_PI, 0., 0., 0.045, 0., 0., 1.);
+    csmsolid_rotate(hollow_hole_cylinder_left, .5 * CSMMATH_PI, 0., 0., 0.045, 0., 0., 1.);
+    csmsolid_rotate(hollow_hole_cylinder_right, .5 * CSMMATH_PI, 0., 0., 0.045, 0., 0., 1.);
+
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hole_cylinder);
+        csmsolid_free(&solid_aux);
+    }
+    
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left);
+        csmsolid_free(&solid_aux);
+    }
+    
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right);
+        csmsolid_free(&solid_aux);
+    }
+    
+    csmsolid_move(hole_cylinder, 0., 0., -0.045);
+    csmsolid_move(hollow_hole_cylinder_left, 0., 0., -0.045);
+    csmsolid_move(hollow_hole_cylinder_right, 0., 0., -0.045);
+
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hole_cylinder);
+        csmsolid_free(&solid_aux);
+    }
+    
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left);
+        csmsolid_free(&solid_aux);
+    }
+    
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right);
+        csmsolid_free(&solid_aux);
+    }
+    
+    csmdebug_set_enabled_by_code(CSMTRUE);
+    
+    torus = csmshape3d_create_torus(radius + 0.5 * thickness, no_points_circle, thickness, no_points_circle, 0., 0., -0.02, 1., 0., 0., 0., 1., 0., 0);
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, torus);
+        csmsolid_free(&solid_aux);
+    }
+
+    csmsolid_move(torus, 0., 0., -0.01);
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, torus);
+        csmsolid_free(&solid_aux);
+    }
+
+    csmsolid_move(torus, 0., 0., -0.01);
+    {
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(solid_aux, torus);
+        csmsolid_free(&solid_aux);
+    }
     
     csmsolid_set_draw_only_border_edges(solid, CSMFALSE);
     csmdebug_set_viewer_results(solid, NULL);
@@ -2756,6 +2936,10 @@ static void i_test_mechanical5(void)
     
     csmsolid_free(&top_part);
     csmsolid_free(&hollow_cylinder);
+    csmsolid_free(&hole_cylinder);
+    csmsolid_free(&hollow_hole_cylinder_left);
+    csmsolid_free(&hollow_hole_cylinder_right);
+    csmsolid_free(&torus);
     csmsolid_free(&solid);
 }
 
