@@ -152,7 +152,9 @@ CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge
 
 // ----------------------------------------------------------------------------------------------------
 
-static enum csmcompare_t i_compare_edges_by_coord(const struct csmedge_t *edge1, const struct csmedge_t *edge2)
+static enum csmcompare_t i_compare_edges_by_coord(
+                        const struct csmedge_t *edge1, const struct csmedge_t *edge2,
+                        const struct csmtolerance_t *tolerances)
 {
     const struct csmhedge_t *he1_edge1, *he1_edge2;
     const struct csmvertex_t *vertex1, *vertex2;
@@ -169,14 +171,17 @@ static enum csmcompare_t i_compare_edges_by_coord(const struct csmedge_t *edge1,
     return csmmath_compare_coords_xyz(
                         x1, y1, z1,
                         x2, y2, z2,
-                        csmtolerance_equal_coords());
+                        csmtolerance_equal_coords(tolerances));
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_sort_edges_lexicographically_by_xyz(csmArrayStruct(csmedge_t) *set_of_null_edges)
+void csmsetopcom_sort_edges_lexicographically_by_xyz(csmArrayStruct(csmedge_t) *set_of_null_edges, const struct csmtolerance_t *tolerances)
 {
-    csmarrayc_qsort_st(set_of_null_edges, csmedge_t, i_compare_edges_by_coord);
+    csmarrayc_qsort_st_1_extra(
+                        set_of_null_edges, csmedge_t,
+                        tolerances, struct csmtolerance_t,
+                        i_compare_edges_by_coord);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -295,7 +300,9 @@ static CSMBOOL i_is_same_edge_by_ptr(const struct csmedge_t *edge1, const struct
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
+void csmsetopcom_join_hedges(
+                        struct csmhedge_t *he1, struct csmhedge_t *he2,
+                        const struct csmtolerance_t *tolerances)
 {
     struct csmsolid_t *he1_solid;
     struct csmface_t *old_face, *new_face;
@@ -416,13 +423,13 @@ void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2)
         old_face_floops = csmface_floops(old_face);
         
         if (new_face != NULL && csmloop_next(old_face_floops) != NULL)
-            csmeuler_laringmv(old_face, new_face);
+            csmeuler_laringmv(old_face, new_face, tolerances);
         
          if (new_face != NULL && original_loop_is_a_hole == CSMTRUE)
         {
             CSMBOOL did_move_some_loop;
             
-            csmeuler_laringmv_from_face1_to_2_if_fits_in_face(new_face, old_face, &did_move_some_loop);
+            csmeuler_laringmv_from_face1_to_2_if_fits_in_face(new_face, old_face, tolerances, &did_move_some_loop);
             
             if (did_move_some_loop == CSMTRUE && csmface_floops(new_face) == NULL)
                 csmsolid_remove_face(he1_solid, &new_face);
@@ -673,7 +680,9 @@ static CSMBOOL i_is_face_originated_by_hole(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_reintroduce_holes_in_corresponding_faces(csmArrayStruct(csmface_t) *set_of_null_faces)
+void csmsetopcom_reintroduce_holes_in_corresponding_faces(
+                        csmArrayStruct(csmface_t) *set_of_null_faces,
+                        const struct csmtolerance_t *tolerances)
 {
     unsigned long no_iters;
     CSMBOOL did_delete_faces;
@@ -713,7 +722,7 @@ void csmsetopcom_reintroduce_holes_in_corresponding_faces(csmArrayStruct(csmface
                     
                         face_j = csmarrayc_get_st(set_of_null_faces, j, csmface_t);
                     
-                        if (csmface_is_loop_contained_in_face(face_j, floops_face_i) == CSMTRUE)
+                        if (csmface_is_loop_contained_in_face(face_j, floops_face_i, tolerances) == CSMTRUE)
                         {
                             did_delete_faces = CSMTRUE;
                             
@@ -740,7 +749,10 @@ static CSMBOOL i_face_equal_ptr(const struct csmface_t *face1, const struct csmf
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, csmArrayStruct(csmface_t) *set_of_null_faces)
+void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(
+                        struct csmsolid_t *solid,
+                        const struct csmtolerance_t *tolerances,
+                        csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long num_null_faces;
     CSMBOOL there_are_changes;
@@ -786,7 +798,7 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct cs
                     {
                         CSMBOOL did_move_some_loop;
                         
-                        csmeuler_laringmv_from_face1_to_2_if_fits_in_face(face, null_face, &did_move_some_loop);
+                        csmeuler_laringmv_from_face1_to_2_if_fits_in_face(face, null_face, tolerances, &did_move_some_loop);
                         
                         if (did_move_some_loop == CSMTRUE)
                         {

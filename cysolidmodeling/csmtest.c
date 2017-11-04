@@ -39,6 +39,7 @@
 #include "csmviewer.inl"
 #include "csmmath.tli"
 #include "csmmaterial.h"
+#include "csmtolerance.inl"
 
 #include "csmtest_array.inl"
 
@@ -94,17 +95,23 @@ static void i_test_crea_lamina(void)
     csmeuler_lmef(initial_hedge, hedge_from_vertex3, &new_face, &he_pos, &he_neg);
     
     {
+        struct csmtolerance_t *tolerance;
+        
+        tolerance = csmtolerance_new();
+        
         csmsolid_redo_geometric_generated_data(solido);
         
         assert(initial_face != new_face);
 
-        assert(csmface_contains_point(initial_face, 0.5, 0.5, 0.5, NULL, NULL, NULL, NULL) == CSMTRUE);
-        assert(csmface_contains_point(initial_face, 1., 1., 1., NULL, NULL, NULL, NULL) == CSMTRUE);
-        assert(csmface_contains_point(initial_face, 5., 5., 0., NULL, NULL, NULL, NULL) == CSMFALSE);
+        assert(csmface_contains_point(initial_face, 0.5, 0.5, 0.5, tolerance, NULL, NULL, NULL, NULL) == CSMTRUE);
+        assert(csmface_contains_point(initial_face, 1., 1., 1., tolerance, NULL, NULL, NULL, NULL) == CSMTRUE);
+        assert(csmface_contains_point(initial_face, 5., 5., 0., tolerance, NULL, NULL, NULL, NULL) == CSMFALSE);
         
-        assert(csmface_contains_point(new_face, 0.5, 0.5, 0.5, NULL, NULL, NULL, NULL) == CSMTRUE);
-        assert(csmface_contains_point(new_face, 1., 1., 1., NULL, NULL, NULL, NULL) == CSMTRUE);
-        assert(csmface_contains_point(new_face, 5., 5., 0., NULL, NULL, NULL, NULL) == CSMFALSE);
+        assert(csmface_contains_point(new_face, 0.5, 0.5, 0.5, tolerance, NULL, NULL, NULL, NULL) == CSMTRUE);
+        assert(csmface_contains_point(new_face, 1., 1., 1., tolerance, NULL, NULL, NULL, NULL) == CSMTRUE);
+        assert(csmface_contains_point(new_face, 5., 5., 0., tolerance, NULL, NULL, NULL, NULL) == CSMFALSE);
+        
+        csmtolerance_free(&tolerance);
     }
     
     csmeuler_lkef(&he_pos, &he_neg);
@@ -2907,8 +2914,6 @@ static void i_test_mechanical5(void)
         csmsolid_free(&solid_aux);
     }
     
-    csmdebug_set_enabled_by_code(CSMTRUE);
-    
     torus = csmshape3d_create_torus(radius + 0.5 * thickness, no_points_circle, thickness, no_points_circle, 0., 0., -0.02, 1., 0., 0., 0., 1., 0., 0);
     {
         solid_aux = solid;
@@ -2929,6 +2934,8 @@ static void i_test_mechanical5(void)
         solid = csmsetop_difference_A_minus_B(solid_aux, torus);
         csmsolid_free(&solid_aux);
     }
+    
+    csmdebug_set_enabled_by_code(CSMTRUE);
     
     csmsolid_set_draw_only_border_edges(solid, CSMFALSE);
     csmdebug_set_viewer_results(solid, NULL);

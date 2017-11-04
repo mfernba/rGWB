@@ -112,14 +112,14 @@ static void i_classify_point_respect_to_plane(
 
 // ----------------------------------------------------------------------------------------------------
 
-static double i_classification_tolerance(struct csmhedge_t *hedge)
+static double i_classification_tolerance(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
 {
     struct csmface_t *face_hedge;
     double face_tolerance, general_tolerance;
     
     face_hedge = csmopbas_face_from_hedge(hedge);
     face_tolerance = csmface_tolerace(face_hedge);
-    general_tolerance = csmtolerance_equal_coords();
+    general_tolerance = csmtolerance_equal_coords(tolerances);
     
     return CSMMATH_MAX(face_tolerance, general_tolerance);
 }
@@ -129,6 +129,7 @@ static double i_classification_tolerance(struct csmhedge_t *hedge)
 static void i_classify_hedge_respect_to_plane(
                         struct csmhedge_t *hedge,
                         double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances,
                         struct csmvertex_t **vertex_opc, double *dist_to_plane_opc,
                         enum i_position_t *cl_resp_plane_opc)
 {
@@ -136,7 +137,7 @@ static void i_classify_hedge_respect_to_plane(
     struct csmvertex_t *vertex_loc;
     double x_loc, y_loc, z_loc;
     
-    tolerance = i_classification_tolerance(hedge);
+    tolerance = i_classification_tolerance(hedge, tolerances);
 
     vertex_loc = csmhedge_vertex(hedge);
     csmvertex_get_coordenadas(vertex_loc, &x_loc, &y_loc, &z_loc);
@@ -154,7 +155,8 @@ static void i_classify_hedge_respect_to_plane(
 
 CONSTRUCTOR(static csmArrayStruct(csmvertex_t) *, i_split_edges_by_plane, (
                         struct csmsolid_t *work_solid,
-                        double A, double B, double C, double D))
+                        double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances))
 {
     csmArrayStruct(csmvertex_t) *set_of_on_vertices;
     struct csmhashtb_iterator(csmedge_t) *edge_iterator;
@@ -178,10 +180,10 @@ CONSTRUCTOR(static csmArrayStruct(csmvertex_t) *, i_split_edges_by_plane, (
         csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
         
         hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-        i_classify_hedge_respect_to_plane(hedge_pos, A, B, C, D, &vertex_pos, &dist_to_plane_pos, &cl_resp_plane_pos);
+        i_classify_hedge_respect_to_plane(hedge_pos, A, B, C, D, tolerances, &vertex_pos, &dist_to_plane_pos, &cl_resp_plane_pos);
         
         hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
-        i_classify_hedge_respect_to_plane(hedge_neg, A, B, C, D, &vertex_neg, &dist_to_plane_neg, &cl_resp_plane_neg);
+        i_classify_hedge_respect_to_plane(hedge_neg, A, B, C, D, tolerances, &vertex_neg, &dist_to_plane_neg, &cl_resp_plane_neg);
         
         if (csmsetopcom_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(edge) == CSMTRUE)
             new_vertex_algorithm_attrib_mask = CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP;
@@ -264,7 +266,8 @@ CONSTRUCTOR(static csmArrayStruct(csmvertex_t) *, i_split_edges_by_plane, (
 
 CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighborhood, (
                         struct csmvertex_t *vertex,
-                        double A, double B, double C, double D))
+                        double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances))
 {
     csmArrayStruct(i_neighborhood_t) *vertex_neighborhood;
     double x_vertex, y_vertex, z_vertex;
@@ -290,12 +293,12 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
         num_iters++;
         
         hedge_next = csmhedge_next(hedge_iterator);
-        i_classify_hedge_respect_to_plane(hedge_next, A, B, C, D, NULL, NULL, &cl_resp_plane);
+        i_classify_hedge_respect_to_plane(hedge_next, A, B, C, D, tolerances, NULL, NULL, &cl_resp_plane);
         
         hedge_neighborhood = i_create_neighborhod(hedge_iterator, cl_resp_plane);
         csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood, i_neighborhood_t);
         
-        if (csmopbas_is_wide_hedge(hedge_iterator, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CSMTRUE)
+        if (csmopbas_is_wide_hedge(hedge_iterator, tolerances, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CSMTRUE)
         {
             struct i_neighborhood_t *hedge_neighborhood_wide;
             double tolerance;
@@ -303,7 +306,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
             hedge_neighborhood_wide = i_create_neighborhod(hedge_iterator, hedge_neighborhood->position);
             csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood_wide, i_neighborhood_t);
             
-            tolerance = i_classification_tolerance(hedge_iterator);
+            tolerance = i_classification_tolerance(hedge_iterator, tolerances);
             i_classify_point_respect_to_plane(x_vertex + Ux_bisec, y_vertex + Uy_bisec, z_vertex + Uz_bisec, A, B, C, D, tolerance, NULL, &cl_resp_plane);
             hedge_neighborhood->position = cl_resp_plane;
         }
@@ -350,13 +353,14 @@ static void i_reclassify_on_sector_vertex_neighborhood(
 
 static void i_reclassify_on_sectors_vertex_neighborhood(
                         double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
     double tolerance_coplanarity;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
-    tolerance_coplanarity = csmtolerance_coplanarity();
+    tolerance_coplanarity = csmtolerance_coplanarity(tolerances);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -418,13 +422,14 @@ static void i_reclassify_on_edge_vertex_neighborhood(
 
 static void i_reclassify_on_edges_vertex_neighborhood(
                         double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
     double tolerance_coplanarity;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
-    tolerance_coplanarity = csmtolerance_coplanarity();
+    tolerance_coplanarity = csmtolerance_coplanarity(tolerances);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -587,6 +592,7 @@ static void i_print_debug_info_vertex_neighborhood(
 static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
                         struct csmvertex_t *vertex,
                         double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges)
 {
     csmArrayStruct(i_neighborhood_t) *vertex_neighborhood;
@@ -597,13 +603,13 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
     
     vertex_algorithm_mask = csmvertex_get_mask_attrib(vertex);
     
-    vertex_neighborhood = i_initial_vertex_neighborhood(vertex, A, B, C, D);
+    vertex_neighborhood = i_initial_vertex_neighborhood(vertex, A, B, C, D, tolerances);
     i_print_debug_info_vertex_neighborhood("Initial", vertex, vertex_neighborhood);
     
-    i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, vertex_neighborhood);
+    i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, tolerances, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Sectors", vertex, vertex_neighborhood);
     
-    i_reclassify_on_edges_vertex_neighborhood(A, B, C, D, vertex_neighborhood);
+    i_reclassify_on_edges_vertex_neighborhood(A, B, C, D, tolerances, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Edges", vertex, vertex_neighborhood);
     
     if (i_could_locate_begin_sequence(vertex_neighborhood, &start_idx) == CSMTRUE)
@@ -656,7 +662,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
                         csmhedge_id(tail_neighborhood->hedge));
             
             head_next = csmhedge_next(head_neighborhood->hedge);
-            i_classify_hedge_respect_to_plane(head_next, A, B, C, D, NULL, NULL, &cl_head_next_resp_plane);
+            i_classify_hedge_respect_to_plane(head_next, A, B, C, D, tolerances, NULL, NULL, &cl_head_next_resp_plane);
             
             // Null edge oriented from vertex below SP to above. tail is the below hedge.
             if (cl_head_next_resp_plane == i_POSITION_ABOVE || cl_head_next_resp_plane == i_POSITION_ON)
@@ -701,6 +707,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
 
 CONSTRUCTOR(static csmArrayStruct(csmedge_t) *, i_insert_nulledges_to_split_solid, (
                         double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmvertex_t) *set_of_on_vertices))
 {
     csmArrayStruct(csmedge_t) *set_of_null_edges;
@@ -717,7 +724,7 @@ CONSTRUCTOR(static csmArrayStruct(csmedge_t) *, i_insert_nulledges_to_split_soli
         struct csmvertex_t *vertex;
         
         vertex = csmarrayc_get_st(set_of_on_vertices, i, csmvertex_t);
-        i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(vertex, A, B, C, D, set_of_null_edges);
+        i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(vertex, A, B, C, D, tolerances, set_of_null_edges);
     }
     
     csmdebug_end_context();
@@ -769,7 +776,10 @@ static CSMBOOL i_can_join_he(struct csmhedge_t *he, csmArrayStruct(csmhedge_t) *
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_join_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges, csmArrayStruct(csmface_t) **set_of_null_faces)
+static void i_join_null_edges(
+                    csmArrayStruct(csmedge_t) *set_of_null_edges,
+                    const struct csmtolerance_t *tolerances,
+                    csmArrayStruct(csmface_t) **set_of_null_faces)
 {
     csmArrayStruct(csmface_t) *set_of_null_faces_loc;
     csmArrayStruct(csmhedge_t) *loose_ends;
@@ -778,7 +788,7 @@ static void i_join_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges, csmA
     
     csmdebug_begin_context("****JOIN NULL EDGES\n");
     
-    csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges);
+    csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges, tolerances);
     no_null_edges = csmarrayc_count_st(set_of_null_edges, csmedge_t);
     assert(no_null_edges > 0);
     assert_no_null(set_of_null_faces);
@@ -806,7 +816,7 @@ static void i_join_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges, csmA
      
         if (i_can_join_he(he1_next_edge, loose_ends, &matching_loose_end_he1) == CSMTRUE)
         {
-            csmsetopcom_join_hedges(matching_loose_end_he1, he1_next_edge);
+            csmsetopcom_join_hedges(matching_loose_end_he1, he1_next_edge, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(matching_loose_end_he1), loose_ends) == CSMFALSE)
                 csmsetopcom_cut_he(matching_loose_end_he1, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted, NULL);
@@ -818,7 +828,7 @@ static void i_join_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges, csmA
 
         if (i_can_join_he(he2_next_edge, loose_ends, &matching_loose_end_he2) == CSMTRUE)
         {
-            csmsetopcom_join_hedges(matching_loose_end_he2, he2_next_edge);
+            csmsetopcom_join_hedges(matching_loose_end_he2, he2_next_edge, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(matching_loose_end_he2), loose_ends) == CSMFALSE)
                 csmsetopcom_cut_he(matching_loose_end_he2, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted, NULL);
@@ -869,6 +879,7 @@ static void i_assign_result_material(const struct csmsolid_t *solid, struct csms
 static void i_finish_split(
                         csmArrayStruct(csmface_t) *set_of_null_faces,
                         struct csmsolid_t *work_solid,
+                        const struct csmtolerance_t *tolerances,
                         struct csmsolid_t **solid_above, struct csmsolid_t **solid_below)
 {
     unsigned long i, no_null_faces;
@@ -888,8 +899,8 @@ static void i_finish_split(
     set_of_null_faces_below = set_of_null_faces;
     
     csmsolid_redo_geometric_face_data(work_solid);
-    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_above);
-    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_below);
+    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_above, tolerances);
+    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_below, tolerances);
 
     no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
     assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_below, csmface_t));
@@ -943,6 +954,7 @@ CSMBOOL csmsplit_does_plane_split_solid(
 {
     CSMBOOL does_plane_split_solid;
     struct csmsolid_t *solid_above_loc, *solid_below_loc;
+    struct csmtolerance_t *tolerances;
     struct csmsolid_t *work_solid;
     csmArrayStruct(csmvertex_t) *set_of_on_vertices;
     csmArrayStruct(csmedge_t) *set_of_null_edges;
@@ -951,6 +963,8 @@ CSMBOOL csmsplit_does_plane_split_solid(
     assert_no_null(solid_below);
     
     csmdebug_begin_context("Split");
+    
+    tolerances = csmtolerance_new();
     
     work_solid = csmsolid_duplicate(solid);
     csmsolid_redo_geometric_face_data(work_solid);
@@ -961,7 +975,8 @@ CSMBOOL csmsplit_does_plane_split_solid(
     csmdebug_set_plane(A, B, C, D);
     //csmdebug_show_viewer();
     
-    set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D);
+    
+    set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D, tolerances);
     
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
@@ -970,7 +985,7 @@ CSMBOOL csmsplit_does_plane_split_solid(
         csmdebug_print_debug_info("<----WORK SOLID BEFORE INSERTING NULL EDGES\n");
     }
 
-    set_of_null_edges = i_insert_nulledges_to_split_solid(A, B, C, D, set_of_on_vertices);
+    set_of_null_edges = i_insert_nulledges_to_split_solid(A, B, C, D, tolerances, set_of_on_vertices);
 
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
@@ -993,8 +1008,8 @@ CSMBOOL csmsplit_does_plane_split_solid(
         csmArrayStruct(csmface_t) *set_of_null_faces;
         double volume_above, volume_below;
         
-        i_join_null_edges(set_of_null_edges, &set_of_null_faces);
-        i_finish_split(set_of_null_faces, work_solid, &solid_above_loc, &solid_below_loc);
+        i_join_null_edges(set_of_null_edges, tolerances, &set_of_null_faces);
+        i_finish_split(set_of_null_faces, work_solid, tolerances, &solid_above_loc, &solid_below_loc);
 
         csmsolid_clear_algorithm_data(solid_above_loc);
         csmsolid_clear_algorithm_data(solid_below_loc);
@@ -1025,6 +1040,7 @@ CSMBOOL csmsplit_does_plane_split_solid(
     *solid_above = solid_above_loc;
     *solid_below = solid_below_loc;
     
+    csmtolerance_free(&tolerances);
     csmsolid_free(&work_solid);
     csmarrayc_free_st(&set_of_on_vertices, csmvertex_t, NULL);
     csmarrayc_free_st(&set_of_null_edges, csmedge_t, NULL);

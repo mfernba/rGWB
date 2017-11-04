@@ -18,7 +18,9 @@
 
 // ------------------------------------------------------------------------------------------
 
-void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
+void csmeuler_laringmv(
+                    struct csmface_t *face1, struct csmface_t *face2,
+                    const struct csmtolerance_t *tolerances)
 {
     register struct csmloop_t *iterator_face1;
     unsigned long num_iteraciones;
@@ -47,7 +49,7 @@ void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
             vtx = csmhedge_vertex(ledge);
             csmvertex_get_coordenadas(vtx, &x, &y, &z);
             
-            if (csmface_is_point_interior_to_face(face1, x, y, z) == CSMFALSE)
+            if (csmface_is_point_interior_to_face(face1, x, y, z, tolerances) == CSMFALSE)
             {
                 csmloop_set_setop_loop_was_a_hole(iterator_face1, CSMTRUE);
                 
@@ -64,8 +66,9 @@ void csmeuler_laringmv(struct csmface_t *face1, struct csmface_t *face2)
 // ------------------------------------------------------------------------------------------
 
 void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(
-                        struct csmface_t *face1, struct csmface_t *face2,
-                        CSMBOOL *did_move_some_loop_opt)
+                    struct csmface_t *face1, struct csmface_t *face2,
+                    const struct csmtolerance_t *tolerances,
+                    CSMBOOL *did_move_some_loop_opt)
 {
     CSMBOOL did_move_some_loop_loc;
     register struct csmloop_t *iterator_face1;
@@ -95,7 +98,7 @@ void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(
             vtx = csmhedge_vertex(ledge);
             csmvertex_get_coordenadas(vtx, &x, &y, &z);
             
-            if (csmface_is_point_interior_to_face(face2, x, y, z) == CSMTRUE)
+            if (csmface_is_point_interior_to_face(face2, x, y, z, tolerances) == CSMTRUE)
             {
                 csmdebug_print_debug_info("\t***laringmv2 loop %lu to face %lu\n", csmloop_id(iterator_face1), csmface_id(face2));
                 

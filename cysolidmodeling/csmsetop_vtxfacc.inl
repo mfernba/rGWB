@@ -16,5 +16,6 @@ CSMBOOL csmsetop_vtxfacc_equals(const struct csmsetop_vtxfacc_inters_t *vf_inter
 void csmsetop_vtxfacc_append_null_edges(
                         const csmArrayStruct(csmsetop_vtxfacc_inters_t) *vf_intersections,
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges,
                         csmArrayStruct(csmedge_t) *set_of_null_edges_other_solid);

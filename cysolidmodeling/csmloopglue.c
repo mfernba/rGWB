@@ -71,6 +71,7 @@ static CSMBOOL i_does_face2_outer2_a_common_vertex_with_face1(
 
 static CSMBOOL i_is_possible_to_merge_loops(
                         struct csmloop_t *flout_face1, struct csmloop_t *flout_face2,
+                        const struct csmtolerance_t *tolerances,
                         struct csmhedge_t **common_hedge_face1, struct csmhedge_t **common_hedge_face2)
 {
     CSMBOOL is_possible_to_merge_loops;
@@ -84,7 +85,7 @@ static CSMBOOL i_is_possible_to_merge_loops(
     
     lhedge_face1 = csmloop_ledge(flout_face1);
     vertex_face1 = csmhedge_vertex(lhedge_face1);
-    tolerance = csmtolerance_equal_coords();
+    tolerance = csmtolerance_equal_coords(tolerances);
     
     if (i_does_face2_outer2_a_common_vertex_with_face1(flout_face2, vertex_face1, tolerance, &lhedge_face2) == CSMFALSE)
     {
@@ -155,6 +156,7 @@ static CSMBOOL i_is_possible_to_merge_loops(
 
 static CSMBOOL i_is_possible_to_merge_faces(
                         struct csmface_t *face1, struct csmface_t *face2,
+                        const struct csmtolerance_t *tolerances,
                         struct csmhedge_t **common_hedge_face1, struct csmhedge_t **common_hedge_face2)
 {
     CSMBOOL is_possible_to_merge_faces;
@@ -179,6 +181,7 @@ static CSMBOOL i_is_possible_to_merge_faces(
         
         is_possible_to_merge_faces = i_is_possible_to_merge_loops(
                         flout_face1, flout_face2,
+                        tolerances,
                         &common_hedge_face1_loc, &common_hedge_face2_loc);
     }
 
@@ -190,11 +193,13 @@ static CSMBOOL i_is_possible_to_merge_faces(
 
 // ----------------------------------------------------------------------------------------------------
 
-CSMBOOL csmloopglue_can_merge_faces(struct csmface_t *face1, struct csmface_t *face2)
+CSMBOOL csmloopglue_can_merge_faces(
+                        struct csmface_t *face1, struct csmface_t *face2,
+                        const struct csmtolerance_t *tolerances)
 {
     struct csmhedge_t *common_hedge_face1, *common_hedge_face2;
     
-    return i_is_possible_to_merge_faces(face1, face2, &common_hedge_face1, &common_hedge_face2);
+    return i_is_possible_to_merge_faces(face1, face2, tolerances, &common_hedge_face1, &common_hedge_face2);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -253,14 +258,16 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmloopglue_merge_faces(struct csmface_t *face1, struct csmface_t **face2)
+void csmloopglue_merge_faces(
+                        struct csmface_t *face1, struct csmface_t **face2,
+                        const struct csmtolerance_t *tolerances)
 {
     CSMBOOL can_merge_faces;
     struct csmhedge_t *common_hedge_face1, *common_hedge_face2;
     
     assert_no_null(face2);
     
-    can_merge_faces = i_is_possible_to_merge_faces(face1, *face2, &common_hedge_face1, &common_hedge_face2);
+    can_merge_faces = i_is_possible_to_merge_faces(face1, *face2, tolerances, &common_hedge_face1, &common_hedge_face2);
     assert(can_merge_faces == CSMTRUE);
     
     csmeuler_lkfmrh(face1, face2);
@@ -271,7 +278,9 @@ void csmloopglue_merge_faces(struct csmface_t *face1, struct csmface_t **face2)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmloopglue_merge_face_loops(struct csmface_t *face)
+void csmloopglue_merge_face_loops(
+                        struct csmface_t *face,
+                        const struct csmtolerance_t *tolerances)
 {
     struct csmloop_t *loop1, *loop2;
     CSMBOOL did_find_compatible_loop2;
@@ -287,7 +296,7 @@ void csmloopglue_merge_face_loops(struct csmface_t *face)
     
     do
     {
-        if (i_is_possible_to_merge_loops(loop1, loop2, &common_hedge_loop1, &common_hedge_loop2) == CSMTRUE)
+        if (i_is_possible_to_merge_loops(loop1, loop2, tolerances, &common_hedge_loop1, &common_hedge_loop2) == CSMTRUE)
         {
             did_find_compatible_loop2 = CSMTRUE;
             break;

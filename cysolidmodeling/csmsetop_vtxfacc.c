@@ -126,14 +126,14 @@ static void i_classify_point_respect_to_plane(
 
 // ----------------------------------------------------------------------------------------------------
 
-static double i_classification_tolerance(struct csmhedge_t *hedge)
+static double i_classification_tolerance(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
 {
     struct csmface_t *face_hedge;
     double face_tolerance, general_tolerance;
     
     face_hedge = csmopbas_face_from_hedge(hedge);
     face_tolerance = csmface_tolerace(face_hedge);
-    general_tolerance = csmtolerance_equal_coords();
+    general_tolerance = csmtolerance_equal_coords(tolerances);
     
     return CSMMATH_MAX(face_tolerance, general_tolerance);
 }
@@ -143,6 +143,7 @@ static double i_classification_tolerance(struct csmhedge_t *hedge)
 static void i_classify_hedge_respect_to_plane(
                         struct csmhedge_t *hedge,
                         double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances,
                         struct csmvertex_t **vertex_opc, double *dist_to_plane_opc,
                         enum csmsetop_classify_resp_solid_t *cl_resp_plane_opc)
 {
@@ -150,7 +151,7 @@ static void i_classify_hedge_respect_to_plane(
     struct csmvertex_t *vertex_loc;
     double x_loc, y_loc, z_loc;
     
-    tolerance = i_classification_tolerance(hedge);
+    tolerance = i_classification_tolerance(hedge, tolerances);
 
     vertex_loc = csmhedge_vertex(hedge);
     csmvertex_get_coordenadas(vertex_loc, &x_loc, &y_loc, &z_loc);
@@ -168,7 +169,8 @@ static void i_classify_hedge_respect_to_plane(
 
 CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighborhood, (
                         struct csmvertex_t *vertex,
-                        double A, double B, double C, double D))
+                        double A, double B, double C, double D,
+                        const struct csmtolerance_t *tolerances))
 {
     csmArrayStruct(i_neighborhood_t) *vertex_neighborhood;
     double x_vertex, y_vertex, z_vertex;
@@ -194,12 +196,12 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
         num_iters++;
         
         hedge_next = csmhedge_next(hedge_iterator);
-        i_classify_hedge_respect_to_plane(hedge_next, A, B, C, D, NULL, NULL, &cl_resp_plane);
+        i_classify_hedge_respect_to_plane(hedge_next, A, B, C, D, tolerances, NULL, NULL, &cl_resp_plane);
         
         hedge_neighborhood = i_create_neighborhod(hedge_iterator, cl_resp_plane);
         csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood, i_neighborhood_t);
         
-        if (csmopbas_is_wide_hedge(hedge_iterator, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CSMTRUE)
+        if (csmopbas_is_wide_hedge(hedge_iterator, tolerances, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CSMTRUE)
         {
             struct i_neighborhood_t *hedge_neighborhood_wide;
             double tolerance;
@@ -207,7 +209,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
             hedge_neighborhood_wide = i_create_neighborhod(hedge_iterator, hedge_neighborhood->position);
             csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood_wide, i_neighborhood_t);
             
-            tolerance = i_classification_tolerance(hedge_iterator);
+            tolerance = i_classification_tolerance(hedge_iterator, tolerances);
             i_classify_point_respect_to_plane(x_vertex + Ux_bisec, y_vertex + Uy_bisec, z_vertex + Uz_bisec, A, B, C, D, tolerance, NULL, &cl_resp_plane);
             hedge_neighborhood->position = cl_resp_plane;
         }
@@ -324,13 +326,14 @@ static void i_reclassify_on_sector_vertex_neighborhood(
 static void i_reclassify_on_sectors_vertex_neighborhood(
                         double A, double B, double C, double D,
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
     double tolerance_coplanarity;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
-    tolerance_coplanarity = csmtolerance_coplanarity();
+    tolerance_coplanarity = csmtolerance_coplanarity(tolerances);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -405,13 +408,14 @@ static void i_reclassify_on_edge_vertex_neighborhood(
 static void i_reclassify_on_edges_vertex_neighborhood(
                         double A, double B, double C, double D,
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
     double tolerance_coplanarity;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
-    tolerance_coplanarity = csmtolerance_coplanarity();
+    tolerance_coplanarity = csmtolerance_coplanarity(tolerances);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -621,6 +625,7 @@ static void i_mark_null_edge_on_face(
 static void i_process_vf_inters(
                         const struct csmsetop_vtxfacc_inters_t *vf_inters,
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges, csmArrayStruct(csmedge_t) *set_of_null_edges_other_solid)
 {
     double A, B, C, D;
@@ -635,13 +640,13 @@ static void i_process_vf_inters(
     
     vertex_algorithm_mask = csmvertex_get_mask_attrib(vf_inters->vertex);
     
-    vertex_neighborhood = i_initial_vertex_neighborhood(vf_inters->vertex, A, B, C, D);
+    vertex_neighborhood = i_initial_vertex_neighborhood(vf_inters->vertex, A, B, C, D, tolerances);
     i_print_debug_info_vertex_neighborhood("Initial", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
-    i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, vertex_neighborhood);
+    i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, tolerances, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Sectors", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
-    i_reclassify_on_edges_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, vertex_neighborhood);
+    i_reclassify_on_edges_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, tolerances, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Edges", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
     //csmdebug_show_viewer();
@@ -687,7 +692,7 @@ static void i_process_vf_inters(
             assert_no_null(tail_neighborhood);
             
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
-            i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, NULL, NULL, &cl_head_resp_plane);
+            i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, tolerances, NULL, NULL, &cl_head_resp_plane);
             assert(cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_OUT || cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
             
             if (csmdebug_debug_enabled() == CSMTRUE)
@@ -743,6 +748,7 @@ static void i_process_vf_inters(
 void csmsetop_vtxfacc_append_null_edges(
                         const csmArrayStruct(csmsetop_vtxfacc_inters_t) *vf_intersections,
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges,
                         csmArrayStruct(csmedge_t) *set_of_null_edges_other_solid)
 {
@@ -757,7 +763,7 @@ void csmsetop_vtxfacc_append_null_edges(
             const struct csmsetop_vtxfacc_inters_t *vf_inters;
             
             vf_inters = csmarrayc_get_const_st(vf_intersections, i, csmsetop_vtxfacc_inters_t);
-            i_process_vf_inters(vf_inters, set_operation, a_vs_b, set_of_null_edges, set_of_null_edges_other_solid);
+            i_process_vf_inters(vf_inters, set_operation, a_vs_b, tolerances, set_of_null_edges, set_of_null_edges_other_solid);
         }
         csmdebug_end_context();
     }

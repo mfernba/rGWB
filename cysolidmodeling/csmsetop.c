@@ -233,6 +233,7 @@ static void i_append_null_edges_to_debug_view(csmArrayStruct(csmedge_t) *set_of_
 static void i_join_null_edges(
                         struct csmsolid_t *solid_A, csmArrayStruct(csmedge_t) *set_of_null_edges_A,
                         struct csmsolid_t *solid_B, csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        const struct csmtolerance_t *tolerances, 
                         csmArrayStruct(csmface_t) **set_of_null_faces_A,
                         csmArrayStruct(csmface_t) **set_of_null_faces_B)
 {
@@ -242,8 +243,8 @@ static void i_join_null_edges(
     unsigned long no_null_edges_deleted_A, no_null_edges_deleted_B;
     unsigned long no_null_edges_pendant;
     
-    csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_A);
-    csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_B);
+    csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_A, tolerances);
+    csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_B, tolerances);
     no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
     assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
     assert(no_null_edges > 0);
@@ -309,13 +310,13 @@ static void i_join_null_edges(
         if (i_can_join(he1_next_edge_A, he2_next_edge_B, loose_ends_A, loose_ends_B, &h1a, &h2b) == CSMTRUE)
         {
             csmdebug_print_debug_info("Joining h1a, he1_next_edge_A: Iter %lu\n", i);
-            csmsetopcom_join_hedges(h1a, he1_next_edge_A);
+            csmsetopcom_join_hedges(h1a, he1_next_edge_A, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1a), loose_ends_A) == CSMFALSE)
                 i_cut_he_solid_A(h1a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h1a);
             
             csmdebug_print_debug_info("Joining h2b, he2_next_edge_B: Iter %lu\n", i);
-            csmsetopcom_join_hedges(h2b, he2_next_edge_B);
+            csmsetopcom_join_hedges(h2b, he2_next_edge_B, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2b), loose_ends_B) == CSMFALSE)
                 i_cut_he_solid_B(h2b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h2b);
@@ -334,13 +335,13 @@ static void i_join_null_edges(
         if (i_can_join(he2_next_edge_A, he1_next_edge_B, loose_ends_A, loose_ends_B, &h2a, &h1b) == CSMTRUE)
         {
             csmdebug_print_debug_info("Joining h2a, he2_next_edge_A: Iter %lu\n", i);
-            csmsetopcom_join_hedges(h2a, he2_next_edge_A);
+            csmsetopcom_join_hedges(h2a, he2_next_edge_A, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2a), loose_ends_A) == CSMFALSE)
                 i_cut_he_solid_A(h2a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h2a);
 
             csmdebug_print_debug_info("Joining h1b, he1_next_edge_B: Iter %lu\n", i);
-            csmsetopcom_join_hedges(h1b, he1_next_edge_B);
+            csmsetopcom_join_hedges(h1b, he1_next_edge_B, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1b), loose_ends_B) == CSMFALSE)
                 i_cut_he_solid_B(h1b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h1b);
@@ -596,6 +597,7 @@ static CSMBOOL i_is_same_face_ptr(const struct csmface_t *face1, const struct cs
 
 static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(
                         struct csmsolid_t *solid,
+                        const struct csmtolerance_t *tolerance,
                         csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long i, num_null_faces;
@@ -637,7 +639,7 @@ static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_
                         csmface_redo_geometric_generated_data(face);
                         
                         if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face) == CSMTRUE
-                                && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component) == CSMTRUE)
+                                && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component, tolerance) == CSMTRUE)
                         {
                             csmeuler_lkfmrh(face, &loop_attached_to_out_component_face);
                             has_been_converted_in_hole = CSMTRUE;
@@ -707,7 +709,8 @@ static void i_assign_result_material(
 CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
                         enum csmsetop_operation_t set_operation,
                         struct csmsolid_t *solid_A, csmArrayStruct(csmface_t) *set_of_null_faces_A,
-                        struct csmsolid_t *solid_B, csmArrayStruct(csmface_t) *set_of_null_faces_B))
+                        struct csmsolid_t *solid_B, csmArrayStruct(csmface_t) *set_of_null_faces_B,
+                        const struct csmtolerance_t *tolerances))
 {
     struct csmsolid_t *result;
     unsigned long i, no_null_faces, half_no_null_faces;
@@ -718,10 +721,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     assert(no_null_faces > 0);
     
     i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_A);
-    i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_A, set_of_null_faces_A);
+    i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_A, tolerances, set_of_null_faces_A);
     
     i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_B);
-    i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_B, set_of_null_faces_B);
+    i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_B, tolerances, set_of_null_faces_B);
 
     //csmdebug_show_viewer();
     
@@ -732,12 +735,12 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     assert(no_null_faces % 2 == 0);
     
     csmsolid_redo_geometric_face_data(solid_A);
-    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_A);
-    csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_A, set_of_null_faces_A);
+    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_A, tolerances);
+    csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_A, tolerances, set_of_null_faces_A);
     
     csmsolid_redo_geometric_face_data(solid_B);
-    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_B);
-    csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_B, set_of_null_faces_B);
+    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_B, tolerances);
+    csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_B, tolerances, set_of_null_faces_B);
 
     no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
     assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
@@ -809,7 +812,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
         
         csmeuler_lkfmrh(face_from_solid_A, &face_from_solid_B);
-        csmloopglue_merge_face_loops(face_from_solid_A);
+        csmloopglue_merge_face_loops(face_from_solid_A, tolerances);
     }
     
     csmsolid_clear_algorithm_data(result);
@@ -827,11 +830,14 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
                         struct csmsolid_t *solid_A, struct csmsolid_t *solid_B))
 {
     struct csmsolid_t *result;
+    struct csmtolerance_t *tolerances;
     csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections;
     csmArrayStruct(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
     csmArrayStruct(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
     csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
     unsigned long no_null_edges;
+    
+    tolerances = csmtolerance_new();
     
     csmsolid_redo_geometric_face_data(solid_A);
     csmsolid_clear_algorithm_data(solid_A);
@@ -847,6 +853,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
     
     csmsetop_procedges_generate_intersections_on_both_solids(
                         solid_A, solid_B,
+                        tolerances,
                         &vv_intersections,
                         &vf_intersections_A, &vf_intersections_B);
     
@@ -854,16 +861,20 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
     set_of_null_edges_B = csmarrayc_new_st_array(0, csmedge_t);
     
     csmdebug_print_debug_info("***vf_intersections_A [BEGIN]\n");
-    csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, set_of_null_edges_A, set_of_null_edges_B);
+    csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, tolerances, set_of_null_edges_A, set_of_null_edges_B);
     csmdebug_print_debug_info("***vf_intersections_A [END]\n");
     
     csmdebug_print_debug_info("***vf_intersections_B [BEGIN]\n");
-    csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, set_of_null_edges_B, set_of_null_edges_A);
+    csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, tolerances, set_of_null_edges_B, set_of_null_edges_A);
     csmdebug_print_debug_info("***vf_intersections_B [END]\n");
     
     csmsolid_debug_print_debug(solid_A, CSMTRUE);
     
-    csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, set_of_null_edges_A, set_of_null_edges_B);
+    csmsetop_vtxvtx_append_null_edges(
+                        vv_intersections,
+                        set_operation,
+                        tolerances,
+                        set_of_null_edges_A, set_of_null_edges_B);
     
     no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
     assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
@@ -880,16 +891,19 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
         i_join_null_edges(
                         solid_A, set_of_null_edges_A,
                         solid_B, set_of_null_edges_B,
+                        tolerances,
                         &set_of_null_faces_A, &set_of_null_faces_B);
     
         result = i_finish_set_operation(
                         set_operation,
                         solid_A, set_of_null_faces_A,
-                        solid_B, set_of_null_faces_B);
+                        solid_B, set_of_null_faces_B,
+                        tolerances);
     }
     
     csmdebug_end_context();
     
+    csmtolerance_free(&tolerances);
     csmarrayc_free_st(&vv_intersections, csmsetop_vtxvtx_inters_t, csmsetop_vtxvtx_free_inters);
     csmarrayc_free_st(&vf_intersections_A, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
     csmarrayc_free_st(&vf_intersections_B, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);

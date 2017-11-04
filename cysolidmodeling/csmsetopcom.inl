@@ -16,7 +16,7 @@ CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge
 
 // Edges...
 
-void csmsetopcom_sort_edges_lexicographically_by_xyz(csmArrayStruct(csmedge_t) *set_of_null_edges);
+void csmsetopcom_sort_edges_lexicographically_by_xyz(csmArrayStruct(csmedge_t) *set_of_null_edges, const struct csmtolerance_t *tolerances);
 
 void csmsetopcom_print_set_of_null_edges(const csmArrayStruct(csmedge_t) *set_of_null_edges, csmArrayStruct(csmhedge_t) *loose_ends);
 
@@ -24,7 +24,9 @@ CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, csmArrayStruct(csmhed
 
 void csmsetopcom_print_debug_info_loose_ends(const csmArrayStruct(csmhedge_t) *loose_ends);
 
-void csmsetopcom_join_hedges(struct csmhedge_t *he1, struct csmhedge_t *he2);
+void csmsetopcom_join_hedges(
+                        struct csmhedge_t *he1, struct csmhedge_t *he2,
+                        const struct csmtolerance_t *tolerances);
 
 void csmsetopcom_cut_he(
                     struct csmhedge_t *hedge,
@@ -41,9 +43,14 @@ void csmsetopcom_remove_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges)
 
 CONSTRUCTOR(csmArrayStruct(csmface_t) *, csmsetopcom_convert_inner_loops_of_null_faces_to_faces, (csmArrayStruct(csmface_t) *set_of_null_faces));
 
-void csmsetopcom_reintroduce_holes_in_corresponding_faces(csmArrayStruct(csmface_t) *set_of_null_faces);
+void csmsetopcom_reintroduce_holes_in_corresponding_faces(
+                        csmArrayStruct(csmface_t) *set_of_null_faces,
+                        const struct csmtolerance_t *tolerances);
 
-void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(struct csmsolid_t *solid, csmArrayStruct(csmface_t) *set_of_null_faces);
+void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(
+                        struct csmsolid_t *solid,
+                        const struct csmtolerance_t *tolerances,
+                        csmArrayStruct(csmface_t) *set_of_null_faces);
 
 void csmsetopcom_move_face_to_solid(
                         unsigned long recursion_level,

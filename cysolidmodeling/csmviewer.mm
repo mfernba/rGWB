@@ -165,12 +165,14 @@ static void i_show_viewer(struct csmviewer_t *viewer)
     
     bsassert_not_null(viewer);
     
-    viewer_widget = wf3Visor_crea_csgrenderer(500, 500, WF3VISTA_GESTION_DIBUJO_SIN_BDD);
+    //viewer_widget = wf3Visor_crea_csgrenderer(500, 500, WF3VISTA_GESTION_DIBUJO_SIN_BDD);
+    viewer_widget = wf3Visor_crea_csgrenderer(500, 500, WF3VISTA_GESTION_DIBUJO_BDD_OBRA_E_INMEDIATO_CAPTURAS);
     wf3Visor_set_vista_predeterminada(viewer_widget, WF3VISTA_VISTA_ISOMETRICA);
     
     delegado = wf3Vista_crea_delegado_dibujo(viewer, i_draw_scene, csmviewer_t);
     wf3Visor_set_delegado_dibujo(viewer_widget, &delegado);
     
+    wf3Visor_regenera(viewer_widget, WF3VISTA_TIPO_REGENERACION_COMPLETA);
     wf3Visor_ventana_completa(viewer_widget);
 
     panel_area = wf3Visor_panel_area_dibujo(viewer_widget);

@@ -174,6 +174,7 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
 
 CSMBOOL csmopbas_is_wide_hedge(
                         struct csmhedge_t *hedge,
+                        const struct csmtolerance_t *tolerances,
                         double *Ux_bisec_opt, double *Uy_bisec_opt, double *Uz_bisec_opt)
 {
     CSMBOOL is_wide;
@@ -201,7 +202,7 @@ CSMBOOL csmopbas_is_wide_hedge(
     face = csmopbas_face_from_hedge(hedge);
     csmface_face_equation(face, &A, &B, &C, &D);
     
-    if (csmmath_vectors_are_parallel(Ux_to_prev, Uy_to_prev, Uz_to_prev, Ux_to_next, Uy_to_next, Uz_to_next) == CSMTRUE)
+    if (csmmath_vectors_are_parallel(Ux_to_prev, Uy_to_prev, Uz_to_prev, Ux_to_next, Uy_to_next, Uz_to_next, tolerances) == CSMTRUE)
     {
         is_wide = CSMTRUE;
         csmmath_cross_product3D(A, B, C, Ux_to_next, Uy_to_next, Uz_to_next, &Ux_bisec_loc, &Uy_bisec_loc, &Uz_bisec_loc);

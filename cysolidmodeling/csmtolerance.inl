@@ -1,17 +1,28 @@
 // Tolerances...
 
-double csmtolerance_equal_coords(void);
+#include "csmfwddecl.hxx"
 
-double csmtolerance_angle_rad(void);
+CONSTRUCTOR(struct csmtolerance_t *, csmtolerance_new,  (void));
 
-double csmtolerance_dot_product_parallel_vectors(void);
+void csmtolerance_free(struct csmtolerance_t **tolerance);
 
-double csmtolerance_coplanarity(void);
+double csmtolerance_equal_coords(const struct csmtolerance_t *tolerance);
 
-double csmtolerance_relative_position_over_edge(void);
+double csmtolerance_angle_rad(const struct csmtolerance_t *tolerance);
 
-double csmtolerance_null_vector(void);
+double csmtolerance_dot_product_parallel_vectors(const struct csmtolerance_t *tolerance);
 
-double csmtolerance_point_in_loop_boundary(void);
+double csmtolerance_coplanarity(const struct csmtolerance_t *tolerance);
 
-double csmtolerance_bbox_absolute_tolerance(void);
+double csmtolerance_relative_position_over_edge(const struct csmtolerance_t *tolerance);
+
+double csmtolerance_null_vector(const struct csmtolerance_t *tolerance);
+
+double csmtolerance_point_in_loop_boundary(const struct csmtolerance_t *tolerance);
+
+double csmtolerance_bbox_absolute_tolerance(const struct csmtolerance_t *tolerance);
+
+
+double csmtolerance_default_null_vector(void);
+
+double csmtolerance_default_coplanarity(void);

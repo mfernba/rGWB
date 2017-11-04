@@ -230,7 +230,9 @@ CSMBOOL csmmath_is_null_vector(double Ux, double Uy, double Uz, double tolerance
 
 // ------------------------------------------------------------------------------------------
 
-CSMBOOL csmmath_vectors_are_parallel(double Ux1, double Uy1, double Uz1, double Ux2, double Uy2, double Uz2)
+CSMBOOL csmmath_vectors_are_parallel(
+                        double Ux1, double Uy1, double Uz1, double Ux2, double Uy2, double Uz2,
+                        const struct csmtolerance_t *tolerance)
 {
     double dot_product;
     
@@ -239,7 +241,7 @@ CSMBOOL csmmath_vectors_are_parallel(double Ux1, double Uy1, double Uz1, double 
     
     dot_product = csmmath_dot_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
     
-    if (csmmath_fabs(1. - csmmath_fabs(dot_product)) < csmtolerance_dot_product_parallel_vectors())
+    if (csmmath_fabs(1. - csmmath_fabs(dot_product)) < csmtolerance_dot_product_parallel_vectors(tolerance))
         return CSMTRUE;
     else
         return CSMFALSE;

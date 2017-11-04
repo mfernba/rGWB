@@ -35,6 +35,7 @@ CSMBOOL csmface_should_analyze_intersections_with_segment(
 CSMBOOL csmface_contains_vertex(
                         const struct csmface_t *face,
                         const struct csmvertex_t *vertex,
+                        const struct csmtolerance_t *tolerances,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
@@ -42,11 +43,15 @@ CSMBOOL csmface_contains_vertex(
 CSMBOOL csmface_contains_point(
                         const struct csmface_t *face,
                         double x, double y, double z,
+                        const struct csmtolerance_t *tolerances,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 
-CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x, double y, double z);
+CSMBOOL csmface_is_point_interior_to_face(
+                        const struct csmface_t *face,
+                        double x, double y, double z,
+                        const struct csmtolerance_t *tolerances);
 
 enum csmcompare_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex);
 
@@ -55,7 +60,10 @@ CSMBOOL csmface_exists_intersection_between_line_and_face_plane(
                         double x1, double y1, double z1, double x2, double y2, double z2,
                         double *x_inters_opc, double *y_inters_opc, double *z_inters_opc, double *t_inters_opc);
 
-CSMBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_t *loop);
+CSMBOOL csmface_is_loop_contained_in_face(
+                        struct csmface_t *face,
+                        struct csmloop_t *loop,
+                        const struct csmtolerance_t *tolerances);
 
 double csmface_tolerace(const struct csmface_t *face);
 

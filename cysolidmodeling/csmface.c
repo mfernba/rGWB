@@ -86,7 +86,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     B = 0.;
     C = 0.;
     D = 0.;
-    fuzzy_epsilon = csmtolerance_coplanarity();
+    fuzzy_epsilon = csmtolerance_default_coplanarity();
     dropped_coord = (enum csmmath_dropped_coord_t)USHRT_MAX;
     
     bbox = csmbbox_create_empty_box();
@@ -335,7 +335,7 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
         
     } while (iterator != NULL);
     
-    return CSMMATH_MAX(1.01 * max_distance_to_plane, csmtolerance_coplanarity());
+    return CSMMATH_MAX(1.01 * max_distance_to_plane, csmtolerance_default_coplanarity());
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -406,6 +406,7 @@ static CSMBOOL i_is_point_on_face_plane(
 CSMBOOL csmface_contains_vertex(
                         const struct csmface_t *face,
                         const struct csmvertex_t *vertex,
+                        const struct csmtolerance_t *tolerances,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
@@ -419,6 +420,7 @@ CSMBOOL csmface_contains_vertex(
     return csmface_contains_point(
                         face,
                         x, y, z,
+                        tolerances,
                         type_of_containment_opc,
                         hit_vertex_opc,
                         hit_hedge_opc, t_relative_to_hit_hedge_opc);
@@ -429,6 +431,7 @@ CSMBOOL csmface_contains_vertex(
 CSMBOOL csmface_contains_point(
                         const struct csmface_t *face,
                         double x, double y, double z,
+                        const struct csmtolerance_t *tolerances,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
@@ -459,7 +462,7 @@ CSMBOOL csmface_contains_point(
         if (csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
-                        csmtolerance_point_in_loop_boundary(),
+                        tolerances,
                         &type_of_containment_loc, &hit_vertex_loc, &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == CSMFALSE)
         {
             containts_point = CSMFALSE;
@@ -473,13 +476,10 @@ CSMBOOL csmface_contains_point(
             else
             {
                 struct csmloop_t *loop_iterator;
-                double tolerance;
                 
                 loop_iterator = face->floops;
                 containts_point = CSMTRUE;
                 
-                tolerance = csmtolerance_point_in_loop_boundary();
-            
                 while (loop_iterator != NULL)
                 {
                     if (loop_iterator != face->flout && csmloop_has_only_a_null_edge(loop_iterator) == CSMFALSE)
@@ -492,7 +492,7 @@ CSMBOOL csmface_contains_point(
                         if (csmloop_is_point_inside_loop(
                                 loop_iterator,
                                 x, y, z, face->dropped_coord,
-                                tolerance,
+                                tolerances,
                                 &type_of_containment_hole, &hit_vertex_hole, &hit_hedge_hole, &t_relative_to_hit_hedge_hole) == CSMTRUE)
                         {
                             if (type_of_containment_hole == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
@@ -528,7 +528,10 @@ CSMBOOL csmface_contains_point(
 
 // ------------------------------------------------------------------------------------------
 
-CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x, double y, double z)
+CSMBOOL csmface_is_point_interior_to_face(
+                        const struct csmface_t *face,
+                        double x, double y, double z,
+                        const struct csmtolerance_t *tolerances)
 {
     CSMBOOL is_interior_to_face;
     
@@ -549,7 +552,7 @@ CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x
         if (csmloop_is_point_inside_loop(
                         face->flout,
                         x, y, z, face->dropped_coord,
-                        csmtolerance_point_in_loop_boundary(),
+                        tolerances,
                         &type_of_containment, NULL, NULL, NULL) == CSMFALSE)
         {
             is_interior_to_face = CSMFALSE;
@@ -561,12 +564,9 @@ CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x
         else
         {
             struct csmloop_t *loop_iterator;
-            double tolerance;
             
             loop_iterator = face->floops;
             is_interior_to_face = CSMTRUE;
-            
-            tolerance = csmtolerance_point_in_loop_boundary();
             
             while (loop_iterator != NULL)
             {
@@ -575,7 +575,7 @@ CSMBOOL csmface_is_point_interior_to_face(const struct csmface_t *face, double x
                     if (csmloop_is_point_inside_loop(
                             loop_iterator,
                             x, y, z, face->dropped_coord,
-                            tolerance,
+                            tolerances,
                             &type_of_containment, NULL, NULL, NULL) == CSMTRUE)
                     {
                         if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
@@ -681,7 +681,10 @@ CSMBOOL csmface_exists_intersection_between_line_and_face_plane(
 
 // ------------------------------------------------------------------------------------------
 
-CSMBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop_t *loop)
+CSMBOOL csmface_is_loop_contained_in_face(
+                        struct csmface_t *face,
+                        struct csmloop_t *loop,
+                        const struct csmtolerance_t *tolerances)
 {
     register struct csmhedge_t *iterator;
     unsigned long num_iteraciones;
@@ -706,7 +709,7 @@ CSMBOOL csmface_is_loop_contained_in_face(struct csmface_t *face, struct csmloop
         if (csmloop_is_point_inside_loop(
                     face->flout,
                     x, y, z, face->dropped_coord,
-                    csmtolerance_point_in_loop_boundary(),
+                    tolerances,
                     NULL, NULL, NULL, NULL) == CSMFALSE)
         {
             return CSMFALSE;

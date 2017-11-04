@@ -226,7 +226,7 @@ void csmloop_face_equation(
     
     //assert(num_vertexs >= 3);
     
-    if (csmmath_is_null_vector(A_loc, B_loc, C_loc, csmtolerance_null_vector()) == CSMTRUE)
+    if (csmmath_is_null_vector(A_loc, B_loc, C_loc, csmtolerance_default_null_vector()) == CSMTRUE)
     {
         A_loc = 0.;
         B_loc = 0.;
@@ -311,7 +311,7 @@ double csmloop_max_distance_to_plane(
         
     } while (iterator != loop->ledge);
     
-    return CSMMATH_MAX(max_distance_to_plane, csmtolerance_coplanarity());
+    return CSMMATH_MAX(max_distance_to_plane, csmtolerance_default_coplanarity());
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -444,7 +444,9 @@ static CSMBOOL i_is_point_on_loop_boundary(
 
 // --------------------------------------------------------------------------------------------------------------
 
-static CSMBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t *he1, struct csmhedge_t *he2)
+static CSMBOOL i_are_hedges_collinear(
+                        struct csmhedge_t *he0, struct csmhedge_t *he1, struct csmhedge_t *he2,
+                        const struct csmtolerance_t *tolerances)
 {
     struct csmvertex_t *vertex0, *vertex1, *vertex2;
     double tolerance_equal_coords;
@@ -453,7 +455,7 @@ static CSMBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t 
     vertex1 = csmhedge_vertex(he1);
     vertex2 = csmhedge_vertex(he2);
     
-    tolerance_equal_coords = csmtolerance_equal_coords();
+    tolerance_equal_coords = csmtolerance_equal_coords(tolerances);
     
     if (csmvertex_equal_coords(vertex0, vertex1, tolerance_equal_coords) == CSMTRUE
             || csmvertex_equal_coords(vertex1, vertex2, tolerance_equal_coords) == CSMTRUE)
@@ -467,7 +469,7 @@ static CSMBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t 
         csmvertex_vector_from_vertex1_to_vertex2(vertex0, vertex1, &Ux1, &Uy1, &Uz1);
         csmvertex_vector_from_vertex1_to_vertex2(vertex1, vertex2, &Ux2, &Uy2, &Uz2);
         
-        if (csmmath_vectors_are_parallel(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2) == CSMFALSE)
+        if (csmmath_vectors_are_parallel(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, tolerances) == CSMFALSE)
         {
             return CSMFALSE;
         }
@@ -486,12 +488,11 @@ static CSMBOOL i_are_hedges_collinear(struct csmhedge_t *he0, struct csmhedge_t 
 }
 
 // --------------------------------------------------------------------------------------------------------------
-static unsigned long i_niter = 0;
 
 CSMBOOL csmloop_is_point_inside_loop(
                         const struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
-                        double tolerance,
+                        const struct csmtolerance_t *tolerances,
                         enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
@@ -503,12 +504,11 @@ CSMBOOL csmloop_is_point_inside_loop(
     double t_relative_to_hit_hedge_loc;
 
     assert_no_null(loop);
-    i_niter++;
     
     if (i_is_point_on_loop_boundary(
                         loop->ledge,
                         x, y, z,
-                        tolerance,
+                        csmtolerance_point_in_loop_boundary(tolerances),
                         &hit_vertex_loc,
                         &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == CSMTRUE)
     {
@@ -551,7 +551,7 @@ CSMBOOL csmloop_is_point_inside_loop(
             prev_ray_hedge = csmhedge_prev(ray_hedge);
             next_ray_hedge = csmhedge_next(ray_hedge);
             
-            if (i_are_hedges_collinear(prev_ray_hedge, ray_hedge, next_ray_hedge) == CSMFALSE)
+            if (i_are_hedges_collinear(prev_ray_hedge, ray_hedge, next_ray_hedge, tolerances) == CSMFALSE)
             {
                 start_hedge = ray_hedge;
                 break;
@@ -593,7 +593,7 @@ CSMBOOL csmloop_is_point_inside_loop(
                     
                     next_next_ray_hedge = csmhedge_next(next_ray_hedge);
                     
-                    if (i_are_hedges_collinear(ray_hedge, next_ray_hedge, next_next_ray_hedge) == CSMTRUE)
+                    if (i_are_hedges_collinear(ray_hedge, next_ray_hedge, next_next_ray_hedge, tolerances) == CSMTRUE)
                     {
                         hedges_collinear = CSMTRUE;
                         next_ray_hedge = next_next_ray_hedge;

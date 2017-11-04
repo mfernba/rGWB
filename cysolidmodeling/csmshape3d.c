@@ -24,6 +24,7 @@
 #include "csmassert.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
+#include "csmtolerance.inl"
 
 // --------------------------------------------------------------------------------
 
@@ -93,6 +94,7 @@ struct csmsolid_t *csmshape3d_create_torus(
     unsigned long i;
     double incr_alfa_rad, incr_beta_rad;
     struct csmface_t *initial_face, *face_to_extrude;
+    struct csmtolerance_t *tolerances;
     
     assert(no_points_circle_R >= 3);
     assert(no_points_circle_r >= 3);
@@ -104,6 +106,8 @@ struct csmsolid_t *csmshape3d_create_torus(
     incr_alfa_rad = 2. * CSMMATH_PI / no_points_circle_r;
     incr_beta_rad = 2. * CSMMATH_PI / no_points_circle_R;
     csmvertex_set_mask_attrib(csmhedge_vertex(initial_hedge), (csmvertex_mask_t)0);
+    
+    tolerances = csmtolerance_new();
     
     previous_hedge = initial_hedge;
     
@@ -164,7 +168,7 @@ struct csmsolid_t *csmshape3d_create_torus(
         face_to_extrude = csmopbas_face_from_hedge(scan_next_next);
     }
     
-    csmloopglue_merge_faces(initial_face, &face_to_extrude);
+    csmloopglue_merge_faces(initial_face, &face_to_extrude, tolerances);
 
     i_apply_transform_to_solid(
                         x_center, y_center, z_center,
@@ -172,6 +176,8 @@ struct csmsolid_t *csmshape3d_create_torus(
                         torus);
     
     csmsolid_clear_algorithm_data(torus);
+    
+    csmtolerance_free(&tolerances);
     
     return torus;
 }
