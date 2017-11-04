@@ -11,6 +11,8 @@
 
 #include "csmtypes.hxx"
 
+struct csmarrayc_extra_item_t;
+
 #define csmArrayStruct(tipo) struct csmArrayStruct_##tipo
 typedef unsigned char csmarrayc_byte;
 
@@ -22,5 +24,8 @@ typedef void (*csmarrayc_FPtr_free_struct)(void **element);
 
 typedef enum csmcompare_t (*csmarrayc_FPtr_compare)(const void *element1, const void *element2);
 #define CSMARRAYC_CHECK_FUNC_COMPARE_ST(function, type) (void)((enum csmcompare_t (*)(const struct type *, const struct type *))function == function)
+
+typedef enum csmcompare_t (*csmarrayc_FPtr_compare_1_extra)(const void *element1, const void *element2, const struct csmarrayc_extra_item_t *extra_item);
+#define CSMARRAYC_CHECK_FUNC_COMPARE_ST_1_EXTRA(function, type, extra_type) (void)((enum csmcompare_t (*)(const struct type *, const struct type *, const extra_type *))function == function)
 
 #endif /* csmarrayc_hxx */

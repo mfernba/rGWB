@@ -9,7 +9,7 @@
 #include "csmarrayc.hxx"
 #include "csmfwddecl.hxx"
 
-struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacidad_inicial, size_t tamanyo_tipo_dato);
+struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacidad_inicial, size_t tamanyo_type_dato);
 
 void csmarrayc_nousar_destruye(struct csmarrayc_t **array, csmarrayc_FPtr_free_struct func_free_struct);
 
@@ -31,42 +31,46 @@ void csmarrayc_nousar_delete_element(struct csmarrayc_t *array, unsigned long id
 
 void csmarrayc_nousar_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare func_compare);
 
+void csmarrayc_nousar_qsort_1_extra(
+                        struct csmarrayc_t *array,
+                        struct csmarrayc_extra_item_t *extra_item,
+                        csmarrayc_FPtr_compare_1_extra func_compare_1_extra);
 
 // Array of pointers to structs...
 
-#define csmarrayc_new_st_array(capacidad_inicial, tipo) (csmArrayStruct(tipo) *)csmarrayc_dontuse_new_ptr_array(capacidad_inicial, sizeof(struct tipo *))
-#define csmarrayc_new_const_st_array(capacidad_inicial, tipo) (const csmArrayStruct(tipo) *)csmarrayc_dontuse_new_ptr_array(capacidad_inicial, sizeof(struct tipo *))
+#define csmarrayc_new_st_array(capacidad_inicial, type) (csmArrayStruct(type) *)csmarrayc_dontuse_new_ptr_array(capacidad_inicial, sizeof(struct type *))
+#define csmarrayc_new_const_st_array(capacidad_inicial, type) (const csmArrayStruct(type) *)csmarrayc_dontuse_new_ptr_array(capacidad_inicial, sizeof(struct type *))
 
-#define csmarrayc_free_st(array, tipo, func_free)\
+#define csmarrayc_free_st(array, type, func_free)\
 (\
-    (void)((csmArrayStruct(tipo) **)array == array),\
-    CSMARRAYC_CHECK_FUNC_FREE_STRUCT(func_free, tipo),\
+    (void)((csmArrayStruct(type) **)array == array),\
+    CSMARRAYC_CHECK_FUNC_FREE_STRUCT(func_free, type),\
     csmarrayc_nousar_destruye((struct csmarrayc_t **)array, (csmarrayc_FPtr_free_struct)func_free)\
 )
 
-#define csmarrayc_free_const_st(array, tipo)\
+#define csmarrayc_free_const_st(array, type)\
 (\
-    (void)((const csmArrayStruct(tipo) **)array == array),\
+    (void)((const csmArrayStruct(type) **)array == array),\
     csmarrayc_nousar_destruye((struct csmarrayc_t **)array, NULL)\
 )
 
-#define csmarrayc_count_st(array, tipo)\
+#define csmarrayc_count_st(array, type)\
 (\
-    (void)((csmArrayStruct(tipo) *)array == array),\
+    (void)((csmArrayStruct(type) *)array == array),\
     csmarrayc_nousar_num_elems((const struct csmarrayc_t *)array)\
 )
 
-#define csmarrayc_append_element_st(array, dato, tipo)\
+#define csmarrayc_append_element_st(array, dato, type)\
 (\
-    (void)((csmArrayStruct(tipo) *)array == array),\
-    (void)((struct tipo *)dato == dato),\
+    (void)((csmArrayStruct(type) *)array == array),\
+    (void)((struct type *)dato == dato),\
     (void)csmarrayc_nousar_append_elemento((struct csmarrayc_t *)array, (void *)(&(dato)))\
 )
 
-#define csmarrayc_append_element_const_st(array, dato, tipo)\
+#define csmarrayc_append_element_const_st(array, dato, type)\
 (\
-    (void)((const csmArrayStruct(tipo) *)array == array),\
-    (void)((const struct tipo *)dato == dato),\
+    (void)((const csmArrayStruct(type) *)array == array),\
+    (void)((const struct type *)dato == dato),\
     (void)csmarrayc_nousar_append_elemento((struct csmarrayc_t *)array, (void *)(&(dato)))\
 )
 
@@ -78,43 +82,51 @@ void csmarrayc_nousar_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare fu
     csmarrayc_nousar_contains_element((struct csmarrayc_t *)array, (const void *)search_data, (csmarrayc_FPtr_match_condition)func_match_condition, idx_opt)\
 )
 
-#define csmarrayc_get_st(array, idx, tipo)\
+#define csmarrayc_get_st(array, idx, type)\
 (\
-    (void)((csmArrayStruct(tipo) *)array == array),\
-    (struct tipo *)csmarrayc_nousar_get((struct csmarrayc_t *)array, idx)\
+    (void)((csmArrayStruct(type) *)array == array),\
+    (struct type *)csmarrayc_nousar_get((struct csmarrayc_t *)array, idx)\
 )
 
-#define csmarrayc_get_const_st(array, idx, tipo)\
+#define csmarrayc_get_const_st(array, idx, type)\
 (\
-    (void)((const csmArrayStruct(tipo) *)array == array),\
-    (const struct tipo *)csmarrayc_nousar_get((struct csmarrayc_t *)array, idx)\
+    (void)((const csmArrayStruct(type) *)array == array),\
+    (const struct type *)csmarrayc_nousar_get((struct csmarrayc_t *)array, idx)\
 )
 
-#define csmarrayc_set_st(array, idx, element, tipo)\
+#define csmarrayc_set_st(array, idx, element, type)\
 (\
-    (void)((csmArrayStruct(tipo) *)array == array),\
-    (void)((struct tipo *)element == element),\
+    (void)((csmArrayStruct(type) *)array == array),\
+    (void)((struct type *)element == element),\
     csmarrayc_nousar_set_element((struct csmarrayc_t *)array, idx, (void *)(&(element)))\
 )
 
-#define csmarrayc_set_const_st(array, idx, element, tipo)\
+#define csmarrayc_set_const_st(array, idx, element, type)\
 (\
-    (void)((const csmArrayStruct(tipo) *)array == array),\
-    (void)((struct tipo *)element == element),\
+    (void)((const csmArrayStruct(type) *)array == array),\
+    (void)((struct type *)element == element),\
     csmarrayc_nousar_set_element((struct csmarrayc_t *)array, idx, (void *)(&(element)))\
 )
 
-#define csmarrayc_delete_element_st(array, idx, tipo, func_free)\
+#define csmarrayc_delete_element_st(array, idx, type, func_free)\
 (\
-    (void)((csmArrayStruct(tipo) *)array == array),\
-    CSMARRAYC_CHECK_FUNC_FREE_STRUCT(func_free, tipo),\
+    (void)((csmArrayStruct(type) *)array == array),\
+    CSMARRAYC_CHECK_FUNC_FREE_STRUCT(func_free, type),\
     csmarrayc_nousar_delete_element((struct csmarrayc_t *)array, idx, (csmarrayc_FPtr_free_struct)func_free)\
 )
 
-#define csmarrayc_qsort_st(array, tipo, func_compare)\
+#define csmarrayc_qsort_st(array, type, func_compare)\
 (\
-    (void)((csmArrayStruct(tipo) *)array == array),\
-    CSMARRAYC_CHECK_FUNC_COMPARE_ST(func_compare, tipo),\
+    (void)((csmArrayStruct(type) *)array == array),\
+    CSMARRAYC_CHECK_FUNC_COMPARE_ST(func_compare, type),\
     csmarrayc_nousar_qsort((struct csmarrayc_t *)array, (csmarrayc_FPtr_compare)func_compare)\
+)
+
+#define csmarrayc_qsort_st_1_extra(array, type, extra_item, extra_type, func_compare)\
+(\
+    (void)((csmArrayStruct(type) *)array == array),\
+    (void)((extra_type *)extra_item == extra_item),\
+    CSMARRAYC_CHECK_FUNC_COMPARE_ST_1_EXTRA(func_compare, type, extra_type),\
+    csmarrayc_nousar_qsort_1_extra((struct csmarrayc_t *)array, (struct csmarrayc_extra_item_t *)extra_item, (csmarrayc_FPtr_compare_1_extra)func_compare)\
 )
 

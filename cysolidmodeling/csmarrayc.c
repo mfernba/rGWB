@@ -34,6 +34,13 @@ struct i_cmp_data_t
     csmarrayc_FPtr_compare func_compare;
 };
 
+struct i_cmp_data_1_extra_t
+{
+    struct csmarrayc_t *array;
+    struct csmarrayc_extra_item_t *extra_item;
+    csmarrayc_FPtr_compare_1_extra func_compare;
+};
+
 // ---------------------------------------------------------------------------------
 
 static void i_integrity(const struct csmarrayc_t *array)
@@ -274,6 +281,36 @@ void csmarrayc_nousar_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare fu
     cmp_data.func_compare = func_compare;
     
     csmarqsort(array->ptr_datos, array->num_elementos, array->tamanyo_tipo_dato, (void *)&cmp_data, i_cmp_function_ptr);
+}
+
+// ---------------------------------------------------------------------------------
+
+static int i_cmp_function_ptr_1_extra(const void *cmp_data_void, const void *e1, const void *e2)
+{
+    struct i_cmp_data_1_extra_t *cmp_data;
+    
+    cmp_data = (struct i_cmp_data_1_extra_t *)cmp_data_void;
+    assert_no_null(cmp_data);
+    
+    return (int)cmp_data->func_compare(*(void **)e1, *(void **)e2, cmp_data->extra_item);
+}
+
+// ---------------------------------------------------------------------------------
+
+void csmarrayc_nousar_qsort_1_extra(
+                        struct csmarrayc_t *array,
+                        struct csmarrayc_extra_item_t *extra_item,
+                        csmarrayc_FPtr_compare_1_extra func_compare_1_extra)
+{
+    struct i_cmp_data_1_extra_t cmp_data;
+    
+    assert_no_null(array);
+    
+    cmp_data.array = array;
+    cmp_data.extra_item = extra_item;
+    cmp_data.func_compare = func_compare_1_extra;
+    
+    csmarqsort(array->ptr_datos, array->num_elementos, array->tamanyo_tipo_dato, (void *)&cmp_data, i_cmp_function_ptr_1_extra);
 }
 
 
