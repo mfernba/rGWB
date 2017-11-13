@@ -974,6 +974,24 @@ void csmsolid_move(struct csmsolid_t *solid, double dx, double dy, double dz)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_scale(struct csmsolid_t *solid, double Sx, double Sy, double Sz)
+{
+    struct csmtransform_t *transform;
+    
+    assert_no_null(solid);
+    
+    transform = csmtransform_make_general(
+                        Sx, 0., 0., 0.,
+                        0., Sy, 0., 0.,
+                        0., 0., Sz, 0.);
+    
+    i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform, solid->bbox);
+    
+    csmtransform_free(&transform);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_rotate(
                     struct csmsolid_t *solid,
                     double angulo_rotacion_rad,

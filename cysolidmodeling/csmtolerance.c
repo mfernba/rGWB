@@ -57,7 +57,17 @@ struct csmtolerance_t *csmtolerance_new(void)
     double tolerance_null_vector;
     double tolerance_point_in_loop_boundary;
     double tolerance_bbox_absolute_tolerance;
-    
+
+/*
+    tolerance_equal_coords = 1.e-6;
+    tolerance_equal_angle_rad = 1.e-6;
+    tolerance_dot_product_parallel_vectors = 1.e-6;
+    tolerance_coplanarity = csmtolerance_default_coplanarity();
+    tolerance_relative_position_over_edge = 1.e-6;
+    tolerance_null_vector = csmtolerance_default_null_vector();
+    tolerance_point_in_loop_boundary = 1.e-6;
+    tolerance_bbox_absolute_tolerance = 0.01;
+ */
     tolerance_equal_coords = 1.e-6;
     tolerance_equal_angle_rad = 1.e-6;
     tolerance_dot_product_parallel_vectors = 1.e-6;

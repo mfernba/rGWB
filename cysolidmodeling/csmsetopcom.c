@@ -11,6 +11,7 @@
 #include "csmface_debug.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
+#include "csmloopglue.inl"
 #include "csmeuler_laringmv.inl"
 #include "csmeuler_lkef.inl"
 #include "csmeuler_lkev.inl"
@@ -821,6 +822,236 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(
         }
         
         csmhashtb_free_iterator(&face_iterator, csmface_t);
+        
+    } while (there_are_changes == CSMTRUE);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static CSMBOOL i_is_loop_filled_by_face(struct csmloop_t *loop, struct csmface_t **opposed_face_opt)
+{
+    CSMBOOL is_filled_by_face;
+    struct csmface_t *opposed_face_loc;
+    struct csmhedge_t *lhedge, *he_iterator;
+    struct csmloop_t *opposed_loop;
+    unsigned long no_iters;
+    
+    is_filled_by_face = CSMTRUE;
+    
+    lhedge = csmloop_ledge(loop);
+    he_iterator = lhedge;
+    opposed_loop = NULL;
+    opposed_face_loc = NULL;
+    no_iters = 0;
+    
+    do
+    {
+        struct csmhedge_t *he_iterator_mate;
+        struct csmloop_t *he_iterator_mate_loop;
+        
+        assert(no_iters < 10000);
+        no_iters++;
+    
+        he_iterator_mate = csmopbas_mate(he_iterator);
+        he_iterator_mate_loop = csmhedge_loop(he_iterator_mate);
+        
+        if (opposed_loop == NULL)
+        {
+            opposed_loop = he_iterator_mate_loop;
+        }
+        else if (he_iterator_mate_loop != opposed_loop)
+        {
+            is_filled_by_face = CSMFALSE;
+            break;
+        }
+        
+        he_iterator = csmhedge_next(he_iterator);
+        
+    } while (he_iterator != lhedge);
+    
+    if (is_filled_by_face == CSMTRUE)
+    {
+        opposed_face_loc = csmloop_lface(opposed_loop);
+        assert(csmface_has_holes(opposed_face_loc) == CSMFALSE);
+    }
+    else
+    {
+        opposed_face_loc = NULL;
+    }
+    
+    ASSIGN_OPTIONAL_VALUE(opposed_face_opt, opposed_face_loc);
+    
+    return is_filled_by_face;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_remove_hole_filled_by_face(struct csmsolid_t *solid, struct csmface_t *face)
+{
+    struct csmloop_t *loop1, *loop2;
+    struct csmhedge_t *he, *he_next;
+    unsigned long no_iters;
+    struct csmvertex_t *vertex;
+    
+    if (csmdebug_debug_enabled() == CSMTRUE)
+    {
+        csmdebug_print_debug_info("i_remove_hole_filled_by_face(): Before deleting hedges\n");
+        csmface_debug_print_info_debug(face, CSMTRUE, NULL);
+    }
+    
+    loop1 = csmface_floops(face);
+    loop2 = csmloop_next(loop1);
+    assert(csmloop_next(loop2) == NULL);
+    
+    he = csmloop_ledge(loop1);
+    no_iters = 0;
+    
+    do
+    {
+        struct csmhedge_t *he_mate;
+        struct csmedge_t *he_edge;
+        
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        he_next = csmhedge_next(he);
+        
+        he_edge = csmhedge_edge(he);
+        he_mate = csmopbas_mate(he);
+        
+        csmeuler_lkev(&he, &he_mate, NULL, NULL, NULL, NULL);
+        
+        he = he_next;
+        
+    } while (csmhedge_edge(he) != NULL);
+    
+    if (csmdebug_debug_enabled() == CSMTRUE)
+    {
+        csmdebug_print_debug_info("i_remove_hole_filled_by_face(): After deleting hedges\n");
+        csmface_debug_print_info_debug(face, CSMTRUE, NULL);
+    }
+
+    vertex = csmhedge_vertex(he);
+    
+    csmopbas_delhe(&he, NULL, &he);
+    assert(he == NULL);
+    
+    csmface_remove_loop(face, &loop1);
+    csmface_remove_loop(face, &loop2);
+    csmsolid_remove_face(solid, &face);
+    csmsolid_remove_vertex(solid, &vertex);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_delete_holes_filled_by_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances)
+{
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+
+    face_iterator = csmsolid_face_iterator(solid);
+
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        struct csmloop_t *face_floops, *loop_iterator;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        
+        face_floops = csmface_floops(face);
+        loop_iterator = face_floops;
+        
+        do
+        {
+            struct csmloop_t *next_loop;
+            
+            next_loop = csmloop_next(loop_iterator);
+            
+            if (loop_iterator != csmface_flout(face))
+            {
+                struct csmface_t *opposed_face;
+                
+                if (i_is_loop_filled_by_face(loop_iterator, &opposed_face) == CSMTRUE)
+                {
+                    csmface_add_loop_while_removing_from_old(opposed_face, loop_iterator);
+                    i_remove_hole_filled_by_face(solid, opposed_face);
+                }
+            }
+            
+            loop_iterator = next_loop;
+            
+        } while (loop_iterator != NULL);
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_merge_faces_inside_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances)
+{
+    CSMBOOL there_are_changes;
+    
+    there_are_changes = CSMFALSE;
+    
+    do
+    {
+        struct csmhashtb_iterator(csmface_t) *outer_face_iterator;
+    
+        outer_face_iterator = csmsolid_face_iterator(solid);
+        there_are_changes = CSMFALSE;
+    
+        while (csmhashtb_has_next(outer_face_iterator, csmface_t) == CSMTRUE)
+        {
+            struct csmface_t *outer_face;
+            struct csmhashtb_iterator(csmface_t) *inner_face_iterator;
+            
+            csmhashtb_next_pair(outer_face_iterator, NULL, &outer_face, csmface_t);
+            
+            inner_face_iterator = csmsolid_face_iterator(solid);
+            
+            while (csmhashtb_has_next(inner_face_iterator, csmface_t) == CSMTRUE)
+            {
+                struct csmface_t *inner_face;
+                
+                csmhashtb_next_pair(inner_face_iterator, NULL, &inner_face, csmface_t);
+                
+                if (outer_face != inner_face
+                        && csmface_should_analyze_intersections_between_faces(outer_face, inner_face) == CSMTRUE
+                        && csmface_are_coplanar_faces(outer_face, inner_face) == CSMTRUE
+                        && csmface_has_holes(inner_face) == CSMFALSE)
+                {
+                    struct csmloop_t *inner_face_floops;
+                    
+                    inner_face_floops = csmface_floops(inner_face);
+                    
+                    if (csmface_is_loop_contained_in_face(outer_face, inner_face_floops, tolerances) == CSMTRUE)
+                    {
+                        if (csmdebug_debug_enabled() == CSMTRUE)
+                        {
+                            csmface_debug_print_info_debug(outer_face, CSMTRUE, NULL);
+                            csmface_debug_print_info_debug(inner_face, CSMTRUE, NULL);
+                            
+                            csmface_mark_setop_null_face(outer_face);
+                            csmface_mark_setop_null_face(inner_face);
+                            csmdebug_show_viewer();
+                        }
+                        
+                        csmeuler_lkfmrh(outer_face, &inner_face);
+                        there_are_changes = CSMTRUE;
+                    }
+                }
+                
+                if (there_are_changes == CSMTRUE)
+                    break;
+            }
+            
+            csmhashtb_free_iterator(&inner_face_iterator, csmface_t);
+            
+            if (there_are_changes == CSMTRUE)
+                break;
+        }
+        
+        csmhashtb_free_iterator(&outer_face_iterator, csmface_t);
         
     } while (there_are_changes == CSMTRUE);
 }

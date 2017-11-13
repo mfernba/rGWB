@@ -816,6 +816,13 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     }
     
     csmsolid_clear_algorithm_data(result);
+    csmdebug_set_viewer_results(result, NULL);
+    
+    csmdebug_print_debug_info("Deleting holes filled by faces...\n");
+    csmsetopcom_delete_holes_filled_by_faces(result, tolerances);
+    
+    csmdebug_print_debug_info("Merging faces...\n");
+    csmsetopcom_merge_faces_inside_faces(result, tolerances);
     
     csmsolid_redo_geometric_face_data(result);
     //csmsetopcom_reorient_hole_loops_if_needed(result);

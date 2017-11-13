@@ -15,6 +15,8 @@ DLL_CYSOLIDMODELING void csmsolid_free(struct csmsolid_t **solido);
 
 DLL_CYSOLIDMODELING void csmsolid_move(struct csmsolid_t *solid, double dx, double dy, double dz);
 
+DLL_CYSOLIDMODELING void csmsolid_scale(struct csmsolid_t *solid, double Sx, double Sy, double Sz);
+
 DLL_CYSOLIDMODELING void csmsolid_rotate(
                     struct csmsolid_t *solid,
                     double angulo_rotacion_rad,

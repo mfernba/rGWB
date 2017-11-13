@@ -45,6 +45,16 @@
 
 // ------------------------------------------------------------------------------------------
 
+static void i_assign_flat_material_to_solid(float r, float g, float b, struct csmsolid_t *solid)
+{
+    struct csmmaterial_t *material;
+    
+    material = csmmaterial_new_flat_material(r, g, b, 1.);
+    csmsolid_set_visualization_material(solid, &material);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_crea_destruye_solido_vacio(void)
 {
     struct csmsolid_t *solido;
@@ -1637,7 +1647,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
         {
             struct csmsolid_t *solid5;
             
-            cshape2d = gcelem2d_contorno_circular(0.46, no_points_circle); // Revisar resta con num_puntos_circulo = 8
+            cshape2d = gcelem2d_contorno_circular(0.35, no_points_circle); // Revisar resta con num_puntos_circulo = 8
             
             solid5 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
@@ -1645,7 +1655,10 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
                         20000);
             
             csmsolid_move(solid1, -0.5, 0., 0.);
-            //solid_res = csmsetop_difference_A_minus_B(solid1, solid_res);
+            solid_res = csmsetop_difference_A_minus_B(solid1, solid_res);
+            i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_res);
+            
+            i_assign_flat_material_to_solid(1., 0., 0., solid5);
             solid_res = csmsetop_difference_A_minus_B(solid_res, solid5);
             //solid_res = csmsetop_intersection_A_and_B(solid_res, solid5);
             //solid_res = csmsetop_intersection_A_and_B(solid_res5, solid_res);
@@ -1966,7 +1979,7 @@ static void i_test_mechanical_part1(void)
         struct csmsolid_t *solid_above, *solid_below;
         CSMBOOL splitted;
 
-        csmdebug_set_enabled_by_code(CSMFALSE);
+        //csmdebug_set_enabled_by_code(CSMFALSE);
         
         csmmath_implicit_plane_equation(0., 0., 0., 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
     
@@ -2389,6 +2402,7 @@ static void i_test_sphere2(void)
                         1., 0., 0.,
                         0., 1., 0.,
                         1);
+    i_assign_flat_material_to_solid(1., 0., 0., sphere);
 
     torus = csmshape3d_create_torus(
                         3.,  16,
@@ -2397,6 +2411,7 @@ static void i_test_sphere2(void)
                         0., 1., 0.,
                         0., 0., 1.,
                         1);
+    i_assign_flat_material_to_solid(0., 0., 1., torus);
 
     torus2 = csmshape3d_create_torus(
                         3.,  16,
@@ -2405,6 +2420,7 @@ static void i_test_sphere2(void)
                         1., 0., 0.,
                         0., 1., 0.,
                         1);
+    i_assign_flat_material_to_solid(0., 1., 1., torus2);
     
     cone = csmshape3d_create_cone(
                         5., 2., 32,
@@ -2412,6 +2428,7 @@ static void i_test_sphere2(void)
                         -1., 0., 0.,
                         0., 0., 1.,
                         1);
+    i_assign_flat_material_to_solid(1., 1., 1., cone);
     
     csmdebug_set_viewer_results(sphere, torus);
     //csmdebug_show_viewer();
@@ -2494,16 +2511,6 @@ static void i_test_sphere3(void)
     
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
-}
-
-// ------------------------------------------------------------------------------------------
-
-static void i_assign_flat_material_to_solid(float r, float g, float b, struct csmsolid_t *solid)
-{
-    struct csmmaterial_t *material;
-    
-    material = csmmaterial_new_flat_material(r, g, b, 1.);
-    csmsolid_set_visualization_material(solid, &material);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -3038,6 +3045,202 @@ static void i_test_mechanical6(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test7_edge_spheres(
+                        double radius, double thick,
+                        unsigned long no_points_circle,
+                        struct csmsolid_t **edge_left, struct csmsolid_t **edge_rigth)
+{
+    struct csmsolid_t *sphere, *inner_sphere, *half_sphere_top, *half_sphere_bottom;
+    struct csmsolid_t *solid_aux;
+    CSMBOOL splitted;
+    
+    assert(radius > 0.);
+    assert(thick > 0.);
+    assert(thick < radius);
+    
+    sphere = csmshape3d_create_sphere(radius, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    inner_sphere = csmshape3d_create_sphere(radius - thick, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    
+    splitted = csmsplit_does_plane_split_solid(sphere, 0., 0., 1., 0., &half_sphere_top, &half_sphere_bottom);
+    assert(splitted == CSMTRUE);
+    csmsolid_free(&half_sphere_top);
+    csmsolid_free(&sphere);
+    
+    solid_aux = half_sphere_bottom;
+    half_sphere_bottom = csmsetop_difference_A_minus_B(half_sphere_bottom, inner_sphere);
+    csmsolid_free(&solid_aux);
+    csmsolid_free(&inner_sphere);
+    
+    splitted = csmsplit_does_plane_split_solid(half_sphere_bottom, -1., 0., 0., 0., edge_left, edge_rigth);
+    assert(splitted == CSMTRUE);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static struct csmsolid_t *i_create_horizontal_hollow_cylinder(
+                    double radius, double thick,
+                    double length,
+                    unsigned long no_points_circle)
+{
+    struct csmsolid_t *cylinder;
+    struct gccontorno_t *cylinder_shape;
+    
+    cylinder_shape = gcelem2d_contorno_circular_hueco(radius, radius - thick, no_points_circle);
+    
+    cylinder = csmsweep_create_solid_from_shape_debug(
+                    cylinder_shape,
+                     0.5 * length, 0., 0., 0., 1., 0., 0., 0., 1.,
+                    cylinder_shape,
+                    -0.5 * length, 0., 0., 0., 1., 0., 0., 0., 1.,
+                    0);
+    
+    gccontorno_destruye(&cylinder_shape);
+    
+    return cylinder;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static struct csmsolid_t *i_create_planar_block(double ax, double ay, double az)
+{
+    struct csmsolid_t *solid;
+    struct gccontorno_t *shape;
+    
+    shape = gcelem2d_contorno_rectangular(ax, ay);
+    
+    solid = csmsweep_create_solid_from_shape_debug(
+                        shape, 0., 0.,  0.5 * az, 1., 0., 0., 0., 1., 0.,
+                        shape, 0., 0., -0.5 * az, 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    gccontorno_destruye(&shape);
+    
+    return solid;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test7_cylinder(
+                        double radius, double thick,
+                        double length,
+                        unsigned long no_points_circle,
+                        struct csmsolid_t **cylinder)
+{
+    struct csmsolid_t *cyl, *cyl_top;
+    CSMBOOL splitted;
+    
+    assert(radius > 0.);
+    assert(thick > 0.);
+    assert(thick < radius);
+    
+    cyl = i_create_horizontal_hollow_cylinder(radius, thick, length, no_points_circle);
+    
+    splitted = csmsplit_does_plane_split_solid(cyl, 0., 0., 1., 0., &cyl_top, cylinder);
+    assert(splitted == CSMTRUE);
+    csmsolid_free(&cyl_top);
+    csmsolid_free(&cyl);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_mechanichal7(void)
+{
+    struct csmsolid_t *solid;
+    struct csmsolid_t *solid_aux;
+    double radius, thick, length;
+    unsigned long no_points_circle;
+    struct csmsolid_t *hsphere_left, *hsphere_rigth;
+    struct csmsolid_t *body_cylinder;
+    struct csmsolid_t *top_block, *top_block_common, *top_block_common2;
+    
+    radius = 0.2;
+    thick = 0.01;
+    length = 1.;
+    no_points_circle = 4;
+    
+    i_set_output_debug_file("mechanical7.txt");
+
+    csmdebug_set_enabled_by_code(CSMFALSE);
+    
+    i_test7_edge_spheres(radius, thick, no_points_circle, &hsphere_left, &hsphere_rigth);
+    
+    csmsolid_move(hsphere_left,  -(0.5 * length), 0., 0.);
+    csmsolid_move(hsphere_rigth,  (0.5 * length), 0., 0.);
+    
+    i_test7_cylinder(radius, thick, length, no_points_circle, &body_cylinder);
+    
+    solid = csmsetop_union_A_and_B(hsphere_left, body_cylinder);
+    
+    solid_aux = solid;
+    solid = csmsetop_union_A_and_B(solid, hsphere_rigth);
+    csmsolid_free(&solid_aux);
+    
+    csmsolid_scale(solid, 1., 1.5, 1.);
+    
+    top_block = i_create_planar_block(length + 3. * radius, 4. * radius, thick);
+    csmsolid_move(top_block, 0., 0., -0.6 * thick);
+
+    csmdebug_set_enabled_by_code(CSMTRUE);
+    
+    top_block_common = csmsetop_intersection_A_and_B(solid, top_block);
+    csmdebug_set_viewer_results(top_block_common, NULL);
+    csmdebug_show_viewer();
+    
+    /*
+    top_block_common2 = csmsetop_union_A_and_B(solid, top_block_common);
+
+    solid_aux = top_block;
+    top_block = csmsetop_difference_A_minus_B(top_block, top_block_common2);
+    csmsolid_free(&solid_aux);
+    
+    solid_aux = solid;
+    solid = csmsetop_union_A_and_B(solid, top_block);
+    csmsolid_free(&solid_aux);
+    csmsolid_free(&top_block);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    */
+    
+    csmsolid_free(&hsphere_left);
+    csmsolid_free(&hsphere_rigth);
+    csmsolid_free(&body_cylinder);
+    csmsolid_free(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_mechanichal7_simplified(void)
+{
+    struct gccontorno_t *shape1, *shape2;
+    struct csmsolid_t *solid1, *solid2;
+    struct csmsolid_t *solid;
+    
+    i_set_output_debug_file("mechanical7_simplified.txt");
+    
+    shape1 = gcelem2d_contorno_rectangular(1.1, 1.1);
+    shape2 = gcelem2d_contorno_rectangular_hueco(1., 1., 0.9, 0.9);
+    
+    solid1 = csmsweep_create_solid_from_shape_debug(shape1, 0., 0., 0., 1., 0., 0., 0., 1., 0., shape1, 0., 0., -0.01, 1., 0., 0., 0., 1., 0., 0);
+    i_assign_flat_material_to_solid(0., 1., 1., solid1);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(shape2, 0., 0., 0., 1., 0., 0., 0., 1., 0., shape2, 0., 0., -0.1, 1., 0., 0., 0., 1., 0., 0);
+    i_assign_flat_material_to_solid(1., 1., 1., solid2);
+
+    solid = csmsetop_intersection_A_and_B(solid1, solid2);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+    csmsolid_free(&solid);
+    gccontorno_destruye(&shape1);
+    gccontorno_destruye(&shape2);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -3061,7 +3264,6 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
 
-    /*
     i_test_divide_solido_rectangular_hueco_por_plano_medio();
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -3096,9 +3298,10 @@ void csmtest_test(void)
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                               // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
-    
     i_test_mechanical_part1_redux();
+    
     i_test_mechanical_part1();
+    
     i_test_mechanical_part2();
     
     i_test_toroide();
@@ -3107,16 +3310,18 @@ void csmtest_test(void)
 
     i_test_sphere2();
     i_test_sphere3();
-    */
     
-    //i_test_mechanical_part2();
+    i_test_mechanical_part2();
 
-    //i_test_sphere4();
+    i_test_sphere4();
     
     i_test_mechanical5();
-    //i_test_mechanical6bis();
-    //i_test_mechanical6();
-    
+    i_test_mechanical6bis();
+    i_test_mechanical6();
+
+    i_test_mechanichal7_simplified();
+    //i_test_mechanichal7();
+
     csmviewer_free(&viewer);
 }
 
