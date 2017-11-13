@@ -25,7 +25,7 @@ extern "C" {
 
 #define ASSIGN_OPTIONAL_VALUE(a, b) if ((a) != NULL) *(a) = (b)
 
-#define DLL_CYSOLIDMODELING
+#define DLL_RGWB
 
 #define INVERT_BOOLEAN(valor) (((valor) == CSMTRUE) ? CSMFALSE: CSMTRUE)
 

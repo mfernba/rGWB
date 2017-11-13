@@ -8,5 +8,5 @@
 
 #include "csmfwddecl.hxx"
 
-DLL_CYSOLIDMODELING CONSTRUCTOR(struct csmmaterial_t *, csmmaterial_new_flat_material, (float r, float g, float b, float a));
+DLL_RGWB CONSTRUCTOR(struct csmmaterial_t *, csmmaterial_new_flat_material, (float r, float g, float b, float a));
 

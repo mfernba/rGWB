@@ -973,7 +973,7 @@ CSMBOOL csmsplit_does_plane_split_solid(
     csmdebug_set_viewer_results(NULL, NULL);
     csmdebug_set_viewer_parameters(work_solid, NULL);
     csmdebug_set_plane(A, B, C, D);
-    csmdebug_show_viewer();
+    //csmdebug_show_viewer();
     
     
     set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D, tolerances);

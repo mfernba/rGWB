@@ -3156,7 +3156,7 @@ static void i_test_mechanichal7(void)
     radius = 0.2;
     thick = 0.01;
     length = 1.;
-    no_points_circle = 4;
+    no_points_circle = 32;
     
     i_set_output_debug_file("mechanical7.txt");
 
@@ -3264,6 +3264,7 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
 
+    /*
     i_test_divide_solido_rectangular_hueco_por_plano_medio();
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -3320,7 +3321,9 @@ void csmtest_test(void)
     i_test_mechanical6();
 
     i_test_mechanichal7_simplified();
-    //i_test_mechanichal7();
+    */
+    
+    i_test_mechanichal7();
 
     csmviewer_free(&viewer);
 }
