@@ -3484,6 +3484,8 @@ void csmtest_test(void)
 
     i_test_mechanichal7_simplified();
     */
+
+    //i_test_mechanical_part1();
     
     //i_test_mechanichal7_simplified();
     i_test_mechanichal7();

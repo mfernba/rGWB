@@ -815,9 +815,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         csmloopglue_merge_face_loops(face_from_solid_A, tolerances);
     }
     
-    csmsolid_clear_algorithm_data(result);
-    csmdebug_set_viewer_results(result, NULL);
-    
+    csmsolid_redo_geometric_face_data(result);
+
     csmdebug_print_debug_info("Deleting holes filled by faces...\n");
     csmsetopcom_delete_holes_filled_by_faces(result, tolerances);
     
@@ -826,6 +825,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
 
     csmdebug_print_debug_info("Convert holes in holes into faces...\n");
     csmsetopcom_convert_holes_in_holes_into_faces(result, tolerances);
+    
+    csmsolid_clear_algorithm_data(result);
+    csmdebug_set_viewer_results(result, NULL);
     
     csmsolid_redo_geometric_face_data(result);
     //csmsetopcom_reorient_hole_loops_if_needed(result);

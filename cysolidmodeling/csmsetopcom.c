@@ -1015,49 +1015,53 @@ void csmsetopcom_merge_faces_inside_faces(struct csmsolid_t *solid, const struct
         while (csmhashtb_has_next(outer_face_iterator, csmface_t) == CSMTRUE)
         {
             struct csmface_t *outer_face;
-            struct csmhashtb_iterator(csmface_t) *inner_face_iterator;
             
             csmhashtb_next_pair(outer_face_iterator, NULL, &outer_face, csmface_t);
             
-            inner_face_iterator = csmsolid_face_iterator(solid);
-            
-            while (csmhashtb_has_next(inner_face_iterator, csmface_t) == CSMTRUE)
+            if (csmface_is_setop_null_face(outer_face) == CSMTRUE)
             {
-                struct csmface_t *inner_face;
+                struct csmhashtb_iterator(csmface_t) *inner_face_iterator;
                 
-                csmhashtb_next_pair(inner_face_iterator, NULL, &inner_face, csmface_t);
+                inner_face_iterator = csmsolid_face_iterator(solid);
                 
-                if (outer_face != inner_face
-                        && csmface_should_analyze_intersections_between_faces(outer_face, inner_face) == CSMTRUE
-                        && csmface_are_coplanar_faces(outer_face, inner_face) == CSMTRUE
-                        && csmface_has_holes(inner_face) == CSMFALSE)
+                while (csmhashtb_has_next(inner_face_iterator, csmface_t) == CSMTRUE)
                 {
-                    struct csmloop_t *inner_face_floops;
+                    struct csmface_t *inner_face;
                     
-                    inner_face_floops = csmface_floops(inner_face);
+                    csmhashtb_next_pair(inner_face_iterator, NULL, &inner_face, csmface_t);
                     
-                    if (csmface_is_loop_contained_in_face(outer_face, inner_face_floops, tolerances) == CSMTRUE)
+                    if (outer_face != inner_face
+                            && csmface_should_analyze_intersections_between_faces(outer_face, inner_face) == CSMTRUE
+                            && csmface_are_coplanar_faces(outer_face, inner_face) == CSMTRUE
+                            && csmface_has_holes(inner_face) == CSMFALSE)
                     {
-                        if (csmdebug_debug_enabled() == CSMTRUE)
-                        {
-                            csmface_debug_print_info_debug(outer_face, CSMTRUE, NULL);
-                            csmface_debug_print_info_debug(inner_face, CSMTRUE, NULL);
-                            
-                            csmface_mark_setop_null_face(outer_face);
-                            csmface_mark_setop_null_face(inner_face);
-                            csmdebug_show_viewer();
-                        }
+                        struct csmloop_t *inner_face_floops;
                         
-                        csmeuler_lkfmrh(outer_face, &inner_face);
-                        there_are_changes = CSMTRUE;
+                        inner_face_floops = csmface_floops(inner_face);
+                        
+                        if (csmface_is_loop_contained_in_face(outer_face, inner_face_floops, tolerances) == CSMTRUE)
+                        {
+                            if (csmdebug_debug_enabled() == CSMTRUE)
+                            {
+                                csmface_debug_print_info_debug(outer_face, CSMTRUE, NULL);
+                                csmface_debug_print_info_debug(inner_face, CSMTRUE, NULL);
+                                
+                                csmface_mark_setop_null_face(outer_face);
+                                csmface_mark_setop_null_face(inner_face);
+                                csmdebug_show_viewer();
+                            }
+                            
+                            csmeuler_lkfmrh(outer_face, &inner_face);
+                            there_are_changes = CSMTRUE;
+                        }
                     }
+                    
+                    if (there_are_changes == CSMTRUE)
+                        break;
                 }
                 
-                if (there_are_changes == CSMTRUE)
-                    break;
+                csmhashtb_free_iterator(&inner_face_iterator, csmface_t);
             }
-            
-            csmhashtb_free_iterator(&inner_face_iterator, csmface_t);
             
             if (there_are_changes == CSMTRUE)
                 break;
