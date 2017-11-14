@@ -18,6 +18,7 @@
 #include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmhashtb.inl"
+#include "csmexplode.h"
 #include "csmglue.h"
 #include "csmface.inl"
 #include "csmmath.inl"
@@ -41,6 +42,7 @@
 #include "csmmaterial.h"
 #include "csmtolerance.inl"
 
+#include "csmarrayc.inl"
 #include "csmtest_array.inl"
 
 // ------------------------------------------------------------------------------------------
@@ -3176,31 +3178,173 @@ static void i_test_mechanichal7(void)
     csmsolid_free(&solid_aux);
     
     csmsolid_scale(solid, 1., 1.5, 1.);
+    i_assign_flat_material_to_solid(0.95, 0.95, 0.95, solid);
     
     top_block = i_create_planar_block(length + 3. * radius, 4. * radius, thick);
-    csmsolid_move(top_block, 0., 0., -0.6 * thick);
+    i_assign_flat_material_to_solid(0.95, 0.95, 0.95, top_block);
+    csmsolid_move(top_block, 0., 0., -0.5 * thick);
 
-    csmdebug_set_enabled_by_code(CSMTRUE);
-    
-    top_block_common = csmsetop_intersection_A_and_B(solid, top_block);
-    csmdebug_set_viewer_results(top_block_common, NULL);
-    csmdebug_show_viewer();
-    
-    /*
-    top_block_common2 = csmsetop_union_A_and_B(solid, top_block_common);
+    {
+        struct csmsolid_t *difference;
+        csmArrayStruct(csmsolid_t) *shells;
+        struct csmsolid_t *top_block_hole, *top_block_reduced;
+        
+        difference = csmsetop_difference_A_minus_B(top_block, solid);
+        shells = csmexplode_explode_shells(difference);
 
-    solid_aux = top_block;
-    top_block = csmsetop_difference_A_minus_B(top_block, top_block_common2);
-    csmsolid_free(&solid_aux);
+        top_block_hole = csmsolid_duplicate(csmarrayc_get_st(shells, 1, csmsolid_t));
+        
+        csmdebug_set_viewer_results(top_block_hole, NULL);
+        csmdebug_show_viewer();
+        
+        csmsolid_free(&top_block);
+        top_block = csmsolid_duplicate(top_block_hole);
+        csmsolid_scale(top_block, 1.25, 1.25, 1.);
+        
+        top_block_reduced = csmsolid_duplicate(top_block);
+        csmsolid_scale(top_block_reduced, 0.95, 0.95, 1.);
+        csmsolid_move(top_block_reduced, 0., 0., -0.5 * thick);
+
+        solid_aux = top_block;
+        top_block = csmsetop_difference_A_minus_B(top_block, top_block_reduced);
+        csmsolid_free(&solid_aux);
+
+        solid_aux = top_block;
+        top_block = csmsetop_difference_A_minus_B(top_block, top_block_hole);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_free(&difference);
+        csmsolid_free(&top_block_reduced);
+        csmsolid_free(&top_block_hole);
+        csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
+    }
     
     solid_aux = solid;
     solid = csmsetop_union_A_and_B(solid, top_block);
     csmsolid_free(&solid_aux);
     csmsolid_free(&top_block);
     
+    {
+        double outer_radius, inner_radius;
+        struct gccontorno_t *shape;
+        struct csmsolid_t *cylinder;
+
+        {
+            outer_radius = 0.01;
+            shape = gcelem2d_contorno_circular(outer_radius, no_points_circle);
+            cylinder = csmsweep_create_solid_from_shape(shape, 0., 0., 0.1, 1., 0., 0., 0., 1., 0., shape, 0., 0., -0.20, 1., 0., 0., 0., 1., 0.);
+            i_assign_flat_material_to_solid(0.9, 0.9, 0.9, cylinder);
+
+            solid_aux = solid;
+            solid = csmsetop_difference_A_minus_B(solid, cylinder);
+            csmsolid_free(&solid_aux);
+        
+            csmsolid_free(&cylinder);
+        }
+        
+        outer_radius = 0.02;
+        inner_radius = 0.0175;
+        shape = gcelem2d_contorno_circular_hueco(outer_radius, inner_radius, no_points_circle);
+        cylinder = csmsweep_create_solid_from_shape(shape, 0., 0., 0.1, 1., 0., 0., 0., 1., 0., shape, 0., 0., -0.20, 1., 0., 0., 0., 1., 0.);
+        i_assign_flat_material_to_solid(0.95, 0.95, 0.95, cylinder);
+        
+        {
+            struct csmsolid_t *cylinder_aux, *cylinder_cutted;
+            csmArrayStruct(csmsolid_t) *shells;
+            
+            cylinder_aux = csmsolid_duplicate(cylinder);
+            csmsolid_move(cylinder_aux, .5 * length, -radius, 0.);
+        
+            cylinder_cutted = csmsetop_difference_A_minus_B(cylinder_aux, solid);
+            shells = csmexplode_explode_shells(cylinder_cutted);
+        
+            solid_aux = cylinder_cutted;
+            cylinder_cutted = csmsolid_duplicate(csmarrayc_get_st(shells, 0, csmsolid_t));
+            csmsolid_free(&solid_aux);
+            csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
+        
+            solid_aux = solid;
+            solid = csmsetop_union_A_and_B(solid, cylinder_cutted);
+            csmsolid_free(&solid_aux);
+            csmsolid_free(&cylinder_cutted);
+            csmsolid_free(&cylinder_aux);
+        }
+
+        {
+            struct csmsolid_t *cylinder_aux, *cylinder_cutted;
+            csmArrayStruct(csmsolid_t) *shells;
+            
+            cylinder_aux = csmsolid_duplicate(cylinder);
+            csmsolid_move(cylinder_aux, .5 * length, radius, 0.);
+        
+            cylinder_cutted = csmsetop_difference_A_minus_B(cylinder_aux, solid);
+            shells = csmexplode_explode_shells(cylinder_cutted);
+        
+            solid_aux = cylinder_cutted;
+            cylinder_cutted = csmsolid_duplicate(csmarrayc_get_st(shells, 0, csmsolid_t));
+            csmsolid_free(&solid_aux);
+            csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
+        
+            solid_aux = solid;
+            solid = csmsetop_union_A_and_B(solid, cylinder_cutted);
+            csmsolid_free(&solid_aux);
+            csmsolid_free(&cylinder_cutted);
+            csmsolid_free(&cylinder_aux);
+        }
+
+        {
+            struct csmsolid_t *cylinder_aux, *cylinder_cutted;
+            csmArrayStruct(csmsolid_t) *shells;
+            
+            cylinder_aux = csmsolid_duplicate(cylinder);
+            csmsolid_move(cylinder_aux, -.5 * length, radius, 0.);
+        
+            cylinder_cutted = csmsetop_difference_A_minus_B(cylinder_aux, solid);
+            shells = csmexplode_explode_shells(cylinder_cutted);
+        
+            solid_aux = cylinder_cutted;
+            cylinder_cutted = csmsolid_duplicate(csmarrayc_get_st(shells, 0, csmsolid_t));
+            csmsolid_free(&solid_aux);
+            csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
+        
+            solid_aux = solid;
+            solid = csmsetop_union_A_and_B(solid, cylinder_cutted);
+            csmsolid_free(&solid_aux);
+            csmsolid_free(&cylinder_cutted);
+            csmsolid_free(&cylinder_aux);
+        }
+
+        {
+            struct csmsolid_t *cylinder_aux, *cylinder_cutted;
+            csmArrayStruct(csmsolid_t) *shells;
+            
+            cylinder_aux = csmsolid_duplicate(cylinder);
+            csmsolid_move(cylinder_aux, -.5 * length, -radius, 0.);
+        
+            cylinder_cutted = csmsetop_difference_A_minus_B(cylinder_aux, solid);
+            shells = csmexplode_explode_shells(cylinder_cutted);
+        
+            solid_aux = cylinder_cutted;
+            cylinder_cutted = csmsolid_duplicate(csmarrayc_get_st(shells, 0, csmsolid_t));
+            csmsolid_free(&solid_aux);
+            csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
+        
+            solid_aux = solid;
+            solid = csmsetop_union_A_and_B(solid, cylinder_cutted);
+            csmsolid_free(&solid_aux);
+            csmsolid_free(&cylinder_cutted);
+            csmsolid_free(&cylinder_aux);
+        }
+        
+        gccontorno_destruye(&shape);
+        csmsolid_free(&cylinder);
+    }
+    
+    csmdebug_set_enabled_by_code(CSMTRUE);
+    
+    csmsolid_set_draw_only_border_edges(solid, CSMFALSE);
     csmdebug_set_viewer_results(solid, NULL);
     csmdebug_show_viewer();
-    */
     
     csmsolid_free(&hsphere_left);
     csmsolid_free(&hsphere_rigth);
@@ -3228,9 +3372,27 @@ static void i_test_mechanichal7_simplified(void)
     i_assign_flat_material_to_solid(1., 1., 1., solid2);
 
     solid = csmsetop_intersection_A_and_B(solid1, solid2);
-    
     csmdebug_set_viewer_results(solid, NULL);
     csmdebug_show_viewer();
+    
+ {
+        struct csmsolid_t *difference;
+        csmArrayStruct(csmsolid_t) *shells;
+        struct csmsolid_t *solid_aux;
+     
+        difference = csmsetop_difference_A_minus_B(solid1, solid2);
+        shells = csmexplode_explode_shells(difference);
+
+        solid_aux = solid;
+        solid = csmsolid_duplicate(csmarrayc_get_st(shells, 0, csmsolid_t));
+        csmsolid_free(&solid_aux);
+     
+        csmdebug_set_viewer_results(solid, NULL);
+        csmdebug_show_viewer();
+     
+        csmsolid_free(&difference);
+        csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
+    }
     
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
@@ -3323,6 +3485,7 @@ void csmtest_test(void)
     i_test_mechanichal7_simplified();
     */
     
+    //i_test_mechanichal7_simplified();
     i_test_mechanichal7();
 
     csmviewer_free(&viewer);

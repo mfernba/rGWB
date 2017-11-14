@@ -140,6 +140,8 @@
 		5598D6681F24EE4000EA1876 /* callback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6631F24EE4000EA1876 /* callback.framework */; };
 		5598D6691F24EE4000EA1876 /* cyscngraf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6641F24EE4000EA1876 /* cyscngraf.framework */; };
 		5598D66A1F24EE4000EA1876 /* SnapFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6651F24EE4000EA1876 /* SnapFramework.framework */; };
+		55B54B771FBA4C5E00DE5833 /* csmexplode.c in Sources */ = {isa = PBXBuildFile; fileRef = 55B54B751FBA4C5E00DE5833 /* csmexplode.c */; };
+		55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */ = {isa = PBXBuildFile; fileRef = 55B54B761FBA4C5E00DE5833 /* csmexplode.h */; };
 		55C6F71F1F82E7CF005EA51D /* csmassert.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55C6F71E1F82E7CF005EA51D /* csmassert.inl */; };
 		55E30FA91F24BAB300EDE74F /* csmdebug.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55E30FA71F24BAB300EDE74F /* csmdebug.mm */; };
 		55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55E30FA81F24BAB300EDE74F /* csmdebug.inl */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -484,6 +486,8 @@
 		5598D6631F24EE4000EA1876 /* callback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = callback.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/callback.framework"; sourceTree = "<group>"; };
 		5598D6641F24EE4000EA1876 /* cyscngraf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = cyscngraf.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/cyscngraf.framework"; sourceTree = "<group>"; };
 		5598D6651F24EE4000EA1876 /* SnapFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SnapFramework.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/SnapFramework.framework"; sourceTree = "<group>"; };
+		55B54B751FBA4C5E00DE5833 /* csmexplode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmexplode.c; sourceTree = "<group>"; };
+		55B54B761FBA4C5E00DE5833 /* csmexplode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmexplode.h; sourceTree = "<group>"; };
 		55C6F71E1F82E7CF005EA51D /* csmassert.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmassert.inl; sourceTree = "<group>"; };
 		55E30FA71F24BAB300EDE74F /* csmdebug.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = csmdebug.mm; sourceTree = "<group>"; };
 		55E30FA81F24BAB300EDE74F /* csmdebug.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmdebug.inl; sourceTree = "<group>"; };
@@ -669,6 +673,8 @@
 				559452841F79A0E5002AF198 /* csmshape3d.c */,
 				5570129F1E8328E400DFC490 /* csmsweep.h */,
 				5570129E1E8328E400DFC490 /* csmsweep.c */,
+				55B54B751FBA4C5E00DE5833 /* csmexplode.c */,
+				55B54B761FBA4C5E00DE5833 /* csmexplode.h */,
 				55089F4D1E8996B500B9570B /* csmglue.h */,
 				55089F4C1E8996B500B9570B /* csmglue.c */,
 				55244B291EAA57C4006F546E /* csmsplit.h */,
@@ -920,6 +926,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */,
 				55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */,
 				55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */,
 				5579545D1E5DB074000FC91E /* cysolidmodeling.h in Headers */,
@@ -1251,6 +1258,7 @@
 				55308C371F921A5600353A68 /* csmtest_array.c in Sources */,
 				5507A6241E6B8714008B9F73 /* csmtest.c in Sources */,
 				55E30FA91F24BAB300EDE74F /* csmdebug.mm in Sources */,
+				55B54B771FBA4C5E00DE5833 /* csmexplode.c in Sources */,
 				55308C1E1F920A8000353A68 /* csmface_debug.c in Sources */,
 				5507A6841E736565008B9F73 /* csmeuler_lmfkrh.c in Sources */,
 				557954A51E60D0EF000FC91E /* csmeuler_mvfs.c in Sources */,

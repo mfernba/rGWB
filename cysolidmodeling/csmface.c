@@ -887,6 +887,22 @@ const struct csmbbox_t *csmface_bbox(const struct csmface_t *face)
 
 // ------------------------------------------------------------------------------------------
 
+double csmface_loop_area_in_face(const struct csmface_t *face, const struct csmloop_t *loop)
+{
+    double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
+    
+    assert_no_null(face);
+
+    csmmath_plane_axis_from_implicit_plane_equation(
+						face->A, face->B, face->C, face->D,
+                        &Xo, &Yo, &Zo,
+                        &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
+    
+    return csmloop_compute_area(loop, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz);
+}
+
+// ------------------------------------------------------------------------------------------
+
 struct csmsolid_t *csmface_fsolid(struct csmface_t *face)
 {
     assert_no_null(face);

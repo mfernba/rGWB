@@ -56,6 +56,8 @@ void csmsetopcom_delete_holes_filled_by_faces(struct csmsolid_t *solid, const st
 
 void csmsetopcom_merge_faces_inside_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances);
 
+void csmsetopcom_convert_holes_in_holes_into_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances);
+
 void csmsetopcom_move_face_to_solid(
                         unsigned long recursion_level,
                         struct csmface_t *face, struct csmsolid_t *face_solid,

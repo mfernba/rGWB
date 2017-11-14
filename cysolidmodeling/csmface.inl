@@ -89,6 +89,8 @@ void csmface_face_equation_info(
 
 const struct csmbbox_t *csmface_bbox(const struct csmface_t *face);
 
+double csmface_loop_area_in_face(const struct csmface_t *face, const struct csmloop_t *loop);
+
 
 // Topology...
 

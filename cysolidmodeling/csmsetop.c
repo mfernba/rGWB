@@ -823,6 +823,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     
     csmdebug_print_debug_info("Merging faces...\n");
     csmsetopcom_merge_faces_inside_faces(result, tolerances);
+
+    csmdebug_print_debug_info("Convert holes in holes into faces...\n");
+    csmsetopcom_convert_holes_in_holes_into_faces(result, tolerances);
     
     csmsolid_redo_geometric_face_data(result);
     //csmsetopcom_reorient_hole_loops_if_needed(result);
