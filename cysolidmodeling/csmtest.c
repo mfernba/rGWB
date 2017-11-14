@@ -3426,7 +3426,6 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
 
-    /*
     i_test_divide_solido_rectangular_hueco_por_plano_medio();
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -3474,8 +3473,6 @@ void csmtest_test(void)
     i_test_sphere2();
     i_test_sphere3();
     
-    i_test_mechanical_part2();
-
     i_test_sphere4();
     
     i_test_mechanical5();
@@ -3483,11 +3480,7 @@ void csmtest_test(void)
     i_test_mechanical6();
 
     i_test_mechanichal7_simplified();
-    */
 
-    //i_test_mechanical_part1();
-    
-    //i_test_mechanichal7_simplified();
     i_test_mechanichal7();
 
     csmviewer_free(&viewer);
