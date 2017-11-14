@@ -3153,7 +3153,7 @@ static void i_test_mechanichal7(void)
     unsigned long no_points_circle;
     struct csmsolid_t *hsphere_left, *hsphere_rigth;
     struct csmsolid_t *body_cylinder;
-    struct csmsolid_t *top_block, *top_block_common, *top_block_common2;
+    struct csmsolid_t *top_block;
     
     radius = 0.2;
     thick = 0.01;
@@ -3197,9 +3197,9 @@ static void i_test_mechanichal7(void)
         csmdebug_set_viewer_results(top_block_hole, NULL);
         csmdebug_show_viewer();
         
-        csmsolid_free(&top_block);
-        top_block = csmsolid_duplicate(top_block_hole);
-        csmsolid_scale(top_block, 1.25, 1.25, 1.);
+        //csmsolid_free(&top_block);
+        //top_block = csmsolid_duplicate(top_block_hole);
+        //csmsolid_scale(top_block, 1.25, 1.25, 1.);
         
         top_block_reduced = csmsolid_duplicate(top_block);
         csmsolid_scale(top_block_reduced, 0.95, 0.95, 1.);
