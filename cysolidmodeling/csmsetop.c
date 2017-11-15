@@ -827,10 +827,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     csmsetopcom_convert_holes_in_holes_into_faces(result, tolerances);
     
     csmsolid_clear_algorithm_data(result);
+    csmsolid_redo_geometric_face_data(result);    
     csmdebug_set_viewer_results(result, NULL);
-    
-    csmsolid_redo_geometric_face_data(result);
-    //csmsetopcom_reorient_hole_loops_if_needed(result);
     
     return result;
 }
