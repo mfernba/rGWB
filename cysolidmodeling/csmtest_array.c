@@ -33,6 +33,12 @@ struct i_element_t *i_element_new(unsigned long element_id, double value2)
     return element;
 }
 
+struct i_element_t *i_element_copy(const struct i_element_t *element)
+{
+    assert_no_null(element);
+    return i_element_new(element->element_id, element->value2);
+}
+
 static void i_free_element(struct i_element_t **element)
 {
     FREE_PP(element, struct i_element_t);
@@ -166,6 +172,28 @@ void csmtest_array_test1(void)
         i_print_array_elements(elements);
         
         csmarrayc_free_st(&elements, i_element_t, i_free_element);
+    }
+    
+    {
+        csmArrayStruct(i_element_t) *elements_copy;
+
+        elements = csmarrayc_new_st_array(2, i_element_t);
+        i_set_element(elements, 1, 300, 1.25);
+        i_set_element(elements, 0, 100, 33.25);
+        i_print_array_elements(elements);
+        
+        i_append_element(elements, 6, 1.2);
+        i_append_element(elements, 7, 1.2);
+        i_print_array_elements(elements);
+        
+        elements_copy = csmarrayc_copy_st_array(elements, i_element_t, i_element_copy);
+        i_print_array_elements(elements_copy);
+        
+        csmarrayc_invert(elements_copy, i_element_t);
+        i_print_array_elements(elements_copy);
+        
+        csmarrayc_free_st(&elements, i_element_t, i_free_element);
+        csmarrayc_free_st(&elements_copy, i_element_t, i_free_element);
     }
 }
 
