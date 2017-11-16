@@ -48,7 +48,7 @@ static void i_integrity(const struct csmarrayc_t *array)
 
 // ---------------------------------------------------------------------------------
 
-static struct csmarrayc_t *i_crea(
+static struct csmarrayc_t *i_new(
                                   unsigned short is_pointer_array,
                                   size_t no_elems,
                                   size_t capacity,
@@ -96,7 +96,7 @@ struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacity_inicial, siz
     
     ptr_data = (void *)malloc(element_data_size * capacity);
     
-    return i_crea(is_pointer_array, no_elems, capacity, &ptr_data, element_data_size);
+    return i_new(is_pointer_array, no_elems, capacity, &ptr_data, element_data_size);
 }
 
 // ---------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *a
         offset += array->element_data_size;
     }
     
-    return i_crea(array->is_pointer_array, array->no_elems, array->no_elems, &ptr_data, array->element_data_size);
+    return i_new(array->is_pointer_array, array->no_elems, array->no_elems, &ptr_data, array->element_data_size);
 }
 
 // ---------------------------------------------------------------------------------
@@ -171,20 +171,20 @@ void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato)
     
     if (array->capacity == array->no_elems)
     {
-        size_t nueva_capacity;
-        void *ptr_data_ampliado;
+        size_t new_capacity;
+        void *ptr_data_extended;
         
-        nueva_capacity = array->capacity + (3 * array->capacity) / 2;
-        ptr_data_ampliado = (void *)malloc(nueva_capacity * array->element_data_size);
-        assert_no_null(ptr_data_ampliado);
+        new_capacity = array->capacity + (3 * array->capacity) / 2;
+        ptr_data_extended = (void *)malloc(new_capacity * array->element_data_size);
+        assert_no_null(ptr_data_extended);
         
-        //memset(ptr_data_ampliado, 0xFF, nueva_capacity * array->element_data_size);
-        memcpy(ptr_data_ampliado, array->ptr_data, array->no_elems * array->element_data_size);
+        //memset(ptr_data_extended, 0xFF, new_capacity * array->element_data_size);
+        memcpy(ptr_data_extended, array->ptr_data, array->no_elems * array->element_data_size);
         
         FREE_PP(&array->ptr_data, void);
         
-        array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_data_ampliado, void);
-        array->capacity = nueva_capacity;;
+        array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_data_extended, void);
+        array->capacity = new_capacity;;
     }
     
     memcpy(array->ptr_data + array->no_elems * array->element_data_size, dato, array->element_data_size);
