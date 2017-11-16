@@ -115,9 +115,13 @@ struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *a
     for (i = 0; i < array->no_elems; i++)
     {
         const void *element;
+        void *element_copy;
         
         element = *(void **)(array->ptr_data + offset);
-        memcpy(ptr_data + offset, element, array->element_data_size);
+        element_copy = func_copy_element(element);
+        
+        memcpy(ptr_data + offset, &element_copy, array->element_data_size);
+        
         offset += array->element_data_size;
     }
     
@@ -336,7 +340,7 @@ void csmarrayc_dontuse_qsort_1_extra(
 
 void csmarrayc_dontuse_invert(struct csmarrayc_t *array)
 {
-	assert_not_null(array);
+	assert_no_null(array);
 	
 	if (array->no_elems >= 2)
 	{
@@ -352,8 +356,8 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array)
             element1 = *(void **)(array->ptr_data + idx1 * array->element_data_size);
             element2 = *(void **)(array->ptr_data + idx2 * array->element_data_size);
             
-            memcpy(array->ptr_data + idx1 * array->element_data_size, element2, array->element_data_size);
-            memcpy(array->ptr_data + idx2 * array->element_data_size, element1, array->element_data_size);
+            memcpy(array->ptr_data + idx1 * array->element_data_size, &element2, array->element_data_size);
+            memcpy(array->ptr_data + idx2 * array->element_data_size, &element1, array->element_data_size);
 			
 			idx1++;
 			idx2--;
