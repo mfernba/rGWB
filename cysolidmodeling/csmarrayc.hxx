@@ -22,6 +22,9 @@ typedef CSMBOOL (*csmarrayc_FPtr_match_condition)(const void *element, const voi
 typedef void (*csmarrayc_FPtr_free_struct)(void **element);
 #define CSMARRAYC_CHECK_FUNC_FREE_STRUCT(function, type) (void)((void (*)(struct type **))function == function)
 
+typedef void *(*csmarrayc_FPtr_copy_struct)(const void *element);
+#define CSMARRAYC_CHECK_FUNC_COPY_STRUCT(function, type) (void)((struct type *(*)(const struct type *))function == function)
+
 typedef enum csmcompare_t (*csmarrayc_FPtr_compare)(const void *element1, const void *element2);
 #define CSMARRAYC_CHECK_FUNC_COMPARE_ST(function, type) (void)((enum csmcompare_t (*)(const struct type *, const struct type *))function == function)
 

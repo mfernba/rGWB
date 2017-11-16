@@ -1,10 +1,4 @@
-//
-//  csmarrayc.c
-//  cyscngraf
-//
-//  Created by Manuel Fernández on 15/02/14.
-//  Copyright (c) 2014 Manuel Fernández. All rights reserved.
-//
+// Generic container...
 
 #include "csmarrayc.inl"
 
@@ -18,14 +12,14 @@ static const size_t i_INITIAL_CAPACITY = 100;
 
 struct csmarrayc_t
 {
-    char mascara_debug;
+    char debug_mask;
     
     CSMBOOL is_pointer_array;
-    size_t num_elementos;
-    size_t capacidad;
+    size_t no_elems;
+    size_t capacity;
     
-    void *ptr_datos;
-    size_t tamanyo_tipo_dato;
+    void *ptr_data;
+    size_t element_data_size;
 };
 
 struct i_cmp_data_t
@@ -46,20 +40,20 @@ struct i_cmp_data_1_extra_t
 static void i_integrity(const struct csmarrayc_t *array)
 {
     assert_no_null(array);
-    assert(array->num_elementos <= array->capacidad);
-    assert_no_null(array->ptr_datos);
-    assert(array->tamanyo_tipo_dato > 0);
-    assert(array->mascara_debug == i_DEBUG_MASK);
+    assert(array->no_elems <= array->capacity);
+    assert_no_null(array->ptr_data);
+    assert(array->element_data_size > 0);
+    assert(array->debug_mask == i_DEBUG_MASK);
 }
 
 // ---------------------------------------------------------------------------------
 
 static struct csmarrayc_t *i_crea(
                                   unsigned short is_pointer_array,
-                                  size_t num_elementos,
-                                  size_t capacidad,
-                                  void **ptr_datos,
-                                  size_t tamanyo_tipo_dato)
+                                  size_t no_elems,
+                                  size_t capacity,
+                                  void **ptr_data,
+                                  size_t element_data_size)
 {
     struct csmarrayc_t *array;
     
@@ -67,11 +61,11 @@ static struct csmarrayc_t *i_crea(
     
     array->is_pointer_array = is_pointer_array;
     
-    array->num_elementos = num_elementos;
-    array->capacidad = capacidad;
-    array->ptr_datos = ASIGNA_PUNTERO_PP_NO_NULL(ptr_datos, void);
-    array->tamanyo_tipo_dato = tamanyo_tipo_dato;
-    array->mascara_debug = i_DEBUG_MASK;
+    array->no_elems = no_elems;
+    array->capacity = capacity;
+    array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(ptr_data, void);
+    array->element_data_size = element_data_size;
+    array->debug_mask = i_DEBUG_MASK;
     
     i_integrity(array);
     
@@ -80,107 +74,132 @@ static struct csmarrayc_t *i_crea(
 
 // ---------------------------------------------------------------------------------
 
-struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacidad_inicial, size_t tamanyo_tipo_dato)
+struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacity_inicial, size_t element_data_size)
 {
     CSMBOOL is_pointer_array;
-    size_t num_elementos;
-    size_t capacidad;
-    void *ptr_datos;
+    size_t no_elems;
+    size_t capacity;
+    void *ptr_data;
     
     is_pointer_array = CSMTRUE;
     
-    if (capacidad_inicial == 0)
+    if (capacity_inicial == 0)
     {
-        num_elementos = 0;
-        capacidad = i_INITIAL_CAPACITY;
+        no_elems = 0;
+        capacity = i_INITIAL_CAPACITY;
     }
     else
     {
-        num_elementos = capacidad_inicial;
-        capacidad = capacidad_inicial;
+        no_elems = capacity_inicial;
+        capacity = capacity_inicial;
     }
     
-    ptr_datos = (void *)malloc(tamanyo_tipo_dato * capacidad);
+    ptr_data = (void *)malloc(element_data_size * capacity);
     
-    return i_crea(is_pointer_array, num_elementos, capacidad, &ptr_datos, tamanyo_tipo_dato);
+    return i_crea(is_pointer_array, no_elems, capacity, &ptr_data, element_data_size);
 }
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_nousar_destruye(struct csmarrayc_t **array, csmarrayc_FPtr_free_struct func_free_struct)
+struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *array, csmarrayc_FPtr_copy_struct func_copy_element)
+{
+    size_t i, offset;
+    void *ptr_data;
+    
+    assert_no_null(array);
+    assert_no_null(func_copy_element);
+    
+    ptr_data = (void *)malloc(array->no_elems);
+    offset = 0;
+    
+    for (i = 0; i < array->no_elems; i++)
+    {
+        const void *element;
+        
+        element = *(void **)(array->ptr_data + offset);
+        memcpy(ptr_data + offset, element, array->element_data_size);
+        offset += array->element_data_size;
+    }
+    
+    return i_crea(array->is_pointer_array, array->no_elems, array->no_elems, &ptr_data, array->element_data_size);
+}
+
+// ---------------------------------------------------------------------------------
+
+void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_struct func_free_struct)
 {
     assert_no_null(array);
     i_integrity(*array);
     
     if ((*array)->is_pointer_array == CSMTRUE && func_free_struct != NULL)
     {
-        void *ptr_datos;
+        void *ptr_data;
         unsigned long i, offset;
         
-        ptr_datos = (*array)->ptr_datos;
+        ptr_data = (*array)->ptr_data;
         offset = 0;
         
-        for (i = 0; i < (*array)->num_elementos; i++)
+        for (i = 0; i < (*array)->no_elems; i++)
         {
-            func_free_struct(((void **)(ptr_datos + offset)));
-            offset += (*array)->tamanyo_tipo_dato;
+            func_free_struct(((void **)(ptr_data + offset)));
+            offset += (*array)->element_data_size;
         }
     }
 
-    FREE_PP(&(*array)->ptr_datos, void);
+    FREE_PP(&(*array)->ptr_data, void);
     
     FREE_PP(array, struct csmarrayc_t);
 }
 
 // ---------------------------------------------------------------------------------
 
-size_t csmarrayc_nousar_num_elems(const struct csmarrayc_t *array)
+size_t csmarrayc_dontuse_count(const struct csmarrayc_t *array)
 {
     i_integrity(array);
-    return array->num_elementos;
+    return array->no_elems;
 }
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_nousar_append_elemento(struct csmarrayc_t *array, void *dato)
+void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato)
 {
     i_integrity(array);
     
-    if (array->capacidad == array->num_elementos)
+    if (array->capacity == array->no_elems)
     {
-        size_t nueva_capacidad;
-        void *ptr_datos_ampliado;
+        size_t nueva_capacity;
+        void *ptr_data_ampliado;
         
-        nueva_capacidad = array->capacidad + (3 * array->capacidad) / 2;
-        ptr_datos_ampliado = (void *)malloc(nueva_capacidad * array->tamanyo_tipo_dato);
-        assert_no_null(ptr_datos_ampliado);
+        nueva_capacity = array->capacity + (3 * array->capacity) / 2;
+        ptr_data_ampliado = (void *)malloc(nueva_capacity * array->element_data_size);
+        assert_no_null(ptr_data_ampliado);
         
-        //memset(ptr_datos_ampliado, 0xFF, nueva_capacidad * array->tamanyo_tipo_dato);
-        memcpy(ptr_datos_ampliado, array->ptr_datos, array->num_elementos * array->tamanyo_tipo_dato);
+        //memset(ptr_data_ampliado, 0xFF, nueva_capacity * array->element_data_size);
+        memcpy(ptr_data_ampliado, array->ptr_data, array->no_elems * array->element_data_size);
         
-        FREE_PP(&array->ptr_datos, void);
+        FREE_PP(&array->ptr_data, void);
         
-        array->ptr_datos = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_datos_ampliado, void);
-        array->capacidad = nueva_capacidad;;
+        array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_data_ampliado, void);
+        array->capacity = nueva_capacity;;
     }
     
-    memcpy(array->ptr_datos + array->num_elementos * array->tamanyo_tipo_dato, dato, array->tamanyo_tipo_dato);
-    array->num_elementos++;
+    memcpy(array->ptr_data + array->no_elems * array->element_data_size, dato, array->element_data_size);
+    array->no_elems++;
 }
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_nousar_set_element(struct csmarrayc_t *array, unsigned long idx, void *dato)
+void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *dato)
 {
     i_integrity(array);
-    assert(idx < array->num_elementos);
+    assert(idx < array->no_elems);
     
-    memcpy(array->ptr_datos + idx * array->tamanyo_tipo_dato, dato, array->tamanyo_tipo_dato);
+    memcpy(array->ptr_data + idx * array->element_data_size, dato, array->element_data_size);
 }
 
 // ---------------------------------------------------------------------------------
 
-CSMBOOL csmarrayc_nousar_contains_element(
+CSMBOOL csmarrayc_dontuse_contains_element(
                         const struct csmarrayc_t *array,
                         const csmarrayc_byte *search_data,
                         csmarrayc_FPtr_match_condition func_match_condition,
@@ -198,11 +217,11 @@ CSMBOOL csmarrayc_nousar_contains_element(
     
     offset = 0;
     
-    for (i = 0; i < array->num_elementos; i++)
+    for (i = 0; i < array->no_elems; i++)
     {
         const void *element;
         
-        element = *(void **)(array->ptr_datos + offset);
+        element = *(void **)(array->ptr_data + offset);
         
         if (func_match_condition(element, search_data) == CSMTRUE)
         {
@@ -211,7 +230,7 @@ CSMBOOL csmarrayc_nousar_contains_element(
             break;
         }
         
-        offset += array->tamanyo_tipo_dato;
+        offset += array->element_data_size;
     }
     
     ASSIGN_OPTIONAL_VALUE(idx, idx_loc);
@@ -221,40 +240,40 @@ CSMBOOL csmarrayc_nousar_contains_element(
 
 // ---------------------------------------------------------------------------------
 
-void *csmarrayc_nousar_get(struct csmarrayc_t *array, unsigned long idx)
+void *csmarrayc_dontuse_get(struct csmarrayc_t *array, unsigned long idx)
 {
     unsigned long offset;
     
     assert_no_null(array);
-    assert(idx < array->num_elementos);
+    assert(idx < array->no_elems);
     
-    offset = array->tamanyo_tipo_dato * idx;
-    return (void *)(*(void **)(array->ptr_datos + offset));
+    offset = array->element_data_size * idx;
+    return (void *)(*(void **)(array->ptr_data + offset));
 }
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_nousar_delete_element(struct csmarrayc_t *array, unsigned long idx, csmarrayc_FPtr_free_struct func_free)
+void csmarrayc_dontuse_delete_element(struct csmarrayc_t *array, unsigned long idx, csmarrayc_FPtr_free_struct func_free)
 {
     unsigned long offset;
     
     assert_no_null(array);
-    assert(idx < array->num_elementos);
+    assert(idx < array->no_elems);
     
-    offset = array->tamanyo_tipo_dato * idx;
+    offset = array->element_data_size * idx;
     
     if (func_free != NULL)
-        func_free((void **)(array->ptr_datos + offset));
+        func_free((void **)(array->ptr_data + offset));
     
-    if (idx < array->num_elementos - 1)
+    if (idx < array->no_elems - 1)
     {
         size_t bytes_a_mover;
         
-        bytes_a_mover = (array->num_elementos - 1 - idx) * array->tamanyo_tipo_dato;
-        memmove(array->ptr_datos + offset, array->ptr_datos + offset + array->tamanyo_tipo_dato, bytes_a_mover);
+        bytes_a_mover = (array->no_elems - 1 - idx) * array->element_data_size;
+        memmove(array->ptr_data + offset, array->ptr_data + offset + array->element_data_size, bytes_a_mover);
     }
     
-    array->num_elementos--;
+    array->no_elems--;
 }
 
 // ---------------------------------------------------------------------------------
@@ -271,7 +290,7 @@ static int i_cmp_function_ptr(const void *cmp_data_void, const void *e1, const v
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_nousar_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare func_compare)
+void csmarrayc_dontuse_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare func_compare)
 {
     struct i_cmp_data_t cmp_data;
     
@@ -280,7 +299,7 @@ void csmarrayc_nousar_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare fu
     cmp_data.array = array;
     cmp_data.func_compare = func_compare;
     
-    csmarqsort(array->ptr_datos, array->num_elementos, array->tamanyo_tipo_dato, (void *)&cmp_data, i_cmp_function_ptr);
+    csmarqsort(array->ptr_data, array->no_elems, array->element_data_size, (void *)&cmp_data, i_cmp_function_ptr);
 }
 
 // ---------------------------------------------------------------------------------
@@ -297,7 +316,7 @@ static int i_cmp_function_ptr_1_extra(const void *cmp_data_void, const void *e1,
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_nousar_qsort_1_extra(
+void csmarrayc_dontuse_qsort_1_extra(
                         struct csmarrayc_t *array,
                         struct csmarrayc_extra_item_t *extra_item,
                         csmarrayc_FPtr_compare_1_extra func_compare_1_extra)
@@ -310,9 +329,37 @@ void csmarrayc_nousar_qsort_1_extra(
     cmp_data.extra_item = extra_item;
     cmp_data.func_compare = func_compare_1_extra;
     
-    csmarqsort(array->ptr_datos, array->num_elementos, array->tamanyo_tipo_dato, (void *)&cmp_data, i_cmp_function_ptr_1_extra);
+    csmarqsort(array->ptr_data, array->no_elems, array->element_data_size, (void *)&cmp_data, i_cmp_function_ptr_1_extra);
 }
 
+// ---------------------------------------------------------------------------
+
+void csmarrayc_dontuse_invert(struct csmarrayc_t *array)
+{
+	assert_not_null(array);
+	
+	if (array->no_elems >= 2)
+	{
+		unsigned long idx1, idx2;
+		
+		idx1 = 0;
+		idx2 = array->no_elems - 1;
+		
+		while (idx1 < idx2)
+		{
+            const void *element1, *element2;
+            
+            element1 = *(void **)(array->ptr_data + idx1 * array->element_data_size);
+            element2 = *(void **)(array->ptr_data + idx2 * array->element_data_size);
+            
+            memcpy(array->ptr_data + idx1 * array->element_data_size, element2, array->element_data_size);
+            memcpy(array->ptr_data + idx2 * array->element_data_size, element1, array->element_data_size);
+			
+			idx1++;
+			idx2--;
+		}
+	}
+}
 
 
 
