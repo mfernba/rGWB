@@ -505,15 +505,15 @@ static void i_get_vertex_data(
     
     if (tesselator_vertex->Nx == 0. && tesselator_vertex->Ny == 0. && tesselator_vertex->Nz == 0.)
     {
-        *Nx = tesselator_vertex->Nx;
-        *Ny = tesselator_vertex->Ny;
-        *Nz = tesselator_vertex->Nz;
-    }
-    else
-    {
         *Nx = Wx;
         *Ny = Wy;
         *Nz = Wz;
+    }
+    else
+    {
+        *Nx = tesselator_vertex->Nx;
+        *Ny = tesselator_vertex->Ny;
+        *Nz = tesselator_vertex->Nz;
     }
     
     *is_vertex_on_edge = tesselator_vertex->is_vertex_on_edge;
