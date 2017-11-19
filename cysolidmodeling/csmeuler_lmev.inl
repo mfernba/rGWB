@@ -1,6 +1,6 @@
 //
 //  csmeuler_lmev.h
-//  cysolidmodeling
+//  rGWB
 //
 //  Created by Manuel Fernández on 28/2/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.

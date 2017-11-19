@@ -23,7 +23,7 @@
 		5507A64D1E70372E008B9F73 /* csmeuler_lkev.c in Sources */ = {isa = PBXBuildFile; fileRef = 5507A64C1E70372E008B9F73 /* csmeuler_lkev.c */; };
 		5507A6501E705618008B9F73 /* csmeuler_kvfs.c in Sources */ = {isa = PBXBuildFile; fileRef = 5507A64E1E705618008B9F73 /* csmeuler_kvfs.c */; };
 		5507A6511E705618008B9F73 /* csmeuler_kvfs.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5507A64F1E705618008B9F73 /* csmeuler_kvfs.inl */; };
-		5507A6731E70610D008B9F73 /* cysolidmodeling.h in Resources */ = {isa = PBXBuildFile; fileRef = 5579545B1E5DB074000FC91E /* cysolidmodeling.h */; };
+		5507A6731E70610D008B9F73 /* rGWB.h in Resources */ = {isa = PBXBuildFile; fileRef = 5579545B1E5DB074000FC91E /* rGWB.h */; };
 		5507A6741E706175008B9F73 /* csmtest.h in Resources */ = {isa = PBXBuildFile; fileRef = 5507A6231E6B8714008B9F73 /* csmtest.h */; };
 		5507A6781E7341CD008B9F73 /* csmeuler_lkemr.c in Sources */ = {isa = PBXBuildFile; fileRef = 5507A6761E7341CD008B9F73 /* csmeuler_lkemr.c */; };
 		5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6771E7341CD008B9F73 /* csmeuler_lkemr.inl */; };
@@ -99,7 +99,7 @@
 		557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557012BB1E832F0300DFC490 /* csmgeom.inl */; };
 		557012C01E832F9600DFC490 /* csmmath.c in Sources */ = {isa = PBXBuildFile; fileRef = 557012BE1E832F9600DFC490 /* csmmath.c */; };
 		557012C11E832F9600DFC490 /* csmmath.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557012BF1E832F9600DFC490 /* csmmath.inl */; };
-		5579545D1E5DB074000FC91E /* cysolidmodeling.h in Headers */ = {isa = PBXBuildFile; fileRef = 5579545B1E5DB074000FC91E /* cysolidmodeling.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5579545D1E5DB074000FC91E /* rGWB.h in Headers */ = {isa = PBXBuildFile; fileRef = 5579545B1E5DB074000FC91E /* rGWB.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		557954681E5DB0A8000FC91E /* csmassert.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954641E5DB0A8000FC91E /* csmassert.c */; };
 		557954691E5DB0A8000FC91E /* csmmem.inl in Resources */ = {isa = PBXBuildFile; fileRef = 557954651E5DB0A8000FC91E /* csmmem.inl */; };
 		5579546A1E5DB0A8000FC91E /* csmmem.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954661E5DB0A8000FC91E /* csmmem.c */; };
@@ -438,8 +438,8 @@
 		557012BB1E832F0300DFC490 /* csmgeom.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmgeom.inl; sourceTree = "<group>"; };
 		557012BE1E832F9600DFC490 /* csmmath.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmmath.c; sourceTree = "<group>"; };
 		557012BF1E832F9600DFC490 /* csmmath.inl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; path = csmmath.inl; sourceTree = "<group>"; };
-		557954581E5DB074000FC91E /* cysolidmodeling.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = cysolidmodeling.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		5579545B1E5DB074000FC91E /* cysolidmodeling.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cysolidmodeling.h; sourceTree = "<group>"; };
+		557954581E5DB074000FC91E /* rGWB.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = rGWB.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5579545B1E5DB074000FC91E /* rGWB.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rGWB.h; sourceTree = "<group>"; };
 		5579545C1E5DB074000FC91E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		557954641E5DB0A8000FC91E /* csmassert.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmassert.c; sourceTree = "<group>"; };
 		557954651E5DB0A8000FC91E /* csmmem.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmmem.inl; sourceTree = "<group>"; };
@@ -737,7 +737,7 @@
 		557954591E5DB074000FC91E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				557954581E5DB074000FC91E /* cysolidmodeling.framework */,
+				557954581E5DB074000FC91E /* rGWB.framework */,
 			);
 			name = Products;
 			path = ..;
@@ -746,7 +746,7 @@
 		5579545A1E5DB074000FC91E /* cysolidmodeling */ = {
 			isa = PBXGroup;
 			children = (
-				5579545B1E5DB074000FC91E /* cysolidmodeling.h */,
+				5579545B1E5DB074000FC91E /* rGWB.h */,
 				55A9842B1FBCC9DC009F7516 /* License.txt */,
 				5579545C1E5DB074000FC91E /* Info.plist */,
 				550E55AC1F87811A0033864A /* csmtypes.hxx */,
@@ -961,7 +961,7 @@
 				55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */,
 				55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */,
 				55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */,
-				5579545D1E5DB074000FC91E /* cysolidmodeling.h in Headers */,
+				5579545D1E5DB074000FC91E /* rGWB.h in Headers */,
 				55308C231F920BCD00353A68 /* csmsolid_debug.inl in Headers */,
 				5507A6811E7362EF008B9F73 /* csmeuler_lkfmrh.inl in Headers */,
 				55C6F71F1F82E7CF005EA51D /* csmassert.inl in Headers */,
@@ -1035,9 +1035,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		557954571E5DB074000FC91E /* cysolidmodeling */ = {
+		557954571E5DB074000FC91E /* rGWB */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 557954601E5DB074000FC91E /* Build configuration list for PBXNativeTarget "cysolidmodeling" */;
+			buildConfigurationList = 557954601E5DB074000FC91E /* Build configuration list for PBXNativeTarget "rGWB" */;
 			buildPhases = (
 				557954531E5DB074000FC91E /* Sources */,
 				557954541E5DB074000FC91E /* Frameworks */,
@@ -1055,9 +1055,9 @@
 				5598D65A1F24E8BA00EA1876 /* PBXTargetDependency */,
 				5507A6E61E7B40AA008B9F73 /* PBXTargetDependency */,
 			);
-			name = cysolidmodeling;
+			name = rGWB;
 			productName = cysolidmodeling;
-			productReference = 557954581E5DB074000FC91E /* cysolidmodeling.framework */;
+			productReference = 557954581E5DB074000FC91E /* rGWB.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -1125,7 +1125,7 @@
 			);
 			projectRoot = "";
 			targets = (
-				557954571E5DB074000FC91E /* cysolidmodeling */,
+				557954571E5DB074000FC91E /* rGWB */,
 			);
 		};
 /* End PBXProject section */
@@ -1268,7 +1268,7 @@
 				55308C3E1F9222B500353A68 /* csmmaterial.inl in Resources */,
 				551D475C1FC1CED3004F3B43 /* csmshape2d.inl in Resources */,
 				55A9842C1FBCC9DC009F7516 /* License.txt in Resources */,
-				5507A6731E70610D008B9F73 /* cysolidmodeling.h in Resources */,
+				5507A6731E70610D008B9F73 /* rGWB.h in Resources */,
 				5598D6141F24E7F600EA1876 /* csmviewer.inl in Resources */,
 				557954691E5DB0A8000FC91E /* csmmem.inl in Resources */,
 			);
@@ -1544,7 +1544,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		557954601E5DB074000FC91E /* Build configuration list for PBXNativeTarget "cysolidmodeling" */ = {
+		557954601E5DB074000FC91E /* Build configuration list for PBXNativeTarget "rGWB" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				557954611E5DB074000FC91E /* Debug */,

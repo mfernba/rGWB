@@ -1,6 +1,6 @@
 //
 //  csmeuler_laringmv.c
-//  cysolidmodeling
+//  rGWB
 //
 //  Created by Manuel Fernández on 13/4/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.

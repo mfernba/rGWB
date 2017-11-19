@@ -1,7 +1,7 @@
 
 //
 //  csmsweepshape.c
-//  cysolidmodeling
+//  rGWB
 //
 //  Created by Manuel Fernández on 22/3/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.

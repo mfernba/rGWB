@@ -1,6 +1,6 @@
 //
 //  csmsolid.c
-//  cysolidmodeling
+//  rGWB
 //
 //  Created by Manuel Fernández on 23/2/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.

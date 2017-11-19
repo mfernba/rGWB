@@ -1,6 +1,6 @@
 //
 //  csmarrayc.hxx
-//  cysolidmodeling
+//  rGWB
 //
 //  Created by Manuel Fernández on 6/10/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.

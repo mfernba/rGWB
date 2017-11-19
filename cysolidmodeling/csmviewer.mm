@@ -30,7 +30,6 @@ extern "C" {
 #include <WinFrames2/wf2pnutil.h>
 #include <WinFrames3/wf3Visor.h>
 #include <WinFrames3/wf3Vista.h>
-#include <cysolidmodeling/cysolidmodeling.h>
 
 struct csmviewer_t
 {

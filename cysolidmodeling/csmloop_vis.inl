@@ -1,6 +1,6 @@
 //
 //  csmloop_vis.h
-//  cysolidmodeling
+//  rGWB
 //
 //  Created by Manuel Fernandez on 14/10/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.

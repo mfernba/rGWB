@@ -1,6 +1,6 @@
 //
 //  cmsloopglue.c
-//  cysolidmodeling
+//  rGWB
 //
 //  Created by Manuel Fernández on 1/4/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  csmshape2d.h
-//  cysolidmodeling
+//  rGWB
 //
 //  Created by Manuel Fernández on 19/11/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.
