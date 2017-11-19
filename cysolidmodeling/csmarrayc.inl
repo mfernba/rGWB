@@ -103,14 +103,14 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
 (\
     (void)((csmArrayStruct(type) *)array == array),\
     (void)((struct type *)element == element),\
-    csmarrayc_dontuse_set_element((struct csmarrayc_t *)array, idx, (void *)(&(element)))\
+    csmarrayc_dontuse_set_element((struct csmarrayc_t *)array, idx, (void *)(element))\
 )
 
 #define csmarrayc_set_const_st(array, idx, element, type)\
 (\
     (void)((const csmArrayStruct(type) *)array == array),\
     (void)((struct type *)element == element),\
-    csmarrayc_dontuse_set_element((struct csmarrayc_t *)array, idx, (void *)(&(element)))\
+    csmarrayc_dontuse_set_element((struct csmarrayc_t *)array, idx, (void *)(element))\
 )
 
 #define csmarrayc_delete_element_st(array, idx, type, func_free)\

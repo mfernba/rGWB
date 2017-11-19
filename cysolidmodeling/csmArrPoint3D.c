@@ -45,7 +45,18 @@ static void i_free_point(struct i_point_t **point)
 
 csmArrPoint3D *csmArrPoint3D_new(unsigned long no_elems)
 {
-    return (csmArrPoint3D *)csmarrayc_new_st_array(no_elems, i_point_t);
+    csmArrayStruct(i_point_t) *array;
+    unsigned long i;
+    
+    array = csmarrayc_new_st_array(no_elems, i_point_t);
+    
+    if (no_elems > 0)
+    {
+        for (i = 0; i < no_elems; i++)
+            csmarrayc_set_st(array, i, NULL, i_point_t);
+    }
+    
+    return (csmArrPoint3D *)array;
 }
 
 // ---------------------------------------------------------------------------
@@ -92,8 +103,19 @@ void csmArrPoint3D_set(csmArrPoint3D *array, unsigned long idx, double x, double
 {
     struct i_point_t *point;
     
-    point = i_new_point(x, y, z);
-    csmarrayc_set_st((csmArrayStruct(i_point_t) *)array, idx, point, i_point_t);
+    point = csmarrayc_get_st((csmArrayStruct(i_point_t) *)array, idx, i_point_t);
+    
+    if (point == NULL)
+    {
+        point = i_new_point(x, y, z);
+        csmarrayc_set_st((csmArrayStruct(i_point_t) *)array, idx, point, i_point_t);
+    }
+    else
+    {
+        point->x = x;
+        point->y = y;
+        point->z = z;
+    }
 }
 
 // ---------------------------------------------------------------------------

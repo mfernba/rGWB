@@ -20,4 +20,7 @@ enum csmcompare_t
     CSMCOMPARE_FIRST_GREATER = 1
 };
 
+#include "csmArrPoint2D.hxx"
+#include "csmArrPoint3D.hxx"
+
 #endif /* csmtypes_h */

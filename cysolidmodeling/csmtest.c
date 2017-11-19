@@ -15,6 +15,7 @@
 #include "csmeuler_lkemr.inl"
 #include "csmeuler_lmekr.inl"
 
+#include "csmArrPoint2D.h"
 #include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmhashtb.inl"
@@ -28,13 +29,11 @@
 #include "csmsolid_debug.inl"
 #include "csmsweep.h"
 #include "csmsplit.h"
-#include "csmshape3d.h"
+#include "csmquadrics.h"
 #include "csmassert.inl"
 #include "csmstring.inl"
-
-#include "a_pto2d.h"
-#include <geomcomp/gccontorno.h>
-#include <geomcomp/gcelem2d.h>
+#include "csmshape2d.h"
+#include "csmbasicshape2d.h"
 
 #include "csmdebug.inl"
 #include "csmviewer.inl"
@@ -391,10 +390,10 @@ static void i_test_tabla_hash(void)
 
 static void i_test_solid_from_shape2D(void)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid;
     
-    shape2d = gcelem2d_contorno_rectangular(0.3, 0.3);
+    shape2d = csmbasicshape2d_rectangular_shape(0.3, 0.3);
     
     solid = csmsweep_create_solid_from_shape(
                                 shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
@@ -402,7 +401,7 @@ static void i_test_solid_from_shape2D(void)
     
     csmsolid_debug_print_debug(solid, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid);
 }
 
@@ -410,10 +409,10 @@ static void i_test_solid_from_shape2D(void)
 
 static void i_test_solid_from_shape2D_with_hole(void)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid;
     
-    shape2d = gcelem2d_contorno_rectangular_hueco(0.6, 0.6, 0.3, 0.3);
+    shape2d = csmbasicshape2d_rectangular_hollow_shape(0.6, 0.6, 0.3, 0.3);
     
     solid = csmsweep_create_solid_from_shape(
                                 shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
@@ -421,7 +420,7 @@ static void i_test_solid_from_shape2D_with_hole(void)
     
     csmsolid_debug_print_debug(solid, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid);
 }
 
@@ -429,11 +428,11 @@ static void i_test_solid_from_shape2D_with_hole(void)
 
 static void i_test_union_solidos_por_loopglue(void)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1, *solid2;
     CSMBOOL could_merge_solids;
     
-    shape2d = gcelem2d_contorno_rectangular(0.3, 0.3);
+    shape2d = csmbasicshape2d_rectangular_shape(0.3, 0.3);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     csmsolid_debug_print_debug(solid1, CSMTRUE);
@@ -446,7 +445,7 @@ static void i_test_union_solidos_por_loopglue(void)
 
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
 }
 
@@ -511,7 +510,7 @@ static void i_show_split_results(
 
 static void i_test_divide_solido_rectangular_por_plano_medio(void)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
     CSMBOOL splitted;
@@ -519,7 +518,7 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
     
     i_set_output_debug_file("split1.txt");
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     csmsolid_set_name(solid1, "Solid to split");
@@ -532,7 +531,7 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
     
     i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid_above);
     csmsolid_free(&solid_below);
@@ -542,7 +541,7 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
 
 static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
     CSMBOOL splitted;
@@ -550,7 +549,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
     
     i_set_output_debug_file("split_hueco_plano_medio.txt");
 
-    shape2d = gcelem2d_contorno_rectangular_hueco(1., 1., 0.5, 0.5);
+    shape2d = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     csmsolid_debug_print_debug(solid1, CSMTRUE);
@@ -562,7 +561,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
     
     i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid_above);
     csmsolid_free(&solid_below);
@@ -572,7 +571,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
 
 static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
     CSMBOOL splitted;
@@ -580,7 +579,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
     
     i_set_output_debug_file("split_hueco_plano_medio2.txt");
     
-    shape2d = gcelem2d_contorno_rectangular_hueco(1., 1., 0.5, 0.5);
+    shape2d = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
     
     solid1 = csmsweep_create_solid_from_shape(
                         shape2d,
@@ -598,7 +597,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
 
     i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid_above);
     csmsolid_free(&solid_below);
@@ -608,7 +607,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
 
 static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
     CSMBOOL splitted;
@@ -616,8 +615,8 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
     
     i_set_output_debug_file("split_rectangular_hueco_por_plano_superior.txt");
 
-    shape2d = gcelem2d_contorno_rectangular_hueco(1., 1., 0.5, 0.5);
-    shape2d = gcelem2d_contorno_circular_hueco(1., 0.367, 32);
+    shape2d = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
+    shape2d = csmbasicshape2d_circular_hollow_shape(1., 0.367, 32);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     csmsolid_debug_print_debug(solid1, CSMTRUE);
@@ -636,7 +635,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
     
     i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
 }
 
@@ -644,13 +643,13 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
 
 static void i_test_divide_solido_rectangular_hueco_por_plano_superior2(void)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
     CSMBOOL splitted;
     struct csmsolid_t *solid_above, *solid_below;
     
-    shape2d = gcelem2d_contorno_rectangular_hueco(1., 1., 0.5, 0.5);
+    shape2d = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
     
     solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
     csmsolid_debug_print_debug(solid1, CSMTRUE);
@@ -664,7 +663,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior2(void)
     csmsolid_debug_print_debug(solid_above, CSMTRUE);
     csmsolid_debug_print_debug(solid_below, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid_above);
     csmsolid_free(&solid_below);
@@ -674,12 +673,12 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior2(void)
 
 static void i_test_union_solidos1(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("union_solidos1.txt");
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
@@ -698,7 +697,7 @@ static void i_test_union_solidos1(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -708,12 +707,12 @@ static void i_test_union_solidos1(struct csmviewer_t *viewer)
 
 static void i_test_union_solidos2(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("union_solidos2.txt");
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
     //solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
@@ -731,7 +730,7 @@ static void i_test_union_solidos2(struct csmviewer_t *viewer)
     
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -741,10 +740,10 @@ static void i_test_union_solidos2(struct csmviewer_t *viewer)
 
 static void i_test_interseccion_solidos1(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0.5, -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0., -0.25, 0., 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
@@ -758,7 +757,7 @@ static void i_test_interseccion_solidos1(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -768,12 +767,12 @@ static void i_test_interseccion_solidos1(struct csmviewer_t *viewer)
 
 static void i_test_interseccion_solidos2(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *circular_shape2d;
+    struct csmshape2d_t *shape2d, *circular_shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    circular_shape2d = gcelem2d_contorno_circular(0.25, 4);
-    //circular_shape2d = gcelem2d_contorno_rectangular_con_pto_inflexion(0.25, 0.25);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    circular_shape2d = csmbasicshape2d_circular_shape(0.25, 4);
+    //circular_shape2d = csmbasicshape2d_rectangular_shape_con_pto_inflexion(0.25, 0.25);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.15, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.15, -0.01, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
@@ -790,7 +789,7 @@ static void i_test_interseccion_solidos2(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -798,14 +797,39 @@ static void i_test_interseccion_solidos2(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+CONSTRUCTOR(static struct csmshape2d_t *, i_rectangular_shape2d_with_inflection_point, (double ancho_x, double ancho_y))
+{
+    struct csmshape2d_t *shape2d;
+    csmArrPoint2D *points;
+    
+    assert(ancho_x > 0.);
+    assert(ancho_y > 0.);
+    
+    shape2d = csmshape2d_new();
+    
+    points = csmArrPoint2D_new(6);
+    csmArrPoint2D_set(points, 0, -.5 * ancho_x, -.5 * ancho_y);
+    csmArrPoint2D_set(points, 1,  .0, -.5 * ancho_y);
+    csmArrPoint2D_set(points, 2,  .5 * ancho_x, -.5 * ancho_y);
+    
+    csmArrPoint2D_set(points, 3,  .5 * ancho_x,  .5 * ancho_y);
+    csmArrPoint2D_set(points, 4,  .0,  .5 * ancho_y);
+    csmArrPoint2D_set(points, 5, -.5 * ancho_x,  .5 * ancho_y);
+    
+    csmshape2d_append_new_polygon_with_points(shape2d, &points);
+    
+    return shape2d;
+}
+// ------------------------------------------------------------------------------------------
+
 static void i_test_interseccion_solidos5(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *circular_shape2d;
+    struct csmshape2d_t *shape2d, *circular_shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    //circular_shape2d = gcelem2d_contorno_circular(0.25, 4);
-    circular_shape2d = gcelem2d_contorno_rectangular_con_pto_inflexion(0.5, 0.5);
-    shape2d = gcelem2d_contorno_rectangular(2., 2.);
+    //circular_shape2d = csmbasicshape2d_circular_shape(0.25, 4);
+    circular_shape2d = i_rectangular_shape2d_with_inflection_point(0.5, 0.5);
+    shape2d = csmbasicshape2d_rectangular_shape(2., 2.);
     
     solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 1.0, -0.15, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 1.0, -0.15, 0.01, 1., 0., 0., 0., 1., 0., 0);
     //solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., circular_shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 0);
@@ -820,7 +844,7 @@ static void i_test_interseccion_solidos5(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -830,12 +854,12 @@ static void i_test_interseccion_solidos5(struct csmviewer_t *viewer)
 
 static void i_test_interseccion_solidos7(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *c_shape2d;
+    struct csmshape2d_t *shape2d, *c_shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    c_shape2d = gcelem2d_contorno_c(1., 0.9);
-    //c_shape2d = gcelem2d_contorno_L(1., 1.);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    c_shape2d = csmbasicshape2d_C_shape(1., 0.9);
+    //c_shape2d = csmbasicshape2d_L_shape(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     solid1 = csmsweep_create_solid_from_shape_debug(c_shape2d, 1. / 3., 0., 0.75, 1., 0., 0., 0., 1., 0., c_shape2d, 1. / 3., 0., 0.01, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
@@ -851,8 +875,8 @@ static void i_test_interseccion_solidos7(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
-    gccontorno_destruye(&c_shape2d);
+    csmshape2d_free(&shape2d);
+    csmshape2d_free(&c_shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -862,13 +886,13 @@ static void i_test_interseccion_solidos7(struct csmviewer_t *viewer)
 
 static void i_test_union_solidos6(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *circular_shape2d;
+    struct csmshape2d_t *shape2d, *circular_shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
-    struct gccontorno_t *shape3d;
+    struct csmshape2d_t *shape3d;
     struct csmsolid_t *solid3, *solid_res2;
     
-    circular_shape2d = gcelem2d_contorno_circular(0.25, 4);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    circular_shape2d = csmbasicshape2d_circular_shape(0.25, 4);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.15, 1., 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.15, 0.5, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 0.5, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
@@ -879,13 +903,13 @@ static void i_test_union_solidos6(struct csmviewer_t *viewer)
     csmviewer_set_results(viewer, solid_res, NULL);
     //csmviewer_show(viewer);
     
-    shape3d = gcelem2d_contorno_rectangular(0.75, 0.75);
+    shape3d = csmbasicshape2d_rectangular_shape(0.75, 0.75);
     solid3 = csmsweep_create_solid_from_shape_debug(shape3d, 1., 0., 1, 1., 0., 0., 0., 1., 0., shape3d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 2000);
     
     solid_res2 = csmsetop_union_A_and_B(solid3, solid_res);
     csmsolid_debug_print_debug(solid_res2, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -897,14 +921,14 @@ static void i_test_union_solidos6(struct csmviewer_t *viewer)
 
 static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *circular_shape2d;
+    struct csmshape2d_t *shape2d, *circular_shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("inters_solidos3.txt");
 
-    circular_shape2d = gcelem2d_contorno_circular(0.25, 4);
-    //circular_shape2d = gcelem2d_contorno_rectangular_con_pto_inflexion(0.25, 0.25);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    circular_shape2d = csmbasicshape2d_circular_shape(0.25, 4);
+    //circular_shape2d = csmbasicshape2d_rectangular_shape_con_pto_inflexion(0.25, 0.25);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     //solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.16, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.16, 0.0, 1., 0., 1., 0., 1., 0., 0);
     solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.16, 0.75, 1., 0., 1., 0., 1., 0., circular_shape2d, 0.5, -0.16, 0.01, 1., 0., 1., 0., 1., 0., 0);
@@ -920,7 +944,7 @@ static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     csmdebug_print_debug_info("******* Solid 2 intersect solid 2 [end]");
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -930,10 +954,10 @@ static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
 
 static void i_test_interseccion_solidos4(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
     //solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
@@ -952,7 +976,7 @@ static void i_test_interseccion_solidos4(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -962,10 +986,10 @@ static void i_test_interseccion_solidos4(struct csmviewer_t *viewer)
 
 static void i_test_resta_solidos1(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d;
+    struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
     //solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
@@ -984,7 +1008,7 @@ static void i_test_resta_solidos1(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -994,11 +1018,11 @@ static void i_test_resta_solidos1(struct csmviewer_t *viewer)
 
 static void i_test_resta_solidos2(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *rshape2d;
+    struct csmshape2d_t *shape2d, *rshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    rshape2d = gcelem2d_contorno_rectangular(0.25, 0.25);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    rshape2d = csmbasicshape2d_rectangular_shape(0.25, 0.25);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, equal vertex coordinates...
     //solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
@@ -1017,8 +1041,8 @@ static void i_test_resta_solidos2(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&rshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&rshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -1028,11 +1052,11 @@ static void i_test_resta_solidos2(struct csmviewer_t *viewer)
 
 static void i_test_multiple_solidos1(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    cshape2d = gcelem2d_contorno_circular(0.5, 5);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    cshape2d = csmbasicshape2d_circular_shape(0.5, 5);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1060,8 +1084,8 @@ static void i_test_multiple_solidos1(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -1071,11 +1095,11 @@ static void i_test_multiple_solidos1(struct csmviewer_t *viewer)
 
 static void i_test_multiple_solidos2(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    cshape2d = gcelem2d_contorno_circular(0.5, 16);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    cshape2d = csmbasicshape2d_circular_shape(0.5, 16);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1116,8 +1140,8 @@ static void i_test_multiple_solidos2(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -1127,11 +1151,11 @@ static void i_test_multiple_solidos2(struct csmviewer_t *viewer)
 
 static void i_test_multiple_solidos3(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    cshape2d = gcelem2d_contorno_circular(0.5, 16);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    cshape2d = csmbasicshape2d_circular_shape(0.5, 16);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1159,8 +1183,8 @@ static void i_test_multiple_solidos3(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -1170,14 +1194,14 @@ static void i_test_multiple_solidos3(struct csmviewer_t *viewer)
 
 static void i_test_cilindro1(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d, *shape2d2;
+    struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("union_cilindro1.txt");
 
-    cshape2d = gcelem2d_contorno_circular(0.55, 4);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
-    shape2d2 = gcelem2d_contorno_rectangular(1.5, 0.75);
+    cshape2d = csmbasicshape2d_circular_shape(0.55, 4);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
+    shape2d2 = csmbasicshape2d_rectangular_shape(1.5, 0.75);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1223,9 +1247,9 @@ static void i_test_cilindro1(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
-    gccontorno_destruye(&shape2d2);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
+    csmshape2d_free(&shape2d2);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
 }
@@ -1234,14 +1258,14 @@ static void i_test_cilindro1(struct csmviewer_t *viewer)
 
 static void i_test_cilindro2(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d, *shape2d2;
+    struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("test_cilindro1.txt");
 
-    cshape2d = gcelem2d_contorno_circular(0.55, 4);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
-    shape2d2 = gcelem2d_contorno_rectangular(1.5, 0.75);
+    cshape2d = csmbasicshape2d_circular_shape(0.55, 4);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
+    shape2d2 = csmbasicshape2d_rectangular_shape(1.5, 0.75);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1.25, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1286,9 +1310,9 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
-    gccontorno_destruye(&shape2d2);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
+    csmshape2d_free(&shape2d2);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
 }
@@ -1297,14 +1321,14 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
 
 static void i_test_cilindro5(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d, *shape2d2;
+    struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("test_cilindro5.txt");
 
-    cshape2d = gcelem2d_contorno_circular(0.25, 4);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
-    shape2d2 = gcelem2d_contorno_rectangular(1.5, 0.75);
+    cshape2d = csmbasicshape2d_circular_shape(0.25, 4);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
+    shape2d2 = csmbasicshape2d_rectangular_shape(1.5, 0.75);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1.25, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1342,9 +1366,9 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
-    gccontorno_destruye(&shape2d2);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
+    csmshape2d_free(&shape2d2);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
 }
@@ -1353,14 +1377,14 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
 
 static void i_test_cilindro6(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d, *shape2d2;
+    struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("test_cilindro6.txt");
 
-    cshape2d = gcelem2d_contorno_circular(0.50, 4);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
-    shape2d2 = gcelem2d_contorno_rectangular(1.5, 0.75);
+    cshape2d = csmbasicshape2d_circular_shape(0.50, 4);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
+    shape2d2 = csmbasicshape2d_rectangular_shape(1.5, 0.75);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1.25, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1399,9 +1423,9 @@ static void i_test_cilindro6(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
-    gccontorno_destruye(&shape2d2);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
+    csmshape2d_free(&shape2d2);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
 }
@@ -1410,28 +1434,28 @@ static void i_test_cilindro6(struct csmviewer_t *viewer)
 
 static void i_test_cilindro7(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("test_cilindro7.txt");
 
     {
         double ax, ay;
-        ArrPunto2D *points;
+        csmArrPoint2D *points;
         
         ax = 0.5;
         ay = 0.5;
         
-        points = arr_CreaPunto2D(0);
-        arr_AppendPunto2D(points, -0.5 * ax, -0.5 * ay);
-        arr_AppendPunto2D(points,  0.5 * ax, -0.5 * ay);
-        arr_AppendPunto2D(points,  0., 0.5 * ay);
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, -0.5 * ax, -0.5 * ay);
+        csmArrPoint2D_append(points,  0.5 * ax, -0.5 * ay);
+        csmArrPoint2D_append(points,  0., 0.5 * ay);
         
-        cshape2d = gccontorno_crea_vacio();
-        gccontorno_append_array_puntos(cshape2d, &points);
+        cshape2d = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(cshape2d, &points);
     }
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1467,8 +1491,8 @@ static void i_test_cilindro7(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
 }
@@ -1477,7 +1501,7 @@ static void i_test_cilindro7(struct csmviewer_t *viewer)
 
 static void i_test_cilindro3(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     unsigned long no_sides_circle;
     
@@ -1485,8 +1509,8 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
 
     no_sides_circle = 32;
     
-    cshape2d = gcelem2d_contorno_circular(0.40, no_sides_circle);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    cshape2d = csmbasicshape2d_circular_shape(0.40, no_sides_circle);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1508,7 +1532,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
         struct csmsolid_t *solid3;
         struct csmsolid_t *solid_res2;
         
-        cshape2d = gcelem2d_contorno_circular(0.40, no_sides_circle);
+        cshape2d = csmbasicshape2d_circular_shape(0.40, no_sides_circle);
         
         solid3 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,  2., 0., .25, 0., 1., 0., 0., 0., 1.,
@@ -1562,8 +1586,8 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -1573,7 +1597,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
 
 static void i_test_cilindro4(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid3, *solid_res;
     unsigned long no_points_circle;
     
@@ -1582,9 +1606,9 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
 
     no_points_circle = 32;
     
-    //cshape2d = gcelem2d_contorno_rectangular(0.80, 0.80);
-    cshape2d = gcelem2d_contorno_circular(0.40, no_points_circle);
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    //cshape2d = csmbasicshape2d_rectangular_shape(0.80, 0.80);
+    cshape2d = csmbasicshape2d_circular_shape(0.40, no_points_circle);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1610,7 +1634,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
         
         csmdebug_set_enabled_by_code(CSMTRUE);
         
-        //cshape2d = gcelem2d_contorno_rectangular(0.75, 0.75);
+        //cshape2d = csmbasicshape2d_rectangular_shape(0.75, 0.75);
 
         /*
         solid4 = csmsweep_create_solid_from_shape_debug(
@@ -1649,7 +1673,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
         {
             struct csmsolid_t *solid5;
             
-            cshape2d = gcelem2d_contorno_circular(0.35, no_points_circle); // Revisar resta con num_puntos_circulo = 8
+            cshape2d = csmbasicshape2d_circular_shape(0.35, no_points_circle); // Revisar resta con num_puntos_circulo = 8
             
             solid5 = csmsweep_create_solid_from_shape_debug(
                         cshape2d,    1.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
@@ -1705,8 +1729,8 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid_res);
@@ -1716,29 +1740,29 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
 
 static void i_test_cilindro8(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("test_cilindro7.txt");
 
     {
         double ax, ay;
-        ArrPunto2D *points;
+        csmArrPoint2D *points;
         
         ax = 0.5;
         ay = 0.5;
         
-        points = arr_CreaPunto2D(0);
-        arr_AppendPunto2D(points, -0.5 * ax, -0.5 * ay);
-        arr_AppendPunto2D(points,  0.5 * ax, -0.5 * ay);
-        arr_AppendPunto2D(points,  0.01 * ax, 0.5 * ay);
-        arr_AppendPunto2D(points,  -0.01 * ax, 0.5 * ay);
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, -0.5 * ax, -0.5 * ay);
+        csmArrPoint2D_append(points,  0.5 * ax, -0.5 * ay);
+        csmArrPoint2D_append(points,  0.01 * ax, 0.5 * ay);
+        csmArrPoint2D_append(points,  -0.01 * ax, 0.5 * ay);
         
-        cshape2d = gccontorno_crea_vacio();
-        gccontorno_append_array_puntos(cshape2d, &points);
+        cshape2d = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(cshape2d, &points);
     }
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1774,8 +1798,8 @@ static void i_test_cilindro8(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
 }
@@ -1784,28 +1808,28 @@ static void i_test_cilindro8(struct csmviewer_t *viewer)
 
 static void i_test_cilindro9(struct csmviewer_t *viewer)
 {
-    struct gccontorno_t *shape2d, *cshape2d;
+    struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
     i_set_output_debug_file("test_cilindro7.txt");
 
     {
         double ax, ay;
-        ArrPunto2D *points;
+        csmArrPoint2D *points;
         
         ax = 0.5;
         ay = 0.5;
         
-        points = arr_CreaPunto2D(0);
-        arr_AppendPunto2D(points, -0.5 * ax, -0.5 * ay);
-        arr_AppendPunto2D(points,  0.5 * ax, -0.5 * ay);
-        arr_AppendPunto2D(points,  0., 0.5 * ay);
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, -0.5 * ax, -0.5 * ay);
+        csmArrPoint2D_append(points,  0.5 * ax, -0.5 * ay);
+        csmArrPoint2D_append(points,  0., 0.5 * ay);
         
-        cshape2d = gccontorno_crea_vacio();
-        gccontorno_append_array_puntos(cshape2d, &points);
+        cshape2d = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(cshape2d, &points);
     }
     
-    shape2d = gcelem2d_contorno_rectangular(1., 1.);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
     // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
@@ -1841,8 +1865,8 @@ static void i_test_cilindro9(struct csmviewer_t *viewer)
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid2, CSMTRUE);
     
-    gccontorno_destruye(&cshape2d);
-    gccontorno_destruye(&shape2d);
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
 }
@@ -1855,9 +1879,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_ring_part, (
                         double outer_radius, double inner_radius, unsigned long no_points_circle))
 {
     struct csmsolid_t *ring_part;
-    struct gccontorno_t *ring_shape;
+    struct csmshape2d_t *ring_shape;
     
-    ring_shape = gcelem2d_contorno_circular_hueco(outer_radius, inner_radius, no_points_circle);
+    ring_shape = csmbasicshape2d_circular_hollow_shape(outer_radius, inner_radius, no_points_circle);
     
     ring_part = csmsweep_create_solid_from_shape_debug(
                         ring_shape,
@@ -1866,7 +1890,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_ring_part, (
                         0., 0., Zo, 1., 0., 0., 0., 1., 0.,
                         1000);
     
-    gccontorno_destruye(&ring_shape);
+    csmshape2d_free(&ring_shape);
     
     return ring_part;
 }
@@ -1878,7 +1902,7 @@ static void i_test_mechanical_part1(void)
     struct csmsolid_t *basic_part;
     struct csmsolid_t *main_part;
     double ax, ay, main_part_length;
-    struct gccontorno_t *main_part_shape;
+    struct csmshape2d_t *main_part_shape;
     
     i_set_output_debug_file("mechanical1.txt");
     
@@ -1888,8 +1912,8 @@ static void i_test_mechanical_part1(void)
     
     csmdebug_set_enabled_by_code(CSMFALSE);
     
-    //main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
-    main_part_shape = gcelem2d_contorno_circular(ax, 32);
+    //main_part_shape = csmbasicshape2d_rectangular_shape(ax, ay);
+    main_part_shape = csmbasicshape2d_circular_shape(ax, 32);
     
     basic_part = csmsweep_create_solid_from_shape_debug(
                         main_part_shape,
@@ -1948,11 +1972,11 @@ static void i_test_mechanical_part1(void)
    
     
     {
-        struct gccontorno_t *diff_shape;
+        struct csmshape2d_t *diff_shape;
         struct csmsolid_t *basic_part2, *main_part_loc;
         
-        //diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
-        diff_shape = gcelem2d_contorno_circular(0.8 * ax, 16);
+        //diff_shape = csmbasicshape2d_rectangular_shape(0.6 * ax, 0.6 * ax);
+        diff_shape = csmbasicshape2d_circular_shape(0.8 * ax, 16);
         
         basic_part2 = csmsweep_create_solid_from_shape_debug(
                         diff_shape,
@@ -1967,7 +1991,7 @@ static void i_test_mechanical_part1(void)
         csmsolid_free(&main_part);
         main_part = main_part_loc;
         
-        gccontorno_destruye(&diff_shape);
+        csmshape2d_free(&diff_shape);
         csmsolid_free(&basic_part2);
     }
 
@@ -1993,7 +2017,7 @@ static void i_test_mechanical_part1(void)
         i_show_split_results(A, B, C, D, CSMFALSE, solid_above, solid_below);
     }
     
-    gccontorno_destruye(&main_part_shape);
+    csmshape2d_free(&main_part_shape);
     csmsolid_free(&main_part);
     csmsolid_free(&basic_part);
 }
@@ -2005,7 +2029,7 @@ static void i_test_mechanical_part1_redux(void)
     struct csmsolid_t *basic_part;
     struct csmsolid_t *main_part;
     double ax, ay, main_part_length;
-    struct gccontorno_t *main_part_shape;
+    struct csmshape2d_t *main_part_shape;
     
     i_set_output_debug_file("mechanical1_redux.txt");
     
@@ -2015,8 +2039,8 @@ static void i_test_mechanical_part1_redux(void)
     
     csmdebug_set_enabled_by_code(CSMFALSE);
     
-    main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
-    //main_part_shape = gcelem2d_contorno_circular(ax, 32);
+    main_part_shape = csmbasicshape2d_rectangular_shape(ax, ay);
+    //main_part_shape = csmbasicshape2d_circular_shape(ax, 32);
     
     basic_part = csmsweep_create_solid_from_shape_debug(
                         main_part_shape,
@@ -2100,11 +2124,11 @@ static void i_test_mechanical_part1_redux(void)
     }
     
     {
-        struct gccontorno_t *diff_shape;
+        struct csmshape2d_t *diff_shape;
         struct csmsolid_t *basic_part2, *main_part_loc;
         
-        //diff_shape = gcelem2d_contorno_rectangular(0.6 * ax, 0.6 * ax);
-        diff_shape = gcelem2d_contorno_circular(0.6 * ax, 6);
+        //diff_shape = csmbasicshape2d_rectangular_shape(0.6 * ax, 0.6 * ax);
+        diff_shape = csmbasicshape2d_circular_shape(0.6 * ax, 6);
         
         basic_part2 = csmsweep_create_solid_from_shape_debug(
                         diff_shape,
@@ -2119,7 +2143,7 @@ static void i_test_mechanical_part1_redux(void)
         csmsolid_free(&main_part);
         main_part = main_part_loc;
         
-        gccontorno_destruye(&diff_shape);
+        csmshape2d_free(&diff_shape);
         csmsolid_free(&basic_part2);
     }
 
@@ -2145,7 +2169,7 @@ static void i_test_mechanical_part1_redux(void)
         i_show_split_results(A, B, C, D, CSMFALSE, solid_above, solid_below);
     }
     
-    gccontorno_destruye(&main_part_shape);
+    csmshape2d_free(&main_part_shape);
     csmsolid_free(&main_part);
     csmsolid_free(&basic_part);
 }
@@ -2155,7 +2179,7 @@ static void i_test_mechanical_part1_redux(void)
 static void i_test_mechanical_part2(void)
 {
     double ax, ay, head_length, bolt_length, thread_length;
-    struct gccontorno_t *head_shape, *body_shape, *thread_shape;
+    struct csmshape2d_t *head_shape, *body_shape, *thread_shape;
     struct csmsolid_t *head_solid, *body_solid, *thread_solid, *bolt_solid;
     
     i_set_output_debug_file("mechanical2.txt");
@@ -2166,10 +2190,10 @@ static void i_test_mechanical_part2(void)
     bolt_length = 0.08;
     thread_length = 0.0025;
     
-    //main_part_shape = gcelem2d_contorno_rectangular(ax, ay);
-    head_shape = gcelem2d_contorno_circular(ax, 6);
-    body_shape = gcelem2d_contorno_circular(0.5 * ax, 32);
-    thread_shape = gcelem2d_contorno_circular(0.6 * ax, 32);
+    //main_part_shape = csmbasicshape2d_rectangular_shape(ax, ay);
+    head_shape = csmbasicshape2d_circular_shape(ax, 6);
+    body_shape = csmbasicshape2d_circular_shape(0.5 * ax, 32);
+    thread_shape = csmbasicshape2d_circular_shape(0.6 * ax, 32);
     
     head_solid = csmsweep_create_solid_from_shape_debug(
                         head_shape,
@@ -2217,7 +2241,7 @@ static void i_test_mechanical_part2(void)
     
     {
         struct csmsolid_t *bolt_solid2, *bolt_solid3;
-        struct gccontorno_t *block_shape;
+        struct csmshape2d_t *block_shape;
         struct csmsolid_t *block_solid;
         
         bolt_solid2 = csmsolid_duplicate(bolt_solid);
@@ -2233,7 +2257,7 @@ static void i_test_mechanical_part2(void)
         
         csmdebug_set_enabled_by_code(CSMFALSE);
         {
-            block_shape = gcelem2d_contorno_rectangular(0.2, 0.2);
+            block_shape = csmbasicshape2d_rectangular_shape(0.2, 0.2);
         
             block_solid = csmsweep_create_solid_from_shape_debug(
                         block_shape,
@@ -2281,8 +2305,8 @@ static void i_test_toroide(void)
     struct csmsolid_t *block;
     struct csmsolid_t *res;
     
-    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
-    toroide = csmshape3d_create_torus(
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    toroide = csmquadrics_create_torus(
                         3.,  16,
                         .75, 8,
                         0., 0., 0.,
@@ -2291,9 +2315,9 @@ static void i_test_toroide(void)
                         1);
     
     {
-        struct gccontorno_t *block_shape;
+        struct csmshape2d_t *block_shape;
         
-        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        block_shape = csmbasicshape2d_rectangular_shape(6., 6.);
         
         block = csmsweep_create_solid_from_shape_debug(
                         block_shape,
@@ -2317,8 +2341,8 @@ static void i_test_cono(void)
     struct csmsolid_t *block;
     struct csmsolid_t *res;
     
-    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
-    cono = csmshape3d_create_cone(
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    cono = csmquadrics_create_cone(
                         5., 1., 32,
                         0., 0., 0.,
                         1., 0., 0.,
@@ -2329,9 +2353,9 @@ static void i_test_cono(void)
     csmdebug_show_viewer();
     
     {
-        struct gccontorno_t *block_shape;
+        struct csmshape2d_t *block_shape;
         
-        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        block_shape = csmbasicshape2d_rectangular_shape(6., 6.);
         
         block = csmsweep_create_solid_from_shape_debug(
                         block_shape,
@@ -2355,8 +2379,8 @@ static void i_test_sphere(void)
     struct csmsolid_t *block;
     struct csmsolid_t *res;
     
-    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
-    cono = csmshape3d_create_sphere(
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    cono = csmquadrics_create_sphere(
                         2.,
                         8,
                         16,
@@ -2369,9 +2393,9 @@ static void i_test_sphere(void)
     //csmdebug_show_viewer();
     
     {
-        struct gccontorno_t *block_shape;
+        struct csmshape2d_t *block_shape;
         
-        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        block_shape = csmbasicshape2d_rectangular_shape(6., 6.);
         
         block = csmsweep_create_solid_from_shape_debug(
                         block_shape,
@@ -2395,8 +2419,8 @@ static void i_test_sphere2(void)
     struct csmsolid_t *block;
     struct csmsolid_t *res;
     
-    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
-    sphere = csmshape3d_create_sphere(
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    sphere = csmquadrics_create_sphere(
                         2.8,
                         8,
                         16,
@@ -2406,7 +2430,7 @@ static void i_test_sphere2(void)
                         1);
     i_assign_flat_material_to_solid(1., 0., 0., sphere);
 
-    torus = csmshape3d_create_torus(
+    torus = csmquadrics_create_torus(
                         3.,  16,
                         .75, 16,
                         0., 0., 0.,
@@ -2415,7 +2439,7 @@ static void i_test_sphere2(void)
                         1);
     i_assign_flat_material_to_solid(0., 0., 1., torus);
 
-    torus2 = csmshape3d_create_torus(
+    torus2 = csmquadrics_create_torus(
                         3.,  16,
                         .75, 16,
                         0., 0., 0.,
@@ -2424,7 +2448,7 @@ static void i_test_sphere2(void)
                         1);
     i_assign_flat_material_to_solid(0., 1., 1., torus2);
     
-    cone = csmshape3d_create_cone(
+    cone = csmquadrics_create_cone(
                         5., 2., 32,
                         0., 0., 0.,
                         -1., 0., 0.,
@@ -2436,9 +2460,9 @@ static void i_test_sphere2(void)
     //csmdebug_show_viewer();
     
     {
-        struct gccontorno_t *block_shape;
+        struct csmshape2d_t *block_shape;
         
-        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        block_shape = csmbasicshape2d_rectangular_shape(6., 6.);
         
         block = csmsweep_create_solid_from_shape_debug(
                         block_shape,
@@ -2465,8 +2489,8 @@ static void i_test_sphere3(void)
     struct csmsolid_t *block;
     struct csmsolid_t *res;
     
-    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
-    sphere = csmshape3d_create_sphere(
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    sphere = csmquadrics_create_sphere(
                         2.8,
                         8,
                         16,
@@ -2475,7 +2499,7 @@ static void i_test_sphere3(void)
                         0., 1., 0.,
                         1);
 
-    torus = csmshape3d_create_torus(
+    torus = csmquadrics_create_torus(
                         3.,  16,
                         .75, 16,
                         0., 0., 0.,
@@ -2483,7 +2507,7 @@ static void i_test_sphere3(void)
                         0., 0., 1.,
                         1);
 
-    torus2 = csmshape3d_create_torus(
+    torus2 = csmquadrics_create_torus(
                         3.,  16,
                         .75, 16,
                         0., 0., 0.,
@@ -2495,9 +2519,9 @@ static void i_test_sphere3(void)
     //csmdebug_show_viewer();
     
     {
-        struct gccontorno_t *block_shape;
+        struct csmshape2d_t *block_shape;
         
-        block_shape = gcelem2d_contorno_rectangular(6., 6.);
+        block_shape = csmbasicshape2d_rectangular_shape(6., 6.);
         
         block = csmsweep_create_solid_from_shape_debug(
                         block_shape,
@@ -2525,8 +2549,8 @@ static void i_test_sphere4(void)
     struct csmsolid_t *torus;
     struct csmsolid_t *cylinder;
     
-    //toroide = csmshape3d_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
-    sphere1 = csmshape3d_create_sphere(
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    sphere1 = csmquadrics_create_sphere(
                         2.8,
                         8,
                         16,
@@ -2535,7 +2559,7 @@ static void i_test_sphere4(void)
                         0., 1., 0.,
                         1);
 
-    sphere2 = csmshape3d_create_sphere(
+    sphere2 = csmquadrics_create_sphere(
                         2.8,
                         8,
                         16,
@@ -2544,7 +2568,7 @@ static void i_test_sphere4(void)
                         0., 1., 0.,
                         1);
 
-    sphere3 = csmshape3d_create_sphere(
+    sphere3 = csmquadrics_create_sphere(
                         2.8,
                         8,
                         16,
@@ -2553,7 +2577,7 @@ static void i_test_sphere4(void)
                         0., 1., 0.,
                         1);
 
-    sphere4 = csmshape3d_create_sphere(
+    sphere4 = csmquadrics_create_sphere(
                         2.8,
                         8,
                         16,
@@ -2576,9 +2600,9 @@ static void i_test_sphere4(void)
     csmdebug_show_viewer();
     
     {
-        struct gccontorno_t *block_shape;
+        struct csmshape2d_t *block_shape;
         
-        block_shape = gcelem2d_contorno_rectangular(2.9, 2.9);
+        block_shape = csmbasicshape2d_rectangular_shape(2.9, 2.9);
         
         block = csmsweep_create_solid_from_shape_debug(
                         block_shape,
@@ -2602,7 +2626,7 @@ static void i_test_sphere4(void)
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
     
-    torus = csmshape3d_create_torus(
+    torus = csmquadrics_create_torus(
                         1.5,  16,
                         1., 16,
                         1.4, 1.4, -.6,
@@ -2618,9 +2642,9 @@ static void i_test_sphere4(void)
     csmdebug_show_viewer();
     
     {
-        struct gccontorno_t *cylinder_shape;
+        struct csmshape2d_t *cylinder_shape;
         
-        cylinder_shape = gcelem2d_contorno_circular(0.3, 32);
+        cylinder_shape = csmbasicshape2d_circular_shape(0.3, 32);
         
         cylinder = csmsweep_create_solid_from_shape_debug(
                         cylinder_shape,
@@ -2638,9 +2662,9 @@ static void i_test_sphere4(void)
     csmdebug_show_viewer();
     
     {
-        struct gccontorno_t *cylinder_shape;
+        struct csmshape2d_t *cylinder_shape;
         
-        cylinder_shape = gcelem2d_contorno_circular(0.6, 32);
+        cylinder_shape = csmbasicshape2d_circular_shape(0.6, 32);
         
         cylinder = csmsweep_create_solid_from_shape_debug(
                         cylinder_shape,
@@ -2702,11 +2726,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_semisphere_at_origin, (dou
     assert(thickness > 0.);
     assert(thickness < radius);
     
-    solid_sphere = csmshape3d_create_sphere(radius, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    solid_sphere = csmquadrics_create_sphere(radius, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     solid_above_sphere = i_split_solid_ang_get_division(solid_sphere, 0., 0., 0., 1., 0., 0., 0., 1., 0., CSMTRUE);
     csmsolid_free(&solid_sphere);
     
-    inner_sphere = csmshape3d_create_sphere(radius - thickness, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    inner_sphere = csmquadrics_create_sphere(radius - thickness, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     hollow_sphere = csmsetop_difference_A_minus_B(solid_above_sphere, inner_sphere);
     csmsolid_free(&inner_sphere);
     
@@ -2720,14 +2744,14 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_semisphere_at_origin, (dou
 CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_cylinder, (double radius, double thickness, double height, unsigned long no_points_circle))
 {
     struct csmsolid_t *hollow_cylinder;
-    struct gccontorno_t *shape;
+    struct csmshape2d_t *shape;
     
     assert(radius > 0.);
     assert(thickness > 0.);
     assert(thickness < radius);
     assert(height > 0.);
     
-    shape = gcelem2d_contorno_circular_hueco(radius, radius - thickness, no_points_circle);
+    shape = csmbasicshape2d_circular_hollow_shape(radius, radius - thickness, no_points_circle);
     
     hollow_cylinder = csmsweep_create_solid_from_shape_debug(
 	                    shape, 0., 0.,  0.5 * height, 1., 0., 0., 0., 1., 0.,
@@ -2736,7 +2760,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_cylinder, (double radius, 
     
     i_assign_flat_material_to_solid(.5, .5, .5, hollow_cylinder);
     
-    gccontorno_destruye(&shape);
+    csmshape2d_free(&shape);
     
     return hollow_cylinder;
 }
@@ -2746,11 +2770,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_cylinder, (double radius, 
 CONSTRUCTOR(static struct csmsolid_t *, i_make_horizontal_hole_cylinder, (double radius, double x1, double x2, double z, unsigned long no_points_circle))
 {
     struct csmsolid_t *hollow_cylinder;
-    struct gccontorno_t *shape;
+    struct csmshape2d_t *shape;
     
     assert(radius > 0.);
     
-    shape = gcelem2d_contorno_circular(radius, no_points_circle);
+    shape = csmbasicshape2d_circular_shape(radius, no_points_circle);
     
     hollow_cylinder = csmsweep_create_solid_from_shape_debug(
                         shape, x2, 0., z, 0., 1., 0., 0., 0., 1.,
@@ -2759,7 +2783,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_horizontal_hole_cylinder, (double
     
     i_assign_flat_material_to_solid(.5, .5, .5, hollow_cylinder);
     
-    gccontorno_destruye(&shape);
+    csmshape2d_free(&shape);
     
     return hollow_cylinder;
 }
@@ -2769,11 +2793,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_horizontal_hole_cylinder, (double
 CONSTRUCTOR(static struct csmsolid_t *, i_make_horizontal_hollow_hole_cylinder, (double radius, double thickness, double x1, double x2, double z, unsigned long no_points_circle))
 {
     struct csmsolid_t *hollow_cylinder;
-    struct gccontorno_t *shape;
+    struct csmshape2d_t *shape;
     
     assert(radius > 0.);
     
-    shape = gcelem2d_contorno_circular_hueco(radius, radius - thickness, no_points_circle);
+    shape = csmbasicshape2d_circular_hollow_shape(radius, radius - thickness, no_points_circle);
     
     hollow_cylinder = csmsweep_create_solid_from_shape_debug(
                         shape, x2, 0., z, 0., 1., 0., 0., 0., 1.,
@@ -2782,7 +2806,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_horizontal_hollow_hole_cylinder, 
     
     i_assign_flat_material_to_solid(1., .3, .3, hollow_cylinder);
     
-    gccontorno_destruye(&shape);
+    csmshape2d_free(&shape);
     
     return hollow_cylinder;
 }
@@ -2923,7 +2947,7 @@ static void i_test_mechanical5(void)
         csmsolid_free(&solid_aux);
     }
     
-    torus = csmshape3d_create_torus(radius + 0.5 * thickness, no_points_circle, thickness, no_points_circle, 0., 0., -0.02, 1., 0., 0., 0., 1., 0., 0);
+    torus = csmquadrics_create_torus(radius + 0.5 * thickness, no_points_circle, thickness, no_points_circle, 0., 0., -0.02, 1., 0., 0., 0., 1., 0., 0);
     {
         solid_aux = solid;
         solid = csmsetop_difference_A_minus_B(solid_aux, torus);
@@ -2964,16 +2988,16 @@ static void i_test_mechanical5(void)
 static void i_test_mechanical6bis(void)
 {
     unsigned long no_points_circle;
-    struct gccontorno_t *shape1, *shape2_redux, *shape2;
+    struct csmshape2d_t *shape1, *shape2_redux, *shape2;
     struct csmsolid_t *s1, *s2, *s3;
     
     i_set_output_debug_file("test_mechanical7_redux.txt");
     
     no_points_circle = 4;
     
-    shape1 = gcelem2d_contorno_circular_hueco(1., 0.6, no_points_circle);
-    shape2 = gcelem2d_contorno_circular_hueco(1., 0.6, no_points_circle);
-    shape2_redux = gcelem2d_contorno_circular_hueco(0.75, 0.6, no_points_circle);
+    shape1 = csmbasicshape2d_circular_hollow_shape(1., 0.6, no_points_circle);
+    shape2 = csmbasicshape2d_circular_hollow_shape(1., 0.6, no_points_circle);
+    shape2_redux = csmbasicshape2d_circular_hollow_shape(0.75, 0.6, no_points_circle);
     
     s1 = csmsweep_create_solid_from_shape_debug(
                         shape1, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
@@ -2992,9 +3016,9 @@ static void i_test_mechanical6bis(void)
     csmdebug_set_viewer_results(s3, NULL);
     csmdebug_show_viewer();
     
-    gccontorno_destruye(&shape1);
-    gccontorno_destruye(&shape2_redux);
-    gccontorno_destruye(&shape2);
+    csmshape2d_free(&shape1);
+    csmshape2d_free(&shape2_redux);
+    csmshape2d_free(&shape2);
     csmsolid_free(&s1);
     csmsolid_free(&s2);
     csmsolid_free(&s3);
@@ -3004,15 +3028,15 @@ static void i_test_mechanical6bis(void)
 
 static void i_test_mechanical6(void)
 {
-    struct gccontorno_t *shape1, *shape2, *shape3;
+    struct csmshape2d_t *shape1, *shape2, *shape3;
     struct csmsolid_t *s1, *s1_aux, *s2, *s3;
     
     i_set_output_debug_file("test_mechanical6.txt");
     
-    //shape = gcelem2d_contorno_rectangular_hueco(1., 1., 0.5, 0.5);
-    shape1 = gcelem2d_contorno_circular(1., 16);
-    shape3 = gcelem2d_contorno_circular(.6, 16);
-    shape2 = gcelem2d_contorno_circular_hueco(1., 0.6, 16);
+    //shape = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
+    shape1 = csmbasicshape2d_circular_shape(1., 16);
+    shape3 = csmbasicshape2d_circular_shape(.6, 16);
+    shape2 = csmbasicshape2d_circular_hollow_shape(1., 0.6, 16);
     
     s1 = csmsweep_create_solid_from_shape_debug(
 	                    shape1, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
@@ -3038,8 +3062,8 @@ static void i_test_mechanical6(void)
     csmdebug_set_viewer_results(s3, NULL);
     csmdebug_show_viewer();
     
-    gccontorno_destruye(&shape1);
-    gccontorno_destruye(&shape2);
+    csmshape2d_free(&shape1);
+    csmshape2d_free(&shape2);
     csmsolid_free(&s1);
     csmsolid_free(&s2);
     csmsolid_free(&s3);
@@ -3060,8 +3084,8 @@ static void i_test7_edge_spheres(
     assert(thick > 0.);
     assert(thick < radius);
     
-    sphere = csmshape3d_create_sphere(radius, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
-    inner_sphere = csmshape3d_create_sphere(radius - thick, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    sphere = csmquadrics_create_sphere(radius, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    inner_sphere = csmquadrics_create_sphere(radius - thick, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     
     splitted = csmsplit_does_plane_split_solid(sphere, 0., 0., 1., 0., &half_sphere_top, &half_sphere_bottom);
     assert(splitted == CSMTRUE);
@@ -3085,9 +3109,9 @@ static struct csmsolid_t *i_create_horizontal_hollow_cylinder(
                     unsigned long no_points_circle)
 {
     struct csmsolid_t *cylinder;
-    struct gccontorno_t *cylinder_shape;
+    struct csmshape2d_t *cylinder_shape;
     
-    cylinder_shape = gcelem2d_contorno_circular_hueco(radius, radius - thick, no_points_circle);
+    cylinder_shape = csmbasicshape2d_circular_hollow_shape(radius, radius - thick, no_points_circle);
     
     cylinder = csmsweep_create_solid_from_shape_debug(
                     cylinder_shape,
@@ -3096,7 +3120,7 @@ static struct csmsolid_t *i_create_horizontal_hollow_cylinder(
                     -0.5 * length, 0., 0., 0., 1., 0., 0., 0., 1.,
                     0);
     
-    gccontorno_destruye(&cylinder_shape);
+    csmshape2d_free(&cylinder_shape);
     
     return cylinder;
 }
@@ -3106,16 +3130,16 @@ static struct csmsolid_t *i_create_horizontal_hollow_cylinder(
 static struct csmsolid_t *i_create_planar_block(double ax, double ay, double az)
 {
     struct csmsolid_t *solid;
-    struct gccontorno_t *shape;
+    struct csmshape2d_t *shape;
     
-    shape = gcelem2d_contorno_rectangular(ax, ay);
+    shape = csmbasicshape2d_rectangular_shape(ax, ay);
     
     solid = csmsweep_create_solid_from_shape_debug(
                         shape, 0., 0.,  0.5 * az, 1., 0., 0., 0., 1., 0.,
                         shape, 0., 0., -0.5 * az, 1., 0., 0., 0., 1., 0.,
                         0);
     
-    gccontorno_destruye(&shape);
+    csmshape2d_free(&shape);
     
     return solid;
 }
@@ -3226,12 +3250,12 @@ static void i_test_mechanichal7(void)
     
     {
         double outer_radius, inner_radius;
-        struct gccontorno_t *shape;
+        struct csmshape2d_t *shape;
         struct csmsolid_t *cylinder;
 
         {
             outer_radius = 0.01;
-            shape = gcelem2d_contorno_circular(outer_radius, no_points_circle);
+            shape = csmbasicshape2d_circular_shape(outer_radius, no_points_circle);
             cylinder = csmsweep_create_solid_from_shape(shape, 0., 0., 0.1, 1., 0., 0., 0., 1., 0., shape, 0., 0., -0.20, 1., 0., 0., 0., 1., 0.);
             i_assign_flat_material_to_solid(0.9, 0.9, 0.9, cylinder);
 
@@ -3244,7 +3268,7 @@ static void i_test_mechanichal7(void)
         
         outer_radius = 0.02;
         inner_radius = 0.0175;
-        shape = gcelem2d_contorno_circular_hueco(outer_radius, inner_radius, no_points_circle);
+        shape = csmbasicshape2d_circular_hollow_shape(outer_radius, inner_radius, no_points_circle);
         cylinder = csmsweep_create_solid_from_shape(shape, 0., 0., 0.1, 1., 0., 0., 0., 1., 0., shape, 0., 0., -0.20, 1., 0., 0., 0., 1., 0.);
         i_assign_flat_material_to_solid(0.95, 0.95, 0.95, cylinder);
         
@@ -3336,7 +3360,7 @@ static void i_test_mechanichal7(void)
             csmsolid_free(&cylinder_aux);
         }
         
-        gccontorno_destruye(&shape);
+        csmshape2d_free(&shape);
         csmsolid_free(&cylinder);
     }
     
@@ -3356,14 +3380,14 @@ static void i_test_mechanichal7(void)
 
 static void i_test_mechanichal7_simplified(void)
 {
-    struct gccontorno_t *shape1, *shape2;
+    struct csmshape2d_t *shape1, *shape2;
     struct csmsolid_t *solid1, *solid2;
     struct csmsolid_t *solid;
     
     i_set_output_debug_file("mechanical7_simplified.txt");
     
-    shape1 = gcelem2d_contorno_rectangular(1.1, 1.1);
-    shape2 = gcelem2d_contorno_rectangular_hueco(1., 1., 0.9, 0.9);
+    shape1 = csmbasicshape2d_rectangular_shape(1.1, 1.1);
+    shape2 = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.9, 0.9);
     
     solid1 = csmsweep_create_solid_from_shape_debug(shape1, 0., 0., 0., 1., 0., 0., 0., 1., 0., shape1, 0., 0., -0.01, 1., 0., 0., 0., 1., 0., 0);
     i_assign_flat_material_to_solid(0., 1., 1., solid1);
@@ -3397,8 +3421,8 @@ static void i_test_mechanichal7_simplified(void)
     csmsolid_free(&solid1);
     csmsolid_free(&solid2);
     csmsolid_free(&solid);
-    gccontorno_destruye(&shape1);
-    gccontorno_destruye(&shape2);
+    csmshape2d_free(&shape1);
+    csmshape2d_free(&shape2);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -3461,9 +3485,7 @@ void csmtest_test(void)
                               // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
     i_test_mechanical_part1_redux();
-    
     i_test_mechanical_part1();
-    
     i_test_mechanical_part2();
     
     i_test_toroide();
@@ -3480,9 +3502,8 @@ void csmtest_test(void)
     i_test_mechanical6();
 
     i_test_mechanichal7_simplified();
-
     i_test_mechanichal7();
-
+    
     csmviewer_free(&viewer);
 }
 

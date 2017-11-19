@@ -55,7 +55,18 @@ static void i_free_point(struct i_point_t **point)
 
 csmArrPoint2D *csmArrPoint2D_new(unsigned long no_elems)
 {
-    return (csmArrPoint2D *)csmarrayc_new_st_array(no_elems, i_point_t);
+    csmArrayStruct(i_point_t) *array;
+    unsigned long i;
+    
+    array = csmarrayc_new_st_array(no_elems, i_point_t);
+    
+    if (no_elems > 0)
+    {
+        for (i = 0; i < no_elems; i++)
+            csmarrayc_set_st(array, i, NULL, i_point_t);
+    }
+    
+    return (csmArrPoint2D *)array;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,8 +113,18 @@ void csmArrPoint2D_set(csmArrPoint2D *array, unsigned long idx, double x, double
 {
     struct i_point_t *point;
     
-    point = i_new_point(x, y);
-    csmarrayc_set_st((csmArrayStruct(i_point_t) *)array, idx, point, i_point_t);
+    point = csmarrayc_get_st((csmArrayStruct(i_point_t) *)array, idx, i_point_t);
+    
+    if (point == NULL)
+    {
+        point = i_new_point(x, y);
+        csmarrayc_set_st((csmArrayStruct(i_point_t) *)array, idx, point, i_point_t);
+    }
+    else
+    {
+        point->x = x;
+        point->y = y;
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -281,7 +302,7 @@ CSMBOOL csmArrPoint2D_exists_point_with_tolerance(
     return csmarrayc_contains_element_st(
                             (csmArrayStruct(i_point_t) *)array, i_point_t,
                             &searched_point, struct i_searched_point_t,
-                            i_equal_points,
+                            i_equal_points_with_tolerance,
                             idx_opt);
 }
 

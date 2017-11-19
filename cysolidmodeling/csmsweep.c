@@ -30,21 +30,20 @@
 #include "csmeuler_lkemr.inl"
 #include "csmeuler_lkfmrh.inl"
 #include "csmeuler_lmfkrh.inl"
-
-#include <geomcomp/gccontorno.h>
+#include "csmshape2d.inl"
 
 csmArrayStruct(csmhedge_t);
 
 // --------------------------------------------------------------------------------
 
 static void i_check_compatibility_between_shapes(
-                        const struct gccontorno_t *shape2d_top, const struct gccontorno_t *shape2d_bot,
+                        const struct csmshape2d_t *shape2d_top, const struct csmshape2d_t *shape2d_bot,
                         unsigned long *idx_outer_loop)
 {
     unsigned long i, no_of_polygons;
     
-    no_of_polygons = gccontorno_num_poligonos(shape2d_top);
-    assert(no_of_polygons == gccontorno_num_poligonos(shape2d_bot));
+    no_of_polygons = csmshape2d_polygon_count(shape2d_top);
+    assert(no_of_polygons == csmshape2d_polygon_count(shape2d_bot));
     assert(no_of_polygons > 0);
     assert_no_null(idx_outer_loop);
     
@@ -55,11 +54,11 @@ static void i_check_compatibility_between_shapes(
         unsigned long no_of_points_in_polygon;
         CSMBOOL is_hole_loop_top;
         
-        no_of_points_in_polygon = gccontorno_num_puntos_poligono(shape2d_top, i);
-        assert(no_of_points_in_polygon == gccontorno_num_puntos_poligono(shape2d_bot, i));
+        no_of_points_in_polygon = csmshape2d_point_polygon_count(shape2d_top, i);
+        assert(no_of_points_in_polygon == csmshape2d_point_polygon_count(shape2d_bot, i));
         
-        is_hole_loop_top = gccontorno_es_poligono_hueco(shape2d_top, i);
-        assert(is_hole_loop_top == gccontorno_es_poligono_hueco(shape2d_bot, i));
+        is_hole_loop_top = csmshape2d_polygon_is_hole(shape2d_top, i);
+        assert(is_hole_loop_top == csmshape2d_polygon_is_hole(shape2d_bot, i));
         
         if (is_hole_loop_top == CSMFALSE)
         {
@@ -72,7 +71,7 @@ static void i_check_compatibility_between_shapes(
 // --------------------------------------------------------------------------------
 
 static void i_coords_point_in_loop_3D(
-                        const struct gccontorno_t *shape2d,
+                        const struct csmshape2d_t *shape2d,
                         unsigned long idx_loop, unsigned long idx_point,
                         double Xo, double Yo, double Zo,
 						double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
@@ -80,7 +79,7 @@ static void i_coords_point_in_loop_3D(
 {
     double x_2d, y_2d;
     
-    gccontorno_coordenadas_punto_poligono(shape2d, idx_loop, idx_point, &x_2d, &y_2d);
+    csmshape2d_point_polygon_coords(shape2d, idx_loop, idx_point, &x_2d, &y_2d);
     
     csmgeom_coords_2d_to_3d(
                         Xo, Yo, Zo,
@@ -93,7 +92,7 @@ static void i_coords_point_in_loop_3D(
 
 static void i_append_loop_from_hedge(
                         struct csmhedge_t *first_hedge,
-                        const struct gccontorno_t *shape2d, unsigned long idx_loop,
+                        const struct csmshape2d_t *shape2d, unsigned long idx_loop,
                         double Xo, double Yo, double Zo,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         struct csmface_t **new_face,
@@ -104,7 +103,7 @@ static void i_append_loop_from_hedge(
     unsigned long i, no_of_points_outer_loop;
     struct csmhedge_t *last_hedge, *he_from_first_vertex;
     
-    no_of_points_outer_loop = gccontorno_num_puntos_poligono(shape2d, idx_loop);
+    no_of_points_outer_loop = csmshape2d_point_polygon_count(shape2d, idx_loop);
     assert(no_of_points_outer_loop >= 3);
     assert_no_null(new_face);
     assert_no_null(hedges_from_vertexs);
@@ -140,7 +139,7 @@ static void i_append_loop_from_hedge(
 // --------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_face, (
-                        const struct gccontorno_t *shape2d,
+                        const struct csmshape2d_t *shape2d,
                         unsigned long start_id_of_new_element,
                         unsigned long idx_outer_loop,
                         double Xo, double Yo, double Zo,
@@ -186,7 +185,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_face, (
 // --------------------------------------------------------------------------------
 
 static void i_create_hedges_from_bottom_to_top_face(
-                        const struct gccontorno_t *shape2d_top,
+                        const struct csmshape2d_t *shape2d_top,
                         unsigned long idx_outer_loop,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
@@ -194,7 +193,7 @@ static void i_create_hedges_from_bottom_to_top_face(
 {
     unsigned long i, no_of_points_outer_loop;
     
-    no_of_points_outer_loop = gccontorno_num_puntos_poligono(shape2d_top, idx_outer_loop);
+    no_of_points_outer_loop = csmshape2d_point_polygon_count(shape2d_top, idx_outer_loop);
     assert(no_of_points_outer_loop >= 3);
     assert(no_of_points_outer_loop == csmarrayc_count_st(hedges_from_vertexs_bottom_face, csmhedge_t));
     
@@ -260,10 +259,10 @@ static void i_append_holes_to_solid(
                         struct csmsolid_t *solid,
                         struct csmface_t *top_face, struct csmface_t *bottom_face,
                         unsigned long idx_hole_loop,
-                        const struct gccontorno_t *shape2d_top,
+                        const struct csmshape2d_t *shape2d_top,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
-                        const struct gccontorno_t *shape2d_bot,
+                        const struct csmshape2d_t *shape2d_bot,
                         double Xo_bot, double Yo_bot, double Zo_bot,
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot)
 {
@@ -276,8 +275,8 @@ static void i_append_holes_to_solid(
     struct csmface_t *top_hole_face_loc;
     csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face;
     
-    no_of_points = gccontorno_num_puntos_poligono(shape2d_bot, idx_hole_loop);
-    assert(no_of_points == gccontorno_num_puntos_poligono(shape2d_top, idx_hole_loop));
+    no_of_points = csmshape2d_point_polygon_count(shape2d_bot, idx_hole_loop);
+    assert(no_of_points == csmshape2d_point_polygon_count(shape2d_top, idx_hole_loop));
     
     i_coords_point_in_loop_3D(
                         shape2d_bot,
@@ -338,25 +337,25 @@ static void i_append_holes_to_solid(
 static void i_append_holes_to_solid_if_proceed(
                         struct csmsolid_t *solid,
                         struct csmface_t *top_face, struct csmface_t *bottom_face,
-                        const struct gccontorno_t *shape2d_top,
+                        const struct csmshape2d_t *shape2d_top,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
-                        const struct gccontorno_t *shape2d_bot,
+                        const struct csmshape2d_t *shape2d_bot,
                         double Xo_bot, double Yo_bot, double Zo_bot,
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot)
 {
     unsigned long i, no_of_polygons;
     
-    no_of_polygons = gccontorno_num_poligonos(shape2d_top);
-    assert(no_of_polygons == gccontorno_num_poligonos(shape2d_bot));
+    no_of_polygons = csmshape2d_polygon_count(shape2d_top);
+    assert(no_of_polygons == csmshape2d_polygon_count(shape2d_bot));
     assert(no_of_polygons > 0);
     
     for (i = 0; i < no_of_polygons; i++)
     {
         CSMBOOL is_hole_loop;
         
-        is_hole_loop = gccontorno_es_poligono_hueco(shape2d_top, i);
-        assert(is_hole_loop == gccontorno_es_poligono_hueco(shape2d_bot, i) == CSMTRUE);
+        is_hole_loop = csmshape2d_polygon_is_hole(shape2d_top, i);
+        assert(is_hole_loop == csmshape2d_polygon_is_hole(shape2d_bot, i) == CSMTRUE);
         
         if (is_hole_loop == CSMTRUE)
         {
@@ -377,10 +376,10 @@ static void i_append_holes_to_solid_if_proceed(
 // --------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes, (
-                        const struct gccontorno_t *shape2d_top,
+                        const struct csmshape2d_t *shape2d_top,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
-                        const struct gccontorno_t *shape2d_bot,
+                        const struct csmshape2d_t *shape2d_bot,
                         double Xo_bot, double Yo_bot, double Zo_bot,
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot,
                         unsigned long start_id_of_new_element,
@@ -424,10 +423,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
 // --------------------------------------------------------------------------------
 
 struct csmsolid_t *csmsweep_create_solid_from_shape(
-                        const struct gccontorno_t *shape2d_top,
+                        const struct csmshape2d_t *shape2d_top,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
-                        const struct gccontorno_t *shape2d_bot,
+                        const struct csmshape2d_t *shape2d_bot,
                         double Xo_bot, double Yo_bot, double Zo_bot,
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot)
 {
@@ -463,10 +462,10 @@ struct csmsolid_t *csmsweep_create_solid_from_shape(
 // --------------------------------------------------------------------------------
 
 struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
-                        const struct gccontorno_t *shape2d_top,
+                        const struct csmshape2d_t *shape2d_top,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
-                        const struct gccontorno_t *shape2d_bot,
+                        const struct csmshape2d_t *shape2d_bot,
                         double Xo_bot, double Yo_bot, double Zo_bot,
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot,
                         unsigned long start_id_of_new_element)

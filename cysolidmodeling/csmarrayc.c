@@ -198,7 +198,7 @@ void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx,
     i_integrity(array);
     assert(idx < array->no_elems);
     
-    memcpy(array->ptr_data + idx * array->element_data_size, dato, array->element_data_size);
+    memcpy(array->ptr_data + idx * array->element_data_size, &dato, array->element_data_size);
 }
 
 // ---------------------------------------------------------------------------------

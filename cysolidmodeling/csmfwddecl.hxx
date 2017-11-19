@@ -39,6 +39,7 @@ struct csmsolid_t;
 struct csmtransform_t;
 struct csmmaterial_t;
 struct csmtolerance_t;
+struct csmshape2d_t;
     
 #ifdef __cplusplus
 enum csmedge_lado_hedge_t: int;
@@ -76,8 +77,10 @@ csmArrayStruct(csmsetop_vtxvtx_inters_t);
 csmArrayStruct(csmsetop_vtxfacc_inters_t);
 csmArrayStruct(csmedge_t);
 
-struct gccontorno_t;
 struct bsmaterial_t;
+    
+csmArrPoint2D;
+csmArrPoint3D;
     
 #include "csmmath.tli"
 

@@ -1,12 +1,12 @@
 //
-//  csmshape3d.c
+//  csmquadrics.c
 //  cysolidmodeling
 //
 //  Created by Manuel Fernández on 25/9/17.
 //  Copyright © 2017 Manuel Fernández. All rights reserved.
 //
 
-#include "csmshape3d.h"
+#include "csmquadrics.h"
 
 #include "csmeuler_lkev.inl"
 #include "csmeuler_lmef.inl"
@@ -81,7 +81,7 @@ static void i_apply_transform_to_solid(
 
 // --------------------------------------------------------------------------------
 
-struct csmsolid_t *csmshape3d_create_torus(
+struct csmsolid_t *csmquadrics_create_torus(
                         double R, unsigned long no_points_circle_R,
                         double r, unsigned long no_points_circle_r,
                         double x_center, double y_center, double z_center,
@@ -278,7 +278,7 @@ static void i_connect_face_hegdes_with_vertex(
                         
 // --------------------------------------------------------------------------------
 
-struct csmsolid_t *csmshape3d_create_cone(
+struct csmsolid_t *csmquadrics_create_cone(
                         double height, double radius, unsigned long no_points_circle_radius,
                         double x_base_center, double y_base_center, double z_base_center,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
@@ -395,7 +395,7 @@ static void i_generate_semisphere(
 
 // --------------------------------------------------------------------------------
 
-struct csmsolid_t *csmshape3d_create_sphere(
+struct csmsolid_t *csmquadrics_create_sphere(
                         double radius,
                         unsigned long no_points_circle_radius_parallels_semisphere,
                         unsigned long no_points_circle_radius_meridians,

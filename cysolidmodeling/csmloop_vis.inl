@@ -12,5 +12,5 @@ void csmloop_vis_append_loop_to_shape(
                         struct csmloop_t *loop,
                         double Xo, double Yo, double Zo,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
-	                    struct gccontorno_t *shape);
+	                    struct csmshape2d_t *shape);
 

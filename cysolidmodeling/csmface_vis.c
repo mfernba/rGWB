@@ -23,10 +23,11 @@
 #include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmmaterial.tli"
+#include "csmshape2d.h"
+#include "csmshape2d.inl"
 
 #include <basicSystem/bsmaterial.h>
 #include <basicGraphics/bsgraphics2.h>
-#include <geomcomp/gccontorno.h>
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -44,7 +45,7 @@ void csmface_vis_draw_solid(
     {
         double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
         struct csmloop_t *loop_iterator;
-        struct gccontorno_t *shape;
+        struct csmshape2d_t *shape;
     
         csmmath_plane_axis_from_implicit_plane_equation(
                         face->A, face->B, face->C, face->D,
@@ -52,7 +53,7 @@ void csmface_vis_draw_solid(
                         &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
     
         loop_iterator = csmface_floops(face);
-        shape = gccontorno_crea_vacio();
+        shape = csmshape2d_new();
         
         while (loop_iterator != NULL)
         {
@@ -60,7 +61,7 @@ void csmface_vis_draw_solid(
             loop_iterator = csmloop_next(loop_iterator);
         }
         
-        if (gccontorno_num_poligonos(shape) > 0)
+        if (csmshape2d_polygon_count(shape) > 0)
         {
             if (face->visz_material_opt != NULL)
             {
@@ -76,10 +77,10 @@ void csmface_vis_draw_solid(
                 bsgraphics2_escr_color(graphics, face_material);
             }
             
-            gccontorno_dibuja_3d_ex(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMFALSE, graphics);
+            csmshape2d_dibuja_3d(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMFALSE, graphics);
         }
         
-        gccontorno_destruye(&shape);
+        csmshape2d_free(&shape);
     }
 
     if (draw_face_normal == CSMTRUE)
