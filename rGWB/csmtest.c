@@ -3378,6 +3378,46 @@ static void i_test_mechanichal7(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_ellipsoid(void)
+{
+    struct csmsolid_t *ellipsoid;
+    struct csmsolid_t *block;
+    struct csmsolid_t *res;
+    
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    ellipsoid = csmquadrics_create_ellipsoid(
+                        2., 1., 0.5,
+                        8,
+                        16,
+                        1.2, 1., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+
+    csmdebug_set_viewer_results(ellipsoid, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        struct csmshape2d_t *block_shape;
+        
+        block_shape = csmbasicshape2d_rectangular_shape(6., 6.);
+        
+        block = csmsweep_create_solid_from_shape_debug(
+                        block_shape,
+                        0., 0.,  0.5, 1., 0., 0., 0., 1., 0.,
+                        block_shape,
+                        0., 0., -0.5, 1., 0., 0., 0., 1., 0.,
+                        10000);
+    }
+    
+    res = csmsetop_difference_A_minus_B(block, ellipsoid);
+    
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_mechanichal7_simplified(void)
 {
     struct csmshape2d_t *shape1, *shape2;
@@ -3503,8 +3543,10 @@ void csmtest_test(void)
     i_test_mechanical6();
 
     i_test_mechanichal7_simplified();
-     */
     i_test_mechanichal7();
+    */
+    
+    i_test_ellipsoid();
     
     csmviewer_free(&viewer);
 }

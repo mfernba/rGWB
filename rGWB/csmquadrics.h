@@ -28,3 +28,11 @@ DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmquadrics_create_sphere, (
                         double x_center, double y_center, double z_center,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         unsigned long start_id_of_new_element));
+
+DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmquadrics_create_ellipsoid, (
+                        double radius_x, double radius_y, double radius_z,
+                        unsigned long no_points_circle_radius_parallels_semisphere,
+                        unsigned long no_points_circle_radius_meridians,
+                        double x_center, double y_center, double z_center,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        unsigned long start_id_of_new_element));

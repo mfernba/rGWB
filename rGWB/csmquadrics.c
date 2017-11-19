@@ -175,7 +175,7 @@ struct csmsolid_t *csmquadrics_create_torus(
                         Ux, Uy, Uz, Vx, Vy, Vz,
                         torus);
     
-    csmsolid_clear_algorithm_data(torus);
+    csmsolid_redo_geometric_face_data(torus);
     
     csmtolerance_free(&tolerances);
     
@@ -185,24 +185,26 @@ struct csmsolid_t *csmquadrics_create_torus(
 // --------------------------------------------------------------------------------
 
 static void i_compute_point_on_cone_base(
-                        double r, double beta_rad,
+                        double r_x, double r_y, double beta_rad,
                         double *x, double *y, double *z)
 {
-    assert(r > 0.);
+    assert(r_x > 0.);
+    assert(r_y > 0.);
     assert_no_null(x);
     assert_no_null(y);
     assert_no_null(z);
     
-    *x = r * csmmath_cos(beta_rad);
-    *y = r * csmmath_sin(beta_rad);
+    *x = r_x * csmmath_cos(beta_rad);
+    *y = r_y * csmmath_sin(beta_rad);
     *z = 0.;
 }
 
 
 // --------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsolid_t *, i_create_circle_solid, (
-                        double radius, unsigned long no_points_circle_radius,
+CONSTRUCTOR(static struct csmsolid_t *, i_create_ellipsoid_base_solid, (
+                        double radius_x, double radius_y,
+                        unsigned long no_points_circle_radius,
                         unsigned long start_id_of_new_element,
                         struct csmface_t **bottom_face_opt, struct csmface_t **top_face_opt))
 {
@@ -213,9 +215,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_circle_solid, (
     double incr_beta_rad;
     struct csmface_t *bottom_face_loc;
     
+    assert(radius_x > 0.);
+    assert(radius_y > 0.);
     assert(no_points_circle_radius >= 3);
 
-    i_compute_point_on_cone_base(radius, 0., &x, &y, &z);
+    i_compute_point_on_cone_base(radius_x, radius_y, 0., &x, &y, &z);
     circle = csmeuler_mvfs(x, y, z, start_id_of_new_element, &initial_hedge);
     bottom_face_loc = csmopbas_face_from_hedge(initial_hedge);
     
@@ -229,7 +233,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_circle_solid, (
         double beta_rad;
      
         beta_rad = 2. * CSMMATH_PI - incr_beta_rad * i;
-        i_compute_point_on_cone_base(radius, beta_rad, &x, &y, &z);
+        i_compute_point_on_cone_base(radius_x, radius_y, beta_rad, &x, &y, &z);
         
         csmeuler_lmev_strut_edge(previous_hedge, x, y, z, &previous_hedge);
         csmvertex_set_mask_attrib(csmhedge_vertex(previous_hedge), (csmvertex_mask_t)i);
@@ -289,7 +293,7 @@ struct csmsolid_t *csmquadrics_create_cone(
     
     assert(height > 0.);
 
-    cone = i_create_circle_solid(radius, no_points_circle_radius, start_id_of_new_element, NULL, &top_face);
+    cone = i_create_ellipsoid_base_solid(radius, radius, no_points_circle_radius, start_id_of_new_element, NULL, &top_face);
     i_connect_face_hegdes_with_vertex(top_face, 0., 0., height);
 
     i_apply_transform_to_solid(
@@ -304,8 +308,8 @@ struct csmsolid_t *csmquadrics_create_cone(
 
 // --------------------------------------------------------------------------------
 
-static void i_extrude_sphere_hedge(
-                        double r_sphere,
+static void i_extrude_ellipsoid_hedge(
+                        double rx_sphere, double ry_sphere, double rz_sphere,
                         unsigned long no_points_circle_radius_meridians,
                         double direction_sign,
                         double alfa_rad,
@@ -317,7 +321,9 @@ static void i_extrude_sphere_hedge(
     struct csmhedge_t *new_hedge;
     double x, y, z;
     
-    assert(r_sphere > 0.);
+    assert(rx_sphere > 0.);
+    assert(ry_sphere > 0.);
+    assert(rz_sphere > 0.);
     assert(no_points_circle_radius_meridians >= 3);
     
     iterator_vertex = csmhedge_vertex(hedge);
@@ -326,9 +332,9 @@ static void i_extrude_sphere_hedge(
     incr_beta_rad = 2. * CSMMATH_PI / no_points_circle_radius_meridians;
     beta_rad = 2. * CSMMATH_PI - incr_beta_rad * circle_point_idx;
     
-    x = r_sphere * csmmath_cos(beta_rad) * csmmath_cos(alfa_rad);
-    y = r_sphere * csmmath_sin(beta_rad) * csmmath_cos(alfa_rad);
-    z = direction_sign * r_sphere * csmmath_sin(alfa_rad);
+    x = rx_sphere * csmmath_cos(beta_rad) * csmmath_cos(alfa_rad);
+    y = ry_sphere * csmmath_sin(beta_rad) * csmmath_cos(alfa_rad);
+    z = direction_sign * rz_sphere * csmmath_sin(alfa_rad);
     
     csmeuler_lmev_strut_edge(hedge, x, y, z, &new_hedge);
     csmvertex_set_mask_attrib(csmhedge_vertex(new_hedge), (csmvertex_mask_t)circle_point_idx);
@@ -336,10 +342,10 @@ static void i_extrude_sphere_hedge(
 
 // --------------------------------------------------------------------------------
 
-static void i_generate_semisphere(
+static void i_generate_half_ellipsoid(
                         struct csmface_t *initial_face,
                         double direction_sign,
-                        double radius,
+                        double radius_x, double radius_y, double radius_z,
                         unsigned long no_points_circle_radius_parallels_semisphere,
                         unsigned long no_points_circle_radius_meridians)
 {
@@ -347,7 +353,6 @@ static void i_generate_semisphere(
     double incr_alfa;
     struct csmface_t *face_to_extrude;
     
-    assert(radius > 0.);
     assert(no_points_circle_radius_parallels_semisphere >= 3);
     
     no_homothetic_circles = no_points_circle_radius_parallels_semisphere - 1;
@@ -367,14 +372,14 @@ static void i_generate_semisphere(
         scan = csmhedge_next(first);
         
         alfa_rad = (i + 1) * incr_alfa;
-        i_extrude_sphere_hedge(radius, no_points_circle_radius_meridians, direction_sign, alfa_rad, scan);
+        i_extrude_ellipsoid_hedge(radius_x, radius_y, radius_z, no_points_circle_radius_meridians, direction_sign, alfa_rad, scan);
         
         while (scan != first)
         {
             struct csmhedge_t *scan_next;
             
             scan_next = csmhedge_next(scan);
-            i_extrude_sphere_hedge(radius, no_points_circle_radius_meridians, direction_sign, alfa_rad, scan_next);
+            i_extrude_ellipsoid_hedge(radius_x, radius_y, radius_z, no_points_circle_radius_meridians, direction_sign, alfa_rad, scan_next);
             
             scan_prev = csmhedge_prev(scan);
             scan_next_next = csmhedge_next(csmhedge_next(scan));
@@ -390,7 +395,7 @@ static void i_generate_semisphere(
         face_to_extrude = csmopbas_face_from_hedge(scan_next_next);
     }
     
-    i_connect_face_hegdes_with_vertex(face_to_extrude, 0., 0., direction_sign * radius);
+    i_connect_face_hegdes_with_vertex(face_to_extrude, 0., 0., direction_sign * radius_z);
 }
 
 // --------------------------------------------------------------------------------
@@ -407,23 +412,56 @@ struct csmsolid_t *csmquadrics_create_sphere(
     struct csmface_t *bottom_face, *top_face;
     double direction_sign;
     
-    sphere = i_create_circle_solid(radius, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
+    sphere = i_create_ellipsoid_base_solid(radius, radius, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
     csmsolid_set_draw_only_border_edges(sphere, CSMFALSE);
     
     direction_sign = 1.;
-    i_generate_semisphere(top_face, direction_sign, radius, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
+    i_generate_half_ellipsoid(top_face, direction_sign, radius, radius, radius, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
 
     direction_sign = -1.;
-    i_generate_semisphere(bottom_face, direction_sign, radius, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
+    i_generate_half_ellipsoid(bottom_face, direction_sign, radius, radius, radius, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
     
     i_apply_transform_to_solid(
                         x_center, y_center, z_center,
                         Ux, Uy, Uz, Vx, Vy, Vz,
                         sphere);
 
-    csmsolid_clear_algorithm_data(sphere);
+    csmsolid_redo_geometric_face_data(sphere);
     
     return sphere;
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsolid_t *csmquadrics_create_ellipsoid(
+                        double radius_x, double radius_y, double radius_z,
+                        unsigned long no_points_circle_radius_parallels_semisphere,
+                        unsigned long no_points_circle_radius_meridians,
+                        double x_center, double y_center, double z_center,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        unsigned long start_id_of_new_element)
+{
+    struct csmsolid_t *ellipsoid;
+    struct csmface_t *bottom_face, *top_face;
+    double direction_sign;
+    
+    ellipsoid = i_create_ellipsoid_base_solid(radius_x, radius_y, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
+    csmsolid_set_draw_only_border_edges(ellipsoid, CSMFALSE);
+    
+    direction_sign = 1.;
+    i_generate_half_ellipsoid(top_face, direction_sign, radius_x, radius_y, radius_z, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
+
+    direction_sign = -1.;
+    i_generate_half_ellipsoid(bottom_face, direction_sign, radius_x, radius_y, radius_z, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
+    
+    i_apply_transform_to_solid(
+                        x_center, y_center, z_center,
+                        Ux, Uy, Uz, Vx, Vy, Vz,
+                        ellipsoid);
+
+    csmsolid_redo_geometric_face_data(ellipsoid);
+    
+    return ellipsoid;
 }
 
 
