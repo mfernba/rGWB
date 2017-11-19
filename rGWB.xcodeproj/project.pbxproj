@@ -92,6 +92,7 @@
 		5532DDBF1E9001390047B9DF /* csmtolerance.c in Sources */ = {isa = PBXBuildFile; fileRef = 5532DDBD1E9001390047B9DF /* csmtolerance.c */; };
 		5532DDC01E9001390047B9DF /* csmtolerance.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5532DDBE1E9001390047B9DF /* csmtolerance.inl */; };
 		55354A441E9AE595007B0692 /* csmmath.tli in Headers */ = {isa = PBXBuildFile; fileRef = 55354A431E9AE595007B0692 /* csmmath.tli */; settings = {ATTRIBUTES = (Public, ); }; };
+		554E4F7C1FC1EFDE00D8E7D4 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5579545C1E5DB074000FC91E /* Info.plist */; };
 		557012A01E8328E400DFC490 /* csmsweep.c in Sources */ = {isa = PBXBuildFile; fileRef = 5570129E1E8328E400DFC490 /* csmsweep.c */; };
 		557012A11E8328E400DFC490 /* csmsweep.h in Headers */ = {isa = PBXBuildFile; fileRef = 5570129F1E8328E400DFC490 /* csmsweep.h */; };
 		557012B91E832A7800DFC490 /* geomcomp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557012B41E832A5900DFC490 /* geomcomp.framework */; };
@@ -729,7 +730,7 @@
 			isa = PBXGroup;
 			children = (
 				5598D66B1F24F3C700EA1876 /* Dependencies */,
-				5579545A1E5DB074000FC91E /* cysolidmodeling */,
+				5579545A1E5DB074000FC91E /* rGWB */,
 				5507A6441E701EC5008B9F73 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -743,7 +744,7 @@
 			path = ..;
 			sourceTree = "<group>";
 		};
-		5579545A1E5DB074000FC91E /* cysolidmodeling */ = {
+		5579545A1E5DB074000FC91E /* rGWB */ = {
 			isa = PBXGroup;
 			children = (
 				5579545B1E5DB074000FC91E /* rGWB.h */,
@@ -762,7 +763,7 @@
 				550765CA1F92051400E6BD2E /* Half-Edge Data Structured Visualization */,
 				5507A6261E6B8721008B9F73 /* Test */,
 			);
-			path = cysolidmodeling;
+			path = rGWB;
 			sourceTree = "<group>";
 		};
 		5579546B1E5DB209000FC91E /* Cype Wrapper */ = {
@@ -1056,7 +1057,7 @@
 				5507A6E61E7B40AA008B9F73 /* PBXTargetDependency */,
 			);
 			name = rGWB;
-			productName = cysolidmodeling;
+			productName = rGWB;
 			productReference = 557954581E5DB074000FC91E /* rGWB.framework */;
 			productType = "com.apple.product-type.framework";
 		};
@@ -1075,7 +1076,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 557954521E5DB074000FC91E /* Build configuration list for PBXProject "cysolidmodeling" */;
+			buildConfigurationList = 557954521E5DB074000FC91E /* Build configuration list for PBXProject "rGWB" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -1264,6 +1265,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				554E4F7C1FC1EFDE00D8E7D4 /* Info.plist in Resources */,
 				5507A6741E706175008B9F73 /* csmtest.h in Resources */,
 				55308C3E1F9222B500353A68 /* csmmaterial.inl in Resources */,
 				551D475C1FC1CED3004F3B43 /* csmshape2d.inl in Resources */,
@@ -1503,10 +1505,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = cysolidmodeling/Info.plist;
+				INFOPLIST_FILE = rGWB/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = MSW.cysolidmodeling;
+				PRODUCT_BUNDLE_IDENTIFIER = MSW.rGWB;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -1523,10 +1525,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = cysolidmodeling/Info.plist;
+				INFOPLIST_FILE = rGWB/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = MSW.cysolidmodeling;
+				PRODUCT_BUNDLE_IDENTIFIER = MSW.rGWB;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -1535,7 +1537,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		557954521E5DB074000FC91E /* Build configuration list for PBXProject "cysolidmodeling" */ = {
+		557954521E5DB074000FC91E /* Build configuration list for PBXProject "rGWB" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				5579545E1E5DB074000FC91E /* Debug */,
