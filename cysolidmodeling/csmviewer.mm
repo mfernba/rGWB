@@ -26,7 +26,6 @@ extern "C" {
 #include <basicGraphics/bsgbibluz.h>
 #include <basicSystem/bsassert.h>
 #include <basicSystem/bsmem.h>
-#include <cypearrays/a_punter.h>
 #include <WinFrames2/wf2DlgUtil.h>
 #include <WinFrames2/wf2pnutil.h>
 #include <WinFrames3/wf3Visor.h>

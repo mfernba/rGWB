@@ -199,13 +199,6 @@
 			remoteGlobalIDString = 55321F5919E67477002BB462;
 			remoteInfo = basicSystem;
 		};
-		5507A6E71E7B40AA008B9F73 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5507A6CE1E7B400D008B9F73 /* cypearrays.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 55321FD819E6766C002BB462;
-			remoteInfo = cypearrays;
-		};
 		557012B31E832A5900DFC490 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 557012AE1E832A5900DFC490 /* geomcomp.xcodeproj */;
@@ -1061,7 +1054,6 @@
 				5598D6581F24E8BA00EA1876 /* PBXTargetDependency */,
 				5598D65A1F24E8BA00EA1876 /* PBXTargetDependency */,
 				5507A6E61E7B40AA008B9F73 /* PBXTargetDependency */,
-				5507A6E81E7B40AA008B9F73 /* PBXTargetDependency */,
 			);
 			name = cysolidmodeling;
 			productName = cysolidmodeling;
@@ -1359,11 +1351,6 @@
 			isa = PBXTargetDependency;
 			name = basicSystem;
 			targetProxy = 5507A6E51E7B40AA008B9F73 /* PBXContainerItemProxy */;
-		};
-		5507A6E81E7B40AA008B9F73 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = cypearrays;
-			targetProxy = 5507A6E71E7B40AA008B9F73 /* PBXContainerItemProxy */;
 		};
 		5598D6501F24E8BA00EA1876 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
