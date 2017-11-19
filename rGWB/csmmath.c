@@ -660,3 +660,17 @@ double csmmath_sin(double angle)
 {
     return sin(angle);
 }
+
+//-------------------------------------------------------------------------------------------
+
+double csmmath_cosh(double angle)
+{
+    return cosh(angle);
+}
+
+//-------------------------------------------------------------------------------------------
+
+double csmmath_sinh(double angle)
+{
+    return sinh(angle);
+}
