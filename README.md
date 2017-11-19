@@ -14,12 +14,13 @@ I have studied the book and some of the papers it refers to, also I have read "B
 
 This implementations allows:
 
-  - Sweep solids by extrusion (csmsweep.h)
-  - Quadrics solids (csmshape3d.h)
+  - Sweep solids by extrusion (csmsweep.h, csmshape2d.h, csmbasicshape2d.h)
+  - Quadrics solids (csmquadrics.h)
   - Split algorithm (csmsplit.h)
   - Boolean Operations (csmsetop.h)  
+  - Explode solids with several shells (csmexplode.h)
   
-Look at rGWB/Screenshots to get some sense of what can be done.
+Look at Screenshots to get some sense of what can be done.
 
 Non-manifold solids: This is a 2-manifold modeler, but non-manifold solids can be produced as a consequence of the solid operation used. In such case, the algorithms may fail if you use the solid in another operations. This is an extension I will do in the future.
 
