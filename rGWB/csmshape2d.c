@@ -541,7 +541,7 @@ void csmshape2d_dibuja_3d(
     assert(no_vertexs % 3 == 0);
     
     no_triangles = no_vertexs / 3;
-    assert(no_triangles > 0);
+    //assert(no_triangles > 0);
     
     csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx, &Wy, &Wz);
     

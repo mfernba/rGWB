@@ -464,7 +464,131 @@ struct csmsolid_t *csmquadrics_create_ellipsoid(
     return ellipsoid;
 }
 
+// --------------------------------------------------------------------------------
+/*
+static void i_extrude_hyperbolid_hedge(
+                        double rx_sphere, double ry_sphere, double rz_sphere,
+                        unsigned long no_points_circle_radius_meridians,
+                        double direction_sign,
+                        double alfa_rad,
+                        struct csmhedge_t *hedge)
+{
+    struct csmvertex_t *iterator_vertex;
+    unsigned long circle_point_idx;
+    double incr_beta_rad, beta_rad;
+    struct csmhedge_t *new_hedge;
+    double x, y, z;
+    
+    assert(rx_sphere > 0.);
+    assert(ry_sphere > 0.);
+    assert(rz_sphere > 0.);
+    assert(no_points_circle_radius_meridians >= 3);
+    
+    iterator_vertex = csmhedge_vertex(hedge);
+    circle_point_idx = (unsigned long)csmvertex_get_mask_attrib(iterator_vertex);
+    
+    incr_beta_rad = 2. * CSMMATH_PI / no_points_circle_radius_meridians;
+    beta_rad = 2. * CSMMATH_PI - incr_beta_rad * circle_point_idx;
+    
+    x = rx_sphere * csmmath_cosh(beta_rad) * csmmath_cos(alfa_rad);
+    y = ry_sphere * csmmath_sinh(beta_rad) * csmmath_sin(alfa_rad);
+    z = direction_sign * rz_sphere * csmmath_sinh(alfa_rad);
+    
+    csmeuler_lmev_strut_edge(hedge, x, y, z, &new_hedge);
+    csmvertex_set_mask_attrib(csmhedge_vertex(new_hedge), (csmvertex_mask_t)circle_point_idx);
+}
 
+// --------------------------------------------------------------------------------
+
+static void i_generate_half_hiperboloid(
+                        struct csmface_t *initial_face,
+                        double direction_sign,
+                        double radius_x, double radius_y, double radius_z,
+                        unsigned long no_points_circle_radius_parallels_semisphere,
+                        unsigned long no_points_circle_radius_meridians)
+{
+    unsigned long i, no_homothetic_circles;
+    double incr_alfa;
+    struct csmface_t *face_to_extrude;
+    
+    assert(no_points_circle_radius_parallels_semisphere >= 3);
+    
+    no_homothetic_circles = no_points_circle_radius_parallels_semisphere - 1;
+    incr_alfa = 0.5 * CSMMATH_PI / no_points_circle_radius_parallels_semisphere;
+    
+    face_to_extrude = initial_face;
+    
+    for (i = 0; i < no_homothetic_circles; i++)
+    {
+        struct csmloop_t *flout;
+        struct csmhedge_t *first, *scan;
+        struct csmhedge_t *scan_prev, *scan_next_next;
+        double alfa_rad;
+        
+        flout = csmface_flout(face_to_extrude);
+        first = csmloop_ledge(flout);
+        scan = csmhedge_next(first);
+        
+        alfa_rad = (i + 1) * incr_alfa;
+        i_extrude_hyperbolid_hedge(radius_x, radius_y, radius_z, no_points_circle_radius_meridians, direction_sign, alfa_rad, scan);
+        
+        while (scan != first)
+        {
+            struct csmhedge_t *scan_next;
+            
+            scan_next = csmhedge_next(scan);
+            i_extrude_hyperbolid_hedge(radius_x, radius_y, radius_z, no_points_circle_radius_meridians, direction_sign, alfa_rad, scan_next);
+            
+            scan_prev = csmhedge_prev(scan);
+            scan_next_next = csmhedge_next(csmhedge_next(scan));
+            csmeuler_lmef(scan_prev, scan_next_next, NULL, NULL, NULL);
+            
+            scan = csmhedge_next(csmopbas_mate(csmhedge_next(scan)));
+        }
+        
+        scan_prev = csmhedge_prev(scan);
+        scan_next_next = csmhedge_next(csmhedge_next(scan));
+        csmeuler_lmef(scan_prev, scan_next_next, NULL, NULL, NULL);
+        
+        face_to_extrude = csmopbas_face_from_hedge(scan_next_next);
+    }
+    
+    i_connect_face_hegdes_with_vertex(face_to_extrude, 0., 0., direction_sign * radius_z);
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsolid_t *csmquadrics_create_hyperbolid_one_sheet(
+                        double radius_x, double radius_y, double radius_z,
+                        unsigned long no_points_circle_radius_parallels_semisphere,
+                        unsigned long no_points_circle_radius_meridians,
+                        double x_center, double y_center, double z_center,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        unsigned long start_id_of_new_element)
+{
+    struct csmsolid_t *ellipsoid;
+    struct csmface_t *bottom_face, *top_face;
+    double direction_sign;
+    
+    ellipsoid = i_create_ellipsoid_base_solid(radius_x, radius_y, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
+    csmsolid_set_draw_only_border_edges(ellipsoid, CSMFALSE);
+    
+    direction_sign = 1.;
+    i_generate_half_hiperboloid(top_face, direction_sign, radius_x, radius_y, radius_z, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
+
+    direction_sign = -1.;
+    i_generate_half_hiperboloid(bottom_face, direction_sign, radius_x, radius_y, radius_z, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
+    
+    i_apply_transform_to_solid(
+                        x_center, y_center, z_center,
+                        Ux, Uy, Uz, Vx, Vy, Vz,
+                        ellipsoid);
+
+    csmsolid_redo_geometric_face_data(ellipsoid);
+    
+    return ellipsoid;
+}
+*/
 
 
 
