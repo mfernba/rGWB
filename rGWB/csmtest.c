@@ -3386,7 +3386,7 @@ static void i_test_ellipsoid(void)
     
     //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     ellipsoid = csmquadrics_create_ellipsoid(
-                        2., 1., 0.5,
+                        2., 3., 5.,
                         8,
                         16,
                         1.2, 1., 0.,
@@ -3414,6 +3414,154 @@ static void i_test_ellipsoid(void)
     
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
+    
+    csmsolid_free(&ellipsoid);
+    csmsolid_free(&res);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_show_split_results_ex(
+                        double A, double B, double C, double D,
+                        CSMBOOL show_plane,
+                        double desp, CSMBOOL draw_border_edges,
+                        struct csmsolid_t *solid_above, struct csmsolid_t *solid_below)
+{
+    if (solid_above != NULL)
+    {
+        csmsolid_set_name(solid_above, "Above");
+        csmsolid_debug_print_debug(solid_above, CSMTRUE);
+    }
+    
+    if (solid_below != NULL)
+    {
+        csmsolid_set_name(solid_below, "Below");
+        csmsolid_debug_print_debug(solid_below, CSMTRUE);
+    }
+    
+    csmdebug_close_output_file();
+    
+    if (solid_above != NULL)
+    {
+        if (draw_border_edges == CSMTRUE)
+            csmsolid_set_draw_only_border_edges(solid_above, draw_border_edges);
+        
+        csmsolid_move(solid_above, desp * A, desp * D, desp * C);
+    }
+    
+    if (solid_below != NULL)
+    {
+        if (draw_border_edges == CSMTRUE)
+            csmsolid_set_draw_only_border_edges(solid_below, draw_border_edges);
+        
+        csmsolid_move(solid_below, -desp * A, -desp * D, -desp * C);
+    }
+
+    if (solid_above != NULL || solid_below != NULL )
+    {
+        if (show_plane == CSMTRUE)
+            csmdebug_set_plane(A, B, C, D);
+        else
+            csmdebug_clear_plane();
+        
+        csmdebug_set_viewer_results(solid_above, solid_below);
+        csmdebug_show_viewer();
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_paraboloid_one_sheet(void)
+{
+    struct csmsolid_t *paraboloid;
+    
+    paraboloid = csmquadrics_create_hyperbolid_one_sheet(
+                        2., 3., 5.,
+                        8,
+                        16,
+                        1.2, 1., 0.,
+                        1., 0., 0.,
+                        0., 1., 0.,
+                        1);
+    
+    i_assign_flat_material_to_solid(0.5, 0.5, 0.5, paraboloid);
+
+    {
+        struct csmshape2d_t *cshape;
+        struct csmsolid_t *csolid;
+        struct csmsolid_t *solid_aux;
+        
+        //cshape = csmbasicshape2d_C_shape(2.4, 1.5); //Error
+        cshape = csmbasicshape2d_C_shape(1., 1.);
+        csolid = csmsweep_create_solid_from_shape(cshape, 4., 0., 0., 0., 1., 0., 0., 0., 1., cshape, -2., 0., 0., 0., 1., 0., 0., 0., 1.);
+        i_assign_flat_material_to_solid(1., 0., 0., csolid);
+        
+        solid_aux = paraboloid;
+        paraboloid = csmsetop_difference_A_minus_B(paraboloid, csolid);
+        csmsolid_free(&solid_aux);
+        
+        csmshape2d_free(&cshape);
+        csmsolid_free(&csolid);
+    }
+    
+    {
+        struct csmsolid_t *torus;
+        struct csmsolid_t *solid_aux;
+        
+        torus = csmquadrics_create_torus(3., 16, .75, 16, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+        i_assign_flat_material_to_solid(1., 1., 1., torus);
+        solid_aux = paraboloid;
+        paraboloid = csmsetop_difference_A_minus_B(paraboloid, torus);
+        csmsolid_free(&solid_aux);
+
+        torus = csmquadrics_create_torus(3., 16, .75, 16, 0., 0., 2.5, 1., 0., 0., 0., 1., 0., 0);
+        i_assign_flat_material_to_solid(0., 1., 1., torus);
+        solid_aux = paraboloid;
+        paraboloid = csmsetop_union_A_and_B(paraboloid, torus);
+        csmsolid_free(&solid_aux);
+
+        torus = csmquadrics_create_torus(3., 16, .75, 16, 1.2, 0., 3., 1., 0., 0., 0., 1., 0., 0);
+        i_assign_flat_material_to_solid(0., 1., 1., torus);
+        solid_aux = paraboloid;
+        paraboloid = csmsetop_union_A_and_B(paraboloid, torus);
+        csmsolid_free(&solid_aux);
+
+        torus = csmquadrics_create_torus(3., 16, .75, 16, 0., 0., -2.5, 1., 0., 0., 0., 1., 0., 0);
+        i_assign_flat_material_to_solid(0., 1., 1., torus);
+        solid_aux = paraboloid;
+        paraboloid = csmsetop_union_A_and_B(paraboloid, torus);
+        csmsolid_free(&solid_aux);
+
+        torus = csmquadrics_create_torus(3., 16, .75, 16, 2., 0., -2.45, 1., 0., 0., 0., 1., 0., 0);
+        i_assign_flat_material_to_solid(0., 1., 1., torus);
+        solid_aux = paraboloid;
+        paraboloid = csmsetop_union_A_and_B(paraboloid, torus);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_free(&torus);
+    }
+    
+    csmsolid_set_draw_only_border_edges(paraboloid, CSMFALSE);
+    csmdebug_set_viewer_results(paraboloid, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        double A, B, C, D;
+        CSMBOOL splitted;
+        struct csmsolid_t *solid_above, *solid_below;
+        
+        csmmath_implicit_plane_equation(0., 0., .0, 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
+    
+        splitted = csmsplit_does_plane_split_solid(paraboloid, A, B, C, D, &solid_above, &solid_below);
+        assert(splitted == CSMTRUE);
+    
+        i_show_split_results_ex(A, B, C, D, CSMTRUE, 2.5, CSMTRUE, solid_above, solid_below);
+        
+        csmsolid_free(&solid_above);
+        csmsolid_free(&solid_below);
+    }
+    
+    csmsolid_free(&paraboloid);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -3490,7 +3638,6 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
 
-    /*
     i_test_divide_solido_rectangular_hueco_por_plano_medio();
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -3544,9 +3691,9 @@ void csmtest_test(void)
 
     i_test_mechanichal7_simplified();
     i_test_mechanichal7();
-    */
     
     i_test_ellipsoid();
+    i_test_paraboloid_one_sheet();
     
     csmviewer_free(&viewer);
 }

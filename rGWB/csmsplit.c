@@ -776,6 +776,31 @@ static CSMBOOL i_can_join_he(struct csmhedge_t *he, csmArrayStruct(csmhedge_t) *
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_cut_he(
+                    struct csmhedge_t *hedge,
+                    csmArrayStruct(csmedge_t) *set_of_null_edges,
+                    csmArrayStruct(csmface_t) *set_of_null_faces,
+                    unsigned long *no_null_edges_deleted)
+{
+    CSMBOOL null_face_created_loc;
+    
+    csmsetopcom_cut_he(hedge, set_of_null_edges, set_of_null_faces, no_null_edges_deleted, &null_face_created_loc);
+    
+    if (null_face_created_loc == CSMTRUE)
+    {
+        unsigned long no_null_faces;
+        struct csmface_t *null_face;
+        
+        no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
+        assert(no_null_faces > 0);
+        
+        null_face = csmarrayc_get_st(set_of_null_faces, no_null_faces - 1, csmface_t);
+        csmface_mark_setop_null_face(null_face);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_join_null_edges(
                     csmArrayStruct(csmedge_t) *set_of_null_edges,
                     const struct csmtolerance_t *tolerances,
@@ -819,7 +844,7 @@ static void i_join_null_edges(
             csmsetopcom_join_hedges(matching_loose_end_he1, he1_next_edge, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(matching_loose_end_he1), loose_ends) == CSMFALSE)
-                csmsetopcom_cut_he(matching_loose_end_he1, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted, NULL);
+                i_cut_he(matching_loose_end_he1, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         }
         else
         {
@@ -831,7 +856,7 @@ static void i_join_null_edges(
             csmsetopcom_join_hedges(matching_loose_end_he2, he2_next_edge, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(matching_loose_end_he2), loose_ends) == CSMFALSE)
-                csmsetopcom_cut_he(matching_loose_end_he2, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted, NULL);
+                i_cut_he(matching_loose_end_he2, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         }
         else
         {
@@ -839,7 +864,7 @@ static void i_join_null_edges(
         }
         
         if (matching_loose_end_he1 != NULL && matching_loose_end_he2 != NULL)
-            csmsetopcom_cut_he(he1_next_edge, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted, NULL);
+            i_cut_he(he1_next_edge, set_of_null_edges, set_of_null_faces_loc, &no_null_edges_deleted);
         
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
@@ -929,6 +954,12 @@ static void i_finish_split(
     
     csmsetopcom_cleanup_solid(work_solid, solid_above_loc);
     csmsetopcom_cleanup_solid(work_solid, solid_below_loc);
+    
+    csmsolid_redo_geometric_face_data(solid_above_loc);
+    csmsetopcom_merge_faces_inside_faces(solid_above_loc, tolerances);
+    
+    csmsolid_redo_geometric_face_data(solid_below_loc);
+    csmsetopcom_merge_faces_inside_faces(solid_below_loc, tolerances);
 
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
