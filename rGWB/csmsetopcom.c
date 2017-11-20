@@ -629,6 +629,7 @@ csmArrayStruct(csmface_t) *csmsetopcom_convert_inner_loops_of_null_faces_to_face
             if (loop_to_move != csmface_flout(null_face))
             {
                 csmeuler_lmfkrh(loop_to_move, &new_face);
+                csmface_mark_setop_null_face(new_face);
                 csmarrayc_append_element_st(set_of_null_faces_below, new_face, csmface_t);
             }
             
@@ -1041,16 +1042,6 @@ void csmsetopcom_merge_faces_inside_faces(struct csmsolid_t *solid, const struct
                         
                         if (csmface_is_loop_contained_in_face(outer_face, inner_face_floops, tolerances) == CSMTRUE)
                         {
-                            if (csmdebug_debug_enabled() == CSMTRUE)
-                            {
-                                csmface_debug_print_info_debug(outer_face, CSMTRUE, NULL);
-                                csmface_debug_print_info_debug(inner_face, CSMTRUE, NULL);
-                                
-                                csmface_mark_setop_null_face(outer_face);
-                                csmface_mark_setop_null_face(inner_face);
-                                csmdebug_show_viewer();
-                            }
-                            
                             csmeuler_lkfmrh(outer_face, &inner_face);
                             there_are_changes = CSMTRUE;
                         }

@@ -642,6 +642,14 @@ double csmmath_fabs(double value)
 
 //-------------------------------------------------------------------------------------------
 
+double csmmath_sqrt(double value)
+{
+    assert(value > 0.);
+    return sqrt(value);
+}
+
+//-------------------------------------------------------------------------------------------
+
 double csmmath_atan2(double y, double x)
 {
     return atan2(y, x);

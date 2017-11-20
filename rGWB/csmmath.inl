@@ -105,6 +105,8 @@ void csmmath_plane_axis_from_implicit_plane_equation(
 
 double csmmath_fabs(double value);
 
+double csmmath_sqrt(double value);
+
 double csmmath_atan2(double y, double x);
 
 double csmmath_cos(double angle);
