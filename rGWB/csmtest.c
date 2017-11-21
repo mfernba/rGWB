@@ -3673,6 +3673,7 @@ void csmtest_test(void)
                               // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                               // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
+    */
     i_test_mechanical_part1_redux();
     i_test_mechanical_part1();
     i_test_mechanical_part2();
@@ -3692,9 +3693,8 @@ void csmtest_test(void)
 
     i_test_mechanichal7_simplified();
     i_test_mechanichal7();
-    */
     
-    //i_test_ellipsoid();
+    i_test_ellipsoid();
     i_test_paraboloid_one_sheet();
     
     csmviewer_free(&viewer);
