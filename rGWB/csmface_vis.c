@@ -9,8 +9,9 @@
 #include "csmface_vis.inl"
 #include "csmface.tli"
 
+#include "csmArrPoint2D.h"
+#include "csmArrPoint3D.h"
 #include "csmloop.inl"
-#include "csmloop_vis.inl"
 #include "csmhedge.inl"
 #include "csmface.inl"
 #include "csmmath.inl"
@@ -25,9 +26,156 @@
 #include "csmmaterial.tli"
 #include "csmshape2d.h"
 #include "csmshape2d.inl"
+#include "csmgeom.inl"
+#include "csmedge.inl"
+#include "csmsurface.inl"
 
 #include <basicSystem/bsmaterial.h>
 #include <basicGraphics/bsgraphics2.h>
+
+// ------------------------------------------------------------------------------------------
+
+static struct csmhedge_t *i_hedge_mate(struct csmhedge_t *hedge)
+{
+    struct csmedge_t *edge;
+    
+    edge = csmhedge_edge(hedge);
+    return csmedge_mate(edge, hedge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_compute_vertex_normal_for_hedge(
+                        struct csmhedge_t *loop_hedge, double Wx_hedge, double Wy_hedge, double Wz_hedge,
+                        const struct csmsurface_t *surface_eq,
+                        double *Nx, double *Ny, double *Nz)
+{
+    struct csmhedge_t *iterator;
+    unsigned long no_faces, no_iters;
+    
+    assert_no_null(Nx);
+    assert_no_null(Ny);
+    assert_no_null(Nz);
+    
+    iterator = loop_hedge;
+    
+    *Nx = 0.;
+    *Ny = 0.;
+    *Nz = 0.;
+    no_faces = 0;
+    no_iters = 0;
+    
+    do
+    {
+        assert(no_iters < 100);
+        no_iters++;
+        
+        if (iterator == loop_hedge)
+        {
+            *Nx += Wx_hedge;
+            *Ny += Wy_hedge;
+            *Nz += Wz_hedge;
+            no_faces++;
+        }
+        else
+        {
+            struct csmface_t *face_from_hedge;
+            
+            face_from_hedge = csmloop_lface(csmhedge_loop(iterator));
+            assert_no_null(face_from_hedge);
+            
+            if (csmsurface_surfaces_define_border_edge(
+                        surface_eq, Wx_hedge, Wy_hedge, Wz_hedge,
+                        face_from_hedge->surface_eq, face_from_hedge->A, face_from_hedge->B, face_from_hedge->C) == CSMFALSE)
+            {
+                *Nx += face_from_hedge->A;
+                *Ny += face_from_hedge->B;
+                *Nz += face_from_hedge->C;
+                
+                no_faces++;
+            }
+        }
+        
+        iterator = csmhedge_next(i_hedge_mate(iterator));
+    }
+    while (iterator != loop_hedge);
+    
+    assert(no_faces > 0);
+    
+    *Nx /= no_faces;
+    *Ny /= no_faces;
+    *Nz /= no_faces;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_vis_append_loop_to_shape(
+                        struct csmloop_t *loop,
+                        const struct csmsurface_t *surface_eq,
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        struct csmshape2d_t *shape)
+{
+    struct csmhedge_t *ledge, *iterator;
+    unsigned long num_iteraciones;
+    double Wx, Wy, Wz;
+    csmArrPoint2D *points;
+    csmArrPoint3D *points_normals;
+    
+    assert_no_null(loop);
+    
+    ledge = csmloop_ledge(loop);
+    iterator = ledge;
+    num_iteraciones = 0;
+    
+    csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx, &Wy, &Wz);
+    
+    points = csmArrPoint2D_new(0);
+    points_normals = csmArrPoint3D_new(0);
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x_3d, y_3d, z_3d;
+        double Nx, Ny, Nz;
+        double x_2d, y_2d;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
+        
+        i_compute_vertex_normal_for_hedge(
+                        iterator, Wx, Wy, Wz,
+                        surface_eq,
+                        &Nx, &Ny, &Nz);
+        
+        csmgeom_project_coords_3d_to_2d(
+                        Xo, Yo, Zo,
+                        Ux, Uy, Uz, Vx, Vy, Vz,
+                        x_3d, y_3d, z_3d,
+                        &x_2d, &y_2d);
+        
+        csmArrPoint2D_append(points, x_2d, y_2d);
+        csmArrPoint3D_append(points_normals, -Nx, -Ny, -Nz);
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != ledge);
+    
+    if (csmArrPoint2D_count(points) >= 3 && csmmath_fabs(csmArrPoint2D_area(points)) > 0.)
+    {
+        csmArrPoint2D_invert(points);
+        csmArrPoint3D_invert(points_normals);
+        csmshape2d_append_new_polygon_with_points_and_normals(shape, &points, &points_normals);
+    }
+    else
+    {
+        csmArrPoint2D_free(&points);
+        csmArrPoint3D_free(&points_normals);
+    }
+}
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -57,7 +205,7 @@ void csmface_vis_draw_solid(
         
         while (loop_iterator != NULL)
         {
-            csmloop_vis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, shape);
+            i_vis_append_loop_to_shape(loop_iterator, face->surface_eq, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, shape);
             loop_iterator = csmloop_next(loop_iterator);
         }
         
@@ -77,7 +225,7 @@ void csmface_vis_draw_solid(
                 bsgraphics2_escr_color(graphics, face_material);
             }
             
-            csmshape2d_dibuja_3d(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMFALSE, graphics);
+            csmshape2d_draw_3D(shape, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMFALSE, graphics);
         }
         
         csmshape2d_free(&shape);

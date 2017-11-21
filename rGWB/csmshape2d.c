@@ -521,7 +521,7 @@ static void i_get_vertex_data(
 
 // --------------------------------------------------------------------------------
 
-void csmshape2d_dibuja_3d(
+void csmshape2d_draw_3D(
                         const struct csmshape2d_t *shape2d,
                         double Xo, double Yo, double Zo,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,

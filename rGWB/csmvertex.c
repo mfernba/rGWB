@@ -17,8 +17,7 @@ CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
 						unsigned long id,
                         double x, double y, double z,
                         struct csmhedge_t *hedge,
-                        csmvertex_mask_t algorithm_attrib_mask,
-                        double Nx, double Ny, double Nz))
+                        csmvertex_mask_t algorithm_attrib_mask))
 {
     struct csmvertex_t *vertex;
     
@@ -34,10 +33,6 @@ CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
     
     vertex->algorithm_attrib_mask = algorithm_attrib_mask;
     
-    vertex->Nx = Nx;
-    vertex->Ny = Ny;
-    vertex->Nz = Nz;
-
     return vertex;
 }
 
@@ -56,16 +51,12 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
     
     algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
     
-    Nx = 0.;
-    Ny = 0.;
-    Nz = 0.;
-    
-    return i_crea(id, x, y, z, hedge, algorithm_attrib_mask, Nx, Ny, Nz);
+    return i_crea(id, x, y, z, hedge, algorithm_attrib_mask);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y, double z, double Nx, double Ny, double Nz, unsigned long *id_nuevo_elemento))
+CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y, double z, unsigned long *id_nuevo_elemento))
 {
     unsigned long id;
     struct csmhedge_t *hedge;
@@ -77,7 +68,7 @@ CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y
     
     algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
     
-    return i_crea(id, x, y, z, hedge, algorithm_attrib_mask, Nx, Ny, Nz);
+    return i_crea(id, x, y, z, hedge, algorithm_attrib_mask);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -91,7 +82,7 @@ struct csmvertex_t *csmvertex_duplicate(
     
     assert_no_null(vertex);
     
-    new_vertex = i_duplicate_vertex(vertex->x, vertex->y, vertex->z, vertex->Nx, vertex->Ny, vertex->Nz, id_nuevo_elemento);
+    new_vertex = i_duplicate_vertex(vertex->x, vertex->y, vertex->z, id_nuevo_elemento);
     assert_no_null(new_vertex);
     assert(new_vertex->hedge == NULL);
     
@@ -245,29 +236,4 @@ void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtrans
 {
     assert_no_null(vertex);
     csmtransform_transform_point(transform, vertex->x, vertex->y, vertex->z, &vertex->x, &vertex->y, &vertex->z);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmvertex_get_normal(struct csmvertex_t *vertex, double *Nx, double *Ny, double *Nz)
-{
-    assert_no_null(vertex);
-    assert_no_null(Nx);
-    assert_no_null(Ny);
-    assert_no_null(Nz);
-    
-    *Nx = vertex->Nx;
-    *Ny = vertex->Ny;
-    *Nz = vertex->Nz;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmvertex_set_normal(struct csmvertex_t *vertex, double Nx, double Ny, double Nz)
-{
-    assert_no_null(vertex);
-
-    vertex->Nx = Nx;
-    vertex->Ny = Ny;
-    vertex->Nz = Nz;
 }

@@ -298,7 +298,7 @@ void csmsolid_free(struct csmsolid_t **solido)
     if ((*solido)->name != NULL)
         csmstring_free(&(*solido)->name);
     
-    csmhashtb_free(&(*solido)->sfaces, csmface_t, csmface_destruye);
+    csmhashtb_free(&(*solido)->sfaces, csmface_t, csmface_free);
     csmhashtb_free(&(*solido)->sedges, csmedge_t, csmedge_destruye);
     csmhashtb_free(&(*solido)->svertexs, csmvertex_t, csmvertex_destruye);
 
@@ -471,57 +471,6 @@ static void i_add_he_face_normal(struct csmhedge_t *he, double *Nx, double *Ny, 
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_redo_vertex_normals(struct csmhashtb(csmvertex_t) *svertexs)
-{
-    struct csmhashtb_iterator(csmvertex_t) *iterator;
-    
-    iterator = csmhashtb_create_iterator(svertexs, csmvertex_t);
-    
-    while (csmhashtb_has_next(iterator, csmvertex_t) == CSMTRUE)
-    {
-        struct csmvertex_t *vertex;
-        struct csmhedge_t *he_vertex, *he_iterator;
-        double Nx, Ny, Nz;
-        unsigned long num_faces;
-        
-        csmhashtb_next_pair(iterator, NULL, &vertex, csmvertex_t);
-        
-        he_vertex = csmvertex_hedge(vertex);
-        he_iterator = he_vertex;
-        
-        Nx = 0.;
-        Ny = 0.;
-        Nz = 0.;
-        num_faces = 0;
-        
-        do
-        {
-            struct csmhedge_t *he_iterator_mate;
-            
-            i_add_he_face_normal(he_iterator, &Nx, &Ny, &Nz, &num_faces);
-            
-            he_iterator_mate = i_he_mate(he_iterator);
-            i_add_he_face_normal(he_iterator_mate, &Nx, &Ny, &Nz, &num_faces);
-            
-            he_iterator = csmhedge_next(he_iterator_mate);
-            
-        } while (he_iterator != he_vertex);
-        
-        assert(num_faces > 0);
-        
-        Nx /= num_faces;
-        Ny /= num_faces;
-        Nz /= num_faces;
-        
-        csmmath_make_unit_vector3D(&Nx, &Ny, &Nz);
-        csmvertex_set_normal(vertex, Nx, Ny, Nz);
-    }
-    
-    csmhashtb_free_iterator(&iterator, csmvertex_t);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 void csmsolid_redo_geometric_face_data(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
@@ -530,18 +479,10 @@ void csmsolid_redo_geometric_face_data(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_redo_geometric_generated_data(struct csmhashtb(csmvertex_t) *svertexs, struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *bbox)
-{
-    i_redo_faces_geometric_generated_data(sfaces, bbox);
-    i_redo_vertex_normals(svertexs);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
-    i_redo_geometric_generated_data(solid->svertexs, solid->sfaces, solid->bbox);
+    i_redo_faces_geometric_generated_data(solid->sfaces, solid->bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -712,7 +653,7 @@ void csmsolid_append_new_face(struct csmsolid_t *solido, struct csmface_t **face
     assert_no_null(solido);
     assert_no_null(face);
     
-    face_loc = csmface_crea(solido, &solido->id_nuevo_elemento);
+    face_loc = csmface_new(solido, &solido->id_nuevo_elemento);
     csmhashtb_add_item(solido->sfaces, csmface_id(face_loc), face_loc, csmface_t);
     
     if (solido->visz_material_opt != NULL)
@@ -729,7 +670,7 @@ void csmsolid_remove_face(struct csmsolid_t *solido, struct csmface_t **face)
     assert_no_null(face);
     
     csmhashtb_remove_item(solido->sfaces, csmface_id(*face), csmface_t);
-    csmface_destruye(face);
+    csmface_free(face);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -955,7 +896,7 @@ static void i_apply_transformation_to_vertexs(
     
     csmhashtb_free_iterator(&iterator, csmvertex_t);
     
-    i_redo_geometric_generated_data(svertexs, sfaces, bbox);
+    i_redo_faces_geometric_generated_data(sfaces, bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------

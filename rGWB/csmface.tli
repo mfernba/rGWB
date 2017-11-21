@@ -12,7 +12,8 @@ struct csmface_t
     
     struct csmloop_t *flout;
     struct csmloop_t *floops;
-    
+
+    struct csmsurface_t *surface_eq;
     struct csmmaterial_t *visz_material_opt;
     
     double A, B, C, D;

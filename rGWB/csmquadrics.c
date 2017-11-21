@@ -24,7 +24,33 @@
 #include "csmassert.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
+#include "csmmem.inl"
 #include "csmtolerance.inl"
+#include "csmsurface.inl"
+#include "csmhashtb.inl"
+
+// --------------------------------------------------------------------------------
+
+static void i_assign_face_eq_to_solid_faces(struct csmsolid_t *solid, struct csmsurface_t **surface)
+{
+    struct csmsurface_t *surface_loc;
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    surface_loc = ASIGNA_PUNTERO_PP_NO_NULL(surface, struct csmsurface_t);
+    face_iterator = csmsolid_face_iterator(solid);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        csmface_set_surface_eq(face, surface_loc);
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+    
+    csmsurface_free(&surface_loc);
+}
 
 // --------------------------------------------------------------------------------
 
@@ -101,7 +127,7 @@ struct csmsolid_t *csmquadrics_create_torus(
     
     i_compute_point_on_torus(R, r, 0., 0., &x, &y, &z);
     torus = csmeuler_mvfs(x, y, z, start_id_of_new_element, &initial_hedge);
-    csmsolid_set_draw_only_border_edges(torus, CSMFALSE);    
+    //csmsolid_set_draw_only_border_edges(torus, CSMFALSE);    
     
     incr_alfa_rad = 2. * CSMMATH_PI / no_points_circle_r;
     incr_beta_rad = 2. * CSMMATH_PI / no_points_circle_R;
@@ -174,6 +200,13 @@ struct csmsolid_t *csmquadrics_create_torus(
                         x_center, y_center, z_center,
                         Ux, Uy, Uz, Vx, Vy, Vz,
                         torus);
+    
+    {
+        struct csmsurface_t *surface;
+        
+        surface = csmsurface_new_torus(R, r);
+        i_assign_face_eq_to_solid_faces(torus, &surface);
+    }
     
     csmsolid_redo_geometric_face_data(torus);
     
@@ -301,6 +334,13 @@ struct csmsolid_t *csmquadrics_create_cone(
                         Ux, Uy, Uz, Vx, Vy, Vz,
                         cone);
     
+    {
+        struct csmsurface_t *surface;
+        
+        surface = csmsurface_new_cone(height, radius);
+        i_assign_face_eq_to_solid_faces(cone, &surface);
+    }
+    
     csmsolid_clear_algorithm_data(cone);
     
     return cone;
@@ -413,7 +453,7 @@ struct csmsolid_t *csmquadrics_create_sphere(
     double direction_sign;
     
     sphere = i_create_ellipsoid_base_solid(radius, radius, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
-    csmsolid_set_draw_only_border_edges(sphere, CSMFALSE);
+    //csmsolid_set_draw_only_border_edges(sphere, CSMFALSE);
     
     direction_sign = 1.;
     i_generate_half_ellipsoid(top_face, direction_sign, radius, radius, radius, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
@@ -426,6 +466,13 @@ struct csmsolid_t *csmquadrics_create_sphere(
                         Ux, Uy, Uz, Vx, Vy, Vz,
                         sphere);
 
+    {
+        struct csmsurface_t *surface;
+        
+        surface = csmsurface_new_ellipsoid(radius, radius, radius);
+        i_assign_face_eq_to_solid_faces(sphere, &surface);
+    }
+    
     csmsolid_redo_geometric_face_data(sphere);
     
     return sphere;
@@ -446,7 +493,7 @@ struct csmsolid_t *csmquadrics_create_ellipsoid(
     double direction_sign;
     
     ellipsoid = i_create_ellipsoid_base_solid(radius_x, radius_y, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
-    csmsolid_set_draw_only_border_edges(ellipsoid, CSMFALSE);
+    //csmsolid_set_draw_only_border_edges(ellipsoid, CSMFALSE);
     
     direction_sign = 1.;
     i_generate_half_ellipsoid(top_face, direction_sign, radius_x, radius_y, radius_z, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
@@ -459,6 +506,13 @@ struct csmsolid_t *csmquadrics_create_ellipsoid(
                         Ux, Uy, Uz, Vx, Vy, Vz,
                         ellipsoid);
 
+    {
+        struct csmsurface_t *surface;
+        
+        surface = csmsurface_new_ellipsoid(radius_x, radius_y, radius_z);
+        i_assign_face_eq_to_solid_faces(ellipsoid, &surface);
+    }
+    
     csmsolid_redo_geometric_face_data(ellipsoid);
     
     return ellipsoid;
@@ -566,12 +620,12 @@ struct csmsolid_t *csmquadrics_create_hyperbolid_one_sheet(
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         unsigned long start_id_of_new_element)
 {
-    struct csmsolid_t *ellipsoid;
+    struct csmsolid_t *hyperboloid;
     struct csmface_t *bottom_face, *top_face;
     double direction_sign;
     
-    ellipsoid = i_create_ellipsoid_base_solid(a, a, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
-    csmsolid_set_draw_only_border_edges(ellipsoid, CSMFALSE);
+    hyperboloid = i_create_ellipsoid_base_solid(a, a, no_points_circle_radius_meridians, start_id_of_new_element, &bottom_face, &top_face);
+    //csmsolid_set_draw_only_border_edges(hyperboloid, CSMFALSE);
     
     direction_sign = 1.;
     i_generate_half_hiperboloid(top_face, direction_sign, a, c, .5 * height, no_points_circle_radius_parallels_semisphere, no_points_circle_radius_meridians);
@@ -582,11 +636,18 @@ struct csmsolid_t *csmquadrics_create_hyperbolid_one_sheet(
     i_apply_transform_to_solid(
                         x_center, y_center, z_center,
                         Ux, Uy, Uz, Vx, Vy, Vz,
-                        ellipsoid);
+                        hyperboloid);
 
-    csmsolid_redo_geometric_face_data(ellipsoid);
+    {
+        struct csmsurface_t *surface;
+        
+        surface = csmsurface_new_hyperboloid(a, c);
+        i_assign_face_eq_to_solid_faces(hyperboloid, &surface);
+    }
     
-    return ellipsoid;
+    csmsolid_redo_geometric_face_data(hyperboloid);
+    
+    return hyperboloid;
 }
 
 

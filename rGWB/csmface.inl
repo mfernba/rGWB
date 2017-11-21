@@ -2,7 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-CONSTRUCTOR(struct csmface_t *, csmface_crea, (struct csmsolid_t *solido, unsigned long *id_nuevo_elemento));
+CONSTRUCTOR(struct csmface_t *, csmface_new, (struct csmsolid_t *solido, unsigned long *id_nuevo_elemento));
 
 CONSTRUCTOR(struct csmface_t *, csmface_duplicate, (
                         struct csmface_t *face,
@@ -11,7 +11,7 @@ CONSTRUCTOR(struct csmface_t *, csmface_duplicate, (
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
-void csmface_destruye(struct csmface_t **face);
+void csmface_free(struct csmface_t **face);
 
 unsigned long csmface_id(const struct csmface_t *face);
 
@@ -19,7 +19,9 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
 
 void csmface_set_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt);
 
-void csmface_copy_visualization_material_from_face1(const struct csmface_t *face1, struct csmface_t *face2);
+void csmface_set_surface_eq(struct csmface_t *face, const struct csmsurface_t *surface_eq);
+
+void csmface_copy_attributtes_from_face1(const struct csmface_t *face1, struct csmface_t *face2);
 
 
 // Geometry...
@@ -75,7 +77,7 @@ CSMBOOL csmface_is_coplanar_to_plane(
 
 CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2);
 
-CSMBOOL csmface_faces_define_border_edge(struct csmface_t *face1, const struct csmface_t *face2);
+CSMBOOL csmface_faces_define_border_edge(const struct csmface_t *face1, const struct csmface_t *face2);
 
 CSMBOOL csmface_is_oriented_in_direction(const struct csmface_t *face, double Wx, double Wy, double Wz);
 

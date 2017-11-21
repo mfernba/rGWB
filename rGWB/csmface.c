@@ -16,8 +16,7 @@
 #include "csmmem.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-
-static const double i_COS_15_DEGREES = 0.9659358;
+#include "csmsurface.inl"
 
 // ------------------------------------------------------------------------------------------
 
@@ -26,6 +25,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         struct csmsolid_t *fsolid, struct csmsolid_t *fsolid_aux,
                         struct csmloop_t *flout,
                         struct csmloop_t *floops,
+                        struct csmsurface_t **surface_eq,
                         struct csmmaterial_t **visz_material_opt,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         struct csmbbox_t **bbox,
@@ -43,6 +43,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     face->flout = flout;
     face->floops = floops;
     
+    face->surface_eq = ASIGNA_PUNTERO_PP_NO_NULL(surface_eq, struct csmsurface_t);
     face->visz_material_opt = ASIGNA_PUNTERO_PP(visz_material_opt, struct csmmaterial_t);
     
     face->A = A;
@@ -61,12 +62,13 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
 
 // ------------------------------------------------------------------------------------------
 
-struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento)
+struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
     struct csmsolid_t *fsolid, *fsolid_aux;
     struct csmloop_t *flout;
     struct csmloop_t *floops;
+    struct csmsurface_t *surface_eq;
     struct csmmaterial_t *visz_material_opt;
     double A, B, C, D, fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;
@@ -80,6 +82,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
     flout = NULL;
     floops = NULL;
     
+    surface_eq = csmsurface_new_undefined();
     visz_material_opt = NULL;
     
     A = 0.;
@@ -99,6 +102,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
                 fsolid_aux,
                 flout,
                 floops,
+                &surface_eq,
                 &visz_material_opt,
                 A, B, C, D,
                 fuzzy_epsilon,
@@ -111,6 +115,7 @@ struct csmface_t *csmface_crea(struct csmsolid_t *solido, unsigned long *id_nuev
 
 CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                         struct csmsolid_t *fsolid,
+                        struct csmsurface_t **surface_eq,
 	                    struct csmmaterial_t **visz_material_opt,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         unsigned long *id_nuevo_elemento))
@@ -132,6 +137,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                 NULL,
                 flout,
                 floops,
+                surface_eq,
                 visz_material_opt,
                 A, B, C, D,
                 fuzzy_epsilon,
@@ -150,10 +156,13 @@ struct csmface_t *csmface_duplicate(
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
 {
     struct csmface_t *new_face;
+    struct csmsurface_t *surface_eq;
     struct csmmaterial_t *visz_material_opt;
     struct csmloop_t *iterator, *last_loop;
     
     assert_no_null(face);
+    
+    surface_eq = csmsurface_copy(face->surface_eq);
     
     if (face->visz_material_opt != NULL)
         visz_material_opt = csmmaterial_copy(face->visz_material_opt);
@@ -162,6 +171,7 @@ struct csmface_t *csmface_duplicate(
 
     new_face = i_duplicate_face(
                         fsolid,
+                        &surface_eq,
                         &visz_material_opt,
                         face->A, face->B, face->C, face->D, face->fuzzy_epsilon, face->dropped_coord,
                         id_nuevo_elemento);
@@ -201,7 +211,7 @@ struct csmface_t *csmface_duplicate(
 
 // ------------------------------------------------------------------------------------------
 
-void csmface_destruye(struct csmface_t **face)
+void csmface_free(struct csmface_t **face)
 {
     assert_no_null(face);
     assert_no_null(*face);
@@ -209,6 +219,8 @@ void csmface_destruye(struct csmface_t **face)
     if ((*face)->floops != NULL)
         csmnode_free_node_list(&(*face)->floops, csmloop_t);
 
+    csmsurface_free(&(*face)->surface_eq);
+    
     if ((*face)->visz_material_opt != NULL)
         csmmaterial_free(&(*face)->visz_material_opt);
     
@@ -271,13 +283,32 @@ void csmface_set_visualization_material(struct csmface_t *face, const struct csm
     i_set_visualization_material(visz_material_opt, &face->visz_material_opt);
 }
 
+// ------------------------------------------------------------------------------------------
+
+static void i_set_surface_eq(struct csmsurface_t **surface_eq_solid, const struct csmsurface_t *surface_eq)
+{
+    assert_no_null(surface_eq_solid);
+    
+    csmsurface_free(surface_eq_solid);
+    *surface_eq_solid = csmsurface_copy(surface_eq);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmface_set_surface_eq(struct csmface_t *face, const struct csmsurface_t *surface_eq)
+{
+    assert_no_null(face);
+    i_set_surface_eq(&face->surface_eq, surface_eq);
+}
+
 // ----------------------------------------------------------------------------------------------------
 
-void csmface_copy_visualization_material_from_face1(const struct csmface_t *face1, struct csmface_t *face2)
+void csmface_copy_attributtes_from_face1(const struct csmface_t *face1, struct csmface_t *face2)
 {
     assert_no_null(face1);
     assert_no_null(face2);
     
+    i_set_surface_eq(&face2->surface_eq, face1->surface_eq);
     i_set_visualization_material(face1->visz_material_opt, &face2->visz_material_opt);
 }
 
@@ -813,19 +844,14 @@ CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface
 
 // ------------------------------------------------------------------------------------------
 
-CSMBOOL csmface_faces_define_border_edge(struct csmface_t *face1, const struct csmface_t *face2)
+CSMBOOL csmface_faces_define_border_edge(const struct csmface_t *face1, const struct csmface_t *face2)
 {
-    double dot;
-    
     assert_no_null(face1);
     assert_no_null(face2);
     
-    dot = csmmath_dot_product3D(face1->A, face1->B, face1->C, face2->A, face2->B, face2->C);
-    
-    if (csmmath_fabs(dot) > i_COS_15_DEGREES)
-        return CSMFALSE;
-    else
-        return CSMTRUE;
+    return csmsurface_surfaces_define_border_edge(
+                        face1->surface_eq, face1->A, face1->B, face1->C,
+                        face2->surface_eq, face2->A, face2->B, face2->C);
 }
 
 // ------------------------------------------------------------------------------------------
