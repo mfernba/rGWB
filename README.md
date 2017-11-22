@@ -14,7 +14,7 @@ I have studied the book and some of the papers it refers to, also I have read "B
 
 This implementations allows:
 
-  - Sweep solids by extrusion (csmsweep.h, csmshape2d.h, csmbasicshape2d.h)
+  - Sweep solids by extrusion or along a path (csmsweep.h, csmshape2d.h, csmbasicshape2d.h)
   - Quadrics solids (csmquadrics.h)
   - Split algorithm (csmsplit.h)
   - Boolean Operations (csmsetop.h)  
