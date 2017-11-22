@@ -39,6 +39,8 @@ DLL_RGWB void csmArrPoint2D_append_elipse_points(
                             unsigned long no_points_circle,
                             CSMBOOL clockwise_orientation);
 
+DLL_RGWB CSMBOOL csmArrPoint2D_equal(const csmArrPoint2D *array1, const csmArrPoint2D *array2, double tolerance);
+    
 DLL_RGWB CSMBOOL csmArrPoint2D_exists_point(
                             const csmArrPoint2D *array,
                             double x, double y,

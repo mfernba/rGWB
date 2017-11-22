@@ -251,7 +251,39 @@ static CSMBOOL i_equal_points(const struct i_point_t *point, const struct i_sear
     
     return searched_point->func_equal_points(point->x, point->y, searched_point->x, searched_point->y);
 }
-                              
+
+// ---------------------------------------------------------------------------
+
+CSMBOOL csmArrPoint2D_equal(const csmArrPoint2D *array1, const csmArrPoint2D *array2, double tolerance)
+{
+    unsigned long no_points1, no_points2;
+    
+    no_points1 = csmArrPoint2D_count(array1);
+    no_points2 = csmArrPoint2D_count(array2);
+    
+    if (no_points1 != no_points2)
+    {
+        return CSMFALSE;
+    }
+    else
+    {
+        unsigned long i;
+    
+        for (i = 0; i < no_points1; i++)
+        {
+            double x1, y1, x2, y2;
+            
+            csmArrPoint2D_get(array1, i, &x1, &y1);
+            csmArrPoint2D_get(array2, i, &x2, &y2);
+            
+            if (csmmath_fabs(x1 - x2) > tolerance || csmmath_fabs(y1 - y2) > tolerance)
+                return CSMFALSE;
+        }
+        
+        return CSMTRUE;
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 CSMBOOL csmArrPoint2D_exists_point(

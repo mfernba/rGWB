@@ -109,7 +109,7 @@ struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *a
     assert_no_null(array);
     assert_no_null(func_copy_element);
     
-    ptr_data = (void *)malloc(array->no_elems);
+    ptr_data = (void *)malloc(array->element_data_size * array->no_elems);
     offset = 0;
     
     for (i = 0; i < array->no_elems; i++)
