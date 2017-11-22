@@ -14,6 +14,8 @@ extern "C" {
 
 DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmshape2d_new, (void));
 
+DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmshape2d_copy, (const struct csmshape2d_t *shape2d));
+    
 DLL_RGWB void csmshape2d_free(struct csmshape2d_t **shape2d);
 
 

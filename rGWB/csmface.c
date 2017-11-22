@@ -256,7 +256,7 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
         assert(num_iters < 100000);
         num_iters++;
 
-        csmloop_reassign_id(iterator, id_nuevo_elemento, new_id_opc);
+        csmloop_reassign_id(iterator, id_nuevo_elemento, NULL);
         iterator = csmloop_next(iterator);
         
     } while (iterator != NULL);

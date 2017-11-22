@@ -41,6 +41,7 @@ struct csmmaterial_t;
 struct csmtolerance_t;
 struct csmshape2d_t;
 struct csmsurface_t;
+struct csmsweep_path_t;
     
 #ifdef __cplusplus
 enum csmedge_lado_hedge_t: int;

@@ -21,7 +21,7 @@ void csmassert_dontuse_assertion_failed(const char *file, int line, const char *
     csmdebug_close_output_file();
     
     fprintf(stderr, "Solid modeler assertion failed: (%s)\nFILE: %s\nLINE: %d\n", assertion, file, line);
-    _Exit(-1);
+    //_Exit(-1);
 }
 
 // ---------------------------------------------------------------------------------

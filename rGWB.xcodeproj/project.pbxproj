@@ -33,7 +33,6 @@
 		5507A6851E736565008B9F73 /* csmeuler_lmfkrh.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6831E736565008B9F73 /* csmeuler_lmfkrh.inl */; };
 		5507A6881E736714008B9F73 /* csmeuler_lringmv.c in Sources */ = {isa = PBXBuildFile; fileRef = 5507A6861E736714008B9F73 /* csmeuler_lringmv.c */; };
 		5507A6891E736714008B9F73 /* csmeuler_lringmv.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6871E736714008B9F73 /* csmeuler_lringmv.inl */; };
-		5507A6E41E7B4077008B9F73 /* a_pto2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6E31E7B4077008B9F73 /* a_pto2d.h */; };
 		5507A6EC1E7B40BA008B9F73 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5507A6EB1E7B40BA008B9F73 /* Cocoa.framework */; };
 		5507A6EE1E7B40C1008B9F73 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5507A6ED1E7B40C1008B9F73 /* Foundation.framework */; };
 		5507A6F21E7B450C008B9F73 /* csmhashtb.c in Sources */ = {isa = PBXBuildFile; fileRef = 5507A6F01E7B450C008B9F73 /* csmhashtb.c */; };
@@ -250,7 +249,6 @@
 		5507A6831E736565008B9F73 /* csmeuler_lmfkrh.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmeuler_lmfkrh.inl; sourceTree = "<group>"; };
 		5507A6861E736714008B9F73 /* csmeuler_lringmv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmeuler_lringmv.c; sourceTree = "<group>"; };
 		5507A6871E736714008B9F73 /* csmeuler_lringmv.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmeuler_lringmv.inl; sourceTree = "<group>"; };
-		5507A6E31E7B4077008B9F73 /* a_pto2d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = a_pto2d.h; sourceTree = "<group>"; };
 		5507A6EB1E7B40BA008B9F73 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		5507A6ED1E7B40C1008B9F73 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		5507A6F01E7B450C008B9F73 /* csmhashtb.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmhashtb.c; sourceTree = "<group>"; };
@@ -613,7 +611,6 @@
 				5579545C1E5DB074000FC91E /* Info.plist */,
 				550E55AC1F87811A0033864A /* csmtypes.hxx */,
 				557954711E5DB275000FC91E /* csmfwddecl.hxx */,
-				5579546B1E5DB209000FC91E /* Cype Wrapper */,
 				5579549B1E5E4823000FC91E /* Utility */,
 				551D47561FC1CD1A004F3B43 /* 2D Tools */,
 				5598D6181F24E81100EA1876 /* Viewer */,
@@ -625,14 +622,6 @@
 				5507A6261E6B8721008B9F73 /* Test */,
 			);
 			path = rGWB;
-			sourceTree = "<group>";
-		};
-		5579546B1E5DB209000FC91E /* Cype Wrapper */ = {
-			isa = PBXGroup;
-			children = (
-				5507A6E31E7B4077008B9F73 /* a_pto2d.h */,
-			);
-			name = "Cype Wrapper";
 			sourceTree = "<group>";
 		};
 		557954891E5E41A0000FC91E /* Half-Edge Data Structure */ = {
@@ -827,7 +816,6 @@
 				55EA991B1ED389C0006C063C /* csmsetop_vtxfacc.inl in Headers */,
 				5507A6211E6B744A008B9F73 /* csmeuler_lkev.inl in Headers */,
 				5579549A1E5E4811000FC91E /* csmbbox.inl in Headers */,
-				5507A6E41E7B4077008B9F73 /* a_pto2d.h in Headers */,
 				5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */,
 				55244B271EA02AED006F546E /* csmsolid.h in Headers */,
 				55A9843F1FBE3A8D009F7516 /* csmArrPoint3D.hxx in Headers */,

@@ -3615,6 +3615,40 @@ static void i_test_mechanichal7_simplified(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_sweep_path1(void)
+{
+    struct csmshape2d_t *shape;
+    unsigned long idx_polygon;
+    struct csmsweep_path_t *sweep_path;
+    struct csmsolid_t *solid;
+    
+    //shape = csmbasicshape2d_rectangular_shape(0.05, 1.);
+    shape = csmshape2d_new();
+    csmshape2d_new_polygon(shape, &idx_polygon);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon, -1., -1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon, -0.95, -1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.05, 0.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.05, 1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.0, 1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.0, 0.25);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  -0.1, 0.25);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  -0.1, 0.0);
+    
+    //shape = csmbasicshape2d_L_shape(1., 0.5);
+    sweep_path = csmsweep_new_elliptical_plane_path(0., 0., 1., 1., 32, 0., 0., 0., 1., 0., 0., 0., 1., 0., shape);
+    
+    solid = csmsweep_create_from_path(sweep_path);
+    i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    csmsweep_free_path(&sweep_path);
+    csmshape2d_free(&shape);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -3686,7 +3720,6 @@ void csmtest_test(void)
     
     i_test_sphere4();
     
-    */
     i_test_mechanical5();
     i_test_mechanical6bis();
     i_test_mechanical6();
@@ -3696,6 +3729,9 @@ void csmtest_test(void)
     
     i_test_ellipsoid();
     i_test_paraboloid_one_sheet();
+    */
+    
+    i_test_sweep_path1();
     
     csmviewer_free(&viewer);
 }

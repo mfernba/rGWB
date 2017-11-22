@@ -23,6 +23,7 @@
 
 #include "csmassert.inl"
 #include "csmmem.inl"
+#include "csmdebug.inl"
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -236,7 +237,9 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
         he_prev = csmhedge_prev(he_iterator);
 
         csmeuler_lmef(he_next, he_prev, NULL, NULL, NULL);
-        csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(he_iterator)), CSMTRUE);
+        
+        if (csmdebug_debug_enabled() == CSMTRUE)
+            csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(he_iterator)), CSMTRUE);
         
         he_iterator_next = csmhedge_next(he_iterator);
         he_iterator_next_mate = csmopbas_mate(he_iterator_next);

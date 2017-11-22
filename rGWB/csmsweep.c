@@ -13,13 +13,15 @@
 //  Shapes can have holes;
 //
 
-
 #include "csmsweep.h"
 
 #include "csmarrayc.inl"
 #include "csmassert.inl"
+#include "csmmem.inl"
+#include "csmmath.inl"
 #include "csmgeom.inl"
 #include "csmloop.inl"
+#include "csmloopglue.inl"
 #include "csmface.inl"
 #include "csmhedge.inl"
 #include "csmopbas.inl"
@@ -30,9 +32,28 @@
 #include "csmeuler_lkemr.inl"
 #include "csmeuler_lkfmrh.inl"
 #include "csmeuler_lmfkrh.inl"
+#include "csmshape2d.h"
 #include "csmshape2d.inl"
+#include "csmsolid.h"
+#include "csmsolid.inl"
+#include "csmArrPoint2D.h"
+#include "csmArrPoint3D.h"
+#include "csmtolerance.inl"
 
 csmArrayStruct(csmhedge_t);
+
+struct i_sweep_point_t
+{
+    double Xo, Yo, Zo;
+    double Ux, Uy, Uz, Vx, Vy, Vz;
+    
+    struct csmshape2d_t *shape;
+};
+
+struct csmsweep_path_t
+{
+    csmArrayStruct(i_sweep_point_t) *sweep_points;
+};
 
 // --------------------------------------------------------------------------------
 
@@ -495,6 +516,329 @@ struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
 
     return solid;
 }
+
+// --------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct i_sweep_point_t *, i_new_sweep_point, (
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        struct csmshape2d_t **shape))
+{
+    struct i_sweep_point_t *sweep_point;
+    
+    sweep_point = MALLOC(struct i_sweep_point_t);
+    
+    sweep_point->Xo = Xo;
+    sweep_point->Yo = Yo;
+    sweep_point->Zo = Zo;
+    
+    sweep_point->Ux = Ux;
+    sweep_point->Uy = Uy;
+    sweep_point->Uz = Uz;
+    
+    sweep_point->Vx = Vx;
+    sweep_point->Vy = Vy;
+    sweep_point->Vz = Vz;
+    
+    sweep_point->shape = ASIGNA_PUNTERO_PP_NO_NULL(shape, struct csmshape2d_t);
+    
+    return sweep_point;
+}
+
+// --------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct i_sweep_point_t *, i_copy_sweep_point, (const struct i_sweep_point_t *sweep_point))
+{
+    struct csmshape2d_t *shape;
+    
+    assert_no_null(sweep_point);
+    
+    shape = csmshape2d_copy(sweep_point->shape);
+    
+    return i_new_sweep_point(
+                        sweep_point->Xo, sweep_point->Yo, sweep_point->Zo,
+                        sweep_point->Ux, sweep_point->Uy, sweep_point->Uz, sweep_point->Vx, sweep_point->Vy, sweep_point->Vz,
+                        &shape);
+}
+
+// --------------------------------------------------------------------------------
+
+static void i_free_sweep_point(struct i_sweep_point_t **sweep_point)
+{
+    assert_no_null(sweep_point);
+    assert_no_null(*sweep_point);
+    
+    csmshape2d_free(&(*sweep_point)->shape);
+    
+    FREE_PP(sweep_point, struct i_sweep_point_t);
+}
+
+// --------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmsweep_path_t *, i_new_sweeppath, (csmArrayStruct(i_sweep_point_t) **sweep_points))
+{
+    struct csmsweep_path_t *sweep_path;
+    
+    sweep_path = MALLOC(struct csmsweep_path_t);
+    
+    sweep_path->sweep_points = ASIGNA_PUNTERO_PP_NO_NULL(sweep_points, csmArrayStruct(i_sweep_point_t));
+    
+    return sweep_path;
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsweep_path_t *csmsweep_new_empty_path(void)
+{
+    csmArrayStruct(i_sweep_point_t) *sweep_points;
+    
+    sweep_points = csmarrayc_new_st_array(0, i_sweep_point_t);
+    
+    return i_new_sweeppath(&sweep_points);
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsweep_path_t *csmsweep_new_elliptical_plane_path(
+                            double x, double y, double radius_x, double radius_y,
+                            unsigned long no_points_circle,
+                            double Xo, double Yo, double Zo,
+                            double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                            const struct csmshape2d_t *shape)
+{
+    struct csmsweep_path_t *sweep_path;
+    double Wx, Wy, Wz;
+    csmArrPoint2D *points;
+    unsigned long i, no_points;
+    csmArrayStruct(i_sweep_point_t) *sweep_points;
+    const struct i_sweep_point_t *initial_point, *initial_point_copy;
+    
+    csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx, &Wy, &Wz);
+    
+    points = csmArrPoint2D_new(0);
+    csmArrPoint2D_append_elipse_points(points, x, y, radius_x, radius_y, no_points_circle, CSMFALSE);
+    
+    no_points = csmArrPoint2D_count(points);
+    assert(no_points >= 3);
+    
+    sweep_points = csmarrayc_new_st_array(no_points, i_sweep_point_t);
+    
+    for (i = 0; i < no_points; i++)
+    {
+        double x_i_2d, y_i_2d;
+        unsigned long idx_prev, idx_next;
+        double x_2d_prev, y_2d_prev, x_2d_next, y_2d_next;
+        double x_prev_3d, y_prev_3d, z_prev_3d, x_3d, y_3d, z_3d, x_next_3d, y_next_3d, z_next_3d;
+        double Ux_to_prev, Uy_to_prev, Uz_to_prev;
+        double Ux_to_next, Uy_to_next, Uz_to_next;
+        double Ux_point, Uy_point, Uz_point;
+        struct csmshape2d_t *shape2d_copy;
+        struct i_sweep_point_t *sweep_point;
+
+        idx_prev = (i == 0)? no_points - 1 : i - 1;
+        csmArrPoint2D_get(points, idx_prev, &x_2d_prev, &y_2d_prev);
+        
+        csmArrPoint2D_get(points, i, &x_i_2d, &y_i_2d);
+        
+        idx_next = (i == no_points - 1)? 0 : i + 1;
+        csmArrPoint2D_get(points, idx_next, &x_2d_next, &y_2d_next);
+        
+        csmgeom_coords_2d_to_3d(
+                            Xo, Yo, Zo,
+                            Ux, Uy, Uz, Vx, Vy, Vz,
+                            x_i_2d, y_i_2d,
+                            &x_3d, &y_3d, &z_3d);
+        
+        csmgeom_coords_2d_to_3d(
+                            Xo, Yo, Zo,
+                            Ux, Uy, Uz, Vx, Vy, Vz,
+                            x_2d_prev, y_2d_prev,
+                            &x_prev_3d, &y_prev_3d, &z_prev_3d);
+
+        csmgeom_coords_2d_to_3d(
+                            Xo, Yo, Zo,
+                            Ux, Uy, Uz, Vx, Vy, Vz,
+                            x_2d_next, y_2d_next,
+                            &x_next_3d, &y_next_3d, &z_next_3d);
+        
+        csmmath_vector_between_two_3D_points(x_3d, y_3d, z_3d, x_prev_3d, y_prev_3d, z_prev_3d, &Ux_to_prev, &Uy_to_prev, &Uz_to_prev);
+        csmmath_vector_between_two_3D_points(x_3d, y_3d, z_3d, x_next_3d, y_next_3d, z_next_3d, &Ux_to_next, &Uy_to_next, &Uz_to_next);
+        
+        Ux_point = .5 * (Ux_to_prev + Ux_to_next);
+        Uy_point = .5 * (Uy_to_prev + Uy_to_next);
+        Uz_point = .5 * (Uz_to_prev + Uz_to_next);
+        csmmath_make_unit_vector3D(&Ux_point, &Uy_point, &Uz_point);
+        
+        shape2d_copy = csmshape2d_copy(shape);
+        
+        sweep_point = i_new_sweep_point(x_3d, y_3d, z_3d, Ux_point, Uy_point, Uz_point, Wx, Wy, Wz, &shape2d_copy);
+        csmarrayc_set_st(sweep_points, i, sweep_point, i_sweep_point_t);
+    }
+    
+    initial_point = csmarrayc_get_const_st(sweep_points, 0, i_sweep_point_t);
+    initial_point_copy = i_copy_sweep_point(initial_point);
+    
+    csmarrayc_append_element_st(sweep_points, initial_point_copy, i_sweep_point_t);
+    
+    sweep_path = i_new_sweeppath(&sweep_points);
+    
+    csmArrPoint2D_free(&points);
+    
+    return sweep_path;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmsweep_free_path(struct csmsweep_path_t **sweep_path)
+{
+    assert_no_null(sweep_path);
+    assert_no_null(*sweep_path);
+    
+    csmarrayc_free_st(&(*sweep_path)->sweep_points, i_sweep_point_t, i_free_sweep_point);
+    
+    FREE_PP(sweep_path, struct csmsweep_path_t);
+}
+
+// --------------------------------------------------------------------------------
+
+void csmsweep_append_point_to_path(
+                        struct csmsweep_path_t *sweep_path,
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        struct csmshape2d_t **shape)
+{
+    struct i_sweep_point_t *sweep_point;
+    
+    assert_no_null(sweep_path);
+    
+    sweep_point = i_new_sweep_point(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, shape);
+    csmarrayc_append_element_st(sweep_path->sweep_points, sweep_point, i_sweep_point_t);
+}
+
+// --------------------------------------------------------------------------------
+
+static CSMBOOL i_points_are_equal(
+                        const struct i_sweep_point_t *point1, const struct i_sweep_point_t *point2,
+                        const struct csmtolerance_t *tolerances)
+{
+    unsigned long no_points;
+
+    assert_no_null(point1);
+    assert_no_null(point2);
+    
+    if (csmmath_equal_coords(
+                        point1->Xo, point1->Yo, point1->Zo,
+                        point2->Xo, point2->Yo, point2->Zo,
+                        csmtolerance_equal_coords(tolerances)) == CSMFALSE)
+    {
+        return CSMFALSE;
+    }
+    else if (csmmath_vectors_are_parallel(
+                        point1->Ux, point1->Uy, point1->Uz,
+                        point2->Ux, point2->Uy, point2->Uz,
+                        tolerances) == CSMFALSE)
+    {
+        return CSMFALSE;
+    }
+    else if (csmmath_vectors_are_parallel(
+                        point1->Vx, point1->Vy, point1->Vz,
+                        point2->Vx, point2->Vy, point2->Vz,
+                        tolerances) == CSMFALSE)
+    {
+        return CSMFALSE;
+    }
+    else
+    {
+        return CSMTRUE;
+    }
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep_path)
+{
+    struct csmsolid_t *solid;
+    const struct i_sweep_point_t *initial_point, *end_point;
+    struct csmtolerance_t *tolerances;
+    unsigned long i, no_points;
+    unsigned long start_id_of_new_element;
+    struct csmface_t *bottom_face_first_solid, *top_face_solid_prev;
+    
+    assert_no_null(sweep_path);
+    no_points = csmarrayc_count_st(sweep_path->sweep_points, i_sweep_point_t);
+    assert(no_points >= 2);
+    
+    tolerances = csmtolerance_new();
+
+    solid = NULL;
+    start_id_of_new_element = 0;
+    
+    bottom_face_first_solid = NULL;
+    top_face_solid_prev = NULL;
+    
+    for (i = 0; i < no_points - 1; i++)
+    {
+        const struct i_sweep_point_t *point1, *point2;
+        double dot_product;
+        struct csmsolid_t *solid_i;
+        struct csmface_t *bottom_face_i, *top_face_i;
+        
+        point1 = csmarrayc_get_const_st(sweep_path->sweep_points, i, i_sweep_point_t);
+        assert_no_null(point1);
+        
+        point2 = csmarrayc_get_const_st(sweep_path->sweep_points, i + 1, i_sweep_point_t);
+        assert_no_null(point2);
+        
+        dot_product = csmmath_dot_product3D(point2->Ux, point2->Uy, point2->Uz, point1->Ux, point1->Uy, point1->Uz);
+        assert(dot_product > 0.);
+
+        solid_i = i_create_solid_from_shape_without_holes(
+                        point2->shape,
+                        point2->Xo, point2->Yo, point2->Zo,
+                        point2->Ux, point2->Uy, point2->Uz, point2->Vx, point2->Vy, point2->Vz,
+                        point1->shape,
+                        point1->Xo, point1->Yo, point1->Zo,
+                        point1->Ux, point1->Uy, point1->Uz, point1->Vx, point1->Vy, point1->Vz,
+                        start_id_of_new_element,
+                        &bottom_face_i, &top_face_i);
+        
+        if (i == 0)
+        {
+            solid = solid_i;
+            bottom_face_first_solid = bottom_face_i;
+        }
+        else
+        {
+            csmsolid_merge_solids(solid, solid_i);
+            
+            csmloopglue_merge_faces(top_face_solid_prev, &bottom_face_i, tolerances);
+            csmsolid_free(&solid_i);
+        }
+        
+        top_face_solid_prev = top_face_i;
+    }
+    
+    initial_point = csmarrayc_get_const_st(sweep_path->sweep_points, 0, i_sweep_point_t);
+    end_point = csmarrayc_get_const_st(sweep_path->sweep_points, no_points - 1, i_sweep_point_t);
+    
+    if (i_points_are_equal(initial_point, end_point, tolerances) == CSMTRUE)
+        csmloopglue_merge_faces(top_face_solid_prev, &bottom_face_first_solid, tolerances);
+    
+    csmsolid_redo_geometric_face_data(solid);
+
+    return solid;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -61,6 +61,21 @@ CONSTRUCTOR(static struct i_polygon_t *, i_new_polygon, (csmArrPoint2D **points,
 
 // --------------------------------------------------------------------------------
 
+CONSTRUCTOR(static struct i_polygon_t *, i_copy_polygon, (const struct i_polygon_t *polygon))
+{
+    csmArrPoint2D *points;
+    csmArrPoint3D *normals;
+    
+    assert_no_null(polygon);
+    
+    points = csmArrPoint2D_copy(polygon->points);
+    normals = csmArrPoint3D_copy(polygon->normals);
+	
+	return i_new_polygon(&points, &normals);
+}
+
+// --------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct i_polygon_t *, i_new_empty_polygon, (void))
 {
 	csmArrPoint2D *points;
@@ -104,6 +119,19 @@ struct csmshape2d_t *csmshape2d_new(void)
 	csmArrayStruct(i_polygon_t) *polygons;
 	
 	polygons = csmarrayc_new_st_array(0, i_polygon_t);
+	return i_crea(&polygons);
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmshape2d_t *csmshape2d_copy(const struct csmshape2d_t *shape2d)
+{
+	csmArrayStruct(i_polygon_t) *polygons;
+	
+    assert_no_null(shape2d);
+    
+    polygons = csmarrayc_copy_st_array(shape2d->polygons, i_polygon_t, i_copy_polygon);
+    
 	return i_crea(&polygons);
 }
 
