@@ -47,6 +47,12 @@ void csmvertex_vector_from_vertex1_to_vertex2(
                         const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2,
                         double *Ux, double *Uy, double *Uz);
 
+void csmvertex_implicit_plane_equation_given_3_vertexs(
+                        const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, const struct csmvertex_t *vertex3,
+                        double *A, double *B, double *C, double *D);
+
+double csmvertex_signed_distance_to_plane(const struct csmvertex_t *vertex, double A, double B, double C, double D);
+
 void csmvertex_get_coords_not_dropped(
                         const struct csmvertex_t *vertex,
                         enum csmmath_dropped_coord_t dropped_coord,

@@ -31,6 +31,13 @@ DLL_RGWB CONSTRUCTOR(struct csmsweep_path_t *, csmsweep_new_elliptical_plane_pat
                                 double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                                 const struct csmshape2d_t *shape));
 
+DLL_RGWB CONSTRUCTOR(struct csmsweep_path_t *, csmsweep_new_helix_plane_path, (
+                                double x, double y, double radius, unsigned long no_points_circle,
+                                double one_helix_heigth, unsigned long no_helix,
+                                double Xo, double Yo, double Zo,
+                                double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                                const struct csmshape2d_t *shape));
+
 DLL_RGWB void csmsweep_free_path(struct csmsweep_path_t **sweep_path);
 
 DLL_RGWB void csmsweep_append_point_to_path(

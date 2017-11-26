@@ -138,6 +138,13 @@ static void i_append_new_vv_inters(
         
         *did_add_intersection = CSMTRUE;
         
+        if (vertex_a->id == 10105 || vertex_b->id == 10105)
+        {
+            double a;
+            
+            a = 0.;
+        }
+        
         csmvertex_set_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
         csmvertex_set_mask_attrib(vertex_b, CSMVERTEX_MASK_SETOP_COMMON_VERTEX);
     

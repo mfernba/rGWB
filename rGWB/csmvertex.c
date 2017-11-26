@@ -200,6 +200,38 @@ void csmvertex_vector_from_vertex1_to_vertex2(
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmvertex_implicit_plane_equation_given_3_vertexs(
+                        const struct csmvertex_t *vertex1, const struct csmvertex_t *vertex2, const struct csmvertex_t *vertex3,
+                        double *A, double *B, double *C, double *D)
+{
+    double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
+    
+    assert_no_null(vertex1);
+    assert_no_null(vertex2);
+    assert_no_null(vertex3);
+
+    csmmath_vector_between_two_3D_points(vertex1->x, vertex1->y, vertex1->z, vertex2->x, vertex2->y, vertex2->z, &Ux1, &Uy1, &Uz1);
+    csmmath_make_unit_vector3D(&Ux1, &Uy1, &Uz1);
+    
+    csmmath_vector_between_two_3D_points(vertex1->x, vertex1->y, vertex1->z, vertex3->x, vertex3->y, vertex3->z, &Ux2, &Uy2, &Uz2);
+    csmmath_make_unit_vector3D(&Ux2, &Uy2, &Uz2);
+    
+    csmmath_implicit_plane_equation(
+                        vertex1->x, vertex1->y, vertex1->z,
+                        Ux1, Uy1, Uz1, Ux2, Uy2, Uz2,
+                        A, B, C, D);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+double csmvertex_signed_distance_to_plane(const struct csmvertex_t *vertex, double A, double B, double C, double D)
+{
+    assert_no_null(vertex);
+    return csmmath_signed_distance_point_to_plane(vertex->x, vertex->y, vertex->z, A, B, C, D);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmvertex_get_coords_not_dropped(
                         const struct csmvertex_t *vertex,
                         enum csmmath_dropped_coord_t dropped_coord,

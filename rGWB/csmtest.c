@@ -3649,6 +3649,247 @@ static void i_test_sweep_path1(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_sweep_path2(void)
+{
+    struct csmshape2d_t *shape;
+    unsigned long idx_polygon;
+    struct csmsweep_path_t *sweep_path;
+    struct csmsolid_t *solid;
+    
+    //shape = csmbasicshape2d_rectangular_shape(0.05, 1.);
+    shape = csmshape2d_new();
+    csmshape2d_new_polygon(shape, &idx_polygon);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon, -1., -1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon, -0.95, -1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.05, 0.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.05, 1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.0, 1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.0, 0.25);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  -0.1, 0.25);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  -0.1, 0.0);
+    
+    //shape = csmbasicshape2d_L_shape(1., 0.5);
+    sweep_path = csmsweep_new_elliptical_plane_path(0., 0., 1., 1., 32, 0., 0., 0., 1., 0., 0., 0., 1., 0., shape);
+    
+    solid = csmsweep_create_from_path(sweep_path);
+    i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        struct csmsolid_t *solid_aux;
+        struct csmshape2d_t *block_shape;
+        struct csmsolid_t *block_solid;
+        csmArrayStruct(csmsolid_t) *shells;
+        
+        block_shape = csmbasicshape2d_rectangular_shape(5., 5.);
+        block_solid = csmsweep_create_solid_from_shape(block_shape, 0., 0., 1., 1., 0., 0., 0., 1., 0., block_shape, 0., 0., -1., 1., 0., 0., 0., 1., 0.);
+        
+        solid_aux = solid;
+        solid = csmsetop_difference_A_minus_B(block_solid, solid);
+        csmsolid_free(&solid_aux);
+        
+        shells = csmexplode_explode_shells(solid);
+        solid_aux = solid;
+        solid = csmsolid_duplicate(csmarrayc_get_st(shells, 0, csmsolid_t));
+        csmsolid_free(&solid_aux);
+        csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
+        
+        csmdebug_set_viewer_results(solid, NULL);
+        csmdebug_show_viewer();
+        
+        csmshape2d_free(&block_shape);
+        csmsolid_free(&block_solid);
+    }
+    
+    csmsweep_free_path(&sweep_path);
+    csmshape2d_free(&shape);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_sweep_path3(void)
+{
+    struct csmshape2d_t *shape;
+    unsigned long idx_polygon;
+    struct csmsweep_path_t *sweep_path;
+    struct csmsolid_t *solid;
+    
+    //shape = csmbasicshape2d_rectangular_shape(0.05, 1.);
+    shape = csmshape2d_new();
+    csmshape2d_new_polygon(shape, &idx_polygon);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon, -1., -1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon, -0.95, -1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.05, 0.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.05, 1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.0, 1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.0, 0.25);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  -0.1, 0.25);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  -0.1, 0.0);
+    
+    //shape = csmbasicshape2d_L_shape(1., 0.5);
+    sweep_path = csmsweep_new_elliptical_plane_path(0., 0., 1., 1., 32, 0., 0., 0., 1., 0., 0., 0., 1., 0., shape);
+    
+    solid = csmsweep_create_from_path(sweep_path);
+    i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        struct csmsolid_t *solid_aux;
+        struct csmshape2d_t *block_shape;
+        struct csmsolid_t *block_solid;
+        
+        block_shape = csmbasicshape2d_rectangular_shape(5., 5.);
+        block_solid = csmsweep_create_solid_from_shape(block_shape, 0., 0., 1., 1., 0., 0., 0., 1., 0., block_shape, 0., 0., -1., 1., 0., 0., 0., 1., 0.);
+        
+        solid_aux = solid;
+        solid = csmsetop_intersection_A_and_B(block_solid, solid);
+        csmsolid_free(&solid_aux);
+        
+        csmdebug_set_viewer_results(solid, NULL);
+        csmdebug_show_viewer();
+        
+        csmshape2d_free(&block_shape);
+        csmsolid_free(&block_solid);
+    }
+    
+    csmsweep_free_path(&sweep_path);
+    csmshape2d_free(&shape);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_sweep_path4(void)
+{
+    struct csmshape2d_t *shape;
+    unsigned long idx_polygon;
+    struct csmsweep_path_t *sweep_path;
+    struct csmsolid_t *solid;
+    
+    shape = csmbasicshape2d_rectangular_shape(0.05, 0.5);
+    /*shape = csmshape2d_new();
+    csmshape2d_new_polygon(shape, &idx_polygon);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon, -1., -1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon, -0.95, -1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.05, 0.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.05, 1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.0, 1.);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  0.0, 0.25);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  -0.1, 0.25);
+    csmshape2d_append_point_to_polygon(shape, idx_polygon,  -0.1, 0.0);
+    */
+    
+    //shape = csmbasicshape2d_L_shape(1., 0.5);
+    sweep_path = csmsweep_new_helix_plane_path(
+                        0., 0., 1., 32,
+                        3., 5,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        shape);
+    
+    solid = csmsweep_create_from_path(sweep_path);
+    
+    //solid = csmsweep_create_solid_from_shape(shape, 0., 0., 1., 0.707, 0.707, 0., 0.707, -0.707, 0., shape, 0., 0., -1., 1., 0., 0., 0., 1., 0.);
+    i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    {
+        struct csmsolid_t *solid_aux;
+        struct csmshape2d_t *block_shape;
+        struct csmsolid_t *block_solid;
+        
+        block_shape = csmbasicshape2d_rectangular_shape(5., 5.);
+        block_solid = csmsweep_create_solid_from_shape(block_shape, 0., 0., 1., 1., 0., 0., 0., 1., 0., block_shape, 0., 0., -1., 1., 0., 0., 0., 1., 0.);
+        
+        solid_aux = solid;
+        solid = csmsetop_intersection_A_and_B(block_solid, solid);
+        csmsolid_free(&solid_aux);
+        
+        csmdebug_set_viewer_results(solid, NULL);
+        csmdebug_show_viewer();
+        
+        csmshape2d_free(&block_shape);
+        csmsolid_free(&block_solid);
+    }
+    
+    csmsweep_free_path(&sweep_path);
+    csmshape2d_free(&shape);
+}
+
+// ------------------------------------------------------------------------------------------
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_sweep_path5(void)
+{
+    double factor;
+    double bolt_diameter, bolt_radius, bolt_thread_length, no_threads;
+    unsigned long no_points_circle;
+    struct csmsolid_t *solid_thread;
+    struct csmsolid_t *solid;
+    struct csmsolid_t *solid_aux;
+    
+    factor = 10.;
+    bolt_diameter = factor * 0.05;
+    bolt_radius = factor * 0.5 * bolt_diameter;
+    bolt_thread_length = factor * 0.02;
+    no_threads = 10;
+    
+    no_points_circle = 8;
+
+    {
+        struct csmshape2d_t *shape;
+        unsigned long idx_polygon;
+        struct csmsweep_path_t *sweep_path;
+        
+        shape = csmshape2d_new();
+        csmshape2d_new_polygon(shape, &idx_polygon);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, -factor * 0.0005, 0.);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., -factor * 0.0005);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., factor * 0.0005);
+        
+        sweep_path = csmsweep_new_helix_plane_path(
+                        0., 0., bolt_radius, no_points_circle,
+                        factor * 0.0015, no_threads,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        shape);
+    
+        solid_thread = csmsweep_create_from_path(sweep_path);
+        i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_thread);
+        
+        csmdebug_set_viewer_results(solid_thread, NULL);
+        csmdebug_show_viewer();
+        
+        csmsweep_free_path(&sweep_path);
+        csmshape2d_free(&shape);
+    }
+    
+    {
+        struct csmshape2d_t *shape;
+        
+        shape = csmbasicshape2d_circular_shape(bolt_radius, no_points_circle);
+        solid = csmsweep_create_solid_from_shape(shape, 0., 0., bolt_thread_length, 1., 0., 0., 0., 1., 0., shape, 0., 0., -factor * 0.001, 1., 0., 0., 0., 1., 0.);
+        i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid);
+        
+        csmshape2d_free(&shape);
+    }
+
+    solid_aux = solid;
+    solid = csmsetop_union_A_and_B(solid, solid_thread);
+    csmsolid_free(&solid_aux);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+        
+    csmsolid_free(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -3729,9 +3970,14 @@ void csmtest_test(void)
     
     i_test_ellipsoid();
     i_test_paraboloid_one_sheet();
-    */
-    
+     
     i_test_sweep_path1();
+    i_test_sweep_path2();
+    i_test_sweep_path3();
+    i_test_sweep_path4();
+    */
+    i_test_sweep_path4();
+    //i_test_sweep_path5();
     
     csmviewer_free(&viewer);
 }

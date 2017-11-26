@@ -39,6 +39,7 @@
 #include "csmArrPoint2D.h"
 #include "csmArrPoint3D.h"
 #include "csmtolerance.inl"
+#include "csmsubdvfaces.inl"
 
 csmArrayStruct(csmhedge_t);
 
@@ -53,6 +54,7 @@ struct i_sweep_point_t
 struct csmsweep_path_t
 {
     csmArrayStruct(i_sweep_point_t) *sweep_points;
+    CSMBOOL needs_subdivide_faces;
 };
 
 // --------------------------------------------------------------------------------
@@ -575,13 +577,14 @@ static void i_free_sweep_point(struct i_sweep_point_t **sweep_point)
 
 // --------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsweep_path_t *, i_new_sweeppath, (csmArrayStruct(i_sweep_point_t) **sweep_points))
+CONSTRUCTOR(static struct csmsweep_path_t *, i_new_sweeppath, (csmArrayStruct(i_sweep_point_t) **sweep_points, CSMBOOL needs_subdivide_faces))
 {
     struct csmsweep_path_t *sweep_path;
     
     sweep_path = MALLOC(struct csmsweep_path_t);
     
     sweep_path->sweep_points = ASIGNA_PUNTERO_PP_NO_NULL(sweep_points, csmArrayStruct(i_sweep_point_t));
+    sweep_path->needs_subdivide_faces = needs_subdivide_faces;
     
     return sweep_path;
 }
@@ -591,10 +594,12 @@ CONSTRUCTOR(static struct csmsweep_path_t *, i_new_sweeppath, (csmArrayStruct(i_
 struct csmsweep_path_t *csmsweep_new_empty_path(void)
 {
     csmArrayStruct(i_sweep_point_t) *sweep_points;
+    CSMBOOL needs_subdivide_faces;
     
     sweep_points = csmarrayc_new_st_array(0, i_sweep_point_t);
+    needs_subdivide_faces = CSMTRUE;
     
-    return i_new_sweeppath(&sweep_points);
+    return i_new_sweeppath(&sweep_points, needs_subdivide_faces);
 }
 
 // --------------------------------------------------------------------------------
@@ -612,6 +617,7 @@ struct csmsweep_path_t *csmsweep_new_elliptical_plane_path(
     unsigned long i, no_points;
     csmArrayStruct(i_sweep_point_t) *sweep_points;
     const struct i_sweep_point_t *initial_point, *initial_point_copy;
+    CSMBOOL needs_subdivide_faces;
     
     csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx, &Wy, &Wz);
     
@@ -680,13 +686,126 @@ struct csmsweep_path_t *csmsweep_new_elliptical_plane_path(
     
     csmarrayc_append_element_st(sweep_points, initial_point_copy, i_sweep_point_t);
     
-    sweep_path = i_new_sweeppath(&sweep_points);
+    needs_subdivide_faces = CSMFALSE;
+    sweep_path = i_new_sweeppath(&sweep_points, needs_subdivide_faces);
     
     csmArrPoint2D_free(&points);
     
     return sweep_path;
 }
 
+// --------------------------------------------------------------------------------
+
+struct csmsweep_path_t *csmsweep_new_helix_plane_path(
+                                double x, double y, double radius, unsigned long no_points_circle,
+                                double one_helix_heigth, unsigned long no_helix,
+                                double Xo, double Yo, double Zo,
+                                double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                                const struct csmshape2d_t *shape)
+{
+    double Wx, Wy, Wz;
+    unsigned long i;
+    unsigned long no_points_helix;
+    double alpha, incr_alpha, current_heigth, incr_heigth;
+    csmArrayStruct(i_sweep_point_t) *sweep_points;
+    double Ux_prev, Uy_prev, Uz_prev;
+    CSMBOOL needs_subdivide_faces;
+    
+    assert(radius > 0.);
+    assert(no_points_circle > 0);
+    assert(one_helix_heigth > 0.);
+    assert(no_helix > 0);
+    
+    csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx, &Wy, &Wz);
+    
+    sweep_points = csmarrayc_new_st_array(0, i_sweep_point_t);
+    
+    alpha = 0.;
+    no_points_helix = no_points_circle + 1;
+    incr_alpha = 2. * CSMMATH_PI / no_points_circle;
+    
+    current_heigth = 0;;
+    incr_heigth = one_helix_heigth / no_points_circle;
+
+    Ux_prev = 0.;
+    Uy_prev = 0.;
+    Uz_prev = 0.;
+    
+    for (i = 0; i < no_helix; i++)
+    {
+        unsigned long j;
+        
+        for (j = 0; j < no_points_helix; j++)
+        {
+            double x_i_2d, y_i_2d, z_i_2d;
+            double alpha_i_next, x_2d_next, y_2d_next, z_2d_next;
+            double x_i_3d, y_i_3d, z_i_3d, x_i_3d_next, y_i_3d_next, z_i_3d_next;
+            double Ux_to_next, Uy_to_next, Uz_to_next;
+            double Ux_point, Uy_point, Uz_point, Vx_point, Vy_point, Vz_point, Wx_point, Wy_point, Wz_point;
+            struct csmshape2d_t *shape2d_copy;
+            struct i_sweep_point_t *sweep_point;
+            
+            x_i_2d = radius * csmmath_cos(alpha);
+            y_i_2d = radius * csmmath_sin(alpha);
+            z_i_2d = current_heigth;
+            
+            alpha_i_next = alpha + incr_alpha;
+            x_2d_next = radius * csmmath_cos(alpha_i_next);
+            y_2d_next = radius * csmmath_sin(alpha_i_next);
+            z_2d_next = current_heigth + incr_heigth;
+            
+            csmgeom_coords_3d_local_to_global(
+                                Xo, Yo, Zo,
+                                Ux, Uy, Uz, Vx, Vy, Vz,
+                                x_i_2d, y_i_2d, z_i_2d,
+                                &x_i_3d, &y_i_3d, &z_i_3d);
+
+            csmgeom_coords_3d_local_to_global(
+                                Xo, Yo, Zo,
+                                Ux, Uy, Uz, Vx, Vy, Vz,
+                                x_2d_next, y_2d_next, z_2d_next,
+                                &x_i_3d_next, &y_i_3d_next, &z_i_3d_next);
+
+            csmmath_vector_between_two_3D_points(x_i_3d, y_i_3d, z_i_3d, x_i_3d_next, y_i_3d_next, z_i_3d_next, &Ux_to_next, &Uy_to_next, &Uz_to_next);
+            csmmath_make_unit_vector3D(&Ux_to_next, &Uy_to_next, &Uz_to_next);
+            
+            if (i == 0 && j == 0)
+            {
+                Ux_point = Ux_to_next;
+                Uy_point = Uy_to_next;
+                Uz_point = Uz_to_next;
+                
+                csmmath_cross_product3D(Wx, Wy, Wz, Ux_point, Uy_point, Uz_point, &Vx_point, &Vy_point, &Vz_point);
+            }
+            else
+            {
+                Vx_point = 0.5 * (Ux_to_next - Ux_prev);
+                Vy_point = 0.5 * (Uy_to_next - Uy_prev);
+                Vz_point = 0.5 * (Uz_to_next - Uz_prev);
+            }
+            
+            csmmath_make_unit_vector3D(&Vx_point, &Vy_point, &Vz_point);
+
+            csmmath_cross_product3D(Ux_to_next, Uy_to_next, Uz_to_next, Vx_point, Vy_point, Vz_point, &Wx_point, &Wy_point, &Wz_point);
+            csmmath_make_unit_vector3D(&Wx_point, &Wy_point, &Wz_point);
+
+            shape2d_copy = csmshape2d_copy(shape);
+            
+            sweep_point = i_new_sweep_point(x_i_3d, y_i_3d, z_i_3d, Vx_point, Vy_point, Vz_point, Wx_point, Wy_point, Wz_point, &shape2d_copy);
+            csmarrayc_append_element_st(sweep_points, sweep_point, i_sweep_point_t);
+            
+            alpha += incr_alpha;
+            current_heigth += incr_heigth;
+            
+            Ux_prev = Ux_to_next;
+            Uy_prev = Uy_to_next;
+            Uz_prev = Uz_to_next;
+        }
+    }
+    
+    needs_subdivide_faces = CSMTRUE;
+    return i_new_sweeppath(&sweep_points, needs_subdivide_faces);
+}
 // --------------------------------------------------------------------------------
 
 void csmsweep_free_path(struct csmsweep_path_t **sweep_path)
@@ -713,6 +832,8 @@ void csmsweep_append_point_to_path(
     
     sweep_point = i_new_sweep_point(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, shape);
     csmarrayc_append_element_st(sweep_path->sweep_points, sweep_point, i_sweep_point_t);
+    
+    sweep_path->needs_subdivide_faces = CSMTRUE;
 }
 
 // --------------------------------------------------------------------------------
@@ -721,8 +842,6 @@ static CSMBOOL i_points_are_equal(
                         const struct i_sweep_point_t *point1, const struct i_sweep_point_t *point2,
                         const struct csmtolerance_t *tolerances)
 {
-    unsigned long no_points;
-
     assert_no_null(point1);
     assert_no_null(point2);
     
@@ -779,7 +898,6 @@ struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep
     for (i = 0; i < no_points - 1; i++)
     {
         const struct i_sweep_point_t *point1, *point2;
-        double dot_product;
         struct csmsolid_t *solid_i;
         struct csmface_t *bottom_face_i, *top_face_i;
         
@@ -789,9 +907,6 @@ struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep
         point2 = csmarrayc_get_const_st(sweep_path->sweep_points, i + 1, i_sweep_point_t);
         assert_no_null(point2);
         
-        dot_product = csmmath_dot_product3D(point2->Ux, point2->Uy, point2->Uz, point1->Ux, point1->Uy, point1->Uz);
-        assert(dot_product > 0.);
-
         solid_i = i_create_solid_from_shape_without_holes(
                         point2->shape,
                         point2->Xo, point2->Yo, point2->Zo,
@@ -823,6 +938,9 @@ struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep
     
     if (i_points_are_equal(initial_point, end_point, tolerances) == CSMTRUE)
         csmloopglue_merge_faces(top_face_solid_prev, &bottom_face_first_solid, tolerances);
+    
+    if (sweep_path->needs_subdivide_faces == CSMTRUE)
+        csmsubdvfaces_subdivide_faces(solid);
     
     csmsolid_redo_geometric_face_data(solid);
 
