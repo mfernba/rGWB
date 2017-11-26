@@ -48,4 +48,27 @@ void csmgeom_project_coords_3d_to_2d(
 	y_2d_plano = x_2d_loc * Vx + y_2d_loc * Vy + z_2d_loc * Vz;
 	
 	*x_2d = x_2d_plano;
-	*y_2d = y_2d_plano;}
+	*y_2d = y_2d_plano;    
+}
+
+//-------------------------------------------------------------------------------------------
+
+void csmgeom_coords_3d_local_to_global(
+                        double Xo, double Yo, double Zo,
+						double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+						double x_3d_local, double y_3d_local, double z_3d_local,
+						double *x_3d, double *y_3d, double *z_3d)
+{
+	double Wx, Wy, Wz;
+    
+	assert_no_null(x_3d);
+	assert_no_null(y_3d);
+	assert_no_null(z_3d);
+	
+	csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx, &Wy, &Wz);
+    
+	*x_3d = Xo + x_3d_local * Ux + y_3d_local * Vx + z_3d_local * Wx;
+	*y_3d = Yo + x_3d_local * Uy + y_3d_local * Vy + z_3d_local * Wy;
+	*z_3d = Zo + y_3d_local * Uz + y_3d_local * Vz + z_3d_local * Wz;
+    
+}
