@@ -18,7 +18,7 @@ void csmvertex_debug_print_debug_info(struct csmvertex_t *vertex)
 {
     assert_no_null(vertex);
     
-    csmdebug_print_debug_info("\tVertex %6lu\t%6.3lf\t%6.3lf\t%6.3lf [%lu]", vertex->id, vertex->x, vertex->y, vertex->z, vertex->algorithm_attrib_mask);
+    csmdebug_print_debug_info("\tVertex %6lu\t%6.6lf\t%6.6lf\t%6.6lf [%lu]", vertex->id, vertex->x, vertex->y, vertex->z, vertex->algorithm_attrib_mask);
     
     if (vertex->algorithm_attrib_mask & CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP)
         csmdebug_print_debug_info(" [H] ");

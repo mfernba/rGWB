@@ -60,7 +60,7 @@ void csmloop_debug_print_info_debug(
         if (edge == NULL)
         {
             csmdebug_print_debug_info(
-                "\t\t(He %4lu [edge (null)], %4lu, %6.3f, %6.3f, %6.3f, %d)\n",
+                "\t\t(He %4lu [edge (null)], %4lu, %6.6f, %6.6f, %6.6f, %d)\n",
                 csmnode_id(CSMNODE(iterator)),
                 csmnode_id(CSMNODE(vertex)),
                 x, y, z,
@@ -86,7 +86,7 @@ void csmloop_debug_print_info_debug(
             if (he_mate != NULL)
             {
                 csmdebug_print_debug_info(
-                    "\t\t(%3s %4lu [edge %6lu. Mate: %4lu], %4lu, %6.3f, %6.3f, %6.3f, %d) %s\n",
+                    "\t\t(%3s %4lu [edge %6lu. Mate: %4lu], %4lu, %6.6f, %6.6f, %6.6f, %d) %s\n",
                     he_position,
                     csmnode_id(CSMNODE(iterator)),
                     csmnode_id(CSMNODE(edge)),
