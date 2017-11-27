@@ -27,6 +27,7 @@ csmArrayStruct(i_inters_sectors_t);
 
 struct csmsetop_vtxvtx_inters_t
 {
+    unsigned long intersection_id;
     struct csmvertex_t *vertex_a, *vertex_b;
 };
 
@@ -67,11 +68,13 @@ enum i_nonmanifold_intersect_sequence_t
 
 // ------------------------------------------------------------------------------------------
 
-struct csmsetop_vtxvtx_inters_t *csmsetop_vtxvtx_create_inters(struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b)
+struct csmsetop_vtxvtx_inters_t *csmsetop_vtxvtx_create_inters(unsigned long intersection_id, struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b)
 {
     struct csmsetop_vtxvtx_inters_t *vv_inters;
     
     vv_inters = MALLOC(struct csmsetop_vtxvtx_inters_t);
+    
+    vv_inters->intersection_id = intersection_id;
     
     vv_inters->vertex_a = vertex_a;
     vv_inters->vertex_b = vertex_b;

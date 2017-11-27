@@ -28,6 +28,8 @@
 
 struct csmsetop_vtxfacc_inters_t
 {
+    unsigned long intersection_id;
+    
     struct csmvertex_t *vertex;
     struct csmface_t *face;
 };
@@ -40,11 +42,13 @@ struct i_neighborhood_t
 
 // ------------------------------------------------------------------------------------------
 
-struct csmsetop_vtxfacc_inters_t *csmsetop_vtxfacc_create_inters(struct csmvertex_t *vertex, struct csmface_t *face)
+struct csmsetop_vtxfacc_inters_t *csmsetop_vtxfacc_create_inters(unsigned long intersection_id, struct csmvertex_t *vertex, struct csmface_t *face)
 {
     struct csmsetop_vtxfacc_inters_t *vf_inters;
     
     vf_inters = MALLOC(struct csmsetop_vtxfacc_inters_t);
+    
+    vf_inters->intersection_id = intersection_id;
     
     vf_inters->vertex = vertex;
     vf_inters->face = face;

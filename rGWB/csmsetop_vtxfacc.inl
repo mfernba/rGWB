@@ -4,7 +4,7 @@
 
 // Intersections...
 
-CONSTRUCTOR(struct csmsetop_vtxfacc_inters_t *, csmsetop_vtxfacc_create_inters, (struct csmvertex_t *vertex, struct csmface_t *face));
+CONSTRUCTOR(struct csmsetop_vtxfacc_inters_t *, csmsetop_vtxfacc_create_inters, (unsigned long intersection_id, struct csmvertex_t *vertex, struct csmface_t *face));
 
 void csmsetop_vtxfacc_free_inters(struct csmsetop_vtxfacc_inters_t **vf_inters);
 

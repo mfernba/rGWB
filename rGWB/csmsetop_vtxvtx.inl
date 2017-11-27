@@ -3,7 +3,7 @@
 
 // Intersections...
 
-CONSTRUCTOR(struct csmsetop_vtxvtx_inters_t *, csmsetop_vtxvtx_create_inters, (struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b));
+CONSTRUCTOR(struct csmsetop_vtxvtx_inters_t *, csmsetop_vtxvtx_create_inters, (unsigned long intersection_id, struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b));
 
 void csmsetop_vtxvtx_free_inters(struct csmsetop_vtxvtx_inters_t **vv_inters);
 
