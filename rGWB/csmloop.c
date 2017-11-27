@@ -408,15 +408,20 @@ static CSMBOOL i_is_point_on_loop_boundary(
                         tolerance,
                         &t) == CSMTRUE)
         {
+            double segment_length, relative_tolerance;
+            
             is_point_on_loop_boundary = CSMTRUE;
             
-            if (csmmath_compare_doubles(t, 0.0, tolerance) == CSMCOMPARE_EQUAL)
+            segment_length = csmmath_distance_3D(x_vertex, y_vertex, z_vertex, x_next_vertex, y_next_vertex, z_next_vertex);
+            relative_tolerance = tolerance / segment_length;
+            
+            if (csmmath_compare_doubles(t, 0.0, relative_tolerance) == CSMCOMPARE_EQUAL)
             {
                 hit_vertex_loc = vertex;
                 hit_hedge_loc = NULL;
                 t_relative_to_hit_hedge_loc = 0.0;
             }
-            else if (csmmath_compare_doubles(t, 1.0, tolerance) == CSMCOMPARE_EQUAL)
+            else if (csmmath_compare_doubles(t, 1.0, relative_tolerance) == CSMCOMPARE_EQUAL)
             {
                 hit_vertex_loc = next_vertex;
                 hit_hedge_loc = NULL;
@@ -508,7 +513,7 @@ CSMBOOL csmloop_is_point_inside_loop(
     if (i_is_point_on_loop_boundary(
                         loop->ledge,
                         x, y, z,
-                        csmtolerance_point_in_loop_boundary(tolerances),
+                        csmtolerance_equal_coords(tolerances),
                         &hit_vertex_loc,
                         &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == CSMTRUE)
     {

@@ -14,8 +14,6 @@ double csmtolerance_dot_product_parallel_vectors(const struct csmtolerance_t *to
 
 double csmtolerance_coplanarity(const struct csmtolerance_t *tolerance);
 
-double csmtolerance_relative_position_over_edge(const struct csmtolerance_t *tolerance);
-
 double csmtolerance_null_vector(const struct csmtolerance_t *tolerance);
 
 double csmtolerance_bbox_absolute_tolerance(const struct csmtolerance_t *tolerance);
