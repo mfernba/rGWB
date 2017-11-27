@@ -430,43 +430,12 @@ static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *s
 
 // ------------------------------------------------------------------------------------------
 
-static struct csmhedge_t *i_he_mate(struct csmhedge_t *hedge)
-{
-    struct csmedge_t *edge;
-    
-    edge = csmhedge_edge(hedge);
-    return csmedge_mate(edge, hedge);
-}
-
-// ------------------------------------------------------------------------------------------
-
 static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
 {
     struct csmloop_t *loop;
     
     loop = csmhedge_loop(hedge);
     return csmloop_lface(loop);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static void i_add_he_face_normal(struct csmhedge_t *he, double *Nx, double *Ny, double *Nz, unsigned long *num_faces)
-{
-    struct csmface_t *face;
-    double A, B, C, D;
-    
-    assert_no_null(Nx);
-    assert_no_null(Ny);
-    assert_no_null(Nz);
-    assert_no_null(num_faces);
-    
-    face = i_face_from_hedge(he);
-    csmface_face_equation(face, &A, &B, &C, &D);
-    
-    *Nx += A;
-    *Ny += B;
-    *Nz += C;
-    (*num_faces)++;
 }
 
 // ----------------------------------------------------------------------------------------------------

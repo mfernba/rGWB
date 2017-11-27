@@ -89,11 +89,13 @@ CSMBOOL csmmath_equal_coords(
                         double x2, double y2, double z2,
                         double epsilon)
 {
-    double diff;
+    double diff_x, diff_y, diff_z;
     
-    diff = CSMMATH_CUAD(x1 - x2) + CSMMATH_CUAD(y1 - y2) + CSMMATH_CUAD(z1 - z2);
-
-    if (csmmath_compare_doubles(diff, 0.0, CSMMATH_CUAD(epsilon)) == CSMCOMPARE_EQUAL)
+    diff_x = csmmath_fabs(x1 - x2);
+    diff_y = csmmath_fabs(y1 - y2);
+    diff_z = csmmath_fabs(z1 - z2);
+    
+    if (diff_x < epsilon && diff_y < epsilon && diff_z < epsilon)
         return CSMTRUE;
     else
         return CSMFALSE;

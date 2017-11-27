@@ -112,20 +112,6 @@ static void i_classify_point_respect_to_plane(
 
 // ----------------------------------------------------------------------------------------------------
 
-static double i_classification_tolerance(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
-{
-    struct csmface_t *face_hedge;
-    double face_tolerance, general_tolerance;
-    
-    face_hedge = csmopbas_face_from_hedge(hedge);
-    face_tolerance = csmface_tolerace(face_hedge);
-    general_tolerance = csmtolerance_equal_coords(tolerances);
-    
-    return CSMMATH_MAX(face_tolerance, general_tolerance);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 static void i_classify_hedge_respect_to_plane(
                         struct csmhedge_t *hedge,
                         double A, double B, double C, double D,
@@ -137,7 +123,7 @@ static void i_classify_hedge_respect_to_plane(
     struct csmvertex_t *vertex_loc;
     double x_loc, y_loc, z_loc;
     
-    tolerance = i_classification_tolerance(hedge, tolerances);
+    tolerance = csmtolerance_default_point_on_plane(tolerances);
 
     vertex_loc = csmhedge_vertex(hedge);
     csmvertex_get_coordenadas(vertex_loc, &x_loc, &y_loc, &z_loc);
@@ -306,7 +292,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
             hedge_neighborhood_wide = i_create_neighborhod(hedge_iterator, hedge_neighborhood->position);
             csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood_wide, i_neighborhood_t);
             
-            tolerance = i_classification_tolerance(hedge_iterator, tolerances);
+            tolerance = csmtolerance_point_on_plane(tolerances);
             i_classify_point_respect_to_plane(x_vertex + Ux_bisec, y_vertex + Uy_bisec, z_vertex + Uz_bisec, A, B, C, D, tolerance, NULL, &cl_resp_plane);
             hedge_neighborhood->position = cl_resp_plane;
         }
@@ -324,7 +310,7 @@ static void i_reclassify_on_sector_vertex_neighborhood(
                         struct i_neighborhood_t *hedge_neighborhood,
                         struct i_neighborhood_t *next_hedge_neighborhood,
                         double A, double B, double C, double D,
-                        double tolerance_coplanarity)
+                        const struct csmtolerance_t *tolerances)
 {
     struct csmface_t *common_face;
     CSMBOOL same_orientation;
@@ -334,7 +320,7 @@ static void i_reclassify_on_sector_vertex_neighborhood(
     
     common_face = csmsetopcom_face_for_hedge_sector(hedge_neighborhood->hedge, next_hedge_neighborhood->hedge);
     
-    if (csmface_is_coplanar_to_plane(common_face, A, B, C, D, tolerance_coplanarity, &same_orientation) == CSMTRUE)
+    if (csmface_is_coplanar_to_plane(common_face, A, B, C, D, tolerances, &same_orientation) == CSMTRUE)
     {
         if (same_orientation == CSMTRUE)
         {
@@ -357,10 +343,8 @@ static void i_reclassify_on_sectors_vertex_neighborhood(
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
-    double tolerance_coplanarity;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
-    tolerance_coplanarity = csmtolerance_coplanarity(tolerances);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -377,7 +361,7 @@ static void i_reclassify_on_sectors_vertex_neighborhood(
                         hedge_neighborhood,
                         next_hedge_neighborhood,
                         A, B, C, D,
-                        tolerance_coplanarity);
+                        tolerances);
     }
 }
 
@@ -426,10 +410,8 @@ static void i_reclassify_on_edges_vertex_neighborhood(
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
-    double tolerance_coplanarity;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
-    tolerance_coplanarity = csmtolerance_coplanarity(tolerances);
     
     for (i = 0; i < num_sectors; i++)
     {

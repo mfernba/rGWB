@@ -493,9 +493,12 @@ static void i_append_intersections_between_A_edge_and_B_face(
                 struct csmvertex_t *hit_vertex_at_face;
                 struct csmhedge_t *hit_hedge_at_face;
                 double t_relative_to_hit_hedge_at_face;
+                static unsigned long ninters = 0;
                 
                 hit_vertex_at_face = NULL;
                 hit_hedge_at_face = NULL;
+                
+                ninters++;
                 
                 if (csmface_contains_point(
                             face_B,

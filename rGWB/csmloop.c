@@ -311,7 +311,7 @@ double csmloop_max_distance_to_plane(
         
     } while (iterator != loop->ledge);
     
-    return CSMMATH_MAX(max_distance_to_plane, csmtolerance_default_coplanarity());
+    return CSMMATH_MAX(max_distance_to_plane, csmtolerance_default_point_on_plane());
 }
 
 // ----------------------------------------------------------------------------------------------------

@@ -3848,13 +3848,13 @@ static void i_test_sweep_path5(void)
         
         shape = csmshape2d_new();
         csmshape2d_new_polygon(shape, &idx_polygon);
-        csmshape2d_append_point_to_polygon(shape, idx_polygon, -factor * 0.0005, 0.);
-        csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., -factor * 0.0005);
-        csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., factor * 0.0005);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, -factor * 0.005, 0.);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., -factor * 0.005);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., factor * 0.005);
         
         sweep_path = csmsweep_new_helix_plane_path(
                         0., 0., bolt_radius, no_points_circle,
-                        factor * 0.0015, no_threads,
+                        factor * 0.0015, 1,
                         0., 0., 0., 1., 0., 0., 0., 1., 0.,
                         shape);
     
@@ -3862,7 +3862,7 @@ static void i_test_sweep_path5(void)
         i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_thread);
         
         csmdebug_set_viewer_results(solid_thread, NULL);
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
         
         csmsweep_free_path(&sweep_path);
         csmshape2d_free(&shape);
@@ -3961,6 +3961,8 @@ void csmtest_test(void)
     
     i_test_sphere4();
     
+    */
+
     i_test_mechanical5();
     i_test_mechanical6bis();
     i_test_mechanical6();
@@ -3970,13 +3972,12 @@ void csmtest_test(void)
     
     i_test_ellipsoid();
     i_test_paraboloid_one_sheet();
-     
+    
     i_test_sweep_path1();
     i_test_sweep_path2();
     i_test_sweep_path3();
     i_test_sweep_path4();
-    */
-    i_test_sweep_path4();
+    
     //i_test_sweep_path5();
     
     csmviewer_free(&viewer);

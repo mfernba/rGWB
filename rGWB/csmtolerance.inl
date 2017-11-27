@@ -8,11 +8,11 @@ void csmtolerance_free(struct csmtolerance_t **tolerance);
 
 double csmtolerance_equal_coords(const struct csmtolerance_t *tolerance);
 
+double csmtolerance_point_on_plane(const struct csmtolerance_t *tolerance);
+
 double csmtolerance_angle_rad(const struct csmtolerance_t *tolerance);
 
 double csmtolerance_dot_product_parallel_vectors(const struct csmtolerance_t *tolerance);
-
-double csmtolerance_coplanarity(const struct csmtolerance_t *tolerance);
 
 double csmtolerance_null_vector(const struct csmtolerance_t *tolerance);
 
@@ -21,4 +21,4 @@ double csmtolerance_bbox_absolute_tolerance(const struct csmtolerance_t *toleran
 
 double csmtolerance_default_null_vector(void);
 
-double csmtolerance_default_coplanarity(void);
+double csmtolerance_default_point_on_plane(void);

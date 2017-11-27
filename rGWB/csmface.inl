@@ -72,7 +72,7 @@ double csmface_tolerace(const struct csmface_t *face);
 CSMBOOL csmface_is_coplanar_to_plane(
                         const struct csmface_t *face,
                         double A, double B, double C, double D,
-                        double tolerance,
+                        const struct csmtolerance_t *tolerances,
                         CSMBOOL *same_orientation);
 
 CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2);

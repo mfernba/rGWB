@@ -34,6 +34,21 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
     
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
     bsgraphics2_escr_punto3D(graphics, x, y, z);
+    
+    //if (csmvertex_id(vertex) == 241)
+    /*{
+        bsgraphics2_append_desplazamiento_3D(graphics, x, y, z);
+        bsgraphics2_append_ejes_plano_pantalla(graphics);
+        {
+            char *texto;
+            
+            texto = copiafor_codigo1("%lu", csmvertex_id(vertex));
+            bsgraphics2_escr_texto_mts(graphics, texto, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.002);
+            csmstring_free(&texto);
+        }
+        bsgraphics2_desapila_transformacion(graphics);
+        bsgraphics2_desapila_transformacion(graphics);
+    }*/
 }
 
 // ----------------------------------------------------------------------------------------------------

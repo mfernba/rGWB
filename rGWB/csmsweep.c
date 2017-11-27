@@ -890,7 +890,7 @@ struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep
     tolerances = csmtolerance_new();
 
     solid = NULL;
-    start_id_of_new_element = 0;
+    start_id_of_new_element = 100000;
     
     bottom_face_first_solid = NULL;
     top_face_solid_prev = NULL;

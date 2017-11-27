@@ -321,7 +321,8 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
 
 static enum csmsetop_classify_resp_solid_t i_classify_vector_resp_sector(
                         const struct i_neighborhood_t *neighborhood,
-                        double Ux, double Uy, double Uz)
+                        double Ux, double Uy, double Uz,
+                        const struct csmtolerance_t *tolerances)
 {
     struct csmface_t *neighborhood_face;
     double A, B, C, D;
@@ -509,7 +510,8 @@ static CSMBOOL i_exists_intersection_between_sectors(
 
 CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_sectors, (
                         const struct i_neighborhood_t *neighborhood_a, unsigned long idx_nba,
-                        const struct i_neighborhood_t *neighborhood_b, unsigned long idx_nbb))
+                        const struct i_neighborhood_t *neighborhood_b, unsigned long idx_nbb,
+                        const struct csmtolerance_t *tolerances))
 {
     enum csmsetop_classify_resp_solid_t s1a, s2a, s1b, s2b;
     CSMBOOL intersect;
@@ -517,11 +519,11 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
     
-    s1a = i_classify_vector_resp_sector(neighborhood_b, neighborhood_a->Ux1, neighborhood_a->Uy1, neighborhood_a->Uz1);
-    s2a = i_classify_vector_resp_sector(neighborhood_b, neighborhood_a->Ux2, neighborhood_a->Uy2, neighborhood_a->Uz2);
+    s1a = i_classify_vector_resp_sector(neighborhood_b, neighborhood_a->Ux1, neighborhood_a->Uy1, neighborhood_a->Uz1, tolerances);
+    s2a = i_classify_vector_resp_sector(neighborhood_b, neighborhood_a->Ux2, neighborhood_a->Uy2, neighborhood_a->Uz2, tolerances);
     
-    s1b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1);
-    s2b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2);
+    s1b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1, tolerances);
+    s2b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2, tolerances);
     
     intersect = CSMTRUE;
     
@@ -623,7 +625,7 @@ static void i_generate_neighboorhoods(
             {
                 struct i_inters_sectors_t *inters_sectors;
                 
-                inters_sectors = i_create_intersection_between_sectors(neighborhood_a, i, neighborhood_b, j);
+                inters_sectors = i_create_intersection_between_sectors(neighborhood_a, i, neighborhood_b, j, tolerances);
                 csmarrayc_append_element_st(neighborhood_intersections_loc, inters_sectors, i_inters_sectors_t);
             }
         }

@@ -10,7 +10,7 @@ struct csmtolerance_t
     double tolerance_equal_coords;
     double tolerance_equal_angle_rad;
     double tolerance_dot_product_parallel_vectors;
-    double tolerance_coplanarity;
+    double tolerance_point_on_plane;
     double tolerance_null_vector;
     double tolerance_bbox_absolute_tolerance;
 };
@@ -21,7 +21,7 @@ CONSTRUCTOR(static struct csmtolerance_t *, i_new, (
                         double tolerance_equal_coords,
                         double tolerance_equal_angle_rad,
                         double tolerance_dot_product_parallel_vectors,
-                        double tolerance_coplanarity,
+                        double tolerance_point_on_plane,
                         double tolerance_null_vector,
                         double tolerance_bbox_absolute_tolerance))
 {
@@ -32,7 +32,7 @@ CONSTRUCTOR(static struct csmtolerance_t *, i_new, (
     tolerance->tolerance_equal_coords = tolerance_equal_coords;
     tolerance->tolerance_equal_angle_rad = tolerance_equal_angle_rad;
     tolerance->tolerance_dot_product_parallel_vectors = tolerance_dot_product_parallel_vectors;
-    tolerance->tolerance_coplanarity = tolerance_coplanarity;
+    tolerance->tolerance_point_on_plane = tolerance_point_on_plane;
     tolerance->tolerance_null_vector = tolerance_null_vector;
     tolerance->tolerance_bbox_absolute_tolerance = tolerance_bbox_absolute_tolerance;
     
@@ -46,7 +46,7 @@ struct csmtolerance_t *csmtolerance_new(void)
     double tolerance_equal_coords;
     double tolerance_equal_angle_rad;
     double tolerance_dot_product_parallel_vectors;
-    double tolerance_coplanarity;
+    double tolerance_point_on_plane;
     double tolerance_null_vector;
     double tolerance_bbox_absolute_tolerance;
 
@@ -63,7 +63,7 @@ struct csmtolerance_t *csmtolerance_new(void)
     tolerance_equal_coords = 1.e-6;
     tolerance_equal_angle_rad = 1.e-6;
     tolerance_dot_product_parallel_vectors = 1.e-6;
-    tolerance_coplanarity = csmtolerance_default_coplanarity();
+    tolerance_point_on_plane = csmtolerance_default_point_on_plane();
     tolerance_null_vector = csmtolerance_default_null_vector();
     tolerance_bbox_absolute_tolerance = 0.01;
     
@@ -71,7 +71,7 @@ struct csmtolerance_t *csmtolerance_new(void)
                 tolerance_equal_coords,
                 tolerance_equal_angle_rad,
                 tolerance_dot_product_parallel_vectors,
-                tolerance_coplanarity,
+                tolerance_point_on_plane,
                 tolerance_null_vector,
                 tolerance_bbox_absolute_tolerance);
 }
@@ -96,6 +96,14 @@ double csmtolerance_equal_coords(const struct csmtolerance_t *tolerance)
 
 // --------------------------------------------------------------------------------
 
+double csmtolerance_point_on_plane(const struct csmtolerance_t *tolerance)
+{
+    assert_no_null(tolerance);
+    return tolerance->tolerance_point_on_plane;
+}
+
+// --------------------------------------------------------------------------------
+
 double csmtolerance_angle_rad(const struct csmtolerance_t *tolerance)
 {
     assert_no_null(tolerance);
@@ -108,14 +116,6 @@ double csmtolerance_dot_product_parallel_vectors(const struct csmtolerance_t *to
 {
     assert_no_null(tolerance);
     return tolerance->tolerance_dot_product_parallel_vectors;
-}
-
-// --------------------------------------------------------------------------------
-
-double csmtolerance_coplanarity(const struct csmtolerance_t *tolerance)
-{
-    assert_no_null(tolerance);
-    return tolerance->tolerance_coplanarity;
 }
 
 // --------------------------------------------------------------------------------
@@ -138,12 +138,12 @@ double csmtolerance_bbox_absolute_tolerance(const struct csmtolerance_t *toleran
 
 double csmtolerance_default_null_vector(void)
 {
-    return 1.e-10;
+    return 1.0e-10;
 }
 
 // --------------------------------------------------------------------------------
 
-double csmtolerance_default_coplanarity(void)
+double csmtolerance_default_point_on_plane(void)
 {
-    return 1.e-6;
+    return 1.0e-6;
 }

@@ -130,40 +130,22 @@ static void i_classify_point_respect_to_plane(
 
 // ----------------------------------------------------------------------------------------------------
 
-static double i_classification_tolerance(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
-{
-    struct csmface_t *face_hedge;
-    double face_tolerance, general_tolerance;
-    
-    face_hedge = csmopbas_face_from_hedge(hedge);
-    face_tolerance = csmface_tolerace(face_hedge);
-    general_tolerance = csmtolerance_equal_coords(tolerances);
-    
-    return CSMMATH_MAX(face_tolerance, general_tolerance);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 static void i_classify_hedge_respect_to_plane(
                         struct csmhedge_t *hedge,
-                        double A, double B, double C, double D,
-                        const struct csmtolerance_t *tolerances,
+                        double A, double B, double C, double D, double fuzzy_face_tolerance,
                         struct csmvertex_t **vertex_opc, double *dist_to_plane_opc,
                         enum csmsetop_classify_resp_solid_t *cl_resp_plane_opc)
 {
-    double tolerance;
     struct csmvertex_t *vertex_loc;
     double x_loc, y_loc, z_loc;
     
-    tolerance = i_classification_tolerance(hedge, tolerances);
-
     vertex_loc = csmhedge_vertex(hedge);
     csmvertex_get_coordenadas(vertex_loc, &x_loc, &y_loc, &z_loc);
     
     i_classify_point_respect_to_plane(
                         x_loc, y_loc, z_loc,
                         A, B, C, D,
-                        tolerance,
+                        fuzzy_face_tolerance,
                         dist_to_plane_opc, cl_resp_plane_opc);
 
     ASSIGN_OPTIONAL_VALUE(vertex_opc, vertex_loc);
@@ -173,7 +155,7 @@ static void i_classify_hedge_respect_to_plane(
 
 CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighborhood, (
                         struct csmvertex_t *vertex,
-                        double A, double B, double C, double D,
+                        double A, double B, double C, double D, double fuzzy_face_tolerance,
                         const struct csmtolerance_t *tolerances))
 {
     csmArrayStruct(i_neighborhood_t) *vertex_neighborhood;
@@ -200,7 +182,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
         num_iters++;
         
         hedge_next = csmhedge_next(hedge_iterator);
-        i_classify_hedge_respect_to_plane(hedge_next, A, B, C, D, tolerances, NULL, NULL, &cl_resp_plane);
+        i_classify_hedge_respect_to_plane(hedge_next, A, B, C, D, fuzzy_face_tolerance, NULL, NULL, &cl_resp_plane);
         
         hedge_neighborhood = i_create_neighborhod(hedge_iterator, cl_resp_plane);
         csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood, i_neighborhood_t);
@@ -208,13 +190,11 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
         if (csmopbas_is_wide_hedge(hedge_iterator, tolerances, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CSMTRUE)
         {
             struct i_neighborhood_t *hedge_neighborhood_wide;
-            double tolerance;
             
             hedge_neighborhood_wide = i_create_neighborhod(hedge_iterator, hedge_neighborhood->position);
             csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood_wide, i_neighborhood_t);
             
-            tolerance = i_classification_tolerance(hedge_iterator, tolerances);
-            i_classify_point_respect_to_plane(x_vertex + Ux_bisec, y_vertex + Uy_bisec, z_vertex + Uz_bisec, A, B, C, D, tolerance, NULL, &cl_resp_plane);
+            i_classify_point_respect_to_plane(x_vertex + Ux_bisec, y_vertex + Uy_bisec, z_vertex + Uz_bisec, A, B, C, D, fuzzy_face_tolerance, NULL, &cl_resp_plane);
             hedge_neighborhood->position = cl_resp_plane;
         }
         
@@ -232,7 +212,7 @@ static void i_reclassify_on_sector_vertex_neighborhood(
                         struct i_neighborhood_t *next_hedge_neighborhood,
                         double A, double B, double C, double D,
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
-                        double tolerance_coplanarity)
+                        const struct csmtolerance_t *tolerances)
 {
     struct csmface_t *common_face;
     CSMBOOL same_orientation;
@@ -242,7 +222,7 @@ static void i_reclassify_on_sector_vertex_neighborhood(
 
     common_face = csmsetopcom_face_for_hedge_sector(hedge_neighborhood->hedge, next_hedge_neighborhood->hedge);
     
-    if (csmface_is_coplanar_to_plane(common_face, A, B, C, D, tolerance_coplanarity, &same_orientation) == CSMTRUE)
+    if (csmface_is_coplanar_to_plane(common_face, A, B, C, D, tolerances, &same_orientation) == CSMTRUE)
     {
         if (same_orientation == CSMTRUE)
         {
@@ -334,10 +314,8 @@ static void i_reclassify_on_sectors_vertex_neighborhood(
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
-    double tolerance_coplanarity;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
-    tolerance_coplanarity = csmtolerance_coplanarity(tolerances);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -355,7 +333,7 @@ static void i_reclassify_on_sectors_vertex_neighborhood(
                         next_hedge_neighborhood,
                         A, B, C, D,
                         set_operation, a_vs_b,
-                        tolerance_coplanarity);
+                        tolerances);
     }
 }
 
@@ -416,10 +394,8 @@ static void i_reclassify_on_edges_vertex_neighborhood(
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
-    double tolerance_coplanarity;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
-    tolerance_coplanarity = csmtolerance_coplanarity(tolerances);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -632,7 +608,7 @@ static void i_process_vf_inters(
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges, csmArrayStruct(csmedge_t) *set_of_null_edges_other_solid)
 {
-    double A, B, C, D;
+    double A, B, C, D, fuzzy_face_tolerance;
     csmArrayStruct(i_neighborhood_t) *vertex_neighborhood;
     unsigned long start_idx;
     csmvertex_mask_t vertex_algorithm_mask;
@@ -640,11 +616,12 @@ static void i_process_vf_inters(
     assert_no_null(vf_inters);
     
     csmface_face_equation(vf_inters->face, &A, &B, &C, &D);
+    fuzzy_face_tolerance = csmface_tolerace(vf_inters->face);
     csmdebug_set_plane(A, B, C, D);
     
     vertex_algorithm_mask = csmvertex_get_mask_attrib(vf_inters->vertex);
     
-    vertex_neighborhood = i_initial_vertex_neighborhood(vf_inters->vertex, A, B, C, D, tolerances);
+    vertex_neighborhood = i_initial_vertex_neighborhood(vf_inters->vertex, A, B, C, D, fuzzy_face_tolerance, tolerances);
     i_print_debug_info_vertex_neighborhood("Initial", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
     i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, tolerances, vertex_neighborhood);
@@ -696,7 +673,7 @@ static void i_process_vf_inters(
             assert_no_null(tail_neighborhood);
             
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
-            i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, tolerances, NULL, NULL, &cl_head_resp_plane);
+            i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, fuzzy_face_tolerance, NULL, NULL, &cl_head_resp_plane);
             assert(cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_OUT || cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
             
             if (csmdebug_debug_enabled() == CSMTRUE)

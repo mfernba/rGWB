@@ -89,7 +89,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     B = 0.;
     C = 0.;
     D = 0.;
-    fuzzy_epsilon = csmtolerance_default_coplanarity();
+    fuzzy_epsilon = csmtolerance_default_point_on_plane();
     dropped_coord = (enum csmmath_dropped_coord_t)USHRT_MAX;
     
     bbox = csmbbox_create_empty_box();
@@ -366,7 +366,7 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
         
     } while (iterator != NULL);
     
-    return CSMMATH_MAX(1.01 * max_distance_to_plane, csmtolerance_default_coplanarity());
+    return CSMMATH_MAX(1.01 * max_distance_to_plane, csmtolerance_default_point_on_plane());
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -766,29 +766,24 @@ double csmface_tolerace(const struct csmface_t *face)
 CSMBOOL csmface_is_coplanar_to_plane(
                         const struct csmface_t *face,
                         double A, double B, double C, double D,
-                        double tolerance,
+                        const struct csmtolerance_t *tolerances,
                         CSMBOOL *same_orientation_opt)
 {
     CSMBOOL is_coplanar;
     CSMBOOL same_orientation_loc;
-    double Wx, Wy, Wz;
-    double dot;
     
     assert_no_null(face);
     
-    csmmath_cross_product3D(face->A, face->B, face->C, A, B, C, &Wx, &Wy, &Wz);
-    dot = csmmath_dot_product3D(Wx, Wy, Wz, Wx, Wy, Wz);
-    
-    if (csmmath_compare_doubles(dot, 0., tolerance * tolerance) == CSMCOMPARE_EQUAL)
+    if (csmmath_vectors_are_parallel(
+                        face->A, face->B, face->C, A, B, C,
+                        tolerances) == CSMTRUE)
     {
+        double dot;
+        
         is_coplanar = CSMTRUE;
         
         dot = csmmath_dot_product3D(face->A, face->B, face->C, A, B, C);
-
-        if (csmmath_compare_doubles(dot, 0., tolerance) == CSMCOMPARE_FIRST_GREATER)
-            same_orientation_loc = CSMTRUE;
-        else
-            same_orientation_loc = CSMFALSE;
+        same_orientation_loc = (dot > 0.0) ? CSMTRUE: CSMFALSE;
     }
     else
     {
