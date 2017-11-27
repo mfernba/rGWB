@@ -222,6 +222,19 @@ static CSMBOOL i_equal_edge_intersection(const struct i_edge_intersection_t *edg
     assert_no_null(edge_intersection1);
     assert_no_null(edge_intersection2);
     
+    if (csmmath_compare_doubles(
+                        edge_intersection1->t_absolute_intersection_on_edge, edge_intersection2->t_absolute_intersection_on_edge,
+                        csmtolerance_equal_coords(edge_intersection1->tolerances)) == CSMCOMPARE_EQUAL)
+    {
+        return CSMTRUE;
+    }
+    else
+    {
+        return CSMFALSE;
+    }
+    
+    /*
+    
     if (edge_intersection1->intersection_position_at_edge != edge_intersection2->intersection_position_at_edge)
         return CSMFALSE;
     
@@ -243,6 +256,7 @@ static CSMBOOL i_equal_edge_intersection(const struct i_edge_intersection_t *edg
             
         default_error();
     }
+    */
 }
 
 // ------------------------------------------------------------------------------------------
