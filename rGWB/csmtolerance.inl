@@ -18,8 +18,6 @@ double csmtolerance_relative_position_over_edge(const struct csmtolerance_t *tol
 
 double csmtolerance_null_vector(const struct csmtolerance_t *tolerance);
 
-double csmtolerance_point_in_loop_boundary(const struct csmtolerance_t *tolerance);
-
 double csmtolerance_bbox_absolute_tolerance(const struct csmtolerance_t *tolerance);
 
 

@@ -13,7 +13,6 @@ struct csmtolerance_t
     double tolerance_coplanarity;
     double tolerance_relative_position_over_edge;
     double tolerance_null_vector;
-    double tolerance_point_in_loop_boundary;
     double tolerance_bbox_absolute_tolerance;
 };
 
@@ -26,7 +25,6 @@ CONSTRUCTOR(static struct csmtolerance_t *, i_new, (
                         double tolerance_coplanarity,
                         double tolerance_relative_position_over_edge,
                         double tolerance_null_vector,
-                        double tolerance_point_in_loop_boundary,
                         double tolerance_bbox_absolute_tolerance))
 {
     struct csmtolerance_t *tolerance;
@@ -39,7 +37,6 @@ CONSTRUCTOR(static struct csmtolerance_t *, i_new, (
     tolerance->tolerance_coplanarity = tolerance_coplanarity;
     tolerance->tolerance_relative_position_over_edge = tolerance_relative_position_over_edge;
     tolerance->tolerance_null_vector = tolerance_null_vector;
-    tolerance->tolerance_point_in_loop_boundary = tolerance_point_in_loop_boundary;
     tolerance->tolerance_bbox_absolute_tolerance = tolerance_bbox_absolute_tolerance;
     
     return tolerance;
@@ -55,7 +52,6 @@ struct csmtolerance_t *csmtolerance_new(void)
     double tolerance_coplanarity;
     double tolerance_relative_position_over_edge;
     double tolerance_null_vector;
-    double tolerance_point_in_loop_boundary;
     double tolerance_bbox_absolute_tolerance;
 
 /*
@@ -74,7 +70,6 @@ struct csmtolerance_t *csmtolerance_new(void)
     tolerance_coplanarity = csmtolerance_default_coplanarity();
     tolerance_relative_position_over_edge = 1.e-6;
     tolerance_null_vector = csmtolerance_default_null_vector();
-    tolerance_point_in_loop_boundary = 1.e-6;
     tolerance_bbox_absolute_tolerance = 0.01;
     
     return i_new(
@@ -84,7 +79,6 @@ struct csmtolerance_t *csmtolerance_new(void)
                 tolerance_coplanarity,
                 tolerance_relative_position_over_edge,
                 tolerance_null_vector,
-                tolerance_point_in_loop_boundary,
                 tolerance_bbox_absolute_tolerance);
 }
 
@@ -144,14 +138,6 @@ double csmtolerance_null_vector(const struct csmtolerance_t *tolerance)
 {
     assert_no_null(tolerance);
     return tolerance->tolerance_null_vector;
-}
-
-// --------------------------------------------------------------------------------
-
-double csmtolerance_point_in_loop_boundary(const struct csmtolerance_t *tolerance)
-{
-    assert_no_null(tolerance);
-    return tolerance->tolerance_point_in_loop_boundary;
 }
 
 // --------------------------------------------------------------------------------

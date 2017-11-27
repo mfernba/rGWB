@@ -378,7 +378,7 @@ void csmmath_nearer_points_between_two_lines3D(
 
 //-------------------------------------------------------------------------------------------
 
-CSMBOOL csmmath_is_point_in_segment3D(
+CSMBOOL csmmath_is_point_in_segment3D_antigua(
 						double x, double y, double z,
 						double x1, double y1, double z1, double x2, double y2, double z2,
 						double precision, 
@@ -427,6 +427,83 @@ CSMBOOL csmmath_is_point_in_segment3D(
         is_point_on_segment = CSMTRUE;
     else
         is_point_on_segment = CSMFALSE;
+    
+    ASSIGN_OPTIONAL_VALUE(t_opc, t_loc);
+    
+    return is_point_on_segment;
+}
+
+//-------------------------------------------------------------------------------------------
+
+CSMBOOL csmmath_is_point_in_segment3D(
+						double x, double y, double z,
+						double x1, double y1, double z1, double x2, double y2, double z2,
+						double precision,
+						double *t_opc)
+{
+    CSMBOOL is_point_on_segment;
+    double t_loc;
+
+	assert(precision > 0.);
+    
+    if (csmmath_equal_coords(x1, y1, z1, x2, y2, z2, precision) == CSMTRUE)
+    {
+        is_point_on_segment = csmmath_equal_coords(x, y, z, x1, y1, z1, precision);
+        t_loc = 0.;
+    }
+    else if (csmmath_equal_coords(x, y, z, x1, y1, z1, precision) == CSMTRUE)
+    {
+        is_point_on_segment = CSMTRUE;
+        t_loc = 0.;
+    }
+    else if (csmmath_equal_coords(x, y, z, x2, y2, z2, precision) == CSMTRUE)
+    {
+        is_point_on_segment = CSMTRUE;
+        t_loc = 1.;
+    }
+    else
+    {
+        double Ux_seg, Uy_seg, Uz_seg, segment_length;
+        double Ux_to_point, Uy_to_point, Uz_to_point;
+        double proj_point_on_segment;
+        double x_proj_seg, y_proj_seg, z_proj_seg;
+        
+        Ux_seg = x2 - x1;
+        Uy_seg = y2 - y1;
+        Uz_seg = z2 - z1;
+        segment_length = csmmath_length_vector3D(Ux_seg, Uy_seg, Uz_seg);
+        csmmath_make_unit_vector3D(&Ux_seg, &Uy_seg, &Uz_seg);
+
+        Ux_to_point = x - x1;
+        Uy_to_point = y - y1;
+        Uz_to_point = z - z1;
+        
+        proj_point_on_segment = csmmath_dot_product3D(Ux_seg, Uy_seg, Uz_seg, Ux_to_point, Uy_to_point, Uz_to_point);
+        
+        x_proj_seg = x1 + proj_point_on_segment * Ux_seg;
+        y_proj_seg = y1 + proj_point_on_segment * Uy_seg;
+        z_proj_seg = z1 + proj_point_on_segment * Uz_seg;
+        
+        if (csmmath_equal_coords(x, y, z, x_proj_seg, y_proj_seg, z_proj_seg, precision) == CSMFALSE)
+        {
+            is_point_on_segment = CSMFALSE;
+            t_loc = 0.;
+        }
+        else
+        {
+            if (proj_point_on_segment < -precision || proj_point_on_segment > segment_length + precision)
+            {
+                is_point_on_segment = CSMFALSE;
+                t_loc = 0.;
+            }
+            else
+            {
+                is_point_on_segment = CSMTRUE;
+                t_loc = proj_point_on_segment / segment_length;
+                assert(t_loc >= 0. && t_loc <= 1.);
+            }
+        }
+    }
     
     ASSIGN_OPTIONAL_VALUE(t_opc, t_loc);
     
