@@ -123,7 +123,7 @@ static void i_classify_hedge_respect_to_plane(
     struct csmvertex_t *vertex_loc;
     double x_loc, y_loc, z_loc;
     
-    tolerance = csmtolerance_default_point_on_plane(tolerances);
+    tolerance = csmtolerance_point_on_plane(tolerances);
 
     vertex_loc = csmhedge_vertex(hedge);
     csmvertex_get_coordenadas(vertex_loc, &x_loc, &y_loc, &z_loc);
