@@ -43,7 +43,6 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
     unsigned long id;
     struct csmhedge_t *hedge;
     csmvertex_mask_t algorithm_attrib_mask;
-    double Nx, Ny, Nz;
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
     
