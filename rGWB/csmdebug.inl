@@ -59,6 +59,14 @@ void csmdebug_append_debug_point(double x, double y, double z, char **descriptio
 void csmdebug_clear_plane(void);
 void csmdebug_set_plane(double A, double B, double C, double D);
 
+void csmdebug_clear_inters_sector(void);
+
+void csmdebug_set_inters_sector(
+                    double x, double y, double z,
+                    CSMBOOL with_intersection_line, double Wx_inters, double Wy_inters, double Wz_inters,
+                    double Ux1, double Uy1, double Uz1, double Vx1, double Vy1, double Vz1,
+                    double Ux2, double Uy2, double Uz2, double Vx2, double Vy2, double Vz2);
+                                
 void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics);
 
 

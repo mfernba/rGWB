@@ -3833,13 +3833,16 @@ static void i_test_sweep_path5(void)
     struct csmsolid_t *solid;
     struct csmsolid_t *solid_aux;
     
-    factor = 10.;
+    i_set_output_debug_file("sweep_path5.txt");
+    
+    factor = 1.;
     bolt_diameter = factor * 0.05;
     bolt_radius = factor * 0.5 * bolt_diameter;
     bolt_thread_length = factor * 0.02;
     no_threads = 10;
     
-    no_points_circle = 8;
+    //no_points_circle = 8;
+    no_points_circle = 4;
 
     {
         struct csmshape2d_t *shape;
@@ -3913,7 +3916,6 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
 
-    /*
     i_test_divide_solido_rectangular_hueco_por_plano_medio();
     i_test_divide_solido_rectangular_hueco_por_plano_medio2();
     i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -3961,8 +3963,6 @@ void csmtest_test(void)
     
     i_test_sphere4();
     
-    */
-
     i_test_mechanical5();
     i_test_mechanical6bis();
     i_test_mechanical6();
@@ -3977,6 +3977,7 @@ void csmtest_test(void)
     i_test_sweep_path2();
     i_test_sweep_path3();
     i_test_sweep_path4();
+    
     
     //i_test_sweep_path5();
     

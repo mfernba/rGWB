@@ -48,6 +48,10 @@ CSMBOOL csmmath_vectors_are_parallel(
                         double Ux1, double Uy1, double Uz1, double Ux2, double Uy2, double Uz2,
                         const struct csmtolerance_t *tolerance);
 
+CSMBOOL csmmath_unit_vectors_are_parallel_ex(
+                        double Ux1, double Uy1, double Uz1, double Ux2, double Uy2, double Uz2,
+                        const struct csmtolerance_t *tolerance,
+                        CSMBOOL *same_sense);
 
 // Lines...
 

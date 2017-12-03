@@ -64,6 +64,20 @@ static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
 
 static FILE *g_output_file = NULL;
 
+struct i_inters_sector_t
+{
+    double x, y, z;
+    
+    CSMBOOL with_intersection_line;
+    double Wx_inters, Wy_inters, Wz_inters;
+
+    double Ux1, Uy1, Uz1, Vx1, Vy1, Vz1;
+    double Ux2, Uy2, Uz2, Vx2, Vy2, Vz2;
+};
+
+static int g_Draw_inters_sector = 0;
+struct i_inters_sector_t g_inters_sector;
+
 // --------------------------------------------------------------------------------
 
 void csmdebug_set_enabled_by_code(CSMBOOL enabled)
@@ -324,6 +338,97 @@ void csmdebug_set_plane(double A, double B, double C, double D)
 
 // --------------------------------------------------------------------------------
 
+void csmdebug_clear_inters_sector(void)
+{
+    g_Draw_inters_sector = 0;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_set_inters_sector(
+                    double x, double y, double z,
+                    CSMBOOL with_intersection_line, double Wx_inters, double Wy_inters, double Wz_inters,
+                    double Ux1, double Uy1, double Uz1, double Vx1, double Vy1, double Vz1,
+                    double Ux2, double Uy2, double Uz2, double Vx2, double Vy2, double Vz2)
+{
+    g_Draw_inters_sector = 1;
+    
+    g_inters_sector.x = x;
+    g_inters_sector.y = y;
+    g_inters_sector.z = z;
+    
+    g_inters_sector.with_intersection_line = with_intersection_line;
+    g_inters_sector.Wx_inters = Wx_inters;
+    g_inters_sector.Wy_inters = Wy_inters;
+    g_inters_sector.Wz_inters = Wz_inters;
+    
+    g_inters_sector.Ux1 = Ux1;
+    g_inters_sector.Uy1 = Uy1;
+    g_inters_sector.Uz1 = Uz1;
+    
+    g_inters_sector.Ux1 = Vx1;
+    g_inters_sector.Vy1 = Vy1;
+    g_inters_sector.Vz1 = Vz1;
+    
+    g_inters_sector.Ux2 = Ux2;
+    g_inters_sector.Uy2 = Uy2;
+    g_inters_sector.Uz2 = Uz2;
+    
+    g_inters_sector.Ux2 = Vx2;
+    g_inters_sector.Vy2 = Vy2;
+    g_inters_sector.Vz2 = Vz2;
+}
+
+// --------------------------------------------------------------------------------
+
+static void i_draw_inters_sector(const struct i_inters_sector_t *sector, struct bsgraphics2_t *graphics)
+{
+    struct bsmaterial_t *mat1, *mat2;
+    
+    bsassert_not_null(sector);
+    
+    bsgraphics2_escr_punto3D(graphics, sector->x, sector->y, sector->z);
+    
+    mat1 = bsmaterial_crea_rgb(1., 0., 0.);
+    bsgraphics2_escr_color(graphics, mat1);
+    {
+        bsgraphics2_escr_triangulo3D(
+                graphics,
+                sector->x, sector->y, sector->z,
+                sector->x + sector->Ux1, sector->y + sector->Uy1, sector->z + sector->Uz1,
+                sector->x + sector->Vx1, sector->y + sector->Vy1, sector->z + sector->Vz1);
+    }
+    bsmaterial_destruye(&mat1);
+    
+    mat2 = bsmaterial_crea_rgb(1., 1., 0.);
+    bsgraphics2_escr_color(graphics, mat2);
+    {
+        bsgraphics2_escr_triangulo3D(
+                graphics,
+                sector->x, sector->y, sector->z,
+                sector->x + sector->Ux2, sector->y + sector->Uy2, sector->z + sector->Uz2,
+                sector->x + sector->Vx2, sector->y + sector->Vy2, sector->z + sector->Vz2);
+    }
+    bsmaterial_destruye(&mat2);
+    
+    if (sector->with_intersection_line == CSMTRUE)
+    {
+        struct bsmaterial_t *mat3;
+        
+        mat3 = bsmaterial_crea_rgb(0.5, 0.5, 0.5);
+        bsgraphics2_escr_color(graphics, mat3);
+
+        bsgraphics2_escr_linea3D(
+                graphics,
+                sector->x, sector->y, sector->z,
+                sector->x + sector->Wx_inters, sector->y + sector->Wy_inters, sector->z + sector->Wz_inters);
+        
+        bsmaterial_destruye(&mat3);
+    }
+}
+
+// --------------------------------------------------------------------------------
+
 void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
 {
     struct bsmaterial_t *debug_point_material;
@@ -368,7 +473,10 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
     bsgraphics2_escr_punto3D(graphics, -0.032,  0.003,  0.100);
     bsgraphics2_escr_punto3D(graphics, -0.032,  0.003,  0.100);
     */
-    
+
+    if (g_Draw_inters_sector)
+        i_draw_inters_sector(&g_inters_sector, graphics);
+
     for (i = 0; i < g_no_debug_points; i++)
     {
         enum bsgraphics2_justificacion_t justificacion;

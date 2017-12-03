@@ -35,8 +35,8 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
     bsgraphics2_escr_punto3D(graphics, x, y, z);
     
-    //if (csmvertex_id(vertex) == 241)
-    /*{
+    if (csmvertex_id(vertex) == 137)
+    {
         bsgraphics2_append_desplazamiento_3D(graphics, x, y, z);
         bsgraphics2_append_ejes_plano_pantalla(graphics);
         {
@@ -48,7 +48,7 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
         }
         bsgraphics2_desapila_transformacion(graphics);
         bsgraphics2_desapila_transformacion(graphics);
-    }*/
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------
