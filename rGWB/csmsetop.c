@@ -223,8 +223,28 @@ static void i_append_null_edges_to_debug_view(csmArrayStruct(csmedge_t) *set_of_
         null_edge = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
         csmedge_vertex_coordinates(null_edge, &x1, &y1, &z1, &x2, &y2, &z2);
         
-        description = csmstring_duplicate("");
+        description = csmstring_duplicate("ne");
         csmdebug_append_debug_point(x1, y1, z1, &description);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_validate_edges_belong_to_solid(struct csmsolid_t *solid, csmArrayStruct(csmedge_t) *set_of_null_edges)
+{
+    unsigned long i, no_null_edges;
+    
+    no_null_edges = csmarrayc_count_st(set_of_null_edges, csmedge_t);
+    
+    for (i = 0; i < no_null_edges; i++)
+    {
+        struct csmedge_t *edge;
+        struct csmhedge_t *he1;
+        
+        edge = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
+        
+        he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+        assert(solid == csmopbas_solid_from_hedge(he1));
     }
 }
 
@@ -242,6 +262,9 @@ static void i_join_null_edges(
     unsigned long i, no_null_edges;
     unsigned long no_null_edges_deleted_A, no_null_edges_deleted_B;
     unsigned long no_null_edges_pendant;
+    
+    i_validate_edges_belong_to_solid(solid_A, set_of_null_edges_A);
+    i_validate_edges_belong_to_solid(solid_B, set_of_null_edges_B);
     
     csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_A, tolerances);
     csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_B, tolerances);
@@ -269,7 +292,7 @@ static void i_join_null_edges(
         csmsolid_debug_print_debug(solid_B, CSMTRUE);
         
         i_append_null_edges_to_debug_view(set_of_null_edges_A);
-        //csmdebug_show_viewer();
+        csmdebug_show_viewer();
     }
     
     csmdebug_block_print_solid();
@@ -377,7 +400,7 @@ static void i_join_null_edges(
             csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
             
-            //csmdebug_show_viewer();
+            csmdebug_show_viewer();
         }
     }
     

@@ -3881,6 +3881,9 @@ static void i_test_sweep_path5(void)
         csmshape2d_free(&shape);
     }
 
+    csmsolid_rotate(solid, CSMMATH_PI / 4., 0., 0., 0., 0., 0., 1.);
+    csmsolid_rotate(solid_thread, CSMMATH_PI / 4., 0., 0., 0., 0., 0., 1.);
+    
     solid_aux = solid;
     solid = csmsetop_union_A_and_B(solid, solid_thread);
     csmsolid_free(&solid_aux);
@@ -3977,7 +3980,6 @@ void csmtest_test(void)
     i_test_sweep_path2();
     i_test_sweep_path3();
     i_test_sweep_path4();
-    
     
     //i_test_sweep_path5();
     
