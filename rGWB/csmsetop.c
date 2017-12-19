@@ -620,7 +620,7 @@ static CSMBOOL i_is_same_face_ptr(const struct csmface_t *face1, const struct cs
 
 static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(
                         struct csmsolid_t *solid,
-                        const struct csmtolerance_t *tolerance,
+                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmface_t) *set_of_null_faces)
 {
     unsigned long i, num_null_faces;
@@ -661,8 +661,8 @@ static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_
                     {
                         csmface_redo_geometric_generated_data(face);
                         
-                        if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face) == CSMTRUE
-                                && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component, tolerance) == CSMTRUE)
+                        if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face, tolerances) == CSMTRUE
+                                && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component, tolerances) == CSMTRUE)
                         {
                             csmeuler_lkfmrh(face, &loop_attached_to_out_component_face);
                             has_been_converted_in_hole = CSMTRUE;

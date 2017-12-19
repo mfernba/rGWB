@@ -823,7 +823,7 @@ CSMBOOL csmface_is_coplanar_to_plane(
 
 // ------------------------------------------------------------------------------------------
 
-CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2)
+CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances)
 {
     double Xo1, Yo1, Zo1, Ux1, Uy1, Uz1, Vx1, Vy1, Vz1;
     double Xo2, Yo2, Zo2, Ux2, Uy2, Uz2, Vx2, Vy2, Vz2;
@@ -851,14 +851,9 @@ CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface
     }
     else
     {
-        double dot;
-        
-        dot = csmmath_dot_product3D(face1->A, face1->B, face1->C, face2->A, face2->B, face2->C);
-        
-        if (csmmath_fabs(1. - csmmath_fabs(dot)) > 1.e-5)
-            return CSMFALSE;
-        else
-            return CSMTRUE;
+        return csmmath_vectors_are_parallel(
+                        face1->A, face1->B, face1->C, face2->A, face2->B, face2->C,
+                        tolerances);
     }
 }
 

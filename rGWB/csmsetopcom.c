@@ -796,7 +796,7 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(
                     
                     null_face = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
                     
-                    if (csmface_are_coplanar_faces(face, null_face) == CSMTRUE)
+                    if (csmface_are_coplanar_faces(face, null_face, tolerances) == CSMTRUE)
                     {
                         CSMBOOL did_move_some_loop;
                         
@@ -1033,7 +1033,7 @@ void csmsetopcom_merge_faces_inside_faces(struct csmsolid_t *solid, const struct
                     
                     if (outer_face != inner_face
                             && csmface_should_analyze_intersections_between_faces(outer_face, inner_face) == CSMTRUE
-                            && csmface_are_coplanar_faces(outer_face, inner_face) == CSMTRUE
+                            && csmface_are_coplanar_faces(outer_face, inner_face, tolerances) == CSMTRUE
                             && csmface_has_holes(inner_face) == CSMFALSE)
                     {
                         struct csmloop_t *inner_face_floops;

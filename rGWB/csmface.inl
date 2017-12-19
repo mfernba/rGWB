@@ -75,7 +75,7 @@ CSMBOOL csmface_is_coplanar_to_plane(
                         const struct csmtolerance_t *tolerances,
                         CSMBOOL *same_orientation);
 
-CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2);
+CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances);
 
 CSMBOOL csmface_faces_define_border_edge(const struct csmface_t *face1, const struct csmface_t *face2);
 

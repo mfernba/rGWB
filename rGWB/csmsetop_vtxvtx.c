@@ -39,6 +39,7 @@ struct i_neighborhood_t
     double Ux2, Uy2, Uz2;
     double Ux12, Uy12, Uz12;
     
+    struct csmface_t *face;
     double A_face, B_face, C_face, D_face;
     double face_tolerance;
     
@@ -100,6 +101,7 @@ CONSTRUCTOR(static struct i_neighborhood_t *, i_create_neighborhood, (
                         double Ux1, double Uy1, double Uz1,
                         double Ux2, double Uy2, double Uz2,
                         double Ux12, double Uy12, double Uz12,
+                        struct csmface_t *face,
                         double A_face, double B_face, double C_face, double D_face,
                         double face_tolerance))
 {
@@ -121,6 +123,7 @@ CONSTRUCTOR(static struct i_neighborhood_t *, i_create_neighborhood, (
     neighborhood->Uy12 = Uy12;
     neighborhood->Uz12 = Uz12;
  
+    neighborhood->face = face;
     neighborhood->A_face = A_face;
     neighborhood->B_face = B_face;
     neighborhood->C_face = C_face;
@@ -270,7 +273,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
         is_null_vector = csmmath_vectors_are_parallel(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, tolerances);
         is_oriented_in_direction = csmface_is_oriented_in_direction(he_iterator_face, Ux12, Uy12, Uz12);
         
-        neigborhood = i_create_neighborhood(he_iterator, Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, Ux12, Uy12, Uz12, A, B, C, D, face_tolerance);
+        neigborhood = i_create_neighborhood(he_iterator, Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, Ux12, Uy12, Uz12, he_iterator_face, A, B, C, D, face_tolerance);
         csmarrayc_append_element_st(neighborhoods, neigborhood, i_neighborhood_t);
         
         if (is_null_vector == CSMTRUE || is_oriented_in_direction == CSMTRUE)
@@ -292,7 +295,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
             }
             
             csmmath_cross_product3D(Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, &Ux12_bisec, &Uy12_bisec, &Uz12_bisec);
-            neigborhood_bisec = i_create_neighborhood(he_iterator, Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, Ux12_bisec, Uy12_bisec, Uz12_bisec, A, B, C, D, face_tolerance);
+            neigborhood_bisec = i_create_neighborhood(he_iterator, Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, Ux12_bisec, Uy12_bisec, Uz12_bisec, he_iterator_face, A, B, C, D, face_tolerance);
             csmarrayc_append_element_st(neighborhoods, neigborhood_bisec, i_neighborhood_t);
             
             neigborhood->Ux2 = Ux_bisec;
@@ -620,56 +623,14 @@ static void i_debug_show_inters_sectors(
 
 // ------------------------------------------------------------------------------------------
 
-static CSMBOOL i_belongs_point_to_neighborhood_face_plane(const struct i_neighborhood_t *neighborhood, double x, double y, double z)
-{
-    double d;
-    
-    assert_no_null(neighborhood);
-    
-    d = csmmath_signed_distance_point_to_plane(x, y, z, neighborhood->A_face, neighborhood->B_face, neighborhood->C_face, neighborhood->D_face);
-    return csmmath_compare_doubles(d, 0., neighborhood->face_tolerance);
-}
-
-// ------------------------------------------------------------------------------------------
-
 static CSMBOOL i_are_neighborhoods_coplanar(
                         const struct i_neighborhood_t *neighborhood_a, const struct i_neighborhood_t *neighborhood_b,
                         const struct csmtolerance_t *tolerances)
 {
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
-
-    if (csmmath_vectors_are_parallel(
-                        neighborhood_a->A_face, neighborhood_a->B_face, neighborhood_a->C_face,
-                        neighborhood_b->A_face, neighborhood_b->B_face, neighborhood_b->C_face,
-                        tolerances) == CSMTRUE)
-    {
-        return CSMTRUE;
-    }
-    else
-    {
-        /*
-        double dot;
-        CSMBOOL d1, d2, d3, d4;
-        
-        dot = csmmath_dot_product3D(
-                        neighborhood_a->A_face, neighborhood_a->B_face, neighborhood_a->C_face,
-                        neighborhood_b->A_face, neighborhood_b->B_face, neighborhood_b->C_face);
-        
-        d1 = i_belongs_point_to_neighborhood_face_plane(neighborhood_b, neighborhood_a->Ux1, neighborhood_a->Uy1, neighborhood_a->Uz1);
-        d2 = i_belongs_point_to_neighborhood_face_plane(neighborhood_b, neighborhood_a->Ux2, neighborhood_a->Uy2, neighborhood_a->Uz2);
-        
-        d3 = i_belongs_point_to_neighborhood_face_plane(neighborhood_a, neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1);
-        d4 = i_belongs_point_to_neighborhood_face_plane(neighborhood_a, neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2);
-        
-        if (dot > 0.9999 && d1 == CSMTRUE && d2 == CSMTRUE && d3 == CSMTRUE && d4 == CSMTRUE)
-            return CSMTRUE;
-        else
-            return CSMFALSE;
-         */
-        
-        return CSMFALSE;
-    }
+    
+    return csmface_are_coplanar_faces(neighborhood_a->face, neighborhood_b->face, tolerances);
 }
 
 // ------------------------------------------------------------------------------------------
