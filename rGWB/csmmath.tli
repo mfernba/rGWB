@@ -2,6 +2,13 @@
 #ifndef csmmath_hxx
 #define csmmath_hxx
 
+enum csmmath_classify_point_t
+{
+    CSMMATH_CONTAIMENT_POINT_BELOW,
+    CSMMATH_CONTAIMENT_POINT_ON,
+    CSMMATH_CONTAIMENT_POINT_ABOVE
+};
+
 enum csmmath_contaiment_point_loop_t
 {
     CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR,

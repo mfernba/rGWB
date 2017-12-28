@@ -104,6 +104,10 @@ void csmmath_plane_axis_from_implicit_plane_equation(
 						double *Xo, double *Yo, double *Zo, 
                         double *Ux, double *Uy, double *Uz, double *Vx, double *Vy, double *Vz);
 
+void csmmath_project_point_on_plane(
+						double x, double y, double z,
+                        double A, double B, double C, double D,
+                        double *x_proj_opt, double *y_proj_opt, double *z_proj_opt);
 
 // Trigonometry...
 

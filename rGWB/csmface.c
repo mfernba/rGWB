@@ -413,43 +413,22 @@ static CSMBOOL i_is_point_on_face_plane(
                         double x, double y, double z,
                         double A, double B, double C, double D,
                         double fuzzy_epsilon,
-                        const struct csmbbox_t *bbox,
-                        double *x_proj_opt, double *y_proj_opt, double *z_proj_opt)
+                        const struct csmbbox_t *bbox)
 {
     if (csmbbox_contains_point(bbox, x, y, z) == CSMFALSE)
     {
-        ASSIGN_OPTIONAL_VALUE(x_proj_opt, x);
-        ASSIGN_OPTIONAL_VALUE(y_proj_opt, y);
-        ASSIGN_OPTIONAL_VALUE(z_proj_opt, z);
-        
-        return CSMFALSE;
+csm        return CSMFALSE;
     }
     else
     {
         double distance;
-    
+        
         distance = csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D);
-    
-        if (csmmath_fabs(distance) < fuzzy_epsilon)
-        {
-            double dot_product;
-            
-            dot_product = csmmath_dot_product3D(A, B, C, x, y, z);
-    
-            ASSIGN_OPTIONAL_VALUE(x_proj_opt, x - distance * A);
-            ASSIGN_OPTIONAL_VALUE(y_proj_opt, y - distance * B);
-            ASSIGN_OPTIONAL_VALUE(z_proj_opt, z - distance * C);
-
+        
+        if (csmmath_compare_doubles(distance, 0., fuzzy_epsilon) == CSMCOMPARE_EQUAL)
             return CSMTRUE;
-        }
         else
-        {
-            ASSIGN_OPTIONAL_VALUE(x_proj_opt, x);
-            ASSIGN_OPTIONAL_VALUE(y_proj_opt, y);
-            ASSIGN_OPTIONAL_VALUE(z_proj_opt, z);
-            
             return CSMFALSE;
-        }
     }
 }
 
@@ -489,7 +468,6 @@ CSMBOOL csmface_contains_point(
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
     CSMBOOL containts_point;
-    double x_proj, y_proj, z_proj;
     enum csmmath_contaiment_point_loop_t type_of_containment_loc;
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
@@ -501,8 +479,7 @@ CSMBOOL csmface_contains_point(
                         x, y, z,
                         face->A, face->B, face->C, face->D,
                         face->fuzzy_epsilon,
-                        face->bbox,
-                        &x_proj, &y_proj, &z_proj) == CSMFALSE)
+                        face->bbox) == CSMFALSE)
     {
         containts_point = CSMFALSE;
         
@@ -515,7 +492,7 @@ CSMBOOL csmface_contains_point(
     {
         if (csmloop_is_point_inside_loop(
                         face->flout,
-                        x_proj, y_proj, z_proj, face->dropped_coord,
+                        x, y, z, face->dropped_coord,
                         tolerances,
                         &type_of_containment_loc, &hit_vertex_loc, &hit_hedge_loc, &t_relative_to_hit_hedge_loc) == CSMFALSE)
         {
@@ -545,7 +522,7 @@ CSMBOOL csmface_contains_point(
                         
                         if (csmloop_is_point_inside_loop(
                                 loop_iterator,
-                                x_proj, y_proj, z_proj, face->dropped_coord,
+                                x, y, z, face->dropped_coord,
                                 tolerances,
                                 &type_of_containment_hole, &hit_vertex_hole, &hit_hedge_hole, &t_relative_to_hit_hedge_hole) == CSMTRUE)
                         {
@@ -588,7 +565,6 @@ CSMBOOL csmface_is_point_interior_to_face(
                         const struct csmtolerance_t *tolerances)
 {
     CSMBOOL is_interior_to_face;
-    double x_proj, y_proj, z_proj;
     
     assert_no_null(face);
     
@@ -596,8 +572,7 @@ CSMBOOL csmface_is_point_interior_to_face(
                         x, y, z,
                         face->A, face->B, face->C, face->D,
                         face->fuzzy_epsilon,
-                        face->bbox,
-                        &x_proj, &y_proj, &z_proj) == CSMFALSE)
+                        face->bbox) == CSMFALSE)
     {
         return CSMFALSE;
     }
@@ -607,7 +582,7 @@ CSMBOOL csmface_is_point_interior_to_face(
     
         if (csmloop_is_point_inside_loop(
                         face->flout,
-                        x_proj, y_proj, z_proj, face->dropped_coord,
+                        x, y, z, face->dropped_coord,
                         tolerances,
                         &type_of_containment, NULL, NULL, NULL) == CSMFALSE)
         {
@@ -630,7 +605,7 @@ CSMBOOL csmface_is_point_interior_to_face(
                 {
                     if (csmloop_is_point_inside_loop(
                             loop_iterator,
-                            x_proj, y_proj, z_proj, face->dropped_coord,
+                            x, y, z, face->dropped_coord,
                             tolerances,
                             &type_of_containment, NULL, NULL, NULL) == CSMTRUE)
                     {
@@ -855,6 +830,18 @@ CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface
                         face1->A, face1->B, face1->C, face2->A, face2->B, face2->C,
                         tolerances);
     }
+}
+
+// ------------------------------------------------------------------------------------------
+
+CSMBOOL csmface_are_coplanar_faces_at_common_base_vertex(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances)
+{
+    assert_no_null(face1);
+    assert_no_null(face2);
+    
+    return csmmath_vectors_are_parallel(
+                        face1->A, face1->B, face1->C, face2->A, face2->B, face2->C,
+                        tolerances);
 }
 
 // ------------------------------------------------------------------------------------------

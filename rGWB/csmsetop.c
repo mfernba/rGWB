@@ -221,7 +221,7 @@ static void i_append_null_edges_to_debug_view(csmArrayStruct(csmedge_t) *set_of_
         char *description;
         
         null_edge = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
-        csmedge_vertex_coordinates(null_edge, &x1, &y1, &z1, &x2, &y2, &z2);
+        csmedge_vertex_coordinates(null_edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
         
         description = csmstring_duplicate("ne");
         csmdebug_append_debug_point(x1, y1, z1, &description);

@@ -735,6 +735,22 @@ void csmmath_plane_axis_from_implicit_plane_equation(
 
 //-------------------------------------------------------------------------------------------
 
+void csmmath_project_point_on_plane(
+						double x, double y, double z,
+                        double A, double B, double C, double D,
+                        double *x_proj_opt, double *y_proj_opt, double *z_proj_opt)
+{
+    double distance;
+
+    distance = csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D);
+
+    ASSIGN_OPTIONAL_VALUE(x_proj_opt, x - distance * A);
+    ASSIGN_OPTIONAL_VALUE(y_proj_opt, y - distance * B);
+    ASSIGN_OPTIONAL_VALUE(z_proj_opt, z - distance * C);
+}
+
+//-------------------------------------------------------------------------------------------
+
 double csmmath_fabs(double value)
 {
     return fabs(value);

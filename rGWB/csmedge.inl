@@ -38,4 +38,6 @@ CSMBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge);
 
 void csmedge_vertex_coordinates(
                         const struct csmedge_t *edge,
-                        double *x1, double *y1, double *z1, double *x2, double *y2, double *z2);
+                        double *x1, double *y1, double *z1, unsigned long *id_vertex1_opt,
+                        double *x2, double *y2, double *z2, unsigned long *id_vertex2_opt);
+

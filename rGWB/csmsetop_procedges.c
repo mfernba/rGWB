@@ -70,6 +70,7 @@ struct i_edge_intersection_t
 struct i_optimized_edge_data_t
 {
     struct csmvertex_t *vertex_pos, *vertex_neg;
+    unsigned long edge_id;
     double x1, y1, z1, x2, y2, z2;
     double length;
 };
@@ -670,10 +671,11 @@ static void i_process_edge_intersections(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         double x1, y1, z1, x2, y2, z2;
+        unsigned long id_vertex1, id_vertex2;
         
-        csmedge_vertex_coordinates(original_edge, &x1, &y1, &z1, &x2, &y2, &z2);
+        csmedge_vertex_coordinates(original_edge, &x1, &y1, &z1, &id_vertex1, &x2, &y2, &z2, &id_vertex2);
         csmdebug_print_debug_info("\n");
-        csmdebug_print_debug_info("Edge: %lu. (%lf, %lf, %lf) -> (%lf, %lf, %lf)\n", csmedge_id(original_edge), x1, y1, z1, x2, y2, z2);
+        csmdebug_print_debug_info("Edge: %lu. [%lu](%lf, %lf, %lf) -> [%lu](%lf, %lf, %lf)\n", csmedge_id(original_edge), id_vertex1, x1, y1, z1, id_vertex2, x2, y2, z2);
         csmdebug_print_debug_info("No. intersections: %lu\n", num_intersections);
     }
 
@@ -725,7 +727,7 @@ static void i_process_edge_intersections(
                     {
                         double x1_esplit, y1_esplit, z1_esplit, x2_esplit, y2_esplit, z2_esplit;
             
-                        csmedge_vertex_coordinates(edge_to_split, &x1_esplit, &y1_esplit, &z1_esplit, &x2_esplit, &y2_esplit, &z2_esplit);
+                        csmedge_vertex_coordinates(edge_to_split, &x1_esplit, &y1_esplit, &z1_esplit, NULL, &x2_esplit, &y2_esplit, &z2_esplit, NULL);
                         
                         assert(csmmath_is_point_in_segment3D(
                                     edge_intersection->x_edge_interior, edge_intersection->y_edge_interior, edge_intersection->z_edge_interior,
@@ -796,7 +798,7 @@ static void i_process_edge_intersections(
                         double x1_esplit, y1_esplit, z1_esplit, x2_esplit, y2_esplit, z2_esplit;
             
                         edge_to_split_other_solid = csmhedge_edge(edge_intersection->hit_hedge_at_face);
-                        csmedge_vertex_coordinates(edge_to_split_other_solid, &x1_esplit, &y1_esplit, &z1_esplit, &x2_esplit, &y2_esplit, &z2_esplit);
+                        csmedge_vertex_coordinates(edge_to_split_other_solid, &x1_esplit, &y1_esplit, &z1_esplit, NULL, &x2_esplit, &y2_esplit, &z2_esplit, NULL);
                         
                         assert(csmmath_is_point_in_segment3D(
                                     edge_intersection->x_edge_interior_hedge_at_face, edge_intersection->y_edge_interior_hedge_at_face, edge_intersection->z_edge_interior_hedge_at_face,
@@ -885,6 +887,8 @@ static void i_generate_intersections_edge_with_solid_faces(
     struct i_optimized_edge_data_t optimized_edge_data;
     struct csmhedge_t *hedge_pos, *hedge_neg;
     const struct csmbbox_t *solid_b_bbox;
+    
+    optimized_edge_data.edge_id = csmedge_id(edge_A);
     
     hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_POS);
     optimized_edge_data.vertex_pos = csmhedge_vertex(hedge_pos);

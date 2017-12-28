@@ -484,8 +484,8 @@ static CSMBOOL i_are_hedges_collinear(
             
             dot_product = csmmath_dot_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2);
             
-            if (dot_product < -1.e-6)
-                return CSMTRUE;
+            if (dot_product < -csmtolerance_dot_product_parallel_vectors(tolerances))
+                return CSMTRUE; // Parallel segments, but opposite orientation
             else
                 return CSMFALSE;
         }

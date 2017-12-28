@@ -423,6 +423,9 @@ static CSMBOOL i_is_intersection_parallel_to_sector_edge(
     }
     else
     {
+        *same_sense = CSMFALSE;
+        return CSMFALSE;
+        /*
         double distance;
         double tolerance;
         
@@ -443,6 +446,7 @@ static CSMBOOL i_is_intersection_parallel_to_sector_edge(
             *same_sense = CSMFALSE;
             return CSMFALSE;
         }
+        */
     }
 }
 
@@ -610,13 +614,13 @@ static void i_debug_show_inters_sectors(
         
         csmdebug_set_inters_sector(
                     x, y, z,
-                    with_intersection_line, Wx_inters, Wy_inters, Wz_inters,
+                    with_intersection_line, 0.01 * Wx_inters, 0.01 * Wy_inters, 0.01 * Wz_inters,
                     neighborhood_a->Ux1, neighborhood_a->Uy1, neighborhood_a->Uz1,
                     neighborhood_a->Ux2, neighborhood_a->Uy2, neighborhood_a->Uz2,
                     neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1,
                     neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2);
         
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
         csmdebug_clear_inters_sector();
     }
 }
@@ -630,7 +634,7 @@ static CSMBOOL i_are_neighborhoods_coplanar(
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
     
-    return csmface_are_coplanar_faces(neighborhood_a->face, neighborhood_b->face, tolerances);
+    return csmface_are_coplanar_faces_at_common_base_vertex(neighborhood_a->face, neighborhood_b->face, tolerances);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -659,6 +663,7 @@ static CSMBOOL i_exists_intersection_between_sectors(
                         &Wx_inters, &Wy_inters, &Wz_inters);
         
         csmmath_make_unit_vector3D(&Wx_inters, &Wy_inters, &Wz_inters);
+        i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
         
         is_within_a = i_is_intersection_within_sector(neighborhood_a, Wx_inters, Wy_inters, Wz_inters, tolerances);
         is_within_b = i_is_intersection_within_sector(neighborhood_b, Wx_inters, Wy_inters, Wz_inters, tolerances);

@@ -35,7 +35,7 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
     bsgraphics2_escr_punto3D(graphics, x, y, z);
     
-    //if (csmvertex_id(vertex) == 133)
+    if (csmvertex_id(vertex) == 113)
     {
         bsgraphics2_append_desplazamiento_3D(graphics, x, y, z);
         bsgraphics2_append_ejes_plano_pantalla(graphics);
@@ -285,7 +285,7 @@ static void i_draw_border_edge(struct csmedge_t *edge, CSMBOOL draw_only_border_
     {
         double x1, y1, z1, x2, y2, z2;
     
-        csmedge_vertex_coordinates(edge, &x1, &y1, &z1, &x2, &y2, &z2);
+        csmedge_vertex_coordinates(edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
         bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
     }
 }

@@ -3896,6 +3896,33 @@ static void i_test_sweep_path5(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_inters_inner_segment(void)
+{
+    struct csmshape2d_t *shape1, *shape2;
+    struct csmsolid_t *solid1, *solid2, *solid;
+    
+    i_set_output_debug_file("test_inters_inner_segment.txt");
+    
+    shape1 = csmbasicshape2d_C_shape(0.05, 0.1);
+    solid1 = csmsweep_create_solid_from_shape(shape1, 0.1, 0., 0., 0., 1., 0., 0., 0., 1., shape1, 0., 0., 0., 0., 1., 0., 0., 0., 1.);
+    
+    shape2 = csmbasicshape2d_rectangular_shape(0.035, 0.1);
+    solid2 = csmsweep_create_solid_from_shape(shape2, 0.2, 0., 0., 0., 1., 0., 0., 0., 1., shape2, 0.1, 0., 0., 0., 1., 0., 0., 0., 1.);
+    
+    solid = csmsetop_union_A_and_B(solid1, solid2);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    csmshape2d_free(&shape1);
+    csmshape2d_free(&shape2);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -3982,6 +4009,7 @@ void csmtest_test(void)
     i_test_sweep_path4();
     
     //i_test_sweep_path5();
+    i_test_inters_inner_segment();
     
     csmviewer_free(&viewer);
 }
