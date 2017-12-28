@@ -417,7 +417,7 @@ static CSMBOOL i_is_point_on_face_plane(
 {
     if (csmbbox_contains_point(bbox, x, y, z) == CSMFALSE)
     {
-csm        return CSMFALSE;
+        return CSMFALSE;
     }
     else
     {
