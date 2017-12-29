@@ -32,7 +32,7 @@
 #include "csmstring.inl"
 #include "csmmaterial.inl"
 
-static const unsigned long i_NUM_MAX_PERTURBATIONS = 4;
+static const unsigned long i_NUM_MAX_PERTURBATIONS = 10;
 
 // ------------------------------------------------------------------------------------------
 
@@ -884,8 +884,7 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
     struct csmsolid_t *solid_res_loc;
     csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections;
     csmArrayStruct(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
-    csmArrayStruct(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
-    unsigned long no_null_edges;
+    CSMBOOL did_find_non_manifold_operand;
     
     csmsolid_redo_geometric_face_data(solid_A);
     csmsolid_clear_algorithm_data(solid_A);
@@ -903,57 +902,72 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
                         solid_A, solid_B,
                         tolerances,
                         &vv_intersections,
-                        &vf_intersections_A, &vf_intersections_B);
+                        &vf_intersections_A, &vf_intersections_B,
+                        &did_find_non_manifold_operand);
     
-    set_of_null_edges_A = csmarrayc_new_st_array(0, csmedge_t);
-    set_of_null_edges_B = csmarrayc_new_st_array(0, csmedge_t);
-    
-    csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, tolerances, set_of_null_edges_A, set_of_null_edges_B);
-    csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, tolerances, set_of_null_edges_B, set_of_null_edges_A);
-    csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, tolerances, set_of_null_edges_A, set_of_null_edges_B);
-    
-    no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
-    assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
-    
-    if (no_null_edges == 0)
+    if (did_find_non_manifold_operand == CSMTRUE)
     {
-        result = CSMSETOP_OPRESULT_OK;
-        solid_res_loc = csmsolid_crea_vacio(0);
+        result = CSMSETOP_OPRESULT_NON_MANIFOLD_OPERAND;
+        solid_res_loc = NULL;
     }
     else
     {
-        csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
-        CSMBOOL did_join_all_null_edges_loc;
-        unsigned long no_null_faces;
+        csmArrayStruct(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
+        unsigned long no_null_edges;
         
-        i_join_null_edges(
+        set_of_null_edges_A = csmarrayc_new_st_array(0, csmedge_t);
+        set_of_null_edges_B = csmarrayc_new_st_array(0, csmedge_t);
+        
+        csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, tolerances, set_of_null_edges_A, set_of_null_edges_B);
+        csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, tolerances, set_of_null_edges_B, set_of_null_edges_A);
+        csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, tolerances, set_of_null_edges_A, set_of_null_edges_B);
+        
+        no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
+        assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
+        
+        if (no_null_edges == 0)
+        {
+            result = CSMSETOP_OPRESULT_OK;
+            solid_res_loc = NULL;
+        }
+        else
+        {
+            csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
+            CSMBOOL did_join_all_null_edges_loc;
+            unsigned long no_null_faces;
+            
+            i_join_null_edges(
                         solid_A, set_of_null_edges_A,
                         solid_B, set_of_null_edges_B,
                         tolerances,
                         &set_of_null_faces_A, &set_of_null_faces_B,
                         &did_join_all_null_edges_loc);
-        
-        no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
-        assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
-        
-        if (did_join_all_null_edges_loc == CSMFALSE || no_null_faces == 0)
-        {
-            result = CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS;
-            solid_res_loc = NULL;
-        }
-        else
-        {
-            result = CSMSETOP_OPRESULT_OK;
             
-            solid_res_loc = i_finish_set_operation(
-                        set_operation,
-                        solid_A, set_of_null_faces_A,
-                        solid_B, set_of_null_faces_B,
-                        tolerances);
+            no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
+            assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
+            
+            if (did_join_all_null_edges_loc == CSMFALSE || no_null_faces == 0)
+            {
+                result = CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS;
+                solid_res_loc = NULL;
+            }
+            else
+            {
+                result = CSMSETOP_OPRESULT_OK;
+                
+                solid_res_loc = i_finish_set_operation(
+                            set_operation,
+                            solid_A, set_of_null_faces_A,
+                            solid_B, set_of_null_faces_B,
+                            tolerances);
+            }
+            
+            csmarrayc_free_st(&set_of_null_faces_A, csmface_t, NULL);
+            csmarrayc_free_st(&set_of_null_faces_B, csmface_t, NULL);
         }
         
-        csmarrayc_free_st(&set_of_null_faces_A, csmface_t, NULL);
-        csmarrayc_free_st(&set_of_null_faces_B, csmface_t, NULL);
+        csmarrayc_free_st(&set_of_null_edges_A, csmedge_t, NULL);
+        csmarrayc_free_st(&set_of_null_edges_B, csmedge_t, NULL);
     }
     
     *solid_res = solid_res_loc;
@@ -961,8 +975,6 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
     csmarrayc_free_st(&vv_intersections, csmsetop_vtxvtx_inters_t, csmsetop_vtxvtx_free_inters);
     csmarrayc_free_st(&vf_intersections_A, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
     csmarrayc_free_st(&vf_intersections_B, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
-    csmarrayc_free_st(&set_of_null_edges_A, csmedge_t, NULL);
-    csmarrayc_free_st(&set_of_null_edges_B, csmedge_t, NULL);
     
     return result;
 }
@@ -1018,28 +1030,33 @@ static enum csmsetop_opresult_t i_set_operation(
         csmdebug_show_viewer();
         
         csmdebug_begin_context("SETOP");
-
-        result = i_set_operation_modifying_solids_internal(
+        {
+            result = i_set_operation_modifying_solids_internal(
                         set_operation,
                         solid_A_copy, solid_B_copy,
                         tolerances,
                         &solid_res_loc);
-        
+        }
         csmdebug_end_context();
 
         switch (result)
         {
             case CSMSETOP_OPRESULT_OK:
+            case CSMSETOP_OPRESULT_NON_MANIFOLD_OPERAND:
                 break;
                 
             case CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS:
             
                 apply_perturbation = CSMTRUE;
-                perturbartion_amount += csmtolerance_perturbation_increment(tolerances);
-                no_perturbations++;
                 break;
                 
             default_error();
+        }
+        
+        if (apply_perturbation == CSMTRUE)
+        {
+            perturbartion_amount += csmtolerance_perturbation_increment(tolerances);
+            no_perturbations++;
         }
         
         csmsolid_free(&solid_A_copy);

@@ -660,13 +660,16 @@ static void i_process_edge_intersections(
                         const csmArrayStruct(i_edge_intersection_t) *edge_intersecctions,
                         CSMBOOL is_A_vs_B,
                         csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
-                        csmArrayStruct(csmsetop_vtxfacc_inters_t) *vertex_face_neighborhood)
+                        csmArrayStruct(csmsetop_vtxfacc_inters_t) *vertex_face_neighborhood,
+                        CSMBOOL *did_find_non_manifold_operand_update)
 {
     unsigned long i, num_intersections;
     struct csmedge_t *edge_to_split;
     
     num_intersections = csmarrayc_count_st(edge_intersecctions, i_edge_intersection_t);
     assert(num_intersections > 0);
+    assert_no_null(did_find_non_manifold_operand_update);
+    assert(*did_find_non_manifold_operand_update == CSMFALSE);
     
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
@@ -681,7 +684,7 @@ static void i_process_edge_intersections(
 
     edge_to_split = original_edge;
     
-    for (i = 0; i < num_intersections; i++)
+    for (i = 0; i < num_intersections && *did_find_non_manifold_operand_update == CSMFALSE; i++)
     {
         const struct i_edge_intersection_t *edge_intersection;
         
@@ -836,7 +839,9 @@ static void i_process_edge_intersections(
                     }
                     
                     i_append_new_vv_inters(edge_intersection->intersection_id, edge_vertex_intersection, new_vertex_on_hit_hedge, is_A_vs_B, vv_intersections, &did_add_intersection);
-                    assert(did_add_intersection == CSMTRUE);
+                    
+                    if (did_add_intersection == CSMFALSE)
+                        *did_find_non_manifold_operand_update = CSMTRUE;
                     break;
                 }
                     
@@ -882,11 +887,15 @@ static void i_generate_intersections_edge_with_solid_faces(
                         CSMBOOL is_A_vs_B,
                         unsigned long *id_new_intersection,
                         csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
-                        csmArrayStruct(csmsetop_vtxfacc_inters_t) *vertex_face_neighborhood)
+                        csmArrayStruct(csmsetop_vtxfacc_inters_t) *vertex_face_neighborhood,
+                        CSMBOOL *did_find_non_manifold_operand_update)
 {
     struct i_optimized_edge_data_t optimized_edge_data;
     struct csmhedge_t *hedge_pos, *hedge_neg;
     const struct csmbbox_t *solid_b_bbox;
+    
+    assert_no_null(did_find_non_manifold_operand_update);
+    assert(*did_find_non_manifold_operand_update == CSMFALSE);
     
     optimized_edge_data.edge_id = csmedge_id(edge_A);
     
@@ -920,7 +929,13 @@ static void i_generate_intersections_edge_with_solid_faces(
             struct csmface_t *face_B;
         
             csmhashtb_next_pair(face_iterator_B, NULL, &face_B, csmface_t);
-            i_append_intersections_between_A_edge_and_B_face(&optimized_edge_data, face_B, tolerances, id_new_intersection, edge_intersecctions);
+            
+            i_append_intersections_between_A_edge_and_B_face(
+                        &optimized_edge_data,
+                        face_B,
+                        tolerances,
+                        id_new_intersection,
+                        edge_intersecctions);
         }
         
         if (csmarrayc_count_st(edge_intersecctions, i_edge_intersection_t) > 0)
@@ -928,7 +943,7 @@ static void i_generate_intersections_edge_with_solid_faces(
             csmarrayc_qsort_st(edge_intersecctions, i_edge_intersection_t, i_compara_edge_intersection);
             
             i_discard_invalid_intersections(edge_intersecctions);
-            i_process_edge_intersections(edge_A, edge_intersecctions, is_A_vs_B, vv_intersections, vertex_face_neighborhood);
+            i_process_edge_intersections(edge_A, edge_intersecctions, is_A_vs_B, vv_intersections, vertex_face_neighborhood, did_find_non_manifold_operand_update);
         }
         
         csmhashtb_free_iterator(&face_iterator_B, csmface_t);
@@ -944,18 +959,29 @@ static void i_generate_edge_intersections_solid_A_with_solid_B(
                         CSMBOOL is_A_vs_B,
                         unsigned long *id_new_intersection,
                         csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
-                        csmArrayStruct(csmsetop_vtxfacc_inters_t) *vertex_face_neighborhood)
+                        csmArrayStruct(csmsetop_vtxfacc_inters_t) *vertex_face_neighborhood,
+                        CSMBOOL *did_find_non_manifold_operand_update)
 {
     struct csmhashtb_iterator(csmedge_t) *edge_iterator_A;
     
+    assert_no_null(did_find_non_manifold_operand_update);
+    
     edge_iterator_A = csmsolid_edge_iterator(solid_A);
     
-    while (csmhashtb_has_next(edge_iterator_A, csmedge_t) == CSMTRUE)
+    while (csmhashtb_has_next(edge_iterator_A, csmedge_t) == CSMTRUE && *did_find_non_manifold_operand_update == CSMFALSE)
     {
         struct csmedge_t *edge_A;
         
         csmhashtb_next_pair(edge_iterator_A, NULL, &edge_A, csmedge_t);
-        i_generate_intersections_edge_with_solid_faces(edge_A, solid_B, tolerances, is_A_vs_B, id_new_intersection, vv_intersections, vertex_face_neighborhood);
+        
+        i_generate_intersections_edge_with_solid_faces(
+                        edge_A,
+                        solid_B,
+                        tolerances,
+                        is_A_vs_B,
+                        id_new_intersection,
+                        vv_intersections, vertex_face_neighborhood,
+                        did_find_non_manifold_operand_update);
     }
     
     csmhashtb_free_iterator(&edge_iterator_A, csmedge_t);
@@ -968,16 +994,19 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmsetop_vtxvtx_inters_t) **vv_intersections,
                         csmArrayStruct(csmsetop_vtxfacc_inters_t) **vf_intersections_A,
-                        csmArrayStruct(csmsetop_vtxfacc_inters_t) **vf_intersections_B)
+                        csmArrayStruct(csmsetop_vtxfacc_inters_t) **vf_intersections_B,
+                        CSMBOOL *did_find_non_manifold_operand)
 {
     csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections_loc;
     csmArrayStruct(csmsetop_vtxfacc_inters_t) *vf_intersections_A_loc, *vf_intersections_B_loc;
+    CSMBOOL did_find_non_manifold_operand_solid_A, did_find_non_manifold_operand_solid_B;
     unsigned long id_new_intersection;
     CSMBOOL is_A_vs_B;
     
     assert_no_null(vv_intersections);
     assert_no_null(vf_intersections_A);
     assert_no_null(vf_intersections_B);
+    assert_no_null(did_find_non_manifold_operand);
 
     vv_intersections_loc = csmarrayc_new_st_array(0, csmsetop_vtxvtx_inters_t);
     vf_intersections_A_loc = csmarrayc_new_st_array(0, csmsetop_vtxfacc_inters_t);
@@ -991,7 +1020,16 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
             csmdebug_clear_debug_points();
             
             is_A_vs_B = CSMTRUE;
-            i_generate_edge_intersections_solid_A_with_solid_B(solid_A, solid_B, tolerances, is_A_vs_B, &id_new_intersection, vv_intersections_loc, vf_intersections_A_loc);
+            did_find_non_manifold_operand_solid_A = CSMFALSE;
+            
+            i_generate_edge_intersections_solid_A_with_solid_B(
+                        solid_A,
+                        solid_B,
+                        tolerances,
+                        is_A_vs_B,
+                        &id_new_intersection,
+                        vv_intersections_loc, vf_intersections_A_loc,
+                        &did_find_non_manifold_operand_solid_A);
             
             csmsolid_debug_print_debug(solid_A, CSMTRUE);
             csmsolid_debug_print_debug(solid_B, CSMTRUE);
@@ -1000,25 +1038,49 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
     
         csmdebug_show_viewer();
         
-        csmdebug_begin_context("Intersections B vs A");
+        if (did_find_non_manifold_operand_solid_A == CSMFALSE)
         {
-            csmdebug_clear_debug_points();
+            csmdebug_begin_context("Intersections B vs A");
+            {
+                csmdebug_clear_debug_points();
+                
+                is_A_vs_B = CSMFALSE;
+                did_find_non_manifold_operand_solid_B = CSMFALSE;
+                
+                i_generate_edge_intersections_solid_A_with_solid_B(
+                        solid_B,
+                        solid_A,
+                        tolerances,
+                        is_A_vs_B,
+                        &id_new_intersection,
+                        vv_intersections_loc, vf_intersections_B_loc,
+                        &did_find_non_manifold_operand_solid_B);
             
-            is_A_vs_B = CSMFALSE;
-            i_generate_edge_intersections_solid_A_with_solid_B(solid_B, solid_A, tolerances, is_A_vs_B, &id_new_intersection, vv_intersections_loc, vf_intersections_B_loc);
-            
-            csmsolid_debug_print_debug(solid_A, CSMTRUE);
-            csmsolid_debug_print_debug(solid_B, CSMTRUE);
+                csmsolid_debug_print_debug(solid_A, CSMTRUE);
+                csmsolid_debug_print_debug(solid_B, CSMTRUE);
+            }
+            csmdebug_end_context();
         }
-        csmdebug_end_context();
+        else
+        {
+            did_find_non_manifold_operand_solid_B = CSMFALSE;
+        }
 
         csmdebug_show_viewer();
         
-        i_append_common_vertices_solid_A_and_B_not_previously_found(solid_A, solid_B, tolerances, &id_new_intersection, vv_intersections_loc);
+        if (did_find_non_manifold_operand_solid_A == CSMFALSE && did_find_non_manifold_operand_solid_B == CSMFALSE)
+        {
+            i_append_common_vertices_solid_A_and_B_not_previously_found(
+                        solid_A, solid_B,
+                        tolerances,
+                        &id_new_intersection,
+                        vv_intersections_loc);
+        }
     }
     csmdebug_end_context();
     
     *vv_intersections = vv_intersections_loc;
     *vf_intersections_A = vf_intersections_A_loc;
     *vf_intersections_B = vf_intersections_B_loc;
+    *did_find_non_manifold_operand = IS_TRUE(did_find_non_manifold_operand_solid_A == CSMTRUE || did_find_non_manifold_operand_solid_B == CSMTRUE);
 }

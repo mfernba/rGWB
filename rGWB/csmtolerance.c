@@ -148,5 +148,5 @@ double csmtolerance_default_null_vector(void)
 
 double csmtolerance_default_point_on_plane(void)
 {
-    return 1.0e-6;
+    return 1.0e-8;
 }
