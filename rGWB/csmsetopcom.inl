@@ -18,6 +18,10 @@ CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge
 
 void csmsetopcom_sort_edges_lexicographically_by_xyz(csmArrayStruct(csmedge_t) *set_of_null_edges, const struct csmtolerance_t *tolerances);
 
+void csmsetopcom_sort_pair_edges_lexicographically_by_xyz(
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_A, csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        const struct csmtolerance_t *tolerances);
+
 void csmsetopcom_print_set_of_null_edges(const csmArrayStruct(csmedge_t) *set_of_null_edges, csmArrayStruct(csmhedge_t) *loose_ends);
 
 CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, csmArrayStruct(csmhedge_t) *loose_ends);

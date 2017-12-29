@@ -62,6 +62,8 @@ static int i_DEBUG_FILE = 0;
 
 static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
 
+static CSMBOOL i_TREAT_IMPROPER_SOLID_OPERATIONS_AS_ERRORS = CSMFALSE;
+
 static FILE *g_output_file = NULL;
 
 struct i_inters_sector_t
@@ -77,6 +79,20 @@ struct i_inters_sector_t
 
 static int g_Draw_inters_sector = 0;
 struct i_inters_sector_t g_inters_sector;
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_set_treat_improper_solid_operations_as_errors(CSMBOOL value)
+{
+    i_TREAT_IMPROPER_SOLID_OPERATIONS_AS_ERRORS = value;
+}
+
+// --------------------------------------------------------------------------------
+
+CSMBOOL csmdebug_get_treat_improper_solid_operations_as_errors(void)
+{
+    return i_TREAT_IMPROPER_SOLID_OPERATIONS_AS_ERRORS;
+}
 
 // --------------------------------------------------------------------------------
 

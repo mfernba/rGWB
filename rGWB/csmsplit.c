@@ -1,6 +1,7 @@
 // Split operation...
 
 #include "csmsplit.h"
+#include "csmsplit.hxx"
 
 #include "csmarrayc.inl"
 #include "csmdebug.inl"
@@ -786,12 +787,15 @@ static void i_cut_he(
 static void i_join_null_edges(
                     csmArrayStruct(csmedge_t) *set_of_null_edges,
                     const struct csmtolerance_t *tolerances,
-                    csmArrayStruct(csmface_t) **set_of_null_faces)
+                    csmArrayStruct(csmface_t) **set_of_null_faces,
+                    CSMBOOL *did_join_all_null_edges)
 {
     csmArrayStruct(csmface_t) *set_of_null_faces_loc;
     csmArrayStruct(csmhedge_t) *loose_ends;
     unsigned long i, no_null_edges;
     unsigned long no_null_edges_deleted;
+    
+    assert_no_null(did_join_all_null_edges);
     
     csmdebug_begin_context("****JOIN NULL EDGES\n");
     
@@ -858,8 +862,11 @@ static void i_join_null_edges(
     csmdebug_end_context();
     
     *set_of_null_faces = set_of_null_faces_loc;
+    *did_join_all_null_edges = IS_TRUE(csmarrayc_count_st(set_of_null_edges, csmedge_t) == 0);
     
-    assert(csmarrayc_count_st(set_of_null_edges, csmedge_t) == 0);
+    if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
+        assert(csmarrayc_count_st(set_of_null_edges, csmedge_t) == 0);
+    
     assert(csmarrayc_count_st(loose_ends, csmhedge_t) == 0);
     csmarrayc_free_st(&loose_ends, csmhedge_t, NULL);
 }
@@ -960,12 +967,12 @@ static void i_finish_split(
 
 // ----------------------------------------------------------------------------------------------------
 
-CSMBOOL csmsplit_does_plane_split_solid(
+enum csmsplit_opresult_t csmsplit_split_solid(
                         const struct csmsolid_t *solid,
                         double A, double B, double C, double D,
                         struct csmsolid_t **solid_above, struct csmsolid_t **solid_below)
 {
-    CSMBOOL does_plane_split_solid;
+    enum csmsplit_opresult_t operation_result;
     struct csmsolid_t *solid_above_loc, *solid_below_loc;
     struct csmtolerance_t *tolerances;
     struct csmsolid_t *work_solid;
@@ -1011,7 +1018,7 @@ CSMBOOL csmsplit_does_plane_split_solid(
     
     if (csmarrayc_count_st(set_of_null_edges, csmedge_t) == 0)
     {
-        does_plane_split_solid = CSMFALSE;
+        operation_result = CSMSPLIT_OPRESULT_NO;
         
         solid_above_loc = NULL;
         solid_below_loc = NULL;
@@ -1019,32 +1026,45 @@ CSMBOOL csmsplit_does_plane_split_solid(
     else
     {
         csmArrayStruct(csmface_t) *set_of_null_faces;
-        double volume_above, volume_below;
+        CSMBOOL did_join_all_null_edges;
         
-        i_join_null_edges(set_of_null_edges, tolerances, &set_of_null_faces);
-        i_finish_split(set_of_null_faces, work_solid, tolerances, &solid_above_loc, &solid_below_loc);
-
-        csmsolid_clear_algorithm_data(solid_above_loc);
-        csmsolid_clear_algorithm_data(solid_below_loc);
+        i_join_null_edges(set_of_null_edges, tolerances, &set_of_null_faces, &did_join_all_null_edges);
         
-        assert(csmsolid_is_empty(work_solid) == CSMTRUE);
-        
-        csmsolid_redo_geometric_face_data(solid_above_loc);
-        volume_above = csmsolid_volume(solid_above_loc);
-        
-        csmsolid_redo_geometric_face_data(solid_below_loc);
-        volume_below = csmsolid_volume(solid_below_loc);
-        
-        if (volume_above > 1.e-6 && volume_below > 1.e-6)
+        if (did_join_all_null_edges == CSMFALSE || csmarrayc_count_st(set_of_null_faces, csmface_t) == 0)
         {
-            does_plane_split_solid = CSMTRUE;
+            operation_result = CSMSPLIT_OPRESULT_IMPROPER_CUT;
+            
+            solid_above_loc = NULL;
+            solid_below_loc = NULL;
         }
         else
         {
-            does_plane_split_solid = CSMFALSE;
+            double volume_above, volume_below;
             
-            csmsolid_free(&solid_above_loc);
-            csmsolid_free(&solid_below_loc);
+            i_finish_split(set_of_null_faces, work_solid, tolerances, &solid_above_loc, &solid_below_loc);
+
+            csmsolid_clear_algorithm_data(solid_above_loc);
+            csmsolid_clear_algorithm_data(solid_below_loc);
+            
+            assert(csmsolid_is_empty(work_solid) == CSMTRUE);
+            
+            csmsolid_redo_geometric_face_data(solid_above_loc);
+            volume_above = csmsolid_volume(solid_above_loc);
+            
+            csmsolid_redo_geometric_face_data(solid_below_loc);
+            volume_below = csmsolid_volume(solid_below_loc);
+            
+            if (volume_above > 1.e-6 && volume_below > 1.e-6)
+            {
+                operation_result = CSMSPLIT_OPRESULT_OK;
+            }
+            else
+            {
+                operation_result = CSMSPLIT_OPRESULT_NO;
+                
+                csmsolid_free(&solid_above_loc);
+                csmsolid_free(&solid_below_loc);
+            }
         }
 
         csmarrayc_free_st(&set_of_null_faces, csmface_t, NULL);
@@ -1060,5 +1080,5 @@ CSMBOOL csmsplit_does_plane_split_solid(
     
     csmdebug_end_context();
     
-    return does_plane_split_solid;
+    return operation_result;
 }

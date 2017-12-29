@@ -211,20 +211,9 @@ static void i_free_inters_sectors(struct i_inters_sectors_t **inters)
 static void i_vector_to_he(struct csmhedge_t *he, const struct csmvertex_t *vertex, double *Ux, double *Uy, double *Uz)
 {
     struct csmvertex_t *he_vertex;
-    double x1, y1, z1, x2, y2, z2;
-    
-    assert_no_null(Ux);
-    assert_no_null(Uy);
-    assert_no_null(Uz);
 
-    csmvertex_get_coordenadas(vertex, &x1, &y1, &z1);
-    
     he_vertex = csmhedge_vertex(he);
-    csmvertex_get_coordenadas(he_vertex, &x2, &y2, &z2);
-    
-    *Ux = x2 - x1;
-    *Uy = y2 - y1;
-    *Uz = z2 - z1;
+    csmvertex_vector_from_vertex1_to_vertex2(vertex, he_vertex, Ux, Uy, Uz);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -273,7 +262,12 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
         is_null_vector = csmmath_vectors_are_parallel(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, tolerances);
         is_oriented_in_direction = csmface_is_oriented_in_direction(he_iterator_face, Ux12, Uy12, Uz12);
         
-        neigborhood = i_create_neighborhood(he_iterator, Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, Ux12, Uy12, Uz12, he_iterator_face, A, B, C, D, face_tolerance);
+        neigborhood = i_create_neighborhood(
+                        he_iterator,
+                        Ux1, Uy1, Uz1,
+                        Ux2, Uy2, Uz2,
+                        Ux12, Uy12, Uz12,
+                        he_iterator_face, A, B, C, D, face_tolerance);
         csmarrayc_append_element_st(neighborhoods, neigborhood, i_neighborhood_t);
         
         if (is_null_vector == CSMTRUE || is_oriented_in_direction == CSMTRUE)
@@ -295,7 +289,13 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
             }
             
             csmmath_cross_product3D(Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, &Ux12_bisec, &Uy12_bisec, &Uz12_bisec);
-            neigborhood_bisec = i_create_neighborhood(he_iterator, Ux_bisec, Uy_bisec, Uz_bisec, Ux2, Uy2, Uz2, Ux12_bisec, Uy12_bisec, Uz12_bisec, he_iterator_face, A, B, C, D, face_tolerance);
+            
+            neigborhood_bisec = i_create_neighborhood(
+                        he_iterator,
+                        Ux_bisec, Uy_bisec, Uz_bisec,
+                        Ux2, Uy2, Uz2,
+                        Ux12_bisec, Uy12_bisec, Uz12_bisec,
+                        he_iterator_face, A, B, C, D, face_tolerance);
             csmarrayc_append_element_st(neighborhoods, neigborhood_bisec, i_neighborhood_t);
             
             neigborhood->Ux2 = Ux_bisec;
@@ -413,6 +413,7 @@ static CSMBOOL i_is_intersection_parallel_to_sector_edge(
                         double Wx_inters, double Wy_inters, double Wz_inters,
                         double Ux, double Uy, double Uz, double Ux_u, double Uy_u, double Uz_u,
                         const struct csmtolerance_t *tolerances,
+                        CSMBOOL test_parallelism_using_distances,
                         CSMBOOL *same_sense)
 {
     assert_no_null(same_sense);
@@ -423,30 +424,34 @@ static CSMBOOL i_is_intersection_parallel_to_sector_edge(
     }
     else
     {
-        *same_sense = CSMFALSE;
-        return CSMFALSE;
-        /*
-        double distance;
-        double tolerance;
-        
-        distance = csmmath_distance_from_point_to_line3D(Ux, Uy, Uz, 0., 0., 0., Wx_inters, Wy_inters, Wz_inters);
-        tolerance = csmtolerance_equal_coords(tolerances);
-        
-        if (csmmath_compare_doubles(distance, 0., tolerance) == CSMCOMPARE_EQUAL)
+        if (test_parallelism_using_distances == CSMTRUE)
         {
-            double dot_product;
-            
-            dot_product = csmmath_dot_product3D(Wx_inters, Wy_inters, Wz_inters, Ux_u, Uy_u, Uz_u);
-            *same_sense = (dot_product > 0.0) ? CSMTRUE: CSMFALSE;
-            
-            return CSMTRUE;
+            double distance;
+            double tolerance;
+        
+            distance = csmmath_distance_from_point_to_line3D(Ux, Uy, Uz, 0., 0., 0., Wx_inters, Wy_inters, Wz_inters);
+            tolerance = csmtolerance_equal_coords(tolerances);
+        
+            if (csmmath_compare_doubles(distance, 0., tolerance) == CSMCOMPARE_EQUAL)
+            {
+                double dot_product;
+                
+                dot_product = csmmath_dot_product3D(Wx_inters, Wy_inters, Wz_inters, Ux_u, Uy_u, Uz_u);
+                *same_sense = (dot_product > 0.0) ? CSMTRUE: CSMFALSE;
+                
+                return CSMTRUE;
+            }
+            else
+            {
+                *same_sense = CSMFALSE;
+                return CSMFALSE;
+            }
         }
         else
         {
             *same_sense = CSMFALSE;
             return CSMFALSE;
         }
-        */
     }
 }
 
@@ -503,7 +508,8 @@ static CSMBOOL i_is_intersection_on_sector_interior_using_unit_vectors(
 static CSMBOOL i_is_intersection_within_sector(
                         const struct i_neighborhood_t *neighborhood,
                         double Wx_inters, double Wy_inters, double Wz_inters,
-                        const struct csmtolerance_t *tolerances)
+                        const struct csmtolerance_t *tolerances,
+                        CSMBOOL test_parallelism_using_distances)
 {
     CSMBOOL same_sense;
     
@@ -514,6 +520,7 @@ static CSMBOOL i_is_intersection_within_sector(
                         neighborhood->Ux1, neighborhood->Uy1, neighborhood->Uz1,
                         neighborhood->Ux1_u, neighborhood->Uy1_u, neighborhood->Uz1_u,
                         tolerances,
+                        test_parallelism_using_distances,
                         &same_sense) == CSMTRUE)
     {
         return same_sense;
@@ -523,6 +530,7 @@ static CSMBOOL i_is_intersection_within_sector(
                         neighborhood->Ux2, neighborhood->Uy2, neighborhood->Uz2,
                         neighborhood->Ux2_u, neighborhood->Uy2_u, neighborhood->Uz2_u,
                         tolerances,
+                        test_parallelism_using_distances,
                         &same_sense) == CSMTRUE)
     {
         return same_sense;
@@ -620,21 +628,9 @@ static void i_debug_show_inters_sectors(
                     neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1,
                     neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2);
         
-        //csmdebug_show_viewer();
+        csmdebug_show_viewer();
         csmdebug_clear_inters_sector();
     }
-}
-
-// ------------------------------------------------------------------------------------------
-
-static CSMBOOL i_are_neighborhoods_coplanar(
-                        const struct i_neighborhood_t *neighborhood_a, const struct i_neighborhood_t *neighborhood_b,
-                        const struct csmtolerance_t *tolerances)
-{
-    assert_no_null(neighborhood_a);
-    assert_no_null(neighborhood_b);
-    
-    return csmface_are_coplanar_faces_at_common_base_vertex(neighborhood_a->face, neighborhood_b->face, tolerances);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -647,7 +643,7 @@ static CSMBOOL i_exists_intersection_between_sectors(
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
 
-    if (i_are_neighborhoods_coplanar(neighborhood_a, neighborhood_b, tolerances) == CSMTRUE)
+    if (csmface_are_coplanar_faces_at_common_base_vertex(neighborhood_a->face, neighborhood_b->face, tolerances) == CSMTRUE)
     {
         //i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMFALSE, 0., 0., 0.);
         return i_sectors_overlap(neighborhood_a, neighborhood_b, tolerances);
@@ -655,6 +651,7 @@ static CSMBOOL i_exists_intersection_between_sectors(
     else
     {
         double Wx_inters, Wy_inters, Wz_inters;
+        CSMBOOL test_parallelism_using_distances;
         CSMBOOL is_within_a, is_within_b;
         
         csmmath_cross_product3D(
@@ -663,29 +660,27 @@ static CSMBOOL i_exists_intersection_between_sectors(
                         &Wx_inters, &Wy_inters, &Wz_inters);
         
         csmmath_make_unit_vector3D(&Wx_inters, &Wy_inters, &Wz_inters);
-        i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
+        //i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
         
-        is_within_a = i_is_intersection_within_sector(neighborhood_a, Wx_inters, Wy_inters, Wz_inters, tolerances);
-        is_within_b = i_is_intersection_within_sector(neighborhood_b, Wx_inters, Wy_inters, Wz_inters, tolerances);
+        test_parallelism_using_distances = CSMFALSE;
+        is_within_a = i_is_intersection_within_sector(neighborhood_a, Wx_inters, Wy_inters, Wz_inters, tolerances, test_parallelism_using_distances);
+        is_within_b = i_is_intersection_within_sector(neighborhood_b, Wx_inters, Wy_inters, Wz_inters, tolerances, test_parallelism_using_distances);
         
         if (is_within_a == CSMTRUE && is_within_b == CSMTRUE)
         {
-            //i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
             return CSMTRUE;
         }
         else
         {
-            is_within_a = i_is_intersection_within_sector(neighborhood_a, -Wx_inters, -Wy_inters, -Wz_inters, tolerances);
-            is_within_b = i_is_intersection_within_sector(neighborhood_b, -Wx_inters, -Wy_inters, -Wz_inters, tolerances);
+            is_within_a = i_is_intersection_within_sector(neighborhood_a, -Wx_inters, -Wy_inters, -Wz_inters, tolerances, test_parallelism_using_distances);
+            is_within_b = i_is_intersection_within_sector(neighborhood_b, -Wx_inters, -Wy_inters, -Wz_inters, tolerances, test_parallelism_using_distances);
             
             if (is_within_a == CSMTRUE && is_within_b == CSMTRUE)
             {
-                //i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
                 return CSMTRUE;
             }
             else
             {
-                //i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
                 return CSMFALSE;
             }
         }
@@ -710,6 +705,14 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
     
     s1b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1, tolerances);
     s2b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2, tolerances);
+
+    /*
+    if (s1a == s2a)
+        assert(s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
+
+    if (s1b == s2b)
+        assert(s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
+    */
     
     intersect = CSMTRUE;
     
@@ -1802,6 +1805,171 @@ static void i_reclasssify_on_edges(
 }
 
 // ------------------------------------------------------------------------------------------
+/*
+static void i_reclasssify_incorrect_in_out_edges(
+                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
+                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
+{
+    unsigned long num_sectors_a, num_sectors_b;
+    unsigned long i, num_sectors;
+    
+    num_sectors_a = csmarrayc_count_st(neighborhood_A, i_neighborhood_t);
+    num_sectors_b = csmarrayc_count_st(neighborhood_B, i_neighborhood_t);
+    
+    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
+
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_inters_sectors_t *sector_i;
+        struct i_neighborhood_t *nba, *nbb;
+        unsigned long idx_prev_sector_a, idx_prev_sector_b;
+        unsigned long idx_next_sector_a, idx_next_sector_b;
+        
+        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
+        assert_no_null(sector_i);
+
+        nba = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
+        assert_no_null(nba);
+
+        nbb = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
+        assert_no_null(nbb);
+        
+        idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
+        idx_next_sector_a = csmmath_next_idx(sector_i->idx_nba, num_sectors_a);
+        
+        idx_prev_sector_b = csmmath_prev_idx(sector_i->idx_nbb, num_sectors_b);
+        idx_next_sector_b = csmmath_next_idx(sector_i->idx_nbb, num_sectors_b);
+        
+        if (sector_i->intersect == CSMTRUE
+                && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
+        {
+            enum csmsetop_classify_resp_solid_t newsa;
+            unsigned long j;
+            
+            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+    
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CSMTRUE)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s1a = newsa;
+                    
+                    if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s2a = newsa;
+                    
+                    if (sector_j->s1a == sector_j->s2a
+                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+                }
+            }
+        }
+
+        if (sector_i->intersect == CSMTRUE && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            enum csmsetop_classify_resp_solid_t newsa;
+            unsigned long j;
+            
+            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+    
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CSMTRUE)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s2a = newsa;
+                    
+                    if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s1a = newsa;
+                    
+                    if (sector_j->s1a == sector_j->s2a
+                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+                }
+            }
+        }
+        
+        if(sector_i->intersect == CSMTRUE && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            enum csmsetop_classify_resp_solid_t newsb;
+            unsigned long j;
+            
+            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            //newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+    
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CSMTRUE)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s1b = newsb;
+                    
+                    if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
+                        sector_j->s2b = newsb;
+                    
+                    if (sector_j->s1b == sector_j->s2b
+                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+                }
+            }
+        }
+        
+        if(sector_i->intersect == CSMTRUE && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        {
+            enum csmsetop_classify_resp_solid_t newsb;
+            unsigned long j;
+            
+            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            //newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+    
+            for(j = 0; j < num_sectors; j++)
+            {
+                struct i_inters_sectors_t *sector_j;
+                
+                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
+                assert_no_null(sector_j);
+                
+                if (sector_j->intersect == CSMTRUE)
+                {
+                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                        sector_j->s2b = newsb;
+                    
+                    if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
+                        sector_j->s1b = newsb;
+                    
+                    if (sector_j->s1b == sector_j->s2b
+                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    {
+                        sector_j->intersect = CSMFALSE;
+                    }
+                }
+            }
+        }
+    }
+}
+*/
+// ------------------------------------------------------------------------------------------
 
 static struct i_inters_sectors_t *i_get_next_sector(csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections, unsigned long *last_idx)
 {
@@ -1895,7 +2063,8 @@ static CSMBOOL i_is_convex_edge(struct csmhedge_t *he, const struct csmtolerance
         double dot_product;
     
         csmmath_cross_product3D(A_he, B1_he, C_he, A_mate_he, B1_mate_he, C_mate_he, &Wx, &Wy, &Wz);
-
+        csmmath_make_unit_vector3D(&Wx, &Wy, &Wz);
+        
         he2 = csmhedge_next(he);
     
         if (i_is_null_edge(he2, tolerances) == CSMTRUE)
@@ -1904,6 +2073,7 @@ static CSMBOOL i_is_convex_edge(struct csmhedge_t *he, const struct csmtolerance
         vertex_he = csmhedge_vertex(he);
         vertex_he2 = csmhedge_vertex(he2);
         csmvertex_vector_from_vertex1_to_vertex2(vertex_he, vertex_he2, &Ux, &Uy, &Uz);
+        csmmath_make_unit_vector3D(&Ux, &Uy, &Uz);
         
         dot_product = csmmath_dot_product3D(Ux, Uy, Uz, Wx, Wy, Wz);
         
@@ -1937,7 +2107,10 @@ static CSMBOOL i_is_wide_sector(struct csmhedge_t *he, const struct csmtolerance
         double Ux1, Uy1, Uz1, Ux2, Uy2, Uz2;
         
         csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_prv, &Ux1, &Uy1, &Uz1);
+        csmmath_make_unit_vector3D(&Ux1, &Uy1, &Uz1);
+        
         csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_nxt, &Ux2, &Uy2, &Uz2);
+        csmmath_make_unit_vector3D(&Ux2, &Uy2, &Uz2);
     
         if (csmmath_vectors_are_parallel(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, tolerances) == CSMTRUE)
         {
@@ -1950,6 +2123,7 @@ static CSMBOOL i_is_wide_sector(struct csmhedge_t *he, const struct csmtolerance
             double dot_product;
             
             csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Ux12, &Uy12, &Uz12);
+            csmmath_make_unit_vector3D(&Ux12, &Uy12, &Uz12);
             
             i_face_normal_of_he_face(he, &A, &B, &C);
             dot_product = csmmath_dot_product3D(A, B, C, Ux12, Uy12, Uz12);

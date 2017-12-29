@@ -266,8 +266,7 @@ static void i_join_null_edges(
     i_validate_edges_belong_to_solid(solid_A, set_of_null_edges_A);
     i_validate_edges_belong_to_solid(solid_B, set_of_null_edges_B);
     
-    csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_A, tolerances);
-    csmsetopcom_sort_edges_lexicographically_by_xyz(set_of_null_edges_B, tolerances);
+    csmsetopcom_sort_pair_edges_lexicographically_by_xyz(set_of_null_edges_A, set_of_null_edges_B, tolerances);
     no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
     assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
     assert(no_null_edges > 0);

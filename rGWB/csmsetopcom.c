@@ -22,6 +22,7 @@
 #include "csmeuler_lmfkrh.inl"
 #include "csmhashtb.inl"
 #include "csmmath.inl"
+#include "csmmem.inl"
 #include "csmopbas.inl"
 #include "csmsetop.tli"
 #include "csmsolid.inl"
@@ -31,6 +32,60 @@
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
+struct i_pair_null_edges_t
+{
+    double x, y, z;
+    
+    struct csmedge_t *null_edge_a;
+    struct csmedge_t *null_edge_b;
+};
+
+// ----------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct i_pair_null_edges_t *, i_new_pair_null_edges, (
+                        double x, double y, double z,
+                        struct csmedge_t *null_edge_a,
+                        struct csmedge_t *null_edge_b))
+{
+    struct i_pair_null_edges_t *pair_null_edges;
+    
+    pair_null_edges = MALLOC(struct i_pair_null_edges_t);
+
+    pair_null_edges->x = x;
+    pair_null_edges->y = y;
+    pair_null_edges->z = z;
+    
+    pair_null_edges->null_edge_a = null_edge_a;
+    pair_null_edges->null_edge_b = null_edge_b;
+    
+    return pair_null_edges;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_free_pair_null_edges(struct i_pair_null_edges_t **pair_null_edges)
+{
+    assert_no_null(pair_null_edges);
+    assert_no_null(*pair_null_edges);
+    
+    FREE_PP(pair_null_edges, struct i_pair_null_edges_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static enum csmcompare_t i_compare_pair_null_edges(
+                        const struct i_pair_null_edges_t *pair_null_edges1, const struct i_pair_null_edges_t *pair_null_edges2,
+                        const double *tolerance)
+{
+    assert_no_null(pair_null_edges1);
+    assert_no_null(pair_null_edges2);
+    assert_no_null(tolerance);
+
+    return csmmath_compare_coords_xyz(
+                        pair_null_edges1->x, pair_null_edges1->y, pair_null_edges1->z,
+                        pair_null_edges2->x, pair_null_edges2->y, pair_null_edges2->z,
+                        *tolerance);
+}
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -155,7 +210,7 @@ CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge
 
 static enum csmcompare_t i_compare_edges_by_coord(
                         const struct csmedge_t *edge1, const struct csmedge_t *edge2,
-                        const struct csmtolerance_t *tolerances)
+                        const double *tolerance)
 {
     const struct csmhedge_t *he1_edge1, *he1_edge2;
     const struct csmvertex_t *vertex1, *vertex2;
@@ -168,21 +223,101 @@ static enum csmcompare_t i_compare_edges_by_coord(
     he1_edge2 = csmedge_hedge_lado_const(edge2, CSMEDGE_LADO_HEDGE_POS);
     vertex2 = csmhedge_vertex_const(he1_edge2);
     csmvertex_get_coordenadas(vertex2, &x2, &y2, &z2);
+    
+    return csmmath_compare_coords_xyz(x1, y1, z1, x2, y2, z2, *tolerance);
+}
 
-    return csmmath_compare_coords_xyz(
-                        x1, y1, z1,
-                        x2, y2, z2,
-                        csmtolerance_equal_coords(tolerances));
+// ----------------------------------------------------------------------------------------------------
+
+static const struct csmvertex_t *i_edge_reference_for_ordering(const struct csmedge_t *edge)
+{
+    const struct csmhedge_t *he1_edge;
+
+    he1_edge = csmedge_hedge_lado_const(edge, CSMEDGE_LADO_HEDGE_POS);
+    return csmhedge_vertex_const(he1_edge);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 void csmsetopcom_sort_edges_lexicographically_by_xyz(csmArrayStruct(csmedge_t) *set_of_null_edges, const struct csmtolerance_t *tolerances)
 {
-    csmarrayc_qsort_st_1_extra(
-                        set_of_null_edges, csmedge_t,
-                        tolerances, struct csmtolerance_t,
-                        i_compare_edges_by_coord);
+    double tolerance;
+    
+    tolerance = csmtolerance_equal_coords(tolerances);
+    csmarrayc_qsort_st_1_extra(set_of_null_edges, csmedge_t, &tolerance, double, i_compare_edges_by_coord);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static csmArrayStruct(i_pair_null_edges_t) *, i_pair_null_edges, (
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_A,
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        const struct csmtolerance_t *tolerances))
+{
+    csmArrayStruct(i_pair_null_edges_t) *array_pair_null_edges;
+    unsigned long i, no_null_edges;
+    double tolerance_equal_coords;
+    
+    no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
+    assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
+    
+    array_pair_null_edges = csmarrayc_new_st_array(no_null_edges, i_pair_null_edges_t);
+    tolerance_equal_coords = csmtolerance_equal_coords(tolerances);
+    
+    for (i = 0; i < no_null_edges; i++)
+    {
+        struct csmedge_t *null_edge_a, *null_edge_b;
+        const struct csmvertex_t *vertex_a, *vertex_b;
+        double x, y, z;
+        struct i_pair_null_edges_t *pair_null_edges;
+        
+        null_edge_a = csmarrayc_get_st(set_of_null_edges_A, i, csmedge_t);
+        vertex_a = i_edge_reference_for_ordering(null_edge_a);
+        
+        null_edge_b = csmarrayc_get_st(set_of_null_edges_B, i, csmedge_t);
+        vertex_b = i_edge_reference_for_ordering(null_edge_b);
+        
+        assert(csmvertex_equal_coords(vertex_a, vertex_b, tolerance_equal_coords) == CSMTRUE);
+        csmvertex_get_coordenadas(vertex_a, &x, &y, &z);
+        
+        pair_null_edges = i_new_pair_null_edges(x, y, z, null_edge_a, null_edge_b);
+        csmarrayc_set_st(array_pair_null_edges, i, pair_null_edges, i_pair_null_edges_t);
+    }
+    
+    return array_pair_null_edges;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_sort_pair_edges_lexicographically_by_xyz(
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_A, csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        const struct csmtolerance_t *tolerances)
+{
+    csmArrayStruct(i_pair_null_edges_t) *array_pair_null_edges;
+    double tolerance;
+    unsigned long i, no_null_edges;
+    
+    array_pair_null_edges = i_pair_null_edges(set_of_null_edges_A, set_of_null_edges_B, tolerances);
+    
+    tolerance = csmtolerance_equal_coords(tolerances);
+    csmarrayc_qsort_st_1_extra(array_pair_null_edges, i_pair_null_edges_t, &tolerance, double, i_compare_pair_null_edges);
+    
+    no_null_edges = csmarrayc_count_st(array_pair_null_edges, i_pair_null_edges_t);
+    assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_A, csmedge_t));
+    assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
+    
+    for (i = 0; i < no_null_edges; i++)
+    {
+        const struct i_pair_null_edges_t *pair_null_edges;
+        
+        pair_null_edges = csmarrayc_get_const_st(array_pair_null_edges, i, i_pair_null_edges_t);
+        assert_no_null(pair_null_edges);
+        
+        csmarrayc_set_st(set_of_null_edges_A, i, pair_null_edges->null_edge_a, csmedge_t);
+        csmarrayc_set_st(set_of_null_edges_B, i, pair_null_edges->null_edge_b, csmedge_t);
+    }
+    
+    csmarrayc_free_st(&array_pair_null_edges, i_pair_null_edges_t, i_free_pair_null_edges);
 }
 
 // ----------------------------------------------------------------------------------------------------

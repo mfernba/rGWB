@@ -513,7 +513,7 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
     struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CSMBOOL splitted;
+    enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
     i_set_output_debug_file("split1.txt");
@@ -526,8 +526,8 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
     
     csmmath_implicit_plane_equation(0., 0., .5, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
     
-    splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
     
     i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
@@ -544,7 +544,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
     struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CSMBOOL splitted;
+    enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
     i_set_output_debug_file("split_hueco_plano_medio.txt");
@@ -556,8 +556,8 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
     
     csmmath_implicit_plane_equation(0., 0., .5, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
     
-    splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
     
     i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
@@ -574,7 +574,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
     struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CSMBOOL splitted;
+    enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
     i_set_output_debug_file("split_hueco_plano_medio2.txt");
@@ -592,8 +592,8 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
     
     csmmath_implicit_plane_equation(0., 0., 0., 1., 0., 0., 0., 1., 0.5, &A, &B, &C, &D);
     
-    splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
 
     i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
     
@@ -610,7 +610,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
     struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CSMBOOL splitted;
+    enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
     i_set_output_debug_file("split_rectangular_hueco_por_plano_superior.txt");
@@ -623,15 +623,15 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
     
     csmmath_implicit_plane_equation(0., 0., 1., 1., 0., 0., 0., 1., 1., &A, &B, &C, &D);
     
-    splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
     
     csmsolid_free(&solid_above);
 
     csmmath_implicit_plane_equation(0., 0., 1., 1., 0., 0., 0., 1., -1., &A, &B, &C, &D);
 
-    splitted = csmsplit_does_plane_split_solid(solid_below, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(solid_below, A, B, C, D, &solid_above, &solid_below);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
     
     i_show_split_results(A, B, C, D, CSMTRUE, solid_above, solid_below);
 
@@ -646,7 +646,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior2(void)
     struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
     double A, B, C, D;
-    CSMBOOL splitted;
+    enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
     shape2d = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
@@ -656,8 +656,8 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior2(void)
     
     csmmath_implicit_plane_equation(0., 0., 1. - 1.5e-3, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
     
-    splitted = csmsplit_does_plane_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(solid1, A, B, C, D, &solid_above, &solid_below);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
 
     csmsolid_debug_print_debug(solid1, CSMTRUE);
     csmsolid_debug_print_debug(solid_above, CSMTRUE);
@@ -1557,8 +1557,8 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
             B = C = 0.;
             D = -1.;
             
-            does_split = csmsplit_does_plane_split_solid(solid_res2, A, B, C, D, &solid_above, &solid_below);
-            assert(does_split == CSMTRUE);
+            does_split = csmsplit_split_solid(solid_res2, A, B, C, D, &solid_above, &solid_below);
+            assert(does_split == CSMSPLIT_OPRESULT_OK);
             
             desp = 0.5;
             csmsolid_move(solid_above, A * desp, B * desp, C * desp);
@@ -1701,8 +1701,8 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             C = 1.;
             D = -0.55; // Falla split a -0.75
             
-            does_split = csmsplit_does_plane_split_solid(solid_res, A, B, C, D, &solid_above, &solid_below);
-            assert(does_split == CSMTRUE);
+            does_split = csmsplit_split_solid(solid_res, A, B, C, D, &solid_above, &solid_below);
+            assert(does_split == CSMSPLIT_OPRESULT_OK);
             
             desp = 0.5;
             csmsolid_move(solid_above, A * desp, B * desp, C * desp);
@@ -2003,14 +2003,14 @@ static void i_test_mechanical_part1(void)
     {
         double A, B, C, D;
         struct csmsolid_t *solid_above, *solid_below;
-        CSMBOOL splitted;
+        enum csmsplit_opresult_t split_result;
 
         //csmdebug_set_enabled_by_code(CSMFALSE);
         
         csmmath_implicit_plane_equation(0., 0., 0., 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
     
-        splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CSMTRUE);
+        split_result = csmsplit_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
+        assert(split_result == CSMSPLIT_OPRESULT_OK);
 
         csmdebug_set_enabled_by_code(CSMTRUE);
         
@@ -2101,22 +2101,22 @@ static void i_test_mechanical_part1_redux(void)
     {
         double A, B, C, D;
         struct csmsolid_t *solid_above, *solid_below;
-        CSMBOOL splitted;
+        enum csmsplit_opresult_t split_result;
 
         csmdebug_set_enabled_by_code(CSMFALSE);
         
         csmmath_implicit_plane_equation(0., 0., 0.5, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
     
-        splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CSMTRUE);
+        split_result = csmsplit_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
+        assert(split_result == CSMSPLIT_OPRESULT_OK);
 
         csmdebug_set_enabled_by_code(CSMTRUE);
         
         main_part = solid_above;
         
         csmmath_implicit_plane_equation(0., 0., 0.56, 1., 0., 0., 0., 1., 0., &A, &B, &C, &D);
-        splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CSMTRUE);
+        split_result = csmsplit_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
+        assert(split_result == CSMSPLIT_OPRESULT_OK);
         
         main_part = solid_below;
         
@@ -2155,14 +2155,14 @@ static void i_test_mechanical_part1_redux(void)
     {
         double A, B, C, D;
         struct csmsolid_t *solid_above, *solid_below;
-        CSMBOOL splitted;
+        enum csmsplit_opresult_t split_result;
 
         csmdebug_set_enabled_by_code(CSMFALSE);
         
         csmmath_implicit_plane_equation(0., 0., 0., 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
     
-        splitted = csmsplit_does_plane_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CSMTRUE);
+        split_result = csmsplit_split_solid(main_part, A, B, C, D, &solid_above, &solid_below);
+        assert(split_result == CSMSPLIT_OPRESULT_OK);
 
         csmdebug_set_enabled_by_code(CSMTRUE);
         
@@ -2281,14 +2281,14 @@ static void i_test_mechanical_part2(void)
         {
             double A, B, C, D;
             struct csmsolid_t *solid_above, *solid_below;
-            CSMBOOL splitted;
+            enum csmsplit_opresult_t split_result;
 
             csmdebug_set_enabled_by_code(CSMFALSE);
             
             csmmath_implicit_plane_equation(0., 0., 0., 0., 0., 1., 1., 0., 0., &A, &B, &C, &D);
         
-            splitted = csmsplit_does_plane_split_solid(block_solid, A, B, C, D, &solid_above, &solid_below);
-            assert(splitted == CSMTRUE);
+            split_result = csmsplit_split_solid(block_solid, A, B, C, D, &solid_above, &solid_below);
+            assert(split_result == CSMSPLIT_OPRESULT_OK);
 
             csmdebug_set_enabled_by_code(CSMTRUE);
             
@@ -2699,8 +2699,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_split_solid_ang_get_division, (
                         Ux, Uy, Uz, Vx, Vy, Vz,
                         &A, &B, &C, &D);
     
-    split = csmsplit_does_plane_split_solid(solid, A, B, C, D, &above, &below);
-    assert(split == CSMTRUE);
+    split = csmsplit_split_solid(solid, A, B, C, D, &above, &below);
+    assert(split == CSMSPLIT_OPRESULT_OK);
     
     if (get_top == CSMTRUE)
     {
@@ -3078,7 +3078,7 @@ static void i_test7_edge_spheres(
 {
     struct csmsolid_t *sphere, *inner_sphere, *half_sphere_top, *half_sphere_bottom;
     struct csmsolid_t *solid_aux;
-    CSMBOOL splitted;
+    enum csmsplit_opresult_t split_result;
     
     assert(radius > 0.);
     assert(thick > 0.);
@@ -3087,8 +3087,8 @@ static void i_test7_edge_spheres(
     sphere = csmquadrics_create_sphere(radius, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     inner_sphere = csmquadrics_create_sphere(radius - thick, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     
-    splitted = csmsplit_does_plane_split_solid(sphere, 0., 0., 1., 0., &half_sphere_top, &half_sphere_bottom);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(sphere, 0., 0., 1., 0., &half_sphere_top, &half_sphere_bottom);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
     csmsolid_free(&half_sphere_top);
     csmsolid_free(&sphere);
     
@@ -3097,8 +3097,8 @@ static void i_test7_edge_spheres(
     csmsolid_free(&solid_aux);
     csmsolid_free(&inner_sphere);
     
-    splitted = csmsplit_does_plane_split_solid(half_sphere_bottom, -1., 0., 0., 0., edge_left, edge_rigth);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(half_sphere_bottom, -1., 0., 0., 0., edge_left, edge_rigth);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -3153,7 +3153,7 @@ static void i_test7_cylinder(
                         struct csmsolid_t **cylinder)
 {
     struct csmsolid_t *cyl, *cyl_top;
-    CSMBOOL splitted;
+    enum csmsplit_opresult_t split_result;
     
     assert(radius > 0.);
     assert(thick > 0.);
@@ -3161,8 +3161,8 @@ static void i_test7_cylinder(
     
     cyl = i_create_horizontal_hollow_cylinder(radius, thick, length, no_points_circle);
     
-    splitted = csmsplit_does_plane_split_solid(cyl, 0., 0., 1., 0., &cyl_top, cylinder);
-    assert(splitted == CSMTRUE);
+    split_result = csmsplit_split_solid(cyl, 0., 0., 1., 0., &cyl_top, cylinder);
+    assert(split_result == CSMSPLIT_OPRESULT_OK);
     csmsolid_free(&cyl_top);
     csmsolid_free(&cyl);
 }
@@ -3547,13 +3547,13 @@ static void i_test_paraboloid_one_sheet(void)
     
     {
         double A, B, C, D;
-        CSMBOOL splitted;
+        enum csmsplit_opresult_t split_result;
         struct csmsolid_t *solid_above, *solid_below;
         
         csmmath_implicit_plane_equation(0., 0., .0, 0., 1., 0., 0., 0., 1., &A, &B, &C, &D);
     
-        splitted = csmsplit_does_plane_split_solid(paraboloid, A, B, C, D, &solid_above, &solid_below);
-        assert(splitted == CSMTRUE);
+        split_result = csmsplit_split_solid(paraboloid, A, B, C, D, &solid_above, &solid_below);
+        assert(split_result == CSMSPLIT_OPRESULT_OK);
     
         i_show_split_results_ex(A, B, C, D, CSMTRUE, 2.5, CSMTRUE, solid_above, solid_below);
         
@@ -3926,6 +3926,7 @@ static void i_test_inters_inner_segment(void)
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
+    CSMBOOL process_all_test = CSMTRUE;
     
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_set_parameters, csmviewer_set_results);
@@ -3946,70 +3947,80 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
 
-    i_test_divide_solido_rectangular_hueco_por_plano_medio();
-    i_test_divide_solido_rectangular_hueco_por_plano_medio2();
-    i_test_divide_solido_rectangular_hueco_por_plano_superior();
-    i_test_divide_solido_rectangular_hueco_por_plano_superior2();
+    csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    
+    if (process_all_test == CSMFALSE)
+    {
+        //i_test_cilindro4(viewer);
+        i_test_sweep_path5();
+    }
+    else
+    {
+        i_test_divide_solido_rectangular_hueco_por_plano_medio();
+        i_test_divide_solido_rectangular_hueco_por_plano_medio2();
+        i_test_divide_solido_rectangular_hueco_por_plano_superior();
+        i_test_divide_solido_rectangular_hueco_por_plano_superior2();
 
-    i_test_union_solidos1(viewer);
-    i_test_union_solidos2(viewer);
-    i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
-    
-    i_test_interseccion_solidos1(viewer);
-    i_test_interseccion_solidos2(viewer);
-    i_test_interseccion_solidos3(viewer);
-    i_test_interseccion_solidos4(viewer);
-    i_test_interseccion_solidos5(viewer);
-    i_test_interseccion_solidos7(viewer);
-    i_test_resta_solidos1(viewer);
-    i_test_resta_solidos2(viewer);
-    i_test_multiple_solidos1(viewer);
-    i_test_multiple_solidos2(viewer);
-    i_test_multiple_solidos3(viewer);
-    
-    i_test_cilindro1(viewer);
-    i_test_cilindro2(viewer);
-    i_test_cilindro3(viewer);
-    i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
-    i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
-    i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
-    i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
-    i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
-    
-    //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
-                              // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
-                              // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
+        i_test_union_solidos1(viewer);
+        i_test_union_solidos2(viewer);
+        i_test_union_solidos6(viewer);  // --> Pendiente eliminar caras dentro de caras
+        
+        i_test_interseccion_solidos1(viewer);
+        i_test_interseccion_solidos2(viewer);
+        i_test_interseccion_solidos3(viewer);
+        i_test_interseccion_solidos4(viewer);
+        i_test_interseccion_solidos5(viewer);
+        i_test_interseccion_solidos7(viewer);
+        i_test_resta_solidos1(viewer);
+        i_test_resta_solidos2(viewer);
+        i_test_multiple_solidos1(viewer);
+        i_test_multiple_solidos2(viewer);
+        i_test_multiple_solidos3(viewer);
+        
+        i_test_cilindro1(viewer);
+        i_test_cilindro2(viewer);
+        i_test_cilindro3(viewer);
+        i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
+        i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
+        i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
+        i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
+        i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
+        
+        //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
+                                  // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
+                                  // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
-    i_test_mechanical_part1_redux();
-    i_test_mechanical_part1();
-    i_test_mechanical_part2();
-    
-    i_test_toroide();
-    i_test_cono();
-    i_test_sphere();
+        i_test_mechanical_part1_redux();
+        i_test_mechanical_part1();
+        i_test_mechanical_part2();
+        
+        i_test_toroide();
+        i_test_cono();
+        i_test_sphere();
 
-    i_test_sphere2();
-    i_test_sphere3();
-    
-    i_test_sphere4();
-    
-    i_test_mechanical5();
-    i_test_mechanical6bis();
-    i_test_mechanical6();
+        i_test_sphere2();
+        i_test_sphere3();
+        
+        i_test_sphere4();
+        
+        i_test_mechanical5();
+        i_test_mechanical6bis();
+        i_test_mechanical6();
 
-    i_test_mechanichal7_simplified();
-    i_test_mechanichal7();
-    
-    i_test_ellipsoid();
-    i_test_paraboloid_one_sheet();
-    
-    i_test_sweep_path1();
-    i_test_sweep_path2();
-    i_test_sweep_path3();
-    i_test_sweep_path4();
-    
-    //i_test_sweep_path5();
-    i_test_inters_inner_segment();
+        i_test_mechanichal7_simplified();
+        i_test_mechanichal7();
+        
+        i_test_ellipsoid();
+        i_test_paraboloid_one_sheet();
+        
+        i_test_sweep_path1();
+        i_test_sweep_path2();
+        i_test_sweep_path3();
+        i_test_sweep_path4();
+        
+        //i_test_sweep_path5();
+        i_test_inters_inner_segment();
+    }
     
     csmviewer_free(&viewer);
 }
