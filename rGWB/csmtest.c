@@ -2700,6 +2700,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_split_solid_ang_get_division, (
     split = csmsplit_split_solid(solid, A, B, C, D, &above, &below);
     assert(split == CSMSPLIT_OPRESULT_OK);
     
+    csmdebug_clear_plane();
+    
     if (get_top == CSMTRUE)
     {
         csmsolid_free(&below);
@@ -3820,8 +3822,6 @@ static void i_test_sweep_path4(void)
 
 // ------------------------------------------------------------------------------------------
 
-// ------------------------------------------------------------------------------------------
-
 static void i_test_sweep_path5(void)
 {
     double factor;
@@ -3921,6 +3921,164 @@ static void i_test_inters_inner_segment(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_sweep_path6(void)
+{
+    double factor;
+    double bolt_diameter, bolt_radius, thread_size, margin_between_threads, bolt_thread_length, no_threads;
+    double head_size;
+    unsigned long no_points_circle;
+    double top_transition_size;
+    struct csmsolid_t *solid_thread;
+    struct csmsolid_t *solid;
+    struct csmsolid_t *solid_aux;
+    
+    i_set_output_debug_file("sweep_path6.txt");
+    
+    factor = 1.;
+    bolt_diameter = factor * 0.032;
+    bolt_radius = factor * 0.5 * bolt_diameter;
+    thread_size = 0.0025;
+    margin_between_threads = 0.001;
+    no_threads = 15;
+    bolt_thread_length = factor * (no_threads + 1) * 2. * thread_size + no_threads * margin_between_threads;
+    
+    top_transition_size = 0.004;
+    head_size = 0.5 * bolt_diameter;
+    
+    no_points_circle = 32;
+    
+    {
+        struct csmshape2d_t *shape;
+        unsigned long idx_polygon;
+        struct csmsweep_path_t *sweep_path;
+        
+        shape = csmshape2d_new();
+        csmshape2d_new_polygon(shape, &idx_polygon);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, -factor * thread_size, 0.);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., -factor * thread_size);
+        csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., factor * thread_size);
+        
+        sweep_path = csmsweep_new_helix_plane_path(
+                        0., 0., 0.98 * bolt_radius, no_points_circle,
+                        factor * (2. * thread_size + margin_between_threads), no_threads,
+                        0., 0., 0.5 * thread_size, 1., 0., 0., 0., 1., 0.,
+                        shape);
+    
+        solid_thread = csmsweep_create_from_path(sweep_path);
+        i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_thread);
+        
+        csmdebug_set_viewer_results(solid_thread, NULL);
+        //csmdebug_show_viewer();
+        
+        csmsweep_free_path(&sweep_path);
+        csmshape2d_free(&shape);
+    }
+    
+    {
+        struct csmshape2d_t *shape;
+        
+        shape = csmbasicshape2d_circular_shape(bolt_radius, no_points_circle);
+        solid = csmsweep_create_solid_from_shape(shape, 0., 0., bolt_thread_length, 1., 0., 0., 0., 1., 0., shape, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+        i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid);
+        
+        csmshape2d_free(&shape);
+    }
+
+    //csmsolid_rotate(solid, CSMMATH_PI / 4., 0., 0., 0., 0., 0., 1.);
+    //csmsolid_rotate(solid_thread, CSMMATH_PI / 4., 0., 0., 0., 0., 0., 1.);
+    
+    {
+        struct csmshape2d_t *bottom, *top;
+        struct csmsolid_t *transition;
+        
+        bottom = csmbasicshape2d_circular_shape(bolt_radius, no_points_circle);
+        top = csmbasicshape2d_circular_shape(1.25 * bolt_radius, no_points_circle);
+        
+        transition = csmsweep_create_solid_from_shape(
+                        top,
+                        0., 0., bolt_thread_length + top_transition_size, 1., 0., 0., 0., 1., 0.,
+                        bottom,
+                        0., 0., bolt_thread_length, 1., 0., 0., 0., 1., 0.);
+        
+        i_assign_flat_material_to_solid(0.5, 0.5, 0.5, transition);
+        
+        solid_aux = solid;
+        assert(csmsetop_union_A_and_B(solid, transition, &solid) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+        
+        csmshape2d_free(&bottom);
+        csmshape2d_free(&top);
+        csmsolid_free(&transition);
+    }
+
+    {
+        struct csmshape2d_t *bottom, *top;
+        struct csmsolid_t *transition;
+        
+        top = csmbasicshape2d_circular_shape(bolt_radius, no_points_circle);
+        bottom = csmbasicshape2d_circular_shape(0.90 * bolt_radius, no_points_circle);
+        
+        transition = csmsweep_create_solid_from_shape(
+                        top,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        bottom,
+                        0., 0., 0. - top_transition_size, 1., 0., 0., 0., 1., 0.);
+        
+        i_assign_flat_material_to_solid(0.5, 0.5, 0.5, transition);
+        
+        solid_aux = solid;
+        assert(csmsetop_union_A_and_B(solid, transition, &solid) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+        
+        csmshape2d_free(&bottom);
+        csmshape2d_free(&top);
+        csmsolid_free(&transition);
+    }
+    
+    {
+        struct csmshape2d_t *head;
+        struct csmsolid_t *head_solid;
+        
+        head = csmbasicshape2d_circular_shape(bolt_diameter, 6);
+        
+        head_solid = csmsweep_create_solid_from_shape(
+                        head,
+                        0., 0., bolt_thread_length + top_transition_size + head_size, 1., 0., 0., 0., 1., 0.,
+                        head,
+                        0., 0., bolt_thread_length + top_transition_size, 1., 0., 0., 0., 1., 0.);
+        
+        i_assign_flat_material_to_solid(0.5, 0.5, 0.5, head_solid);
+        
+        solid_aux = solid;
+        assert(csmsetop_union_A_and_B(solid, head_solid, &solid) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+        
+        csmshape2d_free(&head);
+        csmsolid_free(&head_solid);
+    }
+    
+    solid_aux = solid;
+    assert(csmsetop_union_A_and_B(solid, solid_thread, &solid) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    /*
+    solid_aux = solid;
+    solid = i_split_solid_ang_get_division(solid, 0., 0., 0., 1., 0., 0., 0., 1., 0., CSMTRUE);
+    csmsolid_free(&solid_aux);
+
+    solid_aux = solid;
+    solid = i_split_solid_ang_get_division(solid, 0., 0., bolt_thread_length, 1., 0., 0., 0., 1., 0., CSMFALSE);
+    csmsolid_free(&solid_aux);
+    */
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    csmsolid_free(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -3950,7 +4108,7 @@ void csmtest_test(void)
     if (process_all_test == CSMFALSE)
     {
         //i_test_cilindro4(viewer);
-        i_test_sweep_path5();
+        i_test_sweep_path6();
     }
     else
     {
@@ -4015,8 +4173,8 @@ void csmtest_test(void)
         i_test_sweep_path2();
         i_test_sweep_path3();
         i_test_sweep_path4();
-        
-        //i_test_sweep_path5();
+        i_test_sweep_path5();
+        i_test_sweep_path6();
         i_test_inters_inner_segment();
     }
     
