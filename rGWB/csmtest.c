@@ -3921,7 +3921,7 @@ static void i_test_inters_inner_segment(void)
 
 // ------------------------------------------------------------------------------------------
 
-static void i_test_sweep_path6(void)
+static void i_test_sweep_path6(CSMBOOL thread_is_outer)
 {
     double factor;
     double bolt_diameter, bolt_radius, thread_size, margin_between_threads, bolt_thread_length, no_threads;
@@ -3958,11 +3958,22 @@ static void i_test_sweep_path6(void)
         csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., -factor * thread_size);
         csmshape2d_append_point_to_polygon(shape, idx_polygon, 0., factor * thread_size);
         
-        sweep_path = csmsweep_new_helix_plane_path(
+        if (thread_is_outer == CSMTRUE)
+        {
+            sweep_path = csmsweep_new_helix_plane_path(
+                        0., 0., bolt_radius, no_points_circle,
+                        factor * (2. * thread_size + margin_between_threads), no_threads,
+                        0., 0., 0.5 * thread_size, 1., 0., 0., 0., 1., 0.,
+                        shape);
+        }
+        else
+        {
+            sweep_path = csmsweep_new_helix_plane_path(
                         0., 0., 0.98 * bolt_radius, no_points_circle,
                         factor * (2. * thread_size + margin_between_threads), no_threads,
                         0., 0., 0.5 * thread_size, 1., 0., 0., 0., 1., 0.,
                         shape);
+        }
     
         solid_thread = csmsweep_create_from_path(sweep_path);
         i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_thread);
@@ -4108,7 +4119,7 @@ void csmtest_test(void)
     if (process_all_test == CSMFALSE)
     {
         //i_test_cilindro4(viewer);
-        i_test_sweep_path6();
+        i_test_sweep_path6(CSMTRUE);
     }
     else
     {
@@ -4174,7 +4185,8 @@ void csmtest_test(void)
         i_test_sweep_path3();
         i_test_sweep_path4();
         i_test_sweep_path5();
-        i_test_sweep_path6();
+        i_test_sweep_path6(CSMTRUE);
+        i_test_sweep_path6(CSMFALSE);
         i_test_inters_inner_segment();
     }
     
