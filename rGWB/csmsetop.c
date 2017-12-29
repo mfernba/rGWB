@@ -297,7 +297,7 @@ static void i_join_null_edges(
         csmsolid_debug_print_debug(solid_B, CSMTRUE);
         
         i_append_null_edges_to_debug_view(set_of_null_edges_A);
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
     }
     
     csmdebug_block_print_solid();
@@ -405,7 +405,7 @@ static void i_join_null_edges(
             csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
             
-            csmdebug_show_viewer();
+            //csmdebug_show_viewer();
         }
     }
     

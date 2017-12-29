@@ -1036,7 +1036,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
         }
         csmdebug_end_context();
     
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
         
         if (did_find_non_manifold_operand_solid_A == CSMFALSE)
         {
@@ -1066,7 +1066,7 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
             did_find_non_manifold_operand_solid_B = CSMFALSE;
         }
 
-        csmdebug_show_viewer();
+        //csmdebug_show_viewer();
         
         if (did_find_non_manifold_operand_solid_A == CSMFALSE && did_find_non_manifold_operand_solid_B == CSMFALSE)
         {

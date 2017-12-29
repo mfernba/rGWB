@@ -979,9 +979,6 @@ enum csmsplit_opresult_t csmsplit_split_solid(
     csmArrayStruct(csmvertex_t) *set_of_on_vertices;
     csmArrayStruct(csmedge_t) *set_of_null_edges;
 
-    assert_no_null(solid_above);
-    assert_no_null(solid_below);
-    
     csmdebug_begin_context("Split");
     
     tolerances = csmtolerance_new();
@@ -993,8 +990,7 @@ enum csmsplit_opresult_t csmsplit_split_solid(
     csmdebug_set_viewer_results(NULL, NULL);
     csmdebug_set_viewer_parameters(work_solid, NULL);
     csmdebug_set_plane(A, B, C, D);
-    //csmdebug_show_viewer();
-    
+    //csmdebug_show_viewer();    
     
     set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D, tolerances);
     
@@ -1054,7 +1050,7 @@ enum csmsplit_opresult_t csmsplit_split_solid(
             csmsolid_redo_geometric_face_data(solid_below_loc);
             volume_below = csmsolid_volume(solid_below_loc);
             
-            if (volume_above > 1.e-6 && volume_below > 1.e-6)
+            if (volume_above > 1.e-6 || volume_below > 1.e-6)
             {
                 operation_result = CSMSPLIT_OPRESULT_OK;
             }
@@ -1070,8 +1066,15 @@ enum csmsplit_opresult_t csmsplit_split_solid(
         csmarrayc_free_st(&set_of_null_faces, csmface_t, NULL);
     }
 
-    *solid_above = solid_above_loc;
-    *solid_below = solid_below_loc;
+    if (solid_above != NULL)
+        *solid_above = solid_above_loc;
+    else if (solid_above_loc != NULL)
+        csmsolid_free(&solid_above_loc);
+        
+    if (solid_below != NULL)
+        *solid_below = solid_below_loc;
+    else if (solid_below_loc != NULL)
+        csmsolid_free(&solid_below_loc);
     
     csmtolerance_free(&tolerances);
     csmsolid_free(&work_solid);

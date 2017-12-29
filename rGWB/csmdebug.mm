@@ -56,9 +56,9 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 1;
+static int i_DEBUG_SCREEN = 0;
 static int i_DEBUG_VISUAL = 1;
-static int i_DEBUG_FILE = 1;
+static int i_DEBUG_FILE = 0;
 
 static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
 
@@ -519,7 +519,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
         }
     }
     
-    /*if (g_Draw_plane == CSMTRUE)
+    if (g_Draw_plane == CSMTRUE)
     {
         double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
         double desp;
@@ -528,7 +528,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
         
         csmmath_plane_axis_from_implicit_plane_equation(g_A, g_B, g_C, g_D, &Xo, &Yo, &Zo, &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
         
-        desp = 2;
+        desp = 0.5;
         
         csmmath_move_point(Xo, Yo, Zo, Ux, Uy, Uz, -desp, &x1, &y1, &z1);
         csmmath_move_point(x1, y1, z1, Vx, Vy, Vz, -desp, &x1, &y1, &z1);
@@ -553,7 +553,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
                         x4, y4, z4, true, g_A, g_B, g_C);
         
         bsmaterial_destruye(&material);
-    }*/
+    }
     
     bsmaterial_destruye(&debug_point_material);
 }
