@@ -255,13 +255,17 @@ static void i_join_null_edges(
                         struct csmsolid_t *solid_B, csmArrayStruct(csmedge_t) *set_of_null_edges_B,
                         const struct csmtolerance_t *tolerances, 
                         csmArrayStruct(csmface_t) **set_of_null_faces_A,
-                        csmArrayStruct(csmface_t) **set_of_null_faces_B)
+                        csmArrayStruct(csmface_t) **set_of_null_faces_B,
+                        CSMBOOL *did_join_all_null_edges)
 {
     csmArrayStruct(csmface_t) *set_of_null_faces_A_loc, *set_of_null_faces_B_loc;
+    CSMBOOL did_join_all_null_edges_loc;
     csmArrayStruct(csmhedge_t) *loose_ends_A, *loose_ends_B;
     unsigned long i, no_null_edges;
     unsigned long no_null_edges_deleted_A, no_null_edges_deleted_B;
     unsigned long no_null_edges_pendant;
+    
+    assert_no_null(did_join_all_null_edges);
     
     i_validate_edges_belong_to_solid(solid_A, set_of_null_edges_A);
     i_validate_edges_belong_to_solid(solid_B, set_of_null_edges_B);
@@ -419,14 +423,13 @@ static void i_join_null_edges(
     csmsolid_debug_print_debug(solid_B, CSMTRUE);
     //csmdebug_show_viewer();
     
-    *set_of_null_faces_A = set_of_null_faces_A_loc;
-    *set_of_null_faces_B = set_of_null_faces_B_loc;
-    
     no_null_edges_pendant = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
     assert(no_null_edges_pendant == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
     
     if (no_null_edges_pendant == 0)
     {
+        did_join_all_null_edges_loc = CSMTRUE;
+        
         assert(csmarrayc_count_st(loose_ends_A, csmhedge_t) == 0);
         assert(csmarrayc_count_st(loose_ends_B, csmhedge_t) == 0);
     }
@@ -452,9 +455,19 @@ static void i_join_null_edges(
          */
         null_edges_that_cannot_be_matched_A = i_there_are_only_null_edges_that_cannot_be_matched(set_of_null_edges_A);
         null_edges_that_cannot_be_matched_B = i_there_are_only_null_edges_that_cannot_be_matched(set_of_null_edges_B);
+     
+        if (null_edges_that_cannot_be_matched_A == CSMTRUE || null_edges_that_cannot_be_matched_B == CSMTRUE)
+            did_join_all_null_edges_loc = CSMTRUE;
+        else
+            did_join_all_null_edges_loc = CSMFALSE;
         
-        assert(null_edges_that_cannot_be_matched_A == CSMTRUE || null_edges_that_cannot_be_matched_B == CSMTRUE);
+        if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
+            assert(null_edges_that_cannot_be_matched_A == CSMTRUE || null_edges_that_cannot_be_matched_B == CSMTRUE);
     }
+    
+    *set_of_null_faces_A = set_of_null_faces_A_loc;
+    *set_of_null_faces_B = set_of_null_faces_B_loc;
+    *did_join_all_null_edges = did_join_all_null_edges_loc;
     
     csmarrayc_free_st(&loose_ends_A, csmhedge_t, NULL);
     csmarrayc_free_st(&loose_ends_B, csmhedge_t, NULL);
@@ -857,16 +870,17 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_internal, (
+static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
                         enum csmsetop_operation_t set_operation,
-                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B))
+                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        struct csmsolid_t **solid_res)
 {
-    struct csmsolid_t *result;
+    enum csmsetop_opresult_t result;
+    struct csmsolid_t *solid_res_loc;
     struct csmtolerance_t *tolerances;
     csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections;
     csmArrayStruct(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
     csmArrayStruct(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
-    csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
     unsigned long no_null_edges;
     
     tolerances = csmtolerance_new();
@@ -892,46 +906,55 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
     set_of_null_edges_A = csmarrayc_new_st_array(0, csmedge_t);
     set_of_null_edges_B = csmarrayc_new_st_array(0, csmedge_t);
     
-    csmdebug_print_debug_info("***vf_intersections_A [BEGIN]\n");
     csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, tolerances, set_of_null_edges_A, set_of_null_edges_B);
-    csmdebug_print_debug_info("***vf_intersections_A [END]\n");
-    
-    csmdebug_print_debug_info("***vf_intersections_B [BEGIN]\n");
     csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, tolerances, set_of_null_edges_B, set_of_null_edges_A);
-    csmdebug_print_debug_info("***vf_intersections_B [END]\n");
-    
-    csmsolid_debug_print_debug(solid_A, CSMTRUE);
-    
-    csmsetop_vtxvtx_append_null_edges(
-                        vv_intersections,
-                        set_operation,
-                        tolerances,
-                        set_of_null_edges_A, set_of_null_edges_B);
+    csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, tolerances, set_of_null_edges_A, set_of_null_edges_B);
     
     no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
     assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
     
     if (no_null_edges == 0)
     {
-        result = csmsolid_crea_vacio(0);
-        
-        csmdebug_clear_debug_points();
-        csmdebug_set_viewer_results(result, NULL);
+        result = CSMSETOP_OPRESULT_OK;
+        solid_res_loc = csmsolid_crea_vacio(0);
     }
     else
     {
+        csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
+        CSMBOOL did_join_all_null_edges_loc;
+        unsigned long no_null_faces;
+        
         i_join_null_edges(
                         solid_A, set_of_null_edges_A,
                         solid_B, set_of_null_edges_B,
                         tolerances,
-                        &set_of_null_faces_A, &set_of_null_faces_B);
-    
-        result = i_finish_set_operation(
+                        &set_of_null_faces_A, &set_of_null_faces_B,
+                        &did_join_all_null_edges_loc);
+        
+        no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
+        assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
+        
+        if (did_join_all_null_edges_loc == CSMFALSE || no_null_faces == 0)
+        {
+            result = CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS;
+            solid_res_loc = NULL;
+        }
+        else
+        {
+            result = CSMSETOP_OPRESULT_OK;
+            
+            solid_res_loc = i_finish_set_operation(
                         set_operation,
                         solid_A, set_of_null_faces_A,
                         solid_B, set_of_null_faces_B,
                         tolerances);
+        }
+        
+        csmarrayc_free_st(&set_of_null_faces_A, csmface_t, NULL);
+        csmarrayc_free_st(&set_of_null_faces_B, csmface_t, NULL);
     }
+    
+    *solid_res = solid_res_loc;
     
     csmdebug_end_context();
     
@@ -939,17 +962,20 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids_interna
     csmarrayc_free_st(&vv_intersections, csmsetop_vtxvtx_inters_t, csmsetop_vtxvtx_free_inters);
     csmarrayc_free_st(&vf_intersections_A, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
     csmarrayc_free_st(&vf_intersections_B, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
+    csmarrayc_free_st(&set_of_null_edges_A, csmedge_t, NULL);
+    csmarrayc_free_st(&set_of_null_edges_B, csmedge_t, NULL);
     
     return result;
 }
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
+static enum csmsetop_opresult_t i_set_operation_modifying_solids(
                         enum csmsetop_operation_t set_operation,
-                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B))
+                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        struct csmsolid_t **solid_res)
 {
-    struct csmsolid_t *result;
+    enum csmsetop_opresult_t result;
     
     csmdebug_begin_context("SETOP");
     csmsolid_set_name(solid_A, "Solid A");
@@ -959,29 +985,33 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation_modifying_solids, (
     csmdebug_set_viewer_parameters(solid_A, solid_B);
     csmdebug_show_viewer();
     
-    result = i_set_operation_modifying_solids_internal(set_operation, solid_A, solid_B);
+    result = i_set_operation_modifying_solids_internal(set_operation, solid_A, solid_B, solid_res);
     
-    csmdebug_clear_debug_points();
-    csmsolid_debug_print_debug(result, CSMTRUE);
-    csmdebug_set_viewer_results(result, NULL);
-    csmdebug_show_viewer();
+    if (result == CSMSETOP_OPRESULT_OK && csmdebug_debug_enabled() == CSMTRUE)
+    {
+        csmdebug_clear_debug_points();
+        csmsolid_debug_print_debug(*solid_res, CSMTRUE);
+        csmdebug_set_viewer_results(*solid_res, NULL);
+        csmdebug_show_viewer();
+    }
     
     return result;
 }
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsolid_t *, i_set_operation, (
+static enum csmsetop_opresult_t i_set_operation(
                         enum csmsetop_operation_t set_operation,
-                        const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B))
+                        const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B,
+                        struct csmsolid_t **solid_res)
 {
-    struct csmsolid_t *result;
+    enum csmsetop_opresult_t result;
     struct csmsolid_t *solid_A_copy, *solid_B_copy;
     
     solid_A_copy = csmsolid_duplicate(solid_A);
     solid_B_copy = csmsolid_duplicate(solid_B);
     
-    result = i_set_operation_modifying_solids(set_operation, solid_A_copy, solid_B_copy);
+    result = i_set_operation_modifying_solids(set_operation, solid_A_copy, solid_B_copy, solid_res);
     
     csmsolid_free(&solid_A_copy);
     csmsolid_free(&solid_B_copy);
@@ -991,30 +1021,30 @@ CONSTRUCTOR(static struct csmsolid_t *, i_set_operation, (
 
 // ------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsetop_difference_A_minus_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B)
+enum csmsetop_opresult_t csmsetop_difference_A_minus_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, struct csmsolid_t **solid_res)
 {
     enum csmsetop_operation_t set_operation;
     
     set_operation = CSMSETOP_OPERATION_DIFFERENCE;
-    return i_set_operation(set_operation, solid_A, solid_B);
+    return i_set_operation(set_operation, solid_A, solid_B, solid_res);
 }
 
 // ------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsetop_union_A_and_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B)
+enum csmsetop_opresult_t csmsetop_union_A_and_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, struct csmsolid_t **solid_res)
 {
     enum csmsetop_operation_t set_operation;
     
     set_operation = CSMSETOP_OPERATION_UNION;
-    return i_set_operation(set_operation, solid_A, solid_B);
+    return i_set_operation(set_operation, solid_A, solid_B, solid_res);
 }
 
 // ------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsetop_intersection_A_and_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B)
+enum csmsetop_opresult_t csmsetop_intersection_A_and_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, struct csmsolid_t **solid_res)
 {
     enum csmsetop_operation_t set_operation;
     
     set_operation = CSMSETOP_OPERATION_INTERSECTION;
-    return i_set_operation(set_operation, solid_A, solid_B);
+    return i_set_operation(set_operation, solid_A, solid_B, solid_res);
 }

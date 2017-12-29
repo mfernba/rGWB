@@ -737,6 +737,16 @@ void csmsetop_vtxfacc_append_null_edges(
     
     num_intersections = csmarrayc_count_st(vf_intersections, csmsetop_vtxfacc_inters_t);
     
+    if (csmdebug_debug_enabled() == CSMTRUE)
+    {
+        switch (a_vs_b)
+        {
+            case CSMSETOP_A_VS_B: csmdebug_print_debug_info("***vf_intersections_A [BEGIN]\n"); break;
+            case CSMSETOP_B_VS_A: csmdebug_print_debug_info("***vf_intersections_B [BEGIN]\n"); break;
+            default_error();
+        }
+    }
+    
     for (i = 0; i < num_intersections; i++)
     {
         csmdebug_begin_context("VF INTERS");
@@ -747,5 +757,15 @@ void csmsetop_vtxfacc_append_null_edges(
             i_process_vf_inters(vf_inters, set_operation, a_vs_b, tolerances, set_of_null_edges, set_of_null_edges_other_solid);
         }
         csmdebug_end_context();
+    }
+    
+    if (csmdebug_debug_enabled() == CSMTRUE)
+    {
+        switch (a_vs_b)
+        {
+            case CSMSETOP_A_VS_B: csmdebug_print_debug_info("***vf_intersections_A [END]\n"); break;
+            case CSMSETOP_B_VS_A: csmdebug_print_debug_info("***vf_intersections_B [END]\n"); break;
+            default_error();
+        }
     }
 }

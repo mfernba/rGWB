@@ -688,7 +688,7 @@ static void i_test_union_solidos1(struct csmviewer_t *viewer)
     //solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0., -0.25, 0., 1., 0., 0., 0., 1., 0., 0);
     //solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_union_A_and_B(solid1, solid2);
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -722,7 +722,7 @@ static void i_test_union_solidos2(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0., -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0., -0.25, 0., 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_union_A_and_B(solid1, solid2);
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -748,7 +748,7 @@ static void i_test_interseccion_solidos1(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0.5, -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0., -0.25, 0., 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -777,10 +777,10 @@ static void i_test_interseccion_solidos2(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.15, 0.75, 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.15, -0.01, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
-    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+    assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -835,7 +835,7 @@ static void i_test_interseccion_solidos5(struct csmviewer_t *viewer)
     //solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., circular_shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 2., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 2., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -864,9 +864,9 @@ static void i_test_interseccion_solidos7(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(c_shape2d, 1. / 3., 0., 0.75, 1., 0., 0., 0., 1., 0., c_shape2d, 1. / 3., 0., 0.01, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    solid_res = csmsetop_union_A_and_B(solid1, solid2);
-    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -897,7 +897,7 @@ static void i_test_union_solidos6(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.15, 1., 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.15, 0.5, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 0.5, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_union_A_and_B(solid1, solid2);
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -906,7 +906,7 @@ static void i_test_union_solidos6(struct csmviewer_t *viewer)
     shape3d = csmbasicshape2d_rectangular_shape(0.75, 0.75);
     solid3 = csmsweep_create_solid_from_shape_debug(shape3d, 1., 0., 1, 1., 0., 0., 0., 1., 0., shape3d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 2000);
     
-    solid_res2 = csmsetop_union_A_and_B(solid3, solid_res);
+    assert(csmsetop_union_A_and_B(solid3, solid_res, &solid_res2) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res2, CSMTRUE);
     
     csmshape2d_free(&shape2d);
@@ -935,12 +935,12 @@ static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
     csmdebug_print_debug_info("******* Solid 1 intersect solid 2 [begin]");
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     csmdebug_print_debug_info("******* Solid 1 intersect solid 2 [end]");
 
     csmdebug_print_debug_info("******* Solid 2 intersect solid 1 [begin]");
-    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+    assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     csmdebug_print_debug_info("******* Solid 2 intersect solid 2 [end]");
     
@@ -967,7 +967,7 @@ static void i_test_interseccion_solidos4(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0.25, -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0.25, -0.25, 0., 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -999,7 +999,7 @@ static void i_test_resta_solidos1(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 0.25, -0.25, 0.75, 1., 0., 0., 0., 1., 0., shape2d, 0.25, -0.25, 0., 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -1032,7 +1032,7 @@ static void i_test_resta_solidos2(struct csmviewer_t *viewer)
     solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
     solid2 = csmsweep_create_solid_from_shape_debug(rshape2d, 0.5, -0.25, 0.75, 1., 0., 0., 0., 1., 0., rshape2d, 0.5, -0.25, 0., 1., 0., 0., 0., 1., 0., 1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+    assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -1073,9 +1073,9 @@ static void i_test_multiple_solidos1(struct csmviewer_t *viewer)
                         cshape2d, 0.5, -0.25,   0., 0., 0., 1., 1., 0., 0.,
                         1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
-    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
-    solid_res = csmsetop_union_A_and_B(solid2, solid1);
+    assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -1116,22 +1116,22 @@ static void i_test_multiple_solidos2(struct csmviewer_t *viewer)
                         cshape2d, 0.5, -0.25,   0., 0., 0., 1., 1., 0., 0.,
                         1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     
-    solid_res = csmsetop_union_A_and_B(solid1, solid2);
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
-    solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+    assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     
-    solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+    assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     
-    solid_res = csmsetop_union_A_and_B(solid2, solid1);
+    assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
     
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -1172,9 +1172,9 @@ static void i_test_multiple_solidos3(struct csmviewer_t *viewer)
                         cshape2d, 0.5, -0.25,   0., 0., 0., 1., 1., 0., 0.,
                         1000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
-    solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
-    solid_res = csmsetop_union_A_and_B(solid1, solid2);
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_debug_print_debug(solid_res, CSMTRUE);
 
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -1219,27 +1219,27 @@ static void i_test_cilindro1(struct csmviewer_t *viewer)
                         1000);
     
     {
-        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
     }
 
     {
-        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
     }
@@ -1282,27 +1282,27 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
       */
     
     {
-        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
     }
 
     {
-        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
     }
@@ -1338,27 +1338,27 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
                         cshape2d, .75, -2.,     1., -1., 0., 0., 0., 0., 1.,
                         1000);
     {
-        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
     }
 
     {
-        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
     }
@@ -1395,27 +1395,27 @@ static void i_test_cilindro6(struct csmviewer_t *viewer)
                         1000);
     
     {
-        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
     }
 
     {
-        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
     }
@@ -1465,26 +1465,26 @@ static void i_test_cilindro7(struct csmviewer_t *viewer)
                         cshape2d, 1., -2., 0.75, -1., 0., 0., 0., 0., 1.,
                         1000);
     
-        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
     
-        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
      
 
-        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
 
@@ -1527,7 +1527,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
                         cshape2d, 1., -1., 1., 0., 0., 1., 1., 0., 0.,
                         0);
     
-    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     {
         struct csmsolid_t *solid3;
         struct csmsolid_t *solid_res2;
@@ -1539,7 +1539,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
                         cshape2d, -1., 0., .25, 0., 1., 0., 0., 0., 1.,
                         0);
         
-        solid_res2 = csmsetop_difference_A_minus_B(solid_res, solid3);
+        assert(csmsetop_difference_A_minus_B(solid_res, solid3, &solid_res2) == CSMSETOP_OPRESULT_OK);
         
         //csmsolid_move(solid3, 0., -.4, 0.);
         //solid_res2 = csmsetop_difference_A_minus_B(solid_res2, solid3);
@@ -1619,7 +1619,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
                         //cshape2d, 1., -0.25,   0.5, -1., 0., 0., 0., 0., 1.,
                         5000);
     
-    solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     
     {
         struct csmsolid_t *solid3, *solid4;
@@ -1629,8 +1629,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
                         cshape2d,  1., 0., 0.0,  1., 0., 0., 0., 1., 0.,
                         10000);
         
-        solid_res = csmsetop_difference_A_minus_B(solid_res, solid3);
-        
+        assert(csmsetop_difference_A_minus_B(solid_res, solid3, &solid_res) == CSMSETOP_OPRESULT_OK);
         
         csmdebug_set_enabled_by_code(CSMTRUE);
         
@@ -1668,8 +1667,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
                         cshape2d,    -0.75, 0., 0.5,  0., 1., 0., 0., 0., 1.,
                         20000);
         
-        solid_res = csmsetop_difference_A_minus_B(solid_res, solid4);
-        
+        assert(csmsetop_difference_A_minus_B(solid_res, solid4, &solid_res) == CSMSETOP_OPRESULT_OK);
         {
             struct csmsolid_t *solid5;
             
@@ -1681,11 +1679,11 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
                         20000);
             
             csmsolid_move(solid1, -0.5, 0., 0.);
-            solid_res = csmsetop_difference_A_minus_B(solid1, solid_res);
+            assert(csmsetop_difference_A_minus_B(solid1, solid_res, &solid_res) == CSMSETOP_OPRESULT_OK);
             i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_res);
             
             i_assign_flat_material_to_solid(1., 0., 0., solid5);
-            solid_res = csmsetop_difference_A_minus_B(solid_res, solid5);
+            assert(csmsetop_difference_A_minus_B(solid_res, solid5, &solid_res) == CSMSETOP_OPRESULT_OK);
             //solid_res = csmsetop_intersection_A_and_B(solid_res, solid5);
             //solid_res = csmsetop_intersection_A_and_B(solid_res5, solid_res);
         }
@@ -1772,26 +1770,26 @@ static void i_test_cilindro8(struct csmviewer_t *viewer)
                         cshape2d, 1., -2., 0.75, -1., 0., 0., 0., 0., 1.,
                         1000);
     
-        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
     
-        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
      
 
-        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
 
@@ -1839,26 +1837,26 @@ static void i_test_cilindro9(struct csmviewer_t *viewer)
                         cshape2d, 1., -2., 1.25, 1., 0., 0., 0., 0., -1.,
                         1000);
     
-        solid_res = csmsetop_difference_A_minus_B(solid1, solid2);
+        assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
     
-        solid_res = csmsetop_intersection_A_and_B(solid1, solid2);
+        assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid1, solid2);
+        assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
      
 
-        solid_res = csmsetop_difference_A_minus_B(solid2, solid1);
+        assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
-        solid_res = csmsetop_intersection_A_and_B(solid2, solid1);
+        assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
-        solid_res = csmsetop_union_A_and_B(solid2, solid1);
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_res);
         csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
 
@@ -1946,9 +1944,9 @@ static void i_test_mechanical_part1(void)
                 struct csmsolid_t *main_part_loc;
             
                 if (no_operations % 2 == 0)
-                    main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
+                    assert(csmsetop_difference_A_minus_B(main_part, ring_part, &main_part_loc) == CSMSETOP_OPRESULT_OK);
                 else
-                    main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part2);
+                    assert(csmsetop_difference_A_minus_B(main_part, ring_part2, &main_part_loc) == CSMSETOP_OPRESULT_OK);
                 
                 csmsolid_free(&main_part);
                 main_part = main_part_loc;
@@ -1987,7 +1985,7 @@ static void i_test_mechanical_part1(void)
 
         csmsolid_move(basic_part2, 0.25 * ax, 0., 0./*0.05 * main_part_length*/);
         
-        main_part_loc = csmsetop_difference_A_minus_B(main_part, basic_part2);
+        assert(csmsetop_difference_A_minus_B(main_part, basic_part2, &main_part_loc) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&main_part);
         main_part = main_part_loc;
         
@@ -2073,9 +2071,9 @@ static void i_test_mechanical_part1_redux(void)
                 struct csmsolid_t *main_part_loc;
             
                 if (no_operations % 2 == 0)
-                    main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part);
+                    assert(csmsetop_difference_A_minus_B(main_part, ring_part, &main_part_loc) == CSMSETOP_OPRESULT_OK);
                 else
-                    main_part_loc = csmsetop_difference_A_minus_B(main_part, ring_part2);
+                    assert(csmsetop_difference_A_minus_B(main_part, ring_part2, &main_part_loc) == CSMSETOP_OPRESULT_OK);
                 
                 csmsolid_free(&main_part);
                 main_part = main_part_loc;
@@ -2139,7 +2137,7 @@ static void i_test_mechanical_part1_redux(void)
 
         csmsolid_move(basic_part2, 0.25 * ax, 0., 0./*0.05 * main_part_length*/);
         
-        main_part_loc = csmsetop_difference_A_minus_B(main_part, basic_part2);
+        assert(csmsetop_difference_A_minus_B(main_part, basic_part2, &main_part_loc) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&main_part);
         main_part = main_part_loc;
         
@@ -2218,7 +2216,7 @@ static void i_test_mechanical_part2(void)
     
     csmsolid_move(head_solid, 0., 0., bolt_length);
     
-    bolt_solid = csmsetop_union_A_and_B(head_solid, body_solid);
+    assert(csmsetop_union_A_and_B(head_solid, body_solid, &bolt_solid) == CSMSETOP_OPRESULT_OK);
     
     csmdebug_set_enabled_by_code(CSMFALSE);
     {
@@ -2229,7 +2227,7 @@ static void i_test_mechanical_part2(void)
         for (i = 0; i < num_divisions; i++)
         {
             if (i % 2 == 0)
-                bolt_solid = csmsetop_union_A_and_B(bolt_solid, thread_solid);
+                assert(csmsetop_union_A_and_B(bolt_solid, thread_solid, &bolt_solid) == CSMSETOP_OPRESULT_OK);
             
             csmsolid_move(thread_solid, 0., 0., thread_length);
         }
@@ -2269,9 +2267,9 @@ static void i_test_mechanical_part2(void)
             csmdebug_set_viewer_results(bolt_solid2, block_solid);
             csmdebug_show_viewer();
             
-            block_solid = csmsetop_difference_A_minus_B(block_solid, bolt_solid);
-            block_solid = csmsetop_difference_A_minus_B(block_solid, bolt_solid2);
-            block_solid = csmsetop_difference_A_minus_B(block_solid, bolt_solid3);
+            assert(csmsetop_difference_A_minus_B(block_solid, bolt_solid, &block_solid) == CSMSETOP_OPRESULT_OK);
+            assert(csmsetop_difference_A_minus_B(block_solid, bolt_solid2, &block_solid) == CSMSETOP_OPRESULT_OK);
+            assert(csmsetop_difference_A_minus_B(block_solid, bolt_solid3, &block_solid) == CSMSETOP_OPRESULT_OK);
         }
         csmdebug_set_enabled_by_code(CSMTRUE);
         
@@ -2327,7 +2325,7 @@ static void i_test_toroide(void)
                         10000);
     }
     
-    res = csmsetop_difference_A_minus_B(block, toroide);
+    assert(csmsetop_difference_A_minus_B(block, toroide, &res) == CSMSETOP_OPRESULT_OK);
     
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -2365,7 +2363,7 @@ static void i_test_cono(void)
                         10000);
     }
     
-    res = csmsetop_difference_A_minus_B(block, cono);
+    assert(csmsetop_difference_A_minus_B(block, cono, &res) == CSMSETOP_OPRESULT_OK);
     
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -2405,7 +2403,7 @@ static void i_test_sphere(void)
                         10000);
     }
     
-    res = csmsetop_difference_A_minus_B(block, cono);
+    assert(csmsetop_difference_A_minus_B(block, cono, &res) == CSMSETOP_OPRESULT_OK);
     
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -2472,9 +2470,9 @@ static void i_test_sphere2(void)
                         10000);
     }
     
-    res = csmsetop_difference_A_minus_B(sphere, torus);
-    res = csmsetop_difference_A_minus_B(res, torus2);
-    res = csmsetop_difference_A_minus_B(res, cone);
+    assert(csmsetop_difference_A_minus_B(sphere, torus, &res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_difference_A_minus_B(res, torus2, &res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_difference_A_minus_B(res, cone, &res) == CSMSETOP_OPRESULT_OK);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     
     csmdebug_set_viewer_results(res, NULL);
@@ -2531,8 +2529,8 @@ static void i_test_sphere3(void)
                         10000);
     }
     
-    res = csmsetop_union_A_and_B(sphere, torus);
-    res = csmsetop_difference_A_minus_B(res, torus2);
+    assert(csmsetop_union_A_and_B(sphere, torus, &res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_difference_A_minus_B(res, torus2, &res) == CSMSETOP_OPRESULT_OK);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     
     csmdebug_set_viewer_results(res, NULL);
@@ -2591,9 +2589,9 @@ static void i_test_sphere4(void)
     i_assign_flat_material_to_solid(1., 0., 0., sphere3);
     i_assign_flat_material_to_solid(1., 0., 0., sphere4);
     
-    res = csmsetop_union_A_and_B(sphere1, sphere2);
-    res = csmsetop_union_A_and_B(res, sphere3);
-    res = csmsetop_union_A_and_B(res, sphere4);
+    assert(csmsetop_union_A_and_B(sphere1, sphere2, &res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_union_A_and_B(res, sphere3, &res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_union_A_and_B(res, sphere4, &res) == CSMSETOP_OPRESULT_OK);
 
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     csmdebug_set_viewer_results(res, NULL);
@@ -2614,14 +2612,14 @@ static void i_test_sphere4(void)
         i_assign_flat_material_to_solid(0., 1., 0., block);
     }
     
-    res = csmsetop_difference_A_minus_B(block, res);
+    assert(csmsetop_difference_A_minus_B(block, res, &res) == CSMSETOP_OPRESULT_OK);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
     
     i_assign_flat_material_to_solid(1., 0., 0., res);
     
-    res = csmsetop_difference_A_minus_B(block, res);
+    assert(csmsetop_difference_A_minus_B(block, res, &res) == CSMSETOP_OPRESULT_OK);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -2636,7 +2634,7 @@ static void i_test_sphere4(void)
     
     i_assign_flat_material_to_solid(1., 1., 1., torus);
     
-    res = csmsetop_difference_A_minus_B(res, torus);
+    assert(csmsetop_difference_A_minus_B(res, torus, &res) == CSMSETOP_OPRESULT_OK);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -2656,7 +2654,7 @@ static void i_test_sphere4(void)
         i_assign_flat_material_to_solid(1., 0., 1., cylinder);
     }
     
-    res = csmsetop_difference_A_minus_B(res, cylinder);
+    assert(csmsetop_difference_A_minus_B(res, cylinder, &res) == CSMSETOP_OPRESULT_OK);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -2676,7 +2674,7 @@ static void i_test_sphere4(void)
         i_assign_flat_material_to_solid(1., 0., 1., cylinder);
     }
     
-    res = csmsetop_difference_A_minus_B(res, cylinder);
+    assert(csmsetop_difference_A_minus_B(res, cylinder, &res) == CSMSETOP_OPRESULT_OK);
     csmsolid_set_draw_only_border_edges(res, CSMFALSE);
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -2731,7 +2729,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_hollow_semisphere_at_origin, (dou
     csmsolid_free(&solid_sphere);
     
     inner_sphere = csmquadrics_create_sphere(radius - thickness, no_points_circle, no_points_circle, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
-    hollow_sphere = csmsetop_difference_A_minus_B(solid_above_sphere, inner_sphere);
+    assert(csmsetop_difference_A_minus_B(solid_above_sphere, inner_sphere, &hollow_sphere) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&inner_sphere);
     
     i_assign_flat_material_to_solid(.5, .5, .5, hollow_sphere);
@@ -2842,18 +2840,18 @@ static void i_test_mechanical5(void)
     hole_radius = 0.01;
     hole_cylinder = i_make_horizontal_hole_cylinder(hole_radius, -radius, radius, 0., no_points_circle);
     
-    solid = csmsetop_union_A_and_B(top_part, hollow_cylinder);
+    assert(csmsetop_union_A_and_B(top_part, hollow_cylinder, &solid) == CSMSETOP_OPRESULT_OK);
     
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hole_cylinder);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hole_cylinder, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
 
     csmsolid_move(hole_cylinder, 0., 0., 0.045);
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hole_cylinder);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hole_cylinder, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
@@ -2862,7 +2860,7 @@ static void i_test_mechanical5(void)
     hollow_hole_cylinder_left = i_make_horizontal_hollow_hole_cylinder(outer_hole_radius, hollow_hole_cylinder_thickness, -1.5 * radius, -radius + 3. * thickness, 0., no_points_circle);
     {
         solid_aux = hollow_hole_cylinder_left;
-        hollow_hole_cylinder_left = csmsetop_difference_A_minus_B(hollow_hole_cylinder_left, solid);
+        assert(csmsetop_difference_A_minus_B(hollow_hole_cylinder_left, solid, &hollow_hole_cylinder_left) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmsolid_move(hollow_hole_cylinder_left, 0.5 * thickness, 0., 0.);
@@ -2872,7 +2870,7 @@ static void i_test_mechanical5(void)
     hollow_hole_cylinder_right = i_make_horizontal_hollow_hole_cylinder(outer_hole_radius, hollow_hole_cylinder_thickness, radius - 3. * thickness, 1.25 * radius, 0., no_points_circle);
     {
         solid_aux = hollow_hole_cylinder_right;
-        hollow_hole_cylinder_right = csmsetop_difference_A_minus_B(hollow_hole_cylinder_right, solid);
+        assert(csmsetop_difference_A_minus_B(hollow_hole_cylinder_right, solid, &hollow_hole_cylinder_right) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmsolid_move(hollow_hole_cylinder_right, -0.5 * thickness, 0., 0.);
@@ -2881,25 +2879,25 @@ static void i_test_mechanical5(void)
 
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmsolid_move(hollow_hole_cylinder_left, 0., 0., 0.045);
         
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
 
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmsolid_move(hollow_hole_cylinder_right, 0., 0., 0.045);
         
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
@@ -2909,19 +2907,19 @@ static void i_test_mechanical5(void)
 
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hole_cylinder);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hole_cylinder, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
@@ -2931,40 +2929,40 @@ static void i_test_mechanical5(void)
 
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hole_cylinder);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hole_cylinder, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_left, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right);
+        assert(csmsetop_difference_A_minus_B(solid_aux, hollow_hole_cylinder_right, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
     torus = csmquadrics_create_torus(radius + 0.5 * thickness, no_points_circle, thickness, no_points_circle, 0., 0., -0.02, 1., 0., 0., 0., 1., 0., 0);
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, torus);
+        assert(csmsetop_difference_A_minus_B(solid_aux, torus, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
 
     csmsolid_move(torus, 0., 0., -0.01);
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, torus);
+        assert(csmsetop_difference_A_minus_B(solid_aux, torus, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
 
     csmsolid_move(torus, 0., 0., -0.01);
     {
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(solid_aux, torus);
+        assert(csmsetop_difference_A_minus_B(solid_aux, torus, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
     }
     
@@ -3010,7 +3008,7 @@ static void i_test_mechanical6bis(void)
                         1000);
     
     csmdebug_print_debug_info("***MAIN_JOIN_OPERATION");
-    s3 = csmsetop_union_A_and_B(s1, s2);
+    assert(csmsetop_union_A_and_B(s1, s2, &s3) == CSMSETOP_OPRESULT_OK);
     
     csmsolid_set_draw_only_border_edges(s3, CSMFALSE);
     csmdebug_set_viewer_results(s3, NULL);
@@ -3048,7 +3046,7 @@ static void i_test_mechanical6(void)
                         shape3, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
                         0);
     
-    s1 = csmsetop_difference_A_minus_B(s1, s1_aux);
+    assert(csmsetop_difference_A_minus_B(s1, s1_aux, &s1) == CSMSETOP_OPRESULT_OK);
 
     s2 = csmsweep_create_solid_from_shape_debug(
                         shape2, 0., 0., 2., 1., 0., 0., 0., 1., 0.,
@@ -3056,7 +3054,7 @@ static void i_test_mechanical6(void)
                         1000);
     
     csmdebug_print_debug_info("***MAIN_JOIN_OPERATION");
-    s3 = csmsetop_union_A_and_B(s1, s2);
+    assert(csmsetop_union_A_and_B(s1, s2, &s3) == CSMSETOP_OPRESULT_OK);
     
     csmsolid_set_draw_only_border_edges(s3, CSMFALSE);
     csmdebug_set_viewer_results(s3, NULL);
@@ -3093,7 +3091,7 @@ static void i_test7_edge_spheres(
     csmsolid_free(&sphere);
     
     solid_aux = half_sphere_bottom;
-    half_sphere_bottom = csmsetop_difference_A_minus_B(half_sphere_bottom, inner_sphere);
+    assert(csmsetop_difference_A_minus_B(half_sphere_bottom, inner_sphere, &half_sphere_bottom) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
     csmsolid_free(&inner_sphere);
     
@@ -3195,10 +3193,10 @@ static void i_test_mechanichal7(void)
     
     i_test7_cylinder(radius, thick, length, no_points_circle, &body_cylinder);
     
-    solid = csmsetop_union_A_and_B(hsphere_left, body_cylinder);
+    assert(csmsetop_union_A_and_B(hsphere_left, body_cylinder, &solid) == CSMSETOP_OPRESULT_OK);
     
     solid_aux = solid;
-    solid = csmsetop_union_A_and_B(solid, hsphere_rigth);
+    assert(csmsetop_union_A_and_B(solid, hsphere_rigth, &solid) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
     
     csmsolid_scale(solid, 1., 1.5, 1.);
@@ -3213,7 +3211,7 @@ static void i_test_mechanichal7(void)
         csmArrayStruct(csmsolid_t) *shells;
         struct csmsolid_t *top_block_hole, *top_block_reduced;
         
-        difference = csmsetop_difference_A_minus_B(top_block, solid);
+        assert(csmsetop_difference_A_minus_B(top_block, solid, &difference) == CSMSETOP_OPRESULT_OK);
         shells = csmexplode_explode_shells(difference);
 
         top_block_hole = csmsolid_duplicate(csmarrayc_get_st(shells, 1, csmsolid_t));
@@ -3230,11 +3228,11 @@ static void i_test_mechanichal7(void)
         csmsolid_move(top_block_reduced, 0., 0., -0.5 * thick);
 
         solid_aux = top_block;
-        top_block = csmsetop_difference_A_minus_B(top_block, top_block_reduced);
+        assert(csmsetop_difference_A_minus_B(top_block, top_block_reduced, &top_block) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
 
         solid_aux = top_block;
-        top_block = csmsetop_difference_A_minus_B(top_block, top_block_hole);
+        assert(csmsetop_difference_A_minus_B(top_block, top_block_hole, &top_block) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmsolid_free(&difference);
@@ -3244,7 +3242,7 @@ static void i_test_mechanichal7(void)
     }
     
     solid_aux = solid;
-    solid = csmsetop_union_A_and_B(solid, top_block);
+    assert(csmsetop_union_A_and_B(solid, top_block, &solid) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
     csmsolid_free(&top_block);
     
@@ -3260,7 +3258,7 @@ static void i_test_mechanichal7(void)
             i_assign_flat_material_to_solid(0.9, 0.9, 0.9, cylinder);
 
             solid_aux = solid;
-            solid = csmsetop_difference_A_minus_B(solid, cylinder);
+            assert(csmsetop_difference_A_minus_B(solid, cylinder, &solid) == CSMSETOP_OPRESULT_OK);
             csmsolid_free(&solid_aux);
         
             csmsolid_free(&cylinder);
@@ -3279,7 +3277,7 @@ static void i_test_mechanichal7(void)
             cylinder_aux = csmsolid_duplicate(cylinder);
             csmsolid_move(cylinder_aux, .5 * length, -radius, 0.);
         
-            cylinder_cutted = csmsetop_difference_A_minus_B(cylinder_aux, solid);
+            assert(csmsetop_difference_A_minus_B(cylinder_aux, solid, &cylinder_cutted) == CSMSETOP_OPRESULT_OK);
             shells = csmexplode_explode_shells(cylinder_cutted);
         
             solid_aux = cylinder_cutted;
@@ -3288,7 +3286,7 @@ static void i_test_mechanichal7(void)
             csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
         
             solid_aux = solid;
-            solid = csmsetop_union_A_and_B(solid, cylinder_cutted);
+            assert(csmsetop_union_A_and_B(solid, cylinder_cutted, &solid) == CSMSETOP_OPRESULT_OK);
             csmsolid_free(&solid_aux);
             csmsolid_free(&cylinder_cutted);
             csmsolid_free(&cylinder_aux);
@@ -3301,7 +3299,7 @@ static void i_test_mechanichal7(void)
             cylinder_aux = csmsolid_duplicate(cylinder);
             csmsolid_move(cylinder_aux, .5 * length, radius, 0.);
         
-            cylinder_cutted = csmsetop_difference_A_minus_B(cylinder_aux, solid);
+            assert(csmsetop_difference_A_minus_B(cylinder_aux, solid, &cylinder_cutted) == CSMSETOP_OPRESULT_OK);
             shells = csmexplode_explode_shells(cylinder_cutted);
         
             solid_aux = cylinder_cutted;
@@ -3310,7 +3308,7 @@ static void i_test_mechanichal7(void)
             csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
         
             solid_aux = solid;
-            solid = csmsetop_union_A_and_B(solid, cylinder_cutted);
+            assert(csmsetop_union_A_and_B(solid, cylinder_cutted, &solid) == CSMSETOP_OPRESULT_OK);
             csmsolid_free(&solid_aux);
             csmsolid_free(&cylinder_cutted);
             csmsolid_free(&cylinder_aux);
@@ -3323,7 +3321,7 @@ static void i_test_mechanichal7(void)
             cylinder_aux = csmsolid_duplicate(cylinder);
             csmsolid_move(cylinder_aux, -.5 * length, radius, 0.);
         
-            cylinder_cutted = csmsetop_difference_A_minus_B(cylinder_aux, solid);
+            assert(csmsetop_difference_A_minus_B(cylinder_aux, solid, &cylinder_cutted) == CSMSETOP_OPRESULT_OK);
             shells = csmexplode_explode_shells(cylinder_cutted);
         
             solid_aux = cylinder_cutted;
@@ -3332,7 +3330,7 @@ static void i_test_mechanichal7(void)
             csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
         
             solid_aux = solid;
-            solid = csmsetop_union_A_and_B(solid, cylinder_cutted);
+            assert(csmsetop_union_A_and_B(solid, cylinder_cutted, &solid) == CSMSETOP_OPRESULT_OK);
             csmsolid_free(&solid_aux);
             csmsolid_free(&cylinder_cutted);
             csmsolid_free(&cylinder_aux);
@@ -3345,7 +3343,7 @@ static void i_test_mechanichal7(void)
             cylinder_aux = csmsolid_duplicate(cylinder);
             csmsolid_move(cylinder_aux, -.5 * length, -radius, 0.);
         
-            cylinder_cutted = csmsetop_difference_A_minus_B(cylinder_aux, solid);
+            assert(csmsetop_difference_A_minus_B(cylinder_aux, solid, &cylinder_cutted) == CSMSETOP_OPRESULT_OK);
             shells = csmexplode_explode_shells(cylinder_cutted);
         
             solid_aux = cylinder_cutted;
@@ -3354,7 +3352,7 @@ static void i_test_mechanichal7(void)
             csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
         
             solid_aux = solid;
-            solid = csmsetop_union_A_and_B(solid, cylinder_cutted);
+            assert(csmsetop_union_A_and_B(solid, cylinder_cutted, &solid) == CSMSETOP_OPRESULT_OK);
             csmsolid_free(&solid_aux);
             csmsolid_free(&cylinder_cutted);
             csmsolid_free(&cylinder_aux);
@@ -3410,7 +3408,7 @@ static void i_test_ellipsoid(void)
                         10000);
     }
     
-    res = csmsetop_difference_A_minus_B(block, ellipsoid);
+    assert(csmsetop_difference_A_minus_B(block, ellipsoid, &res) == CSMSETOP_OPRESULT_OK);
     
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
@@ -3497,7 +3495,7 @@ static void i_test_paraboloid_one_sheet(void)
         i_assign_flat_material_to_solid(1., 0., 0., csolid);
         
         solid_aux = paraboloid;
-        paraboloid = csmsetop_difference_A_minus_B(paraboloid, csolid);
+        assert(csmsetop_difference_A_minus_B(paraboloid, csolid, &paraboloid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmshape2d_free(&cshape);
@@ -3511,31 +3509,31 @@ static void i_test_paraboloid_one_sheet(void)
         torus = csmquadrics_create_torus(3., 16, .75, 16, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
         i_assign_flat_material_to_solid(1., 1., 1., torus);
         solid_aux = paraboloid;
-        paraboloid = csmsetop_difference_A_minus_B(paraboloid, torus);
+        assert(csmsetop_difference_A_minus_B(paraboloid, torus, &paraboloid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
 
         torus = csmquadrics_create_torus(3., 16, .75, 16, 0., 0., 2.5, 1., 0., 0., 0., 1., 0., 0);
         i_assign_flat_material_to_solid(0., 1., 1., torus);
         solid_aux = paraboloid;
-        paraboloid = csmsetop_union_A_and_B(paraboloid, torus);
+        assert(csmsetop_union_A_and_B(paraboloid, torus, &paraboloid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
 
         torus = csmquadrics_create_torus(3., 16, .75, 16, 1.2, 0., 3., 1., 0., 0., 0., 1., 0., 0);
         i_assign_flat_material_to_solid(0., 1., 1., torus);
         solid_aux = paraboloid;
-        paraboloid = csmsetop_union_A_and_B(paraboloid, torus);
+        assert(csmsetop_union_A_and_B(paraboloid, torus, &paraboloid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
 
         torus = csmquadrics_create_torus(3., 16, .75, 16, 0., 0., -2.5, 1., 0., 0., 0., 1., 0., 0);
         i_assign_flat_material_to_solid(0., 1., 1., torus);
         solid_aux = paraboloid;
-        paraboloid = csmsetop_union_A_and_B(paraboloid, torus);
+        assert(csmsetop_union_A_and_B(paraboloid, torus, &paraboloid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
 
         torus = csmquadrics_create_torus(3., 16, .75, 16, 2., 0., -2.45, 1., 0., 0., 0., 1., 0., 0);
         i_assign_flat_material_to_solid(0., 1., 1., torus);
         solid_aux = paraboloid;
-        paraboloid = csmsetop_union_A_and_B(paraboloid, torus);
+        assert(csmsetop_union_A_and_B(paraboloid, torus, &paraboloid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmsolid_free(&torus);
@@ -3583,7 +3581,7 @@ static void i_test_mechanichal7_simplified(void)
     solid2 = csmsweep_create_solid_from_shape_debug(shape2, 0., 0., 0., 1., 0., 0., 0., 1., 0., shape2, 0., 0., -0.1, 1., 0., 0., 0., 1., 0., 0);
     i_assign_flat_material_to_solid(1., 1., 1., solid2);
 
-    solid = csmsetop_intersection_A_and_B(solid1, solid2);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid) == CSMSETOP_OPRESULT_OK);
     csmdebug_set_viewer_results(solid, NULL);
     csmdebug_show_viewer();
     
@@ -3592,7 +3590,7 @@ static void i_test_mechanichal7_simplified(void)
         csmArrayStruct(csmsolid_t) *shells;
         struct csmsolid_t *solid_aux;
      
-        difference = csmsetop_difference_A_minus_B(solid1, solid2);
+        assert(csmsetop_difference_A_minus_B(solid1, solid2, &difference) == CSMSETOP_OPRESULT_OK);
         shells = csmexplode_explode_shells(difference);
 
         solid_aux = solid;
@@ -3687,7 +3685,7 @@ static void i_test_sweep_path2(void)
         block_solid = csmsweep_create_solid_from_shape(block_shape, 0., 0., 1., 1., 0., 0., 0., 1., 0., block_shape, 0., 0., -1., 1., 0., 0., 0., 1., 0.);
         
         solid_aux = solid;
-        solid = csmsetop_difference_A_minus_B(block_solid, solid);
+        assert(csmsetop_difference_A_minus_B(block_solid, solid, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         shells = csmexplode_explode_shells(solid);
@@ -3746,7 +3744,7 @@ static void i_test_sweep_path3(void)
         block_solid = csmsweep_create_solid_from_shape(block_shape, 0., 0., 1., 1., 0., 0., 0., 1., 0., block_shape, 0., 0., -1., 1., 0., 0., 0., 1., 0.);
         
         solid_aux = solid;
-        solid = csmsetop_intersection_A_and_B(block_solid, solid);
+        assert(csmsetop_intersection_A_and_B(block_solid, solid, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmdebug_set_viewer_results(solid, NULL);
@@ -3806,7 +3804,7 @@ static void i_test_sweep_path4(void)
         block_solid = csmsweep_create_solid_from_shape(block_shape, 0., 0., 1., 1., 0., 0., 0., 1., 0., block_shape, 0., 0., -1., 1., 0., 0., 0., 1., 0.);
         
         solid_aux = solid;
-        solid = csmsetop_intersection_A_and_B(block_solid, solid);
+        assert(csmsetop_intersection_A_and_B(block_solid, solid, &solid) == CSMSETOP_OPRESULT_OK);
         csmsolid_free(&solid_aux);
         
         csmdebug_set_viewer_results(solid, NULL);
@@ -3885,7 +3883,7 @@ static void i_test_sweep_path5(void)
     csmsolid_rotate(solid_thread, CSMMATH_PI / 4., 0., 0., 0., 0., 0., 1.);
     
     solid_aux = solid;
-    solid = csmsetop_union_A_and_B(solid, solid_thread);
+    assert(csmsetop_union_A_and_B(solid, solid_thread, &solid) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
     
     csmdebug_set_viewer_results(solid, NULL);
@@ -3909,7 +3907,7 @@ static void i_test_inters_inner_segment(void)
     shape2 = csmbasicshape2d_rectangular_shape(0.035, 0.1);
     solid2 = csmsweep_create_solid_from_shape(shape2, 0.2, 0., 0., 0., 1., 0., 0., 0., 1., shape2, 0.1, 0., 0., 0., 1., 0., 0., 0., 1.);
     
-    solid = csmsetop_union_A_and_B(solid1, solid2);
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid) == CSMSETOP_OPRESULT_OK);
     
     csmdebug_set_viewer_results(solid, NULL);
     csmdebug_show_viewer();
