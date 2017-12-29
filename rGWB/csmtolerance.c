@@ -12,6 +12,8 @@ struct csmtolerance_t
     double tolerance_dot_product_parallel_vectors;
     double tolerance_point_on_plane;
     double tolerance_bbox_absolute_tolerance;
+    
+    double perturbation_increment;
 };
 
 // --------------------------------------------------------------------------------
@@ -21,7 +23,8 @@ CONSTRUCTOR(static struct csmtolerance_t *, i_new, (
                         double tolerance_equal_angle_rad,
                         double tolerance_dot_product_parallel_vectors,
                         double tolerance_point_on_plane,
-                        double tolerance_bbox_absolute_tolerance))
+                        double tolerance_bbox_absolute_tolerance,
+                        double perturbation_increment))
 {
     struct csmtolerance_t *tolerance;
     
@@ -32,6 +35,8 @@ CONSTRUCTOR(static struct csmtolerance_t *, i_new, (
     tolerance->tolerance_dot_product_parallel_vectors = tolerance_dot_product_parallel_vectors;
     tolerance->tolerance_point_on_plane = tolerance_point_on_plane;
     tolerance->tolerance_bbox_absolute_tolerance = tolerance_bbox_absolute_tolerance;
+    
+    tolerance->perturbation_increment = perturbation_increment;
     
     return tolerance;
 }
@@ -45,6 +50,7 @@ struct csmtolerance_t *csmtolerance_new(void)
     double tolerance_dot_product_parallel_vectors;
     double tolerance_point_on_plane;
     double tolerance_bbox_absolute_tolerance;
+    double perturbation_increment;
 
 /*
     tolerance_equal_coords = 1.e-6;
@@ -62,12 +68,15 @@ struct csmtolerance_t *csmtolerance_new(void)
     tolerance_point_on_plane = csmtolerance_default_point_on_plane();
     tolerance_bbox_absolute_tolerance = 0.01;
     
+    perturbation_increment = 1.e-4;
+    
     return i_new(
                 tolerance_equal_coords,
                 tolerance_equal_angle_rad,
                 tolerance_dot_product_parallel_vectors,
                 tolerance_point_on_plane,
-                tolerance_bbox_absolute_tolerance);
+                tolerance_bbox_absolute_tolerance,
+                perturbation_increment);
 }
 
 // --------------------------------------------------------------------------------
@@ -110,6 +119,14 @@ double csmtolerance_dot_product_parallel_vectors(const struct csmtolerance_t *to
 {
     assert_no_null(tolerance);
     return tolerance->tolerance_dot_product_parallel_vectors;
+}
+
+// --------------------------------------------------------------------------------
+
+double csmtolerance_perturbation_increment(const struct csmtolerance_t *tolerance)
+{
+    assert_no_null(tolerance);
+    return tolerance->perturbation_increment;
 }
 
 // --------------------------------------------------------------------------------

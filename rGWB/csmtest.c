@@ -3924,7 +3924,7 @@ static void i_test_inters_inner_segment(void)
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
-    CSMBOOL process_all_test = CSMTRUE;
+    CSMBOOL process_all_test = CSMFALSE;
     
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_set_parameters, csmviewer_set_results);

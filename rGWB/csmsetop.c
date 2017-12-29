@@ -32,6 +32,8 @@
 #include "csmstring.inl"
 #include "csmmaterial.inl"
 
+static const unsigned long i_NUM_MAX_PERTURBATIONS = 4;
+
 // ------------------------------------------------------------------------------------------
 
 static CSMBOOL i_can_join(
@@ -461,8 +463,10 @@ static void i_join_null_edges(
         else
             did_join_all_null_edges_loc = CSMFALSE;
         
-        if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
+        /*
+         if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
             assert(null_edges_that_cannot_be_matched_A == CSMTRUE || null_edges_that_cannot_be_matched_B == CSMTRUE);
+         */
     }
     
     *set_of_null_faces_A = set_of_null_faces_A_loc;
@@ -873,17 +877,15 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
 static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
                         enum csmsetop_operation_t set_operation,
                         struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        const struct csmtolerance_t *tolerances,
                         struct csmsolid_t **solid_res)
 {
     enum csmsetop_opresult_t result;
     struct csmsolid_t *solid_res_loc;
-    struct csmtolerance_t *tolerances;
     csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections;
     csmArrayStruct(csmsetop_vtxfacc_inters_t) *vf_intersections_A, *vf_intersections_B;
     csmArrayStruct(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
     unsigned long no_null_edges;
-    
-    tolerances = csmtolerance_new();
     
     csmsolid_redo_geometric_face_data(solid_A);
     csmsolid_clear_algorithm_data(solid_A);
@@ -956,44 +958,11 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
     
     *solid_res = solid_res_loc;
     
-    csmdebug_end_context();
-    
-    csmtolerance_free(&tolerances);
     csmarrayc_free_st(&vv_intersections, csmsetop_vtxvtx_inters_t, csmsetop_vtxvtx_free_inters);
     csmarrayc_free_st(&vf_intersections_A, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
     csmarrayc_free_st(&vf_intersections_B, csmsetop_vtxfacc_inters_t, csmsetop_vtxfacc_free_inters);
     csmarrayc_free_st(&set_of_null_edges_A, csmedge_t, NULL);
     csmarrayc_free_st(&set_of_null_edges_B, csmedge_t, NULL);
-    
-    return result;
-}
-
-// ------------------------------------------------------------------------------------------
-
-static enum csmsetop_opresult_t i_set_operation_modifying_solids(
-                        enum csmsetop_operation_t set_operation,
-                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
-                        struct csmsolid_t **solid_res)
-{
-    enum csmsetop_opresult_t result;
-    
-    csmdebug_begin_context("SETOP");
-    csmsolid_set_name(solid_A, "Solid A");
-    csmsolid_set_name(solid_B, "Solid B");
-    
-    csmdebug_set_viewer_results(NULL, NULL);
-    csmdebug_set_viewer_parameters(solid_A, solid_B);
-    csmdebug_show_viewer();
-    
-    result = i_set_operation_modifying_solids_internal(set_operation, solid_A, solid_B, solid_res);
-    
-    if (result == CSMSETOP_OPRESULT_OK && csmdebug_debug_enabled() == CSMTRUE)
-    {
-        csmdebug_clear_debug_points();
-        csmsolid_debug_print_debug(*solid_res, CSMTRUE);
-        csmdebug_set_viewer_results(*solid_res, NULL);
-        csmdebug_show_viewer();
-    }
     
     return result;
 }
@@ -1006,15 +975,92 @@ static enum csmsetop_opresult_t i_set_operation(
                         struct csmsolid_t **solid_res)
 {
     enum csmsetop_opresult_t result;
-    struct csmsolid_t *solid_A_copy, *solid_B_copy;
+    struct csmsolid_t *solid_res_loc;
+    struct csmtolerance_t *tolerances;
+    unsigned long no_perturbations;
+    double perturbartion_amount;
+    CSMBOOL apply_perturbation;
+
+    tolerances = csmtolerance_new();
     
-    solid_A_copy = csmsolid_duplicate(solid_A);
-    solid_B_copy = csmsolid_duplicate(solid_B);
+    no_perturbations = 0;
     
-    result = i_set_operation_modifying_solids(set_operation, solid_A_copy, solid_B_copy, solid_res);
+    apply_perturbation = CSMFALSE;
+    perturbartion_amount = 1.;
     
-    csmsolid_free(&solid_A_copy);
-    csmsolid_free(&solid_B_copy);
+    solid_res_loc = NULL;
+    
+    do
+    {
+        struct csmsolid_t *solid_A_copy, *solid_B_copy;
+    
+        solid_A_copy = csmsolid_duplicate(solid_A);
+        csmsolid_set_name(solid_A_copy, "Solid A");
+        
+        solid_B_copy = csmsolid_duplicate(solid_B);
+        csmsolid_set_name(solid_B_copy, "Solid B");
+
+        if (solid_res_loc != NULL)
+            csmsolid_free(&solid_res_loc);
+        
+        if (apply_perturbation == CSMTRUE)
+        {
+            csmsolid_general_transform(
+                        solid_B_copy,
+                        perturbartion_amount, 0., 0., 0.,
+                        0., perturbartion_amount, 0., 0.,
+                        0., 0., perturbartion_amount, 0.);
+        }
+
+        csmdebug_clear_debug_points();
+        csmdebug_set_viewer_results(NULL, NULL);
+        csmdebug_set_viewer_parameters(solid_A_copy, solid_B_copy);
+        csmdebug_show_viewer();
+        
+        csmdebug_begin_context("SETOP");
+
+        result = i_set_operation_modifying_solids_internal(
+                        set_operation,
+                        solid_A_copy, solid_B_copy,
+                        tolerances,
+                        &solid_res_loc);
+        
+        csmdebug_end_context();
+
+        switch (result)
+        {
+            case CSMSETOP_OPRESULT_OK:
+                break;
+                
+            case CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS:
+            
+                apply_perturbation = CSMTRUE;
+                perturbartion_amount += csmtolerance_perturbation_increment(tolerances);
+                no_perturbations++;
+                break;
+                
+            default_error();
+        }
+        
+        csmsolid_free(&solid_A_copy);
+        csmsolid_free(&solid_B_copy);
+        
+    } while (result != CSMSETOP_OPRESULT_OK && no_perturbations < i_NUM_MAX_PERTURBATIONS);
+
+    if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
+        assert(no_perturbations < i_NUM_MAX_PERTURBATIONS);
+    
+    if (result == CSMSETOP_OPRESULT_OK && csmdebug_debug_enabled() == CSMTRUE)
+    {
+        csmdebug_clear_debug_points();
+        csmsolid_debug_print_debug(solid_res_loc, CSMTRUE);
+        csmdebug_set_viewer_results(solid_res_loc, NULL);
+        csmdebug_show_viewer();
+    }
+    
+    *solid_res = solid_res_loc;
+    
+    csmtolerance_free(&tolerances);
     
     return result;
 }

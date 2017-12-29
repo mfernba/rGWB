@@ -931,6 +931,7 @@ struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep
         }
         
         top_face_solid_prev = top_face_i;
+        //break;
     }
     
     initial_point = csmarrayc_get_const_st(sweep_path->sweep_points, 0, i_sweep_point_t);
