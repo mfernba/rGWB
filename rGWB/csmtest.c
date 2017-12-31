@@ -3926,7 +3926,7 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
     double factor;
     double bolt_diameter, bolt_radius, thread_size, margin_between_threads, bolt_thread_length, no_threads;
     double head_size;
-    unsigned long no_points_circle;
+    unsigned long no_points_circle, no_points_circle_thread;
     double top_transition_size;
     struct csmsolid_t *solid_thread;
     struct csmsolid_t *solid;
@@ -3946,6 +3946,7 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
     head_size = 0.5 * bolt_diameter;
     
     no_points_circle = 32;
+    no_points_circle_thread = 16;
     
     {
         struct csmshape2d_t *shape;
@@ -3961,7 +3962,7 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
         if (thread_is_outer == CSMTRUE)
         {
             sweep_path = csmsweep_new_helix_plane_path(
-                        0., 0., bolt_radius, no_points_circle,
+                        0., 0., bolt_radius, no_points_circle_thread,
                         factor * (2. * thread_size + margin_between_threads), no_threads,
                         0., 0., 0.5 * thread_size, 1., 0., 0., 0., 1., 0.,
                         shape);
@@ -3969,7 +3970,7 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
         else
         {
             sweep_path = csmsweep_new_helix_plane_path(
-                        0., 0., 0.98 * bolt_radius, no_points_circle,
+                        0., 0., 0.98 * bolt_radius, no_points_circle_thread,
                         factor * (2. * thread_size + margin_between_threads), no_threads,
                         0., 0., 0.5 * thread_size, 1., 0., 0., 0., 1., 0.,
                         shape);
@@ -4114,7 +4115,7 @@ void csmtest_test(void)
     i_test_union_solidos_por_loopglue();
     */
 
-    csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
     
     if (process_all_test == CSMFALSE)
     {

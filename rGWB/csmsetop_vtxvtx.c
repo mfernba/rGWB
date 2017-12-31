@@ -706,15 +706,21 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
     s1b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux1, neighborhood_b->Uy1, neighborhood_b->Uz1, tolerances);
     s2b = i_classify_vector_resp_sector(neighborhood_a, neighborhood_b->Ux2, neighborhood_b->Uy2, neighborhood_b->Uz2, tolerances);
 
-    /*
-    if (s1a == s2a)
-        assert(s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
-
-    if (s1b == s2b)
-        assert(s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
-    */
+    if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
+    {
+        if (s1a == s2a && s1a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+            intersect = CSMFALSE;
+        else if (s1b == s2b && s1b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+            intersect = CSMFALSE;
+        else
+            intersect = CSMTRUE;
+    }
+    else
+    {
+        intersect = CSMTRUE;
+    }
     
-    intersect = CSMTRUE;
+    assert(intersect == CSMTRUE);
     
     return i_create_inters_sectors(
                        idx_nba, idx_nbb,
@@ -2319,16 +2325,20 @@ static void i_insert_null_edges(
                         csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections,
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges_A,
-                        csmArrayStruct(csmedge_t) *set_of_null_edges_B)
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        CSMBOOL *improper_intersection_detected)
 {
     struct csmhedge_t *ha1, *ha2, *hb1, *hb2;
     unsigned long num_iters;
     unsigned long last_idx;
     
+    assert_no_null(improper_intersection_detected);
+    assert(*improper_intersection_detected == CSMFALSE);
+    
     num_iters = 0;
     last_idx = 0;
     
-    while (1)
+    while (*improper_intersection_detected == CSMFALSE)
     {
         struct i_inters_sectors_t *sector;
         
@@ -2384,67 +2394,70 @@ static void i_insert_null_edges(
                 
                 if (sector->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
                 {
-                    assert(ha1 == NULL);
-                    assert(ha2 != NULL);
-                    
-                    ha1 = nba->he;
+                    if (ha1 == NULL && ha2 != NULL)
+                        ha1 = nba->he;
+                    else
+                        *improper_intersection_detected = CSMTRUE;
                 }
                 else
                 {
-                    assert(ha1 != NULL);
-                    assert(ha2 == NULL);
-                    
-                    ha2 = nba->he;
+                    if (ha1 != NULL && ha2 == NULL)
+                        ha2 = nba->he;
+                    else
+                        *improper_intersection_detected = CSMTRUE;
                 }
                 
                 if (sector->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
                 {
-                    assert(hb1 == NULL);
-                    assert(hb2 != NULL);
-                    
-                    hb1 = nbb->he;
+                    if (hb1 == NULL && hb2 != NULL)
+                        hb1 = nbb->he;
+                    else
+                        *improper_intersection_detected = CSMTRUE;
                 }
                 else
                 {
-                    assert(hb1 != NULL);
-                    assert(hb2 == NULL);
-                    
-                    hb2 = nbb->he;
+                    if (hb1 != NULL && hb2 == NULL)
+                        hb2 = nbb->he;
+                    else
+                        *improper_intersection_detected = CSMTRUE;
                 }
                 
                 last_idx++;
                 
-                assert_no_null(ha1);
-                assert_no_null(ha2);
-                assert_no_null(hb1);
-                assert_no_null(hb2);
-                
-                if (ha1 == ha2)
+                if (*improper_intersection_detected == CSMFALSE)
                 {
-                    CSMBOOL orient;
+                    assert_no_null(ha1);
+                    assert_no_null(ha2);
+                    assert_no_null(hb1);
+                    assert_no_null(hb2);
                     
-                    //assert(hb1 != hb2);
-                    
-                    orient = i_get_orient(ha1, hb1, hb2, tolerances);
-                    i_separateInteriorHedge(ha1, orient, tolerances, set_of_null_edges_A);
-                    
-                    i_separateEdgeSequence(hb1, hb2, tolerances, set_of_null_edges_B);
-                }
-                else if (hb1 == hb2)
-                {
-                    CSMBOOL orient;
-                    
-                    //assert(ha2 != ha1);
-                    
-                    orient = i_get_orient(hb1, ha2, ha1, tolerances);
-                    i_separateInteriorHedge(hb1, orient, tolerances, set_of_null_edges_B);
-                    
-                    i_separateEdgeSequence(ha2, ha1, tolerances, set_of_null_edges_A);
-                }
-                else
-                {
-                    i_separateEdgeSequence(ha2, ha1, tolerances, set_of_null_edges_A);
-                    i_separateEdgeSequence(hb1, hb2, tolerances, set_of_null_edges_B);
+                    if (ha1 == ha2)
+                    {
+                        CSMBOOL orient;
+                        
+                        //assert(hb1 != hb2);
+                        
+                        orient = i_get_orient(ha1, hb1, hb2, tolerances);
+                        i_separateInteriorHedge(ha1, orient, tolerances, set_of_null_edges_A);
+                        
+                        i_separateEdgeSequence(hb1, hb2, tolerances, set_of_null_edges_B);
+                    }
+                    else if (hb1 == hb2)
+                    {
+                        CSMBOOL orient;
+                        
+                        //assert(ha2 != ha1);
+                        
+                        orient = i_get_orient(hb1, ha2, ha1, tolerances);
+                        i_separateInteriorHedge(hb1, orient, tolerances, set_of_null_edges_B);
+                        
+                        i_separateEdgeSequence(ha2, ha1, tolerances, set_of_null_edges_A);
+                    }
+                    else
+                    {
+                        i_separateEdgeSequence(ha2, ha1, tolerances, set_of_null_edges_A);
+                        i_separateEdgeSequence(hb1, hb2, tolerances, set_of_null_edges_B);
+                    }
                 }
             }
         }
@@ -2458,12 +2471,14 @@ static void i_vtxvtx_append_null_edges(
                         enum csmsetop_operation_t set_operation,
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges_A,
-                        csmArrayStruct(csmedge_t) *set_of_null_edges_B)
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        CSMBOOL *improper_intersection_detected)
 {
     csmArrayStruct(i_neighborhood_t) *neighborhood_A, *neighborhood_B;
     csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections;
     
     assert_no_null(vv_intersection);
+    assert_no_null(improper_intersection_detected);
     
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
@@ -2498,7 +2513,12 @@ static void i_vtxvtx_append_null_edges(
     i_reclasssify_on_edges(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
     i_print_neighborhood_intersections("After reclassify single on-edges", neighborhood_intersections, neighborhood_A, neighborhood_B);
     
-    i_insert_null_edges(neighborhood_A, neighborhood_B, neighborhood_intersections, tolerances, set_of_null_edges_A, set_of_null_edges_B);
+    i_insert_null_edges(
+                        neighborhood_A, neighborhood_B,
+                        neighborhood_intersections,
+                        tolerances,
+                        set_of_null_edges_A, set_of_null_edges_B,
+                        improper_intersection_detected);
     
     csmdebug_end_context();
     
@@ -2514,11 +2534,15 @@ void csmsetop_vtxvtx_append_null_edges(
                         enum csmsetop_operation_t set_operation,
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges_A,
-                        csmArrayStruct(csmedge_t) *set_of_null_edges_B)
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        CSMBOOL *improper_intersection_detected)
 {
     unsigned long i, num_intersections;
     
+    assert_no_null(improper_intersection_detected);
+    
     num_intersections = csmarrayc_count_st(vv_intersections, csmsetop_vtxvtx_inters_t);
+    *improper_intersection_detected = CSMFALSE;
     
     csmdebug_clear_debug_points();
     
@@ -2527,7 +2551,10 @@ void csmsetop_vtxvtx_append_null_edges(
         const struct csmsetop_vtxvtx_inters_t *vv_intersection;
         
         vv_intersection = csmarrayc_get_const_st(vv_intersections, i, csmsetop_vtxvtx_inters_t);
-        i_vtxvtx_append_null_edges(vv_intersection, set_operation, tolerances, set_of_null_edges_A, set_of_null_edges_B);
+        i_vtxvtx_append_null_edges(vv_intersection, set_operation, tolerances, set_of_null_edges_A, set_of_null_edges_B, improper_intersection_detected);
+        
+        if (*improper_intersection_detected == CSMTRUE)
+            break;
     }
     
     //csmdebug_show_viewer();

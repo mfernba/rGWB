@@ -15,4 +15,5 @@ void csmsetop_vtxvtx_append_null_edges(
                         enum csmsetop_operation_t set_operation,
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmedge_t) *set_of_null_edges_A,
-                        csmArrayStruct(csmedge_t) *set_of_null_edges_B);
+                        csmArrayStruct(csmedge_t) *set_of_null_edges_B,
+                        CSMBOOL *improper_intersection_detected);

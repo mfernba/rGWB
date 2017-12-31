@@ -158,7 +158,7 @@ void csmbbox_maximize_bbox(struct csmbbox_t *bbox_maximizar, const struct csmbbo
 static double i_compute_margin(double min, double max)
 {
     assert(min <= max);
-    return CSMMATH_MAX(0.025 * (max - min), 1.e-3);
+    return CSMMATH_MAX(0.01 * (max - min), 1.e-6);
 }
 
 // ------------------------------------------------------------------------------------------

@@ -391,21 +391,24 @@ static void i_join_null_edges(
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
         
-        if (null_face_created_h1a == CSMTRUE || null_face_created_h1b || null_face_created_h12a == CSMTRUE
-                || null_face_created_h1b == CSMTRUE || null_face_created_h2b == CSMTRUE || null_face_created_h12b == CSMTRUE)
+        if (csmdebug_debug_enabled() == CSMTRUE)
         {
-            csmdebug_unblock_print_solid();
-                csmdebug_print_debug_info("*** AFTER NULL FACES\n");
-                csmsolid_debug_print_debug(solid_A, CSMTRUE);
-                csmsolid_debug_print_debug(solid_B, CSMTRUE);
-            csmdebug_block_print_solid();
-            
-            csmsetopcom_print_set_of_null_edges(set_of_null_edges_A, loose_ends_A);
-            csmsetopcom_print_set_of_null_edges(set_of_null_edges_B, loose_ends_B);
-            csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
-            csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
-            
-            //csmdebug_show_viewer();
+            if (null_face_created_h1a == CSMTRUE || null_face_created_h1b || null_face_created_h12a == CSMTRUE
+                    || null_face_created_h1b == CSMTRUE || null_face_created_h2b == CSMTRUE || null_face_created_h12b == CSMTRUE)
+            {
+                csmdebug_unblock_print_solid();
+                    csmdebug_print_debug_info("*** AFTER NULL FACES\n");
+                    csmsolid_debug_print_debug(solid_A, CSMTRUE);
+                    csmsolid_debug_print_debug(solid_B, CSMTRUE);
+                csmdebug_block_print_solid();
+                
+                csmsetopcom_print_set_of_null_edges(set_of_null_edges_A, loose_ends_A);
+                csmsetopcom_print_set_of_null_edges(set_of_null_edges_B, loose_ends_B);
+                csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
+                csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
+                
+                //csmdebug_show_viewer();
+            }
         }
     }
     
@@ -913,57 +916,67 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
     else
     {
         csmArrayStruct(csmedge_t) *set_of_null_edges_A, *set_of_null_edges_B;
-        unsigned long no_null_edges;
+        CSMBOOL improper_intersection_detected;
         
         set_of_null_edges_A = csmarrayc_new_st_array(0, csmedge_t);
         set_of_null_edges_B = csmarrayc_new_st_array(0, csmedge_t);
         
         csmsetop_vtxfacc_append_null_edges(vf_intersections_A, set_operation, CSMSETOP_A_VS_B, tolerances, set_of_null_edges_A, set_of_null_edges_B);
         csmsetop_vtxfacc_append_null_edges(vf_intersections_B, set_operation, CSMSETOP_B_VS_A, tolerances, set_of_null_edges_B, set_of_null_edges_A);
-        csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, tolerances, set_of_null_edges_A, set_of_null_edges_B);
+        csmsetop_vtxvtx_append_null_edges(vv_intersections, set_operation, tolerances, set_of_null_edges_A, set_of_null_edges_B, &improper_intersection_detected);
         
-        no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
-        assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
-        
-        if (no_null_edges == 0)
+        if (improper_intersection_detected == CSMTRUE)
         {
-            result = CSMSETOP_OPRESULT_OK;
+            result = CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS;
             solid_res_loc = NULL;
         }
         else
         {
-            csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
-            CSMBOOL did_join_all_null_edges_loc;
-            unsigned long no_null_faces;
+            unsigned long no_null_edges;
             
-            i_join_null_edges(
-                        solid_A, set_of_null_edges_A,
-                        solid_B, set_of_null_edges_B,
-                        tolerances,
-                        &set_of_null_faces_A, &set_of_null_faces_B,
-                        &did_join_all_null_edges_loc);
+            no_null_edges = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);
+            assert(no_null_edges == csmarrayc_count_st(set_of_null_edges_B, csmedge_t));
             
-            no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
-            assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
-            
-            if (did_join_all_null_edges_loc == CSMFALSE || no_null_faces == 0)
+            if (no_null_edges == 0)
             {
-                result = CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS;
+                result = CSMSETOP_OPRESULT_OK;
                 solid_res_loc = NULL;
             }
             else
             {
-                result = CSMSETOP_OPRESULT_OK;
+                csmArrayStruct(csmface_t) *set_of_null_faces_A, *set_of_null_faces_B;
+                CSMBOOL did_join_all_null_edges_loc;
+                unsigned long no_null_faces;
                 
-                solid_res_loc = i_finish_set_operation(
-                            set_operation,
-                            solid_A, set_of_null_faces_A,
-                            solid_B, set_of_null_faces_B,
-                            tolerances);
+                i_join_null_edges(
+                            solid_A, set_of_null_edges_A,
+                            solid_B, set_of_null_edges_B,
+                            tolerances,
+                            &set_of_null_faces_A, &set_of_null_faces_B,
+                            &did_join_all_null_edges_loc);
+                
+                no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
+                assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
+                
+                if (did_join_all_null_edges_loc == CSMFALSE || no_null_faces == 0)
+                {
+                    result = CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS;
+                    solid_res_loc = NULL;
+                }
+                else
+                {
+                    result = CSMSETOP_OPRESULT_OK;
+                    
+                    solid_res_loc = i_finish_set_operation(
+                                set_operation,
+                                solid_A, set_of_null_faces_A,
+                                solid_B, set_of_null_faces_B,
+                                tolerances);
+                }
+                
+                csmarrayc_free_st(&set_of_null_faces_A, csmface_t, NULL);
+                csmarrayc_free_st(&set_of_null_faces_B, csmface_t, NULL);
             }
-            
-            csmarrayc_free_st(&set_of_null_faces_A, csmface_t, NULL);
-            csmarrayc_free_st(&set_of_null_faces_B, csmface_t, NULL);
         }
         
         csmarrayc_free_st(&set_of_null_edges_A, csmedge_t, NULL);
