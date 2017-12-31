@@ -1070,6 +1070,16 @@ static enum csmsetop_opresult_t i_set_operation(
         {
             perturbartion_amount += csmtolerance_perturbation_increment(tolerances);
             no_perturbations++;
+            
+            if (csmdebug_debug_enabled() == CSMTRUE)
+            {
+                char *text;
+                
+                text = copiafor_codigo2("Perturbation %lu, amount: %lf\n", no_perturbations, perturbartion_amount);
+                csmdebug_print_debug_info(text);
+                
+                csmstring_free(&text);
+            }
         }
         
         csmsolid_free(&solid_A_copy);
