@@ -172,10 +172,14 @@ static void i_append_common_vertices_solid_A_on_solid_B(
                         struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
                         const struct csmtolerance_t *tolerances,
                         unsigned long *id_new_intersection,
-                        csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections)
+                        csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
+                        CSMBOOL *did_find_non_manifold_operand_solid)
 {
     double tolerance;
     struct csmhashtb_iterator(csmvertex_t) *vertex_iterator_A;
+    
+    assert_no_null(did_find_non_manifold_operand_solid);
+    *did_find_non_manifold_operand_solid = CSMFALSE;
     
     tolerance = csmtolerance_equal_coords(tolerances);
     vertex_iterator_A = csmsolid_vertex_iterator(solid_A);
@@ -189,24 +193,33 @@ static void i_append_common_vertices_solid_A_on_solid_B(
         if (csmvertex_has_mask_attrib(vertex_A, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CSMFALSE
                 && csmsolid_contains_vertex_in_same_coordinates_as_given(solid_B, vertex_A, tolerance, &vertex_B) == CSMTRUE)
         {
-            unsigned long intersection_id;
-            CSMBOOL is_A_vs_B;
-            CSMBOOL did_add_intersection;
-            
-            intersection_id = csmid_new_id(id_new_intersection, NULL);
-            is_A_vs_B = CSMTRUE;
-            i_append_new_vv_inters(intersection_id, vertex_A, vertex_B, is_A_vs_B, vv_intersections, &did_add_intersection);
-            
-            if (did_add_intersection == CSMTRUE && csmdebug_debug_enabled() == CSMTRUE)
+            if (csmvertex_has_mask_attrib(vertex_B, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CSMFALSE)
             {
-                char *description;
-                double x, y, z;
+                unsigned long intersection_id;
+                CSMBOOL is_A_vs_B;
+                CSMBOOL did_add_intersection;
                 
-                csmvertex_get_coordenadas(vertex_A, &x, &y, &z);
-                description = copiafor_codigo5("EQ VV (%g, %g, %g) %lu %lu", x, y, z, csmvertex_id(vertex_A), csmvertex_id(vertex_B));
-                csmdebug_append_debug_point(x, y, z, &description);
-            
-                csmdebug_print_debug_info("-->Coincident vertices: (%lu, %lu)\n", csmvertex_id(vertex_A), csmvertex_id(vertex_B));
+                intersection_id = csmid_new_id(id_new_intersection, NULL);
+                is_A_vs_B = CSMTRUE;
+                i_append_new_vv_inters(intersection_id, vertex_A, vertex_B, is_A_vs_B, vv_intersections, &did_add_intersection);
+                assert(did_add_intersection == CSMTRUE);
+                
+                if (csmdebug_debug_enabled() == CSMTRUE)
+                {
+                    char *description;
+                    double x, y, z;
+                    
+                    csmvertex_get_coordenadas(vertex_A, &x, &y, &z);
+                    description = copiafor_codigo5("EQ VV (%g, %g, %g) %lu %lu", x, y, z, csmvertex_id(vertex_A), csmvertex_id(vertex_B));
+                    csmdebug_append_debug_point(x, y, z, &description);
+                
+                    csmdebug_print_debug_info("-->Coincident vertices: (%lu, %lu)\n", csmvertex_id(vertex_A), csmvertex_id(vertex_B));
+                }
+            }
+            else
+            {
+                *did_find_non_manifold_operand_solid = CSMTRUE;
+                break;
             }
         }
     }
@@ -220,10 +233,12 @@ static void i_append_common_vertices_solid_A_and_B_not_previously_found(
                         struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
                         const struct csmtolerance_t *tolerances,
                         unsigned long *id_new_intersection,
-                        csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections)
+                        csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
+                        CSMBOOL *did_find_non_manifold_operand_solid_A,
+                        CSMBOOL *did_find_non_manifold_operand_solid_B)
 {
-    i_append_common_vertices_solid_A_on_solid_B(solid_A, solid_B, tolerances, id_new_intersection, vv_intersections);
-    i_append_common_vertices_solid_A_on_solid_B(solid_B, solid_A, tolerances, id_new_intersection, vv_intersections);
+    i_append_common_vertices_solid_A_on_solid_B(solid_A, solid_B, tolerances, id_new_intersection, vv_intersections, did_find_non_manifold_operand_solid_A);
+    i_append_common_vertices_solid_A_on_solid_B(solid_B, solid_A, tolerances, id_new_intersection, vv_intersections, did_find_non_manifold_operand_solid_B);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1074,7 +1089,9 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
                         solid_A, solid_B,
                         tolerances,
                         &id_new_intersection,
-                        vv_intersections_loc);
+                        vv_intersections_loc,
+                        &did_find_non_manifold_operand_solid_A,
+                        &did_find_non_manifold_operand_solid_B);
         }
     }
     csmdebug_end_context();

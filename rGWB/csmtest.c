@@ -4094,7 +4094,7 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
-    CSMBOOL process_all_test = CSMFALSE;
+    CSMBOOL process_all_test = CSMTRUE;
     
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_set_parameters, csmviewer_set_results);
@@ -4120,7 +4120,9 @@ void csmtest_test(void)
     if (process_all_test == CSMFALSE)
     {
         //i_test_cilindro4(viewer);
-        i_test_sweep_path6(CSMTRUE);
+        //i_test_sweep_path6(CSMTRUE);
+        i_test_paraboloid_one_sheet();
+
     }
     else
     {
