@@ -1,5 +1,4 @@
 # rGWB
-![Complex Part](https://github.com/mfernba/rGWB/tree/master/Screenshots/Bolt.png)
 An implementation of Martti Mäntyllä's Geometric WorkBench
 
 IMPORTANT: Some parts of the system are tied to other tools I developed in the past, so don't expect (for now) that it compiles for you. 
