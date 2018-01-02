@@ -3491,8 +3491,8 @@ static void i_test_paraboloid_one_sheet(void)
         struct csmsolid_t *csolid;
         struct csmsolid_t *solid_aux;
         
-        //cshape = csmbasicshape2d_C_shape(2.4, 1.5); //Error
-        cshape = csmbasicshape2d_C_shape(1., 1.);
+        cshape = csmbasicshape2d_C_shape(2.4, 1.5); //Error
+        //cshape = csmbasicshape2d_C_shape(1., 1.);
         csolid = csmsweep_create_solid_from_shape(cshape, 4., 0., 0., 0., 1., 0., 0., 0., 1., cshape, -2., 0., 0., 0., 1., 0., 0., 0., 1.);
         i_assign_flat_material_to_solid(1., 0., 0., csolid);
         
@@ -4091,10 +4091,117 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_union_no_null_edges1(void)
+{
+    struct csmshape2d_t *shape1, *shape2;
+    struct csmsolid_t *solid1, *solid2;
+    struct csmsolid_t *solid_res;
+    
+    shape1 = csmbasicshape2d_L_shape(3., 3.);
+    solid1 = csmsweep_create_solid_from_shape(shape1, 0., 0., 0., 1., 0., 0., 0., 0., 1., shape1, 0., 3., 0., 1., 0., 0., 0., 0., 1.);
+    i_assign_flat_material_to_solid(1., 1., 0., solid1);
+    
+    shape2 = csmbasicshape2d_L_shape(1., 1.);
+    solid2 = csmsweep_create_solid_from_shape(shape2, 0., 1., 0., 1., 0., 0., 0., 0., 1., shape2, 0., 2., 0., 1., 0., 0., 0., 0., 1.);
+    i_assign_flat_material_to_solid(1., 0., 0., solid2);
+    
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+
+    assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+    
+    csmsolid_move(solid2, 0., 0., -2.5);
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+    
+    csmshape2d_free(&shape1);
+    csmsolid_free(&solid1);
+    csmshape2d_free(&shape2);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_difference_no_null_edges1(void)
+{
+    struct csmshape2d_t *shape1, *shape2;
+    struct csmsolid_t *solid1, *solid2;
+    struct csmsolid_t *solid_res;
+    
+    shape1 = csmbasicshape2d_L_shape(3., 3.);
+    solid1 = csmsweep_create_solid_from_shape(shape1, 0., 0., 0., 1., 0., 0., 0., 0., 1., shape1, 0., 3., 0., 1., 0., 0., 0., 0., 1.);
+    i_assign_flat_material_to_solid(1., 1., 0., solid1);
+    
+    shape2 = csmbasicshape2d_L_shape(1., 1.);
+    solid2 = csmsweep_create_solid_from_shape(shape2, -0.01, 1., 0., 1., 0., 0., 0., 0., 1., shape2, -0.01, 2., 0., 1., 0., 0., 0., 0., 1.);
+    i_assign_flat_material_to_solid(1., 0., 0., solid2);
+    
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+
+    assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+    
+    csmsolid_move(solid2, 0., 0., -2.5);
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+
+    assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+    
+    csmshape2d_free(&shape1);
+    csmsolid_free(&solid1);
+    csmshape2d_free(&shape2);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_intersection_no_null_edges1(void)
+{
+    struct csmshape2d_t *shape1, *shape2;
+    struct csmsolid_t *solid1, *solid2;
+    struct csmsolid_t *solid_res;
+    
+    shape1 = csmbasicshape2d_L_shape(3., 3.);
+    solid1 = csmsweep_create_solid_from_shape(shape1, 0., 0., 0., 1., 0., 0., 0., 0., 1., shape1, 0., 3., 0., 1., 0., 0., 0., 0., 1.);
+    i_assign_flat_material_to_solid(1., 1., 0., solid1);
+    
+    shape2 = csmbasicshape2d_L_shape(1., 1.);
+    solid2 = csmsweep_create_solid_from_shape(shape2, 0., 1., 0., 1., 0., 0., 0., 0., 1., shape2, 0., 2., 0., 1., 0., 0., 0., 0., 1.);
+    i_assign_flat_material_to_solid(1., 0., 0., solid2);
+    
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+
+    assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+
+    csmsolid_move(solid2, -0.01, 0., 0.);
+
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+
+    assert(csmsetop_intersection_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+    
+    csmsolid_move(solid2, 0., 0., -2.5);
+    assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_res);
+    
+    csmshape2d_free(&shape1);
+    csmsolid_free(&solid1);
+    csmshape2d_free(&shape2);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
-    CSMBOOL process_all_test = CSMTRUE;
+    CSMBOOL process_all_test = CSMFALSE;
     
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_set_parameters, csmviewer_set_results);
@@ -4121,11 +4228,14 @@ void csmtest_test(void)
     {
         //i_test_cilindro4(viewer);
         //i_test_sweep_path6(CSMTRUE);
-        i_test_paraboloid_one_sheet();
-
+        //i_test_paraboloid_one_sheet();
+        //i_test_union_no_null_edges1();
+        //i_test_difference_no_null_edges1();
+        i_test_intersection_no_null_edges1();
     }
     else
     {
+        /*
         i_test_divide_solido_rectangular_hueco_por_plano_medio();
         i_test_divide_solido_rectangular_hueco_por_plano_medio2();
         i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -4160,6 +4270,7 @@ void csmtest_test(void)
                                   // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                                   // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
+         */
         i_test_mechanical_part1_redux();
         i_test_mechanical_part1();
         i_test_mechanical_part2();
@@ -4191,6 +4302,10 @@ void csmtest_test(void)
         i_test_sweep_path6(CSMTRUE);
         i_test_sweep_path6(CSMFALSE);
         i_test_inters_inner_segment();
+        
+        i_test_union_no_null_edges1();
+        i_test_difference_no_null_edges1();
+        i_test_intersection_no_null_edges1();
     }
     
     csmviewer_free(&viewer);

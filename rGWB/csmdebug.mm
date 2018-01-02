@@ -56,7 +56,7 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 0;
+static int i_DEBUG_SCREEN = 1;
 static int i_DEBUG_VISUAL = 1;
 static int i_DEBUG_FILE = 0;
 
@@ -512,7 +512,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
                     g_Debug_points[i].text, 0., 0., 1., 0.,
                     justificacion,
                     BSGRAPHICS2_ESTILO_NORMAL,
-                    0.002);
+                    0.2);
         
             bsgraphics2_desapila_transformacion(graphics);
             bsgraphics2_desapila_transformacion(graphics);

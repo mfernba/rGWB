@@ -21,6 +21,7 @@
 #include "csmmaterial.inl"
 #include "csmnode.inl"
 #include "csmmath.inl"
+#include "csmtolerance.inl"
 #include "csmtransform.inl"
 #include "csmvertex.inl"
 #include "csmassert.inl"
@@ -426,16 +427,6 @@ static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *s
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
-}
-
-// ------------------------------------------------------------------------------------------
-
-static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
-{
-    struct csmloop_t *loop;
-    
-    loop = csmhedge_loop(hedge);
-    return csmloop_lface(loop);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1005,6 +996,183 @@ double csmsolid_volume(const struct csmsolid_t *solid)
     csmhashtb_free_iterator(&face_iterator, csmface_t);
     
     return volume / 6.;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static const struct csmface_t *i_get_next_face(struct csmhashtb(csmface_t) *sfaces, unsigned long *last_face)
+{
+    const struct csmface_t *selected_face;
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    unsigned long face_idx;
+    
+    face_iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    
+    selected_face = NULL;
+    face_idx = 0;
+
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        
+        if (*last_face == ULONG_MAX || (face_idx > 0 && *last_face == face_idx - 1))
+        {
+            selected_face = face;
+            *last_face = face_idx;
+            break;
+        }
+        
+        face_idx++;
+    }
+
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+    
+    return selected_face;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CSMBOOL csmsolid_does_solid_contain_point(const struct csmsolid_t *solid, double x, double y, double z, const struct csmtolerance_t *tolerances)
+{
+    CSMBOOL is_point_inside_solid;
+    double x_min, y_min, z_min, x_max, y_max, z_max;
+    double max_bbox_side;
+    CSMBOOL retry;
+    unsigned long last_face, no_iters;
+    
+    assert_no_null(solid);
+    
+    csmbbox_get_extension(solid->bbox, &x_min, &y_min, &z_min, &x_max, &y_max, &z_max);
+    max_bbox_side = CSMMATH_MAX(CSMMATH_MAX(x_max - x_min, y_max - y_min), z_max - z_min);
+    
+    is_point_inside_solid = CSMFALSE;
+    
+    retry = CSMFALSE;
+    last_face = ULONG_MAX;
+    no_iters = 0;
+    
+    do
+    {
+        double x_baricenter_ref_face, y_baricenter_ref_face, z_baricenter_ref_face;
+        double face_tolerance;
+        const struct csmface_t *reference_face;
+        
+        assert(no_iters < 100000);
+        no_iters++;
+        
+        reference_face = i_get_next_face(solid->sfaces, &last_face);
+        assert_no_null(reference_face);
+        
+        csmface_face_baricenter(reference_face, &x_baricenter_ref_face, &y_baricenter_ref_face, &z_baricenter_ref_face);
+        face_tolerance = csmface_tolerace(reference_face);
+        
+        if (csmmath_equal_coords(x, y, z, x_baricenter_ref_face, y_baricenter_ref_face, z_baricenter_ref_face, face_tolerance) == CSMTRUE)
+        {
+            is_point_inside_solid = CSMTRUE;
+            retry = CSMFALSE;
+        }
+        else
+        {
+            double Ux_ray, Uy_ray, Uz_ray;
+            double x1_ray, y1_ray, z1_ray, x2_ray, y2_ray, z2_ray;
+            struct csmhashtb_iterator(csmface_t) *face_iterator;
+            unsigned long no_cuts;
+            
+            csmmath_unit_vector_between_two_3D_points(x, y, z, x_baricenter_ref_face, y_baricenter_ref_face, z_baricenter_ref_face, &Ux_ray, &Uy_ray, &Uz_ray);
+            csmmath_move_point(x, y, z, Ux_ray, Uy_ray, Uz_ray, -5. * max_bbox_side, &x1_ray, &y1_ray, &z1_ray);
+            csmmath_move_point(x, y, z, Ux_ray, Uy_ray, Uz_ray,  5. * max_bbox_side, &x2_ray, &y2_ray, &z2_ray);
+        
+            face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
+            
+            is_point_inside_solid = CSMFALSE;
+            no_cuts = 0;
+            retry = CSMFALSE;
+            
+            while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+            {
+                struct csmface_t *face;
+                
+                csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+                
+                if (csmface_should_analyze_intersections_with_segment(face, x1_ray, y1_ray, z1_ray, x2_ray, y2_ray, z2_ray) == CSMTRUE)
+                {
+                    double A, B, C, D, face_tolerance;
+                    double d1, d2;
+                    
+                    csmface_face_equation(face, &A, &B, &C, &D);
+                    face_tolerance = csmface_tolerace(face);
+                    
+                    d1 = csmmath_signed_distance_point_to_plane(x1_ray, y1_ray, z1_ray, A, B, C, D);
+                    d2 = csmmath_signed_distance_point_to_plane(x2_ray, y2_ray, z2_ray, A, B, C, D);
+                    
+                    if (csmmath_compare_doubles(d1, 0., face_tolerance) == CSMCOMPARE_EQUAL
+                            && csmmath_compare_doubles(d2, 0., face_tolerance) == CSMCOMPARE_EQUAL)
+                    {
+                        retry = CSMTRUE;
+                    }
+                    else
+                    {
+                        double x_inters, y_inters, z_inters;
+                        
+                        if (csmface_exists_intersection_between_line_and_face_plane(
+                                    face,
+                                    x1_ray, y1_ray, z1_ray, x2_ray, y2_ray, z2_ray,
+                                    &x_inters, &y_inters, &z_inters, NULL) == CSMTRUE)
+                         {
+                             double dot;
+                             
+                             dot = csmmath_dot_product3D(Ux_ray, Uy_ray, Uz_ray, x_inters - x, y_inters - y, z_inters - z);
+                             
+                             if (dot > -1.e-3)
+                             {
+                                 enum csmmath_contaiment_point_loop_t type_of_containment;
+                                 
+                                 if (csmface_contains_point(face, x_inters, y_inters, z_inters, tolerances, &type_of_containment, NULL, NULL, NULL) == CSMTRUE)
+                                 {
+                                    switch (type_of_containment)
+                                    {
+                                        case CSMMATH_CONTAIMENT_POINT_LOOP_ON_VERTEX:
+                                        case CSMMATH_CONTAIMENT_POINT_LOOP_ON_HEDGE:
+                                        {
+                                             if (csmmath_equal_coords(x, y, z, x_inters, y_inters, z_inters, csmtolerance_equal_coords(tolerances)) == CSMTRUE)
+                                                 is_point_inside_solid = CSMTRUE;
+                                             else
+                                                 retry = CSMTRUE;
+                                             break;
+                                        }
+                                            
+                                        case CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR:
+                                        {
+                                            if (csmmath_equal_coords(x, y, z, x_inters, y_inters, z_inters, csmtolerance_equal_coords(tolerances)) == CSMTRUE)
+                                                is_point_inside_solid = CSMTRUE;
+                                            else
+                                                no_cuts++;
+                                            break;
+                                        }
+                                            
+                                        default_error();
+                                    }
+                                 }
+                             }
+                         }
+                    }
+                }
+                
+                if (retry == CSMTRUE || is_point_inside_solid == CSMTRUE)
+                    break;
+            }
+            
+            if (is_point_inside_solid == CSMFALSE)
+                is_point_inside_solid = IS_TRUE(no_cuts % 2 == 1);
+            
+            csmhashtb_free_iterator(&face_iterator, csmface_t);
+        }
+        
+    } while (retry == CSMTRUE);
+    
+    return is_point_inside_solid;
 }
 
 // ----------------------------------------------------------------------------------------------------

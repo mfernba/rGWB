@@ -22,7 +22,8 @@ void csmloop_reassign_id(struct csmloop_t *loop, unsigned long *id_new_element, 
 
 void csmloop_face_equation(
                         const struct csmloop_t *loop,
-                        double *A, double *B, double *C, double *D);
+                        double *A, double *B, double *C, double *D,
+                        double *x_center, double *y_center, double *z_center);
 
 void csmloop_update_bounding_box(const struct csmloop_t *loop, struct csmbbox_t *bbox);
 

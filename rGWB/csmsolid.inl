@@ -80,6 +80,13 @@ CSMBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
                         struct csmvertex_t **coincident_vertex);
 
 
+// Point classification...
+
+CSMBOOL csmsolid_does_solid_contain_point(
+                    const struct csmsolid_t *solid,
+                    double x, double y, double z,
+                    const struct csmtolerance_t *tolerances);
+
 // Debug...
 
 void csmsolid_set_draw_only_border_edges(struct csmsolid_t *solido, CSMBOOL draw_only_border_edges);

@@ -165,7 +165,8 @@ void csmloop_reassign_id(struct csmloop_t *loop, unsigned long *id_new_element, 
 
 void csmloop_face_equation(
                         const struct csmloop_t *loop,
-                        double *A, double *B, double *C, double *D)
+                        double *A, double *B, double *C, double *D,
+                        double *x_center, double *y_center, double *z_center)
 {
     double A_loc, B_loc, C_loc, D_loc;
     double xc, yc, zc;
@@ -178,6 +179,9 @@ void csmloop_face_equation(
     assert_no_null(B);
     assert_no_null(C);
     assert_no_null(D);
+    assert_no_null(x_center);
+    assert_no_null(y_center);
+    assert_no_null(z_center);
     
     A_loc = 0.;
     B_loc = 0.;
@@ -243,6 +247,10 @@ void csmloop_face_equation(
     *B = B_loc;
     *C = C_loc;
     *D = D_loc;
+    
+    *x_center = xc;
+    *y_center = yc;
+    *z_center = zc;
 }
 
 // --------------------------------------------------------------------------------------------------------------

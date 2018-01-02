@@ -150,6 +150,7 @@ void csmsolid_debug_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_
 {
     if (csmdebug_debug_enabled() == CSMTRUE && csmdebug_is_print_solid_unblocked() == CSMTRUE)
     {
+        /*
         unsigned long num_faces, num_holes;
         
         assert_no_null(solido);
@@ -164,7 +165,7 @@ void csmsolid_debug_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_
         csmdebug_print_debug_info("Face table\n");
         i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
         csmdebug_print_debug_info("\n");
-        
+        */
         /*
         csmdebug_print_debug_info("Edge table\n");
         i_print_debug_info_edges(solido->sedges, assert_si_no_es_integro, &num_edges);
@@ -173,9 +174,8 @@ void csmsolid_debug_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_
         csmdebug_print_debug_info("Vertex table\n");
         i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, &num_vertexs);
         csmdebug_print_debug_info("\n");
-        */
-        
         csmdebug_end_context();
+        */
     }
 }
 
@@ -185,6 +185,7 @@ void csmsolid_debug_print_complete_debug(struct csmsolid_t *solido, CSMBOOL asse
 {
     if (csmdebug_debug_enabled() == CSMTRUE && csmdebug_is_print_solid_unblocked() == CSMTRUE)
     {
+        /*
         unsigned long num_faces, num_vertexs, num_edges, num_holes;
         
         assert_no_null(solido);
@@ -209,5 +210,6 @@ void csmsolid_debug_print_complete_debug(struct csmsolid_t *solido, CSMBOOL asse
         csmdebug_print_debug_info("\n");
         
         csmdebug_end_context();
+         */
     }
 }

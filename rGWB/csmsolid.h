@@ -33,6 +33,8 @@ DLL_RGWB void csmsolid_general_transform(
 
 DLL_RGWB double csmsolid_volume(const struct csmsolid_t *solid);
 
+// Visualization...
+
 DLL_RGWB void csmsolid_set_visualization_material(struct csmsolid_t *solid, struct csmmaterial_t **visz_material);
 
 #ifdef __cplusplus

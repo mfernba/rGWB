@@ -20,6 +20,7 @@ struct csmface_t
     double fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;
     struct csmbbox_t *bbox;
+    double x_center, y_center, z_center;
     
     CSMBOOL setop_is_null_face;
 };

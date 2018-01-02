@@ -28,6 +28,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         struct csmsurface_t **surface_eq,
                         struct csmmaterial_t **visz_material_opt,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
+                        double x_center, double y_center, double z_center,
                         struct csmbbox_t **bbox,
                         CSMBOOL setop_is_null_face))
 {
@@ -52,6 +53,9 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     face->D = D;
     face->fuzzy_epsilon = fuzzy_epsilon;
     face->dropped_coord = dropped_coord;
+    face->x_center = x_center;
+    face->y_center = y_center;
+    face->z_center = z_center;
     
     face->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
  
@@ -72,6 +76,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     struct csmmaterial_t *visz_material_opt;
     double A, B, C, D, fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;
+    double x_center, y_center, z_center;
     struct csmbbox_t *bbox;
     CSMBOOL setop_is_null_face;
     
@@ -91,6 +96,9 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     D = 0.;
     fuzzy_epsilon = csmtolerance_default_point_on_plane();
     dropped_coord = (enum csmmath_dropped_coord_t)USHRT_MAX;
+    x_center = 0.;
+    y_center = 0.;
+    z_center = 0.;
     
     bbox = csmbbox_create_empty_box();
 
@@ -107,6 +115,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
                 A, B, C, D,
                 fuzzy_epsilon,
                 dropped_coord,
+                x_center, y_center, z_center,
                 &bbox,
                 setop_is_null_face);
 }
@@ -118,6 +127,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                         struct csmsurface_t **surface_eq,
 	                    struct csmmaterial_t **visz_material_opt,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
+                        double x_center, double y_center, double z_center,
                         unsigned long *id_nuevo_elemento))
 {
     unsigned long id;
@@ -142,6 +152,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                 A, B, C, D,
                 fuzzy_epsilon,
                 dropped_coord,
+                x_center, y_center, z_center,
                 &bbox,
                 setop_is_null_face);
 }
@@ -174,6 +185,7 @@ struct csmface_t *csmface_duplicate(
                         &surface_eq,
                         &visz_material_opt,
                         face->A, face->B, face->C, face->D, face->fuzzy_epsilon, face->dropped_coord,
+                        face->x_center, face->y_center, face->z_center,
                         id_nuevo_elemento);
     assert_no_null(new_face);
     
@@ -374,17 +386,35 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
 void csmface_redo_geometric_generated_data(struct csmface_t *face)
 {
     double max_tolerable_distance;
+    
     assert_no_null(face);
     assert_no_null(face->flout);
     assert_no_null(face->floops);
     
-    csmloop_face_equation(face->flout, &face->A, &face->B, &face->C, &face->D);
+    csmloop_face_equation(
+                        face->flout,
+                        &face->A, &face->B, &face->C, &face->D,
+                        &face->x_center, &face->y_center, &face->z_center);
     
     max_tolerable_distance = 1.1 * csmloop_max_distance_to_plane(face->flout, face->A, face->B, face->C, face->D);
     face->fuzzy_epsilon = i_compute_fuzzy_epsilon_for_containing_test(face->A, face->B, face->C, face->D, max_tolerable_distance, face->floops);
     face->dropped_coord = csmmath_dropped_coord(face->A, face->B, face->C);
     
     i_compute_bounding_box(face->floops, face->bbox);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmface_face_baricenter(const struct csmface_t *face, double *x, double *y, double *z)
+{
+    assert_no_null(face);
+    assert_no_null(x);
+    assert_no_null(y);
+    assert_no_null(z);
+    
+    *x = face->x_center;
+    *y = face->y_center;
+    *z = face->z_center;
 }
 
 // ------------------------------------------------------------------------------------------

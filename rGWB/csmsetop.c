@@ -14,6 +14,7 @@
 #include "csmface.inl"
 #include "csmloop.inl"
 #include "csmloopglue.inl"
+#include "csmbbox.inl"
 #include "csmmath.inl"
 #include "csmnode.inl"
 #include "csmopbas.inl"
@@ -877,9 +878,111 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
 
 // ------------------------------------------------------------------------------------------
 
-static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
+static CSMBOOL i_is_solid_A_contained_in_solid_B(
+                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        const struct csmtolerance_t *tolerances)
+{
+    CSMBOOL is_solid_A_contained_in_solid_B;
+    const struct csmbbox_t *bbox_solid_A, *bbox_solid_B;
+    
+    bbox_solid_A = csmsolid_get_bbox(solid_A);
+    bbox_solid_B = csmsolid_get_bbox(solid_B);
+    
+    if (csmbbox_intersects_with_other_bbox(bbox_solid_A, bbox_solid_B) == CSMFALSE)
+    {
+        is_solid_A_contained_in_solid_B = CSMFALSE;
+    }
+    else
+    {
+        struct csmhashtb_iterator(csmvertex_t) *vertex_iterator_A;
+    
+        is_solid_A_contained_in_solid_B = CSMTRUE;
+        vertex_iterator_A = csmsolid_vertex_iterator(solid_A);
+        
+        while (csmhashtb_has_next(vertex_iterator_A, csmvertex_t) == CSMTRUE)
+        {
+            struct csmvertex_t *vertex_A;
+            double x, y, z;
+            
+            csmhashtb_next_pair(vertex_iterator_A, NULL, &vertex_A, csmvertex_t);
+            csmvertex_get_coordenadas(vertex_A, &x, &y, &z);
+            
+            if (csmsolid_does_solid_contain_point(solid_B, x, y, z, tolerances) == CSMFALSE)
+            {
+                is_solid_A_contained_in_solid_B = CSMFALSE;
+                break;
+            }
+        }
+        
+        csmhashtb_free_iterator(&vertex_iterator_A, csmvertex_t);
+    }
+    
+    return is_solid_A_contained_in_solid_B;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmsolid_t *, i_generate_op_result_with_no_null_edges,  (
                         enum csmsetop_operation_t set_operation,
                         struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        const struct csmtolerance_t *tolerances))
+{
+    struct csmsolid_t *solid_res;
+
+    switch (set_operation)
+    {
+        case CSMSETOP_OPERATION_UNION:
+        {
+            if (i_is_solid_A_contained_in_solid_B(solid_A, solid_B, tolerances) == CSMTRUE)
+            {
+                solid_res = csmsolid_duplicate(solid_B);
+            }
+            else if (i_is_solid_A_contained_in_solid_B(solid_B, solid_A, tolerances) == CSMTRUE)
+            {
+                solid_res = csmsolid_duplicate(solid_A);
+            }
+            else
+            {
+                solid_res = csmsolid_crea_vacio(0);
+                
+                csmsolid_merge_solids(solid_res, solid_A);
+                csmsolid_merge_solids(solid_res, solid_B);
+            }
+            break;
+        }
+            
+        case CSMSETOP_OPERATION_DIFFERENCE:
+        {
+            if (i_is_solid_A_contained_in_solid_B(solid_A, solid_B, tolerances) == CSMTRUE)
+                solid_res = csmsolid_crea_vacio(0);
+            else
+                solid_res = csmsolid_duplicate(solid_A);
+            break;
+        }
+            
+        case CSMSETOP_OPERATION_INTERSECTION:
+        {
+            if (i_is_solid_A_contained_in_solid_B(solid_A, solid_B, tolerances) == CSMTRUE)
+                solid_res = csmsolid_duplicate(solid_A);
+            else if (i_is_solid_A_contained_in_solid_B(solid_B, solid_A, tolerances) == CSMTRUE)
+                solid_res = csmsolid_duplicate(solid_B);
+            else
+                solid_res = csmsolid_crea_vacio(0);
+            break;
+        }
+            
+        default_error();
+    }
+    
+    return solid_res;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
+                        enum csmsetop_operation_t set_operation,
+                        struct csmsolid_t *original_solid_A, struct csmsolid_t *solid_A,
+                        struct csmsolid_t *original_solid_B, struct csmsolid_t *solid_B,
                         const struct csmtolerance_t *tolerances,
                         struct csmsolid_t **solid_res)
 {
@@ -940,7 +1043,7 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
             if (no_null_edges == 0)
             {
                 result = CSMSETOP_OPRESULT_OK;
-                solid_res_loc = NULL;
+                solid_res_loc = i_generate_op_result_with_no_null_edges(set_operation, original_solid_A, original_solid_B, tolerances);
             }
             else
             {
@@ -1007,6 +1110,8 @@ static enum csmsetop_opresult_t i_set_operation(
     CSMBOOL apply_perturbation;
 
     tolerances = csmtolerance_new();
+    csmsolid_redo_geometric_face_data((struct csmsolid_t *)solid_A);
+    csmsolid_redo_geometric_face_data((struct csmsolid_t *)solid_B);
     
     no_perturbations = 0;
     
@@ -1046,7 +1151,8 @@ static enum csmsetop_opresult_t i_set_operation(
         {
             result = i_set_operation_modifying_solids_internal(
                         set_operation,
-                        solid_A_copy, solid_B_copy,
+                        solid_A, solid_A_copy,
+                        solid_B, solid_B_copy,
                         tolerances,
                         &solid_res_loc);
         }

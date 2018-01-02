@@ -87,6 +87,8 @@ void csmface_face_equation(
                         const struct csmface_t *face,
                         double *A, double *B, double *C, double *D);
 
+void csmface_face_baricenter(const struct csmface_t *face, double *x, double *y, double *z);
+
 void csmface_face_equation_info(
                         const struct csmface_t *face,
                         double *A, double *B, double *C, double *D);
