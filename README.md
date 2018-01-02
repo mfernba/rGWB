@@ -1,5 +1,5 @@
 # rGWB
-![Complex Part](/Screenshots/Cylindrical part with holes.png)
+![Complex Part](https://github.com/mfernba/rGWB/Screenshots/Cylindrical part with holes.png)
 An implementation of Martti Mäntyllä's Geometric WorkBench
 
 IMPORTANT: Some parts of the system are tied to other tools I developed in the past, so don't expect (for now) that it compiles for you. 
