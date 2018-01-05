@@ -512,7 +512,7 @@ static void i_assign_faces_to_solid(struct csmhashtb(csmface_t) *sfaces, struct 
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to_merge)
+void csmsolid_merge_solids(struct csmsolid_t *solid, const struct csmsolid_t *solid_to_merge)
 {
     assert_no_null(solid);
     assert_no_null(solid_to_merge);
@@ -773,6 +773,14 @@ CSMBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct cs
 // ----------------------------------------------------------------------------------------------------
 
 struct csmhashtb_iterator(csmvertex_t) *csmsolid_vertex_iterator(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    return csmhashtb_create_iterator(solid->svertexs, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmhashtb_iterator(csmvertex_t) *csmsolid_vertex_iterator_const(const struct csmsolid_t *solid)
 {
     assert_no_null(solid);
     return csmhashtb_create_iterator(solid->svertexs, csmvertex_t);

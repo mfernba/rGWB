@@ -860,14 +860,17 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     
     csmsolid_redo_geometric_face_data(result);
 
+    csmdebug_print_debug_info("Convert holes in holes into faces...\n");
+    csmsetopcom_convert_holes_in_holes_into_faces(result, tolerances);
+    csmsolid_debug_print_debug(result, CSMFALSE);
+
     csmdebug_print_debug_info("Deleting holes filled by faces...\n");
     csmsetopcom_delete_holes_filled_by_faces(result, tolerances);
+    csmsolid_debug_print_debug(result, CSMFALSE);
     
     csmdebug_print_debug_info("Merging faces...\n");
     csmsetopcom_merge_faces_inside_faces(result, tolerances);
-
-    csmdebug_print_debug_info("Convert holes in holes into faces...\n");
-    csmsetopcom_convert_holes_in_holes_into_faces(result, tolerances);
+    csmsolid_debug_print_debug(result, CSMFALSE);
     
     csmsolid_clear_algorithm_data(result);
     csmsolid_redo_geometric_face_data(result);
@@ -879,7 +882,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
 // ------------------------------------------------------------------------------------------
 
 static CSMBOOL i_is_solid_A_contained_in_solid_B(
-                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B,
                         const struct csmtolerance_t *tolerances)
 {
     CSMBOOL is_solid_A_contained_in_solid_B;
@@ -897,7 +900,7 @@ static CSMBOOL i_is_solid_A_contained_in_solid_B(
         struct csmhashtb_iterator(csmvertex_t) *vertex_iterator_A;
     
         is_solid_A_contained_in_solid_B = CSMTRUE;
-        vertex_iterator_A = csmsolid_vertex_iterator(solid_A);
+        vertex_iterator_A = csmsolid_vertex_iterator_const(solid_A);
         
         while (csmhashtb_has_next(vertex_iterator_A, csmvertex_t) == CSMTRUE)
         {
@@ -924,7 +927,7 @@ static CSMBOOL i_is_solid_A_contained_in_solid_B(
 
 CONSTRUCTOR(static struct csmsolid_t *, i_generate_op_result_with_no_null_edges,  (
                         enum csmsetop_operation_t set_operation,
-                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B,
                         const struct csmtolerance_t *tolerances))
 {
     struct csmsolid_t *solid_res;
@@ -981,8 +984,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_generate_op_result_with_no_null_edges,
 
 static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
                         enum csmsetop_operation_t set_operation,
-                        struct csmsolid_t *original_solid_A, struct csmsolid_t *solid_A,
-                        struct csmsolid_t *original_solid_B, struct csmsolid_t *solid_B,
+                        const struct csmsolid_t *original_solid_A, struct csmsolid_t *solid_A,
+                        const struct csmsolid_t *original_solid_B, struct csmsolid_t *solid_B,
                         const struct csmtolerance_t *tolerances,
                         struct csmsolid_t **solid_res)
 {
@@ -1200,9 +1203,10 @@ static enum csmsetop_opresult_t i_set_operation(
     {
         csmdebug_clear_debug_points();
         csmsolid_debug_print_debug(solid_res_loc, CSMTRUE);
-        csmdebug_set_viewer_results(solid_res_loc, NULL);
-        csmdebug_show_viewer();
     }
+    
+    csmdebug_set_viewer_results(solid_res_loc, NULL);
+    csmdebug_show_viewer();
     
     *solid_res = solid_res_loc;
     

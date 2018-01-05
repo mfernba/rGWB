@@ -12,6 +12,7 @@
 extern "C" {
 #endif
     
+#include "csmface_vis.inl"
 #include "csmsolid.h"
 #include "csmsolid_vis.h"
 #include "csmsolid.inl"
@@ -33,6 +34,8 @@ extern "C" {
 
 struct csmviewer_t
 {
+    struct csmface_t *face1, *face2;
+    
     struct csmsolid_t *solid1, *solid2;
     struct csmsolid_t *solid_res1, *solid_res2;
     
@@ -42,12 +45,16 @@ struct csmviewer_t
 // ------------------------------------------------------------------------------------------
 
 static struct csmviewer_t *i_new(
+                    struct csmface_t **face1, struct csmface_t **face2,
                     struct csmsolid_t **solid1, struct csmsolid_t **solid2,
                     struct csmsolid_t **solid_res1, struct csmsolid_t **solid_res2)
 {
     struct csmviewer_t *viewer;
     
     viewer = bsmem_malloc(struct csmviewer_t);
+    
+    viewer->face1 = bsmem_asigna_puntero_pp(face1, struct csmface_t);
+    viewer->face2 = bsmem_asigna_puntero_pp(face2, struct csmface_t);
     
     viewer->solid1 = bsmem_asigna_puntero_pp(solid1, struct csmsolid_t);
     viewer->solid2 = bsmem_asigna_puntero_pp(solid2, struct csmsolid_t);
@@ -64,15 +71,18 @@ static struct csmviewer_t *i_new(
 
 struct csmviewer_t *csmviewer_new(void)
 {
+    struct csmface_t *face1, *face2;
     struct csmsolid_t *solid1, *solid2;
     struct csmsolid_t *solid_res1, *solid_res2;
     
+    face1 = NULL;
+    face2 = NULL;
     solid1 = NULL;
     solid2 = NULL;
     solid_res1 = NULL;
     solid_res2 = NULL;
     
-    return i_new(&solid1, &solid2, &solid_res1, &solid_res2);
+    return i_new(&face1, &face2, &solid1, &solid2, &solid_res1, &solid_res2);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -134,7 +144,37 @@ static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graph
     conf_iluminacion = bsgbibluz_crea_luz_blanca_sin_reflejos_con_color_en_zonas_no_iluminadas();
     bsgraphics2_append_luz_puntual(graphics, -10., -10., 10., true, &conf_iluminacion);
 
-    if (viewer->solid_res1 != NULL || viewer->solid_res2 != NULL)
+    if (viewer->face1 != NULL || viewer->face2 != NULL)
+    {
+        struct bsmaterial_t *material1, *material2, *material3;
+        
+        if (viewer->face1 != NULL)
+        {
+            material1 = bsmaterial_crea_rgba(0., 1., 0., 1.);
+            material2 = bsmaterial_crea_rgba(1., 0., 0., 1.);
+            material3 = bsmaterial_crea_rgba(0., 0., 1., 1.);
+            
+            csmface_vis_draw_edges(viewer->face1, material1, material2, material3, graphics);
+            
+            bsmaterial_destruye(&material1);
+            bsmaterial_destruye(&material2);
+            bsmaterial_destruye(&material3);
+        }
+        
+        if (viewer->face2 != NULL)
+        {
+            material1 = bsmaterial_crea_rgba(0.5, 1., 0., 1.);
+            material2 = bsmaterial_crea_rgba(1., 0.5, 0., 1.);
+            material3 = bsmaterial_crea_rgba(0.5, 0.5, 1., 1.);
+            
+            csmface_vis_draw_edges(viewer->face2, material1, material2, material3, graphics);
+            
+            bsmaterial_destruye(&material1);
+            bsmaterial_destruye(&material2);
+            bsmaterial_destruye(&material3);
+        }
+    }
+    else if (viewer->solid_res1 != NULL || viewer->solid_res2 != NULL)
     {
         struct bsmaterial_t *material;
             
@@ -224,4 +264,19 @@ void csmviewer_show(struct csmviewer_t *viewer)
 {
     bsassert_not_null(viewer);
     i_show_viewer(viewer);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmviewer_show_face(struct csmviewer_t *viewer, struct csmface_t *face1, struct csmface_t *face2)
+{
+    bsassert_not_null(viewer);
+    
+    viewer->face1 = face1;
+    viewer->face2 = face2;
+    
+    i_show_viewer(viewer);
+    
+    viewer->face1 = NULL;
+    viewer->face2 = NULL;
 }

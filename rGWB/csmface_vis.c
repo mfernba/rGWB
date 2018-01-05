@@ -264,3 +264,65 @@ void csmface_vis_draw_normal(struct csmface_t *face, struct bsgraphics2_t *graph
                         x_geometric_center, y_geometric_center, z_geometric_center,
                         x_geometric_center + disp * face->A, y_geometric_center + disp * face->B, z_geometric_center + disp * face->C);
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_vis_draw_edges(
+                        struct csmface_t *face,
+                        const struct bsmaterial_t *outer_loop,
+                        const struct bsmaterial_t *hole_loop,
+                        const struct bsmaterial_t *inner_non_hole_loop,
+                        struct bsgraphics2_t *graphics)
+{
+    double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
+    struct csmloop_t *loop_iterator;
+    
+    assert_no_null(face);
+    
+    csmmath_plane_axis_from_implicit_plane_equation(
+                        face->A, face->B, face->C, face->D,
+                        &Xo, &Yo, &Zo,
+                        &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
+    
+    loop_iterator = csmface_floops(face);
+
+    while (loop_iterator != NULL)
+    {
+        double loop_area;
+        struct csmhedge_t *he, *lhedge;
+        
+        loop_area = csmloop_compute_area(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz);
+        
+        if (loop_iterator == face->flout)
+        {
+            assert(loop_area > 0.);
+            bsgraphics2_escr_color(graphics, outer_loop);
+        }
+        else
+        {
+            if (loop_area < 0.)
+                bsgraphics2_escr_color(graphics, hole_loop);
+            else
+                bsgraphics2_escr_color(graphics, inner_non_hole_loop);
+        }
+        
+        lhedge = csmloop_ledge(loop_iterator);
+        he = lhedge;
+        
+        do
+        {
+            struct csmedge_t *edge;
+            double x1, y1, z1, x2, y2, z2;
+            
+            edge = csmhedge_edge(he);
+            csmedge_vertex_coordinates(edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
+            
+            bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
+            
+            he = csmhedge_next(he);
+        }
+        while (he != lhedge);
+        
+        loop_iterator = csmloop_next(loop_iterator);
+    }
+}

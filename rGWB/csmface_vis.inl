@@ -17,3 +17,11 @@ void csmface_vis_draw_solid(
                     struct bsgraphics2_t *graphics);
 
 void csmface_vis_draw_normal(struct csmface_t *face, struct bsgraphics2_t *graphics);
+
+void csmface_vis_draw_edges(
+                        struct csmface_t *face,
+                        const struct bsmaterial_t *outer_loop,
+                        const struct bsmaterial_t *hole_loop,
+                        const struct bsmaterial_t *inner_non_hole_loop,
+                        struct bsgraphics2_t *graphics);
+

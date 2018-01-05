@@ -523,7 +523,8 @@ CSMBOOL csmmath_is_point_in_segment3D(
             {
                 is_point_on_segment = CSMTRUE;
                 t_loc = proj_point_on_segment / segment_length;
-                assert(t_loc >= 0. && t_loc <= 1.);
+                t_loc = CSMMATH_MIN(CSMMATH_MAX(0., t_loc), 1.);
+                //assert(t_loc >= 0. && t_loc <= 1.);
             }
         }
     }

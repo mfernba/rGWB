@@ -1202,47 +1202,75 @@ void csmsetopcom_merge_faces_inside_faces(struct csmsolid_t *solid, const struct
 
 void csmsetopcom_convert_holes_in_holes_into_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances)
 {
-    struct csmhashtb_iterator(csmface_t) *face_iterator_i;
-        
-    face_iterator_i = csmsolid_face_iterator(solid);
-        
-    while (csmhashtb_has_next(face_iterator_i, csmface_t) == CSMTRUE)
+    CSMBOOL there_are_changes;
+    unsigned long no_iters;
+    
+    no_iters = 0;
+    
+    do
     {
-        struct csmface_t *face;
-    
-        csmhashtb_next_pair(face_iterator_i, NULL, &face, csmface_t);
+        struct csmhashtb_iterator(csmface_t) *face_iterator_i;
         
-        if (csmface_has_holes(face) == CSMTRUE)
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        there_are_changes = CSMFALSE;
+        
+        face_iterator_i = csmsolid_face_iterator(solid);
+        
+        while (csmhashtb_has_next(face_iterator_i, csmface_t) == CSMTRUE)
         {
-            struct csmloop_t *face_flout, *face_floops, *loop_iterator;
-    
-            face_flout = csmface_flout(face);
-            face_floops = csmface_floops(face);
-            loop_iterator = face_floops;
+            struct csmface_t *face;
         
-            do
+            csmhashtb_next_pair(face_iterator_i, NULL, &face, csmface_t);
+            
+            if (csmface_has_holes(face) == CSMTRUE)
             {
-                struct csmloop_t *next_loop;
-                
-                next_loop = csmloop_next(loop_iterator);
-                
-                if (loop_iterator != face_flout)
+                struct csmloop_t *face_flout, *face_floops, *loop_iterator;
+        
+                face_flout = csmface_flout(face);
+                face_floops = csmface_floops(face);
+                loop_iterator = face_floops;
+            
+                do
                 {
-                    double loop_area;
+                    struct csmloop_t *next_loop;
                     
-                    loop_area = csmface_loop_area_in_face(face, loop_iterator);
+                    next_loop = csmloop_next(loop_iterator);
                     
-                    if (loop_area > 0.)
-                        csmeuler_lmfkrh(loop_iterator, NULL);
-                }
-                
-                loop_iterator = next_loop;
-                
-            } while (loop_iterator != NULL);
+                    if (loop_iterator != face_flout)
+                    {
+                        double loop_area;
+                        
+                        loop_area = csmface_loop_area_in_face(face, loop_iterator);
+                        
+                        if (loop_area > 0.)
+                        {
+                            struct csmface_t *new_face;
+                            
+                            csmeuler_lmfkrh(loop_iterator, &new_face);
+                            csmface_redo_geometric_generated_data(new_face);
+
+                            csmeuler_laringmv_from_face1_to_2_if_fits_in_face(face, new_face, tolerances, NULL);
+                            csmface_redo_geometric_generated_data(new_face);
+                            
+                            there_are_changes = CSMTRUE;
+                            break;
+                        }
+                    }
+                    
+                    loop_iterator = next_loop;
+                    
+                } while (loop_iterator != NULL);
+            }
+            
+            if (there_are_changes == CSMTRUE)
+                break;
         }
-    }
-    
-    csmhashtb_free_iterator(&face_iterator_i, csmface_t);
+        
+        csmhashtb_free_iterator(&face_iterator_i, csmface_t);
+        
+    } while (there_are_changes == CSMTRUE);
 }
 
 // ----------------------------------------------------------------------------------------------------

@@ -22,7 +22,8 @@ void csmviewer_set_results(struct csmviewer_t *viewer, struct csmsolid_t *solid1
     
 void csmviewer_show(struct csmviewer_t *viewer);
     
-
+void csmviewer_show_face(struct csmviewer_t *viewer, struct csmface_t *face1, struct csmface_t *face2);
+    
 #ifdef __cplusplus
 }
 #endif

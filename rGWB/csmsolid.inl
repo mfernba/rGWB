@@ -21,7 +21,7 @@ void csmsolid_redo_geometric_face_data(struct csmsolid_t *solid);
 
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid);
 
-void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to_merge);
+void csmsolid_merge_solids(struct csmsolid_t *solid, const struct csmsolid_t *solid_to_merge);
 
 void csmsolid_revert(struct csmsolid_t *solid);
 
@@ -72,6 +72,7 @@ void csmsolid_move_vertex_to_solid(struct csmsolid_t *vertex_solid, struct csmve
 CSMBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct csmvertex_t *vertex);
 
 CONSTRUCTOR(struct csmhashtb_iterator(csmvertex_t) *, csmsolid_vertex_iterator, (struct csmsolid_t *solid));
+CONSTRUCTOR(struct csmhashtb_iterator(csmvertex_t) *, csmsolid_vertex_iterator_const, (const struct csmsolid_t *solid));
 
 CSMBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
                         struct csmsolid_t *solid,

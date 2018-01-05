@@ -47,6 +47,7 @@ void csmdebug_unblock_print_solid(void);
 void csmdebug_set_viewer(
                     struct csmviewer_t *viewer,
                     void (*func_show_viewer)(struct csmviewer_t *),
+                    void (*func_show_viewer_face)(struct csmviewer_t *, struct csmface_t *, struct csmface_t *),
                     void (*func_set_parameters)(struct csmviewer_t *, struct csmsolid_t *solid1, struct csmsolid_t *solid2),
                     void (*func_set_results)(struct csmviewer_t *, struct csmsolid_t *solid1, struct csmsolid_t *solid2));
 
@@ -56,10 +57,12 @@ void csmdebug_set_viewer_results(struct csmsolid_t *solid_res1, struct csmsolid_
     
 void csmdebug_show_viewer(void);
 
-
+void csmdebug_show_face(struct csmface_t *face1, struct csmface_t *face2);
+    
 void csmdebug_clear_debug_points(void);
 void csmdebug_append_debug_point(double x, double y, double z, char **description);
-
+void csmdebug_append_debug_point_const(double x, double y, double z, const char *description);
+    
 void csmdebug_clear_plane(void);
 void csmdebug_set_plane(double A, double B, double C, double D);
 

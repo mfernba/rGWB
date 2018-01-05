@@ -2035,7 +2035,7 @@ static void i_test_mechanical_part1_redux(void)
     ay = 0.1;
     main_part_length = 1.;
     
-    csmdebug_set_enabled_by_code(CSMFALSE);
+    //csmdebug_set_enabled_by_code(CSMFALSE);
     
     main_part_shape = csmbasicshape2d_rectangular_shape(ax, ay);
     //main_part_shape = csmbasicshape2d_circular_shape(ax, 32);
@@ -2094,7 +2094,6 @@ static void i_test_mechanical_part1_redux(void)
     csmdebug_set_viewer_results(main_part, NULL);
     csmdebug_show_viewer();
     //csmdebug_set_enabled_by_code(CSMFALSE);
-   
     
     {
         double A, B, C, D;
@@ -3946,7 +3945,7 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
     head_size = 0.5 * bolt_diameter;
     
     no_points_circle = 32;
-    no_points_circle_thread = 16;
+    no_points_circle_thread = 32;
     
     {
         struct csmshape2d_t *shape;
@@ -3980,7 +3979,7 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
         i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_thread);
         
         csmdebug_set_viewer_results(solid_thread, NULL);
-        //csmdebug_show_viewer();
+        csmdebug_show_viewer();
         
         csmsweep_free_path(&sweep_path);
         csmshape2d_free(&shape);
@@ -4072,6 +4071,50 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
     solid_aux = solid;
     assert(csmsetop_union_A_and_B(solid, solid_thread, &solid) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    if (thread_is_outer == CSMFALSE)
+    {
+        struct csmshape2d_t *hole_shape;
+        struct csmsolid_t *hole_solid;
+        
+        hole_shape = csmbasicshape2d_circular_shape(0.5 * bolt_radius, no_points_circle);
+        
+        hole_solid = csmsweep_create_solid_from_shape(
+                        hole_shape,
+                        0., 0.05, 0.5 * bolt_thread_length, 0., 0., 1., 1., 0., 0.,
+                        hole_shape,
+                        0., -0.05, 0.5 * bolt_thread_length, 0., 0., 1., 1., 0., 0.);
+
+        solid_aux = solid;
+        assert(csmsetop_difference_A_minus_B(solid, hole_solid, &solid) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_rotate(solid, 0.5 * CSMMATH_PI, 0., 0., 0.5 * bolt_thread_length, 0., 0., 1.);
+
+        solid_aux = solid;
+        assert(csmsetop_difference_A_minus_B(solid, hole_solid, &solid) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_rotate(solid, -0.5 * CSMMATH_PI, 0., 0., 0.5 * bolt_thread_length, 0., 0., 1.);
+        
+        csmsolid_move(hole_solid, 0., 0., 0.5 * bolt_thread_length);
+
+        solid_aux = solid;
+        assert(csmsetop_difference_A_minus_B(solid, hole_solid, &solid) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+        
+        csmsolid_rotate(solid, 0.5 * CSMMATH_PI, 0., 0., bolt_thread_length, 0., 0., 1.);
+
+        solid_aux = solid;
+        assert(csmsetop_difference_A_minus_B(solid, hole_solid, &solid) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+        
+        csmshape2d_free(&hole_shape);
+        csmsolid_free(&hole_solid);
+    }
 
     /*
     solid_aux = solid;
@@ -4198,13 +4241,70 @@ static void i_test_intersection_no_null_edges1(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_torus2(void)
+{
+    unsigned long no_points_circle_R, no_points_circle_r;
+    struct csmsolid_t *torus1, *torus2;
+    struct csmsolid_t *solid_aux;
+
+    i_set_output_debug_file("torus2.txt");
+
+    //csmdebug_set_enabled_by_code(CSMFALSE);
+    
+    no_points_circle_R = 4;
+    no_points_circle_r = 4;
+    
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    torus1 = csmquadrics_create_torus(3., no_points_circle_R, .75, no_points_circle_r, 0., 0., 0., 1., 0., 0., 0., 1., 0., 1);
+
+    solid_aux = torus1;
+    torus1 = i_split_solid_ang_get_division(torus1, 0., 0., 0., 1., 0., 0., 0., 1., 0., CSMFALSE);
+    csmsolid_free(&solid_aux);
+    
+    csmdebug_set_viewer_results(torus1, NULL);
+    csmdebug_show_viewer();
+    csmsolid_debug_print_debug(torus1, CSMTRUE);
+    
+    torus2 = csmquadrics_create_torus(3.5, no_points_circle_R, .2, no_points_circle_r, 0., 0., 0.05, 1., 0., 0., 0., 1., 0., 1);
+
+    solid_aux = torus1;
+    assert(csmsetop_difference_A_minus_B(torus1, torus2, &torus1) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmdebug_set_viewer_results(torus1, NULL);
+    csmdebug_show_viewer();
+    
+    csmsolid_free(&torus2);
+    torus2 = csmquadrics_create_torus(3.0, no_points_circle_R, .2, no_points_circle_r, 0., 0., 0.05, 1., 0., 0., 0., 1., 0., 1);
+
+    //csmdebug_set_enabled_by_code(CSMTRUE);
+    
+    solid_aux = torus1;
+    assert(csmsetop_difference_A_minus_B(torus1, torus2, &torus1) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+    
+    /*
+    csmsolid_free(&torus2);
+    torus2 = csmquadrics_create_torus(3., no_points_circle_R, .2, no_points_circle_r, 0., 0., 0.05, 1., 0., 0., 0., 1., 0., 1);
+
+    solid_aux = torus1;
+    assert(csmsetop_difference_A_minus_B(torus1, torus2, &torus1) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+    */
+    
+    csmdebug_set_viewer_results(torus1, NULL);
+    csmdebug_show_viewer();
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
     CSMBOOL process_all_test = CSMFALSE;
     
     viewer = csmviewer_new();
-    csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_set_parameters, csmviewer_set_results);
+    csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
     //csmtest_array_test1();
     //csmtest_array_test2();
@@ -4226,16 +4326,17 @@ void csmtest_test(void)
     
     if (process_all_test == CSMFALSE)
     {
+        i_test_mechanical_part1_redux();
         //i_test_cilindro4(viewer);
         //i_test_sweep_path6(CSMTRUE);
         //i_test_paraboloid_one_sheet();
         //i_test_union_no_null_edges1();
         //i_test_difference_no_null_edges1();
-        i_test_intersection_no_null_edges1();
+        //i_test_intersection_no_null_edges1();
+        //i_test_torus2();
     }
     else
     {
-        /*
         i_test_divide_solido_rectangular_hueco_por_plano_medio();
         i_test_divide_solido_rectangular_hueco_por_plano_medio2();
         i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -4270,9 +4371,9 @@ void csmtest_test(void)
                                   // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                                   // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
-         */
         i_test_mechanical_part1_redux();
         i_test_mechanical_part1();
+        
         i_test_mechanical_part2();
         
         i_test_toroide();
@@ -4306,6 +4407,8 @@ void csmtest_test(void)
         i_test_union_no_null_edges1();
         i_test_difference_no_null_edges1();
         i_test_intersection_no_null_edges1();
+        
+        i_test_torus2();
     }
     
     csmviewer_free(&viewer);

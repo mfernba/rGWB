@@ -32,7 +32,7 @@ static char i_CONTEXT_STACK[i_MAX_NUM_CONTEXTS][i_MAX_LENGTH_CONTEXT_NAME];
 static unsigned long i_NO_STACKED_CONTEXTS = 0;
 static int g_INITIALIZED = 0;
 
-#define i_MAX_NUM_POINTS 1000
+#define i_MAX_NUM_POINTS 100000
 #define i_MAX_DESCRIPTION_LENGHT 256
 
 struct i_debug_point_t
@@ -48,15 +48,17 @@ static CSMBOOL g_Draw_plane = CSMFALSE;
 static double g_A = 0., g_B = 0., g_C = 0., g_D = 0.;
 
 typedef void (*i_FPtr_show_viewer)(struct csmviewer_t *);
+typedef void (*i_FPtr_show_viewer_face)(struct csmviewer_t *, struct csmface_t *face1, struct csmface_t *face2);
 typedef void (*i_FPtr_func_set_parameters)(struct csmviewer_t *, struct csmsolid_t *solid1, struct csmsolid_t *solid2);
 
 static struct csmviewer_t *g_Viewer = NULL;
 static i_FPtr_show_viewer g_func_show_viewer = NULL;
+static i_FPtr_show_viewer_face g_func_show_viewer_face = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 1;
+static int i_DEBUG_SCREEN = 0;
 static int i_DEBUG_VISUAL = 1;
 static int i_DEBUG_FILE = 0;
 
@@ -269,11 +271,13 @@ void csmdebug_unblock_print_solid(void)
 void csmdebug_set_viewer(
                     struct csmviewer_t *viewer,
                     void (*func_show_viewer)(struct csmviewer_t *),
+                    void (*func_show_viewer_face)(struct csmviewer_t *, struct csmface_t *, struct csmface_t *),
                     void (*func_set_parameters)(struct csmviewer_t *, struct csmsolid_t *solid1, struct csmsolid_t *solid2),
                     void (*func_set_results)(struct csmviewer_t *, struct csmsolid_t *solid1, struct csmsolid_t *solid2))
 {
     g_Viewer = viewer;
     g_func_show_viewer = func_show_viewer;
+    g_func_show_viewer_face = func_show_viewer_face;
     g_func_set_viewer_parameters = func_set_parameters;
     g_func_set_viewer_results = func_set_results;
 }
@@ -307,6 +311,17 @@ void csmdebug_show_viewer(void)
 
 // --------------------------------------------------------------------------------
 
+void csmdebug_show_face(struct csmface_t *face1, struct csmface_t *face2)
+{
+    if (i_DEBUG_IS_DISABLED_BY_CODE == CSMFALSE && i_DEBUG_VISUAL == CSMTRUE && g_func_show_viewer != NULL)
+    {
+        bsassert(g_Viewer != NULL);
+        g_func_show_viewer_face(g_Viewer, face1, face2);
+    }
+}
+
+// --------------------------------------------------------------------------------
+
 void csmdebug_clear_debug_points(void)
 {
     g_Draw_plane = CSMFALSE;
@@ -318,7 +333,15 @@ void csmdebug_clear_debug_points(void)
 void csmdebug_append_debug_point(double x, double y, double z, char **description)
 {
     bsassert_not_null(description);
-    
+
+    csmdebug_append_debug_point_const(x, y, z, *description);
+    csmstring_free(description);
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_append_debug_point_const(double x, double y, double z, const char *description)
+{
     if (i_DEBUG_VISUAL == 1)
     {
         bsassert(g_no_debug_points < i_MAX_NUM_POINTS);
@@ -326,12 +349,10 @@ void csmdebug_append_debug_point(double x, double y, double z, char **descriptio
         g_Debug_points[g_no_debug_points].x = x;
         g_Debug_points[g_no_debug_points].y = y;
         g_Debug_points[g_no_debug_points].z = z;
-        strlcpy(g_Debug_points[g_no_debug_points].text, *description, i_MAX_DESCRIPTION_LENGHT);
+        strlcpy(g_Debug_points[g_no_debug_points].text, description, i_MAX_DESCRIPTION_LENGHT);
         
         g_no_debug_points++;
     }
-    
-    csmstring_free(description);
 }
 
 // --------------------------------------------------------------------------------
