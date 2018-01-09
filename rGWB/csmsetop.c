@@ -299,6 +299,7 @@ static void i_join_null_edges(
         
         i_append_null_edges_to_debug_view(set_of_null_edges_A);
         //csmdebug_show_viewer();
+        csmdebug_clear_debug_points();
     }
     
     csmdebug_block_print_solid();
@@ -681,7 +682,7 @@ static void i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_
                     {
                         csmface_redo_geometric_generated_data(face);
                         
-                        if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face, tolerances) == CSMTRUE
+                        if (csmface_are_coplanar_faces(face, loop_attached_to_out_component_face, tolerances, NULL) == CSMTRUE
                                 && csmface_is_loop_contained_in_face(face, loop_attached_to_out_component, tolerances) == CSMTRUE)
                         {
                             csmeuler_lkfmrh(face, &loop_attached_to_out_component_face);
@@ -860,17 +861,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     
     csmsolid_redo_geometric_face_data(result);
 
-    csmdebug_print_debug_info("Convert holes in holes into faces...\n");
-    csmsetopcom_convert_holes_in_holes_into_faces(result, tolerances);
+    csmdebug_print_debug_info("After merging face loops...\n");
     csmsolid_debug_print_debug(result, CSMFALSE);
 
-    csmdebug_print_debug_info("Deleting holes filled by faces...\n");
-    csmsetopcom_delete_holes_filled_by_faces(result, tolerances);
-    csmsolid_debug_print_debug(result, CSMFALSE);
-    
-    csmdebug_print_debug_info("Merging faces...\n");
-    csmsetopcom_merge_faces_inside_faces(result, tolerances);
-    csmsolid_debug_print_debug(result, CSMFALSE);
+    csmsetopcom_correct_faces_after_joining_null_edges(result, tolerances);
     
     csmsolid_clear_algorithm_data(result);
     csmsolid_redo_geometric_face_data(result);

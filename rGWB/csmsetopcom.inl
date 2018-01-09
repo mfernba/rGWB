@@ -56,11 +56,7 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmface_t) *set_of_null_faces);
 
-void csmsetopcom_delete_holes_filled_by_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances);
-
-void csmsetopcom_merge_faces_inside_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances);
-
-void csmsetopcom_convert_holes_in_holes_into_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances);
+void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances);
 
 void csmsetopcom_move_face_to_solid(
                         unsigned long recursion_level,

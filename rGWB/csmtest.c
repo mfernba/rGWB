@@ -2070,16 +2070,20 @@ static void i_test_mechanical_part1_redux(void)
             {
                 struct csmsolid_t *main_part_loc;
             
+                csmdebug_print_debug_info("--->Doing Setop\n");
+                
                 if (no_operations % 2 == 0)
                     assert(csmsetop_difference_A_minus_B(main_part, ring_part, &main_part_loc) == CSMSETOP_OPRESULT_OK);
                 else
                     assert(csmsetop_difference_A_minus_B(main_part, ring_part2, &main_part_loc) == CSMSETOP_OPRESULT_OK);
                 
+                csmdebug_print_debug_info("--->End Setop\n");
+                
                 csmsolid_free(&main_part);
                 main_part = main_part_loc;
                 
                 no_operations++;
-                //break;
+                break;
             }
             
             csmsolid_move(ring_part, 0., 0., incr_z);
@@ -4251,8 +4255,8 @@ static void i_test_torus2(void)
 
     //csmdebug_set_enabled_by_code(CSMFALSE);
     
-    no_points_circle_R = 4;
-    no_points_circle_r = 4;
+    no_points_circle_R = 32;
+    no_points_circle_r = 32;
     
     //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     torus1 = csmquadrics_create_torus(3., no_points_circle_R, .75, no_points_circle_r, 0., 0., 0., 1., 0., 0., 0., 1., 0., 1);
@@ -4283,14 +4287,12 @@ static void i_test_torus2(void)
     assert(csmsetop_difference_A_minus_B(torus1, torus2, &torus1) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
     
-    /*
     csmsolid_free(&torus2);
-    torus2 = csmquadrics_create_torus(3., no_points_circle_R, .2, no_points_circle_r, 0., 0., 0.05, 1., 0., 0., 0., 1., 0., 1);
+    torus2 = csmquadrics_create_torus(2.6, no_points_circle_R, .2, no_points_circle_r, 0., 0., 0.05, 1., 0., 0., 0., 1., 0., 1);
 
     solid_aux = torus1;
     assert(csmsetop_difference_A_minus_B(torus1, torus2, &torus1) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
-    */
     
     csmdebug_set_viewer_results(torus1, NULL);
     csmdebug_show_viewer();
@@ -4326,14 +4328,16 @@ void csmtest_test(void)
     
     if (process_all_test == CSMFALSE)
     {
-        i_test_mechanical_part1_redux();
+        //i_test_mechanical_part1();
+        //i_test_mechanical_part1_redux();
         //i_test_cilindro4(viewer);
         //i_test_sweep_path6(CSMTRUE);
         //i_test_paraboloid_one_sheet();
         //i_test_union_no_null_edges1();
         //i_test_difference_no_null_edges1();
         //i_test_intersection_no_null_edges1();
-        //i_test_torus2();
+        i_test_torus2();
+        //i_test_mechanichal7();
     }
     else
     {

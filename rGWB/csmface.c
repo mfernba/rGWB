@@ -767,11 +767,7 @@ CSMBOOL csmface_is_loop_contained_in_face(
         vertex = csmhedge_vertex(iterator);
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
 
-        if (csmloop_is_point_inside_loop(
-                    face->flout,
-                    x, y, z, face->dropped_coord,
-                    tolerances,
-                    NULL, NULL, NULL, NULL) == CSMFALSE)
+        if (csmface_is_point_interior_to_face(face, x, y, z, tolerances) == CSMFALSE)
         {
             return CSMFALSE;
         }
@@ -828,7 +824,7 @@ CSMBOOL csmface_is_coplanar_to_plane(
 
 // ------------------------------------------------------------------------------------------
 
-CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances)
+CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances, CSMBOOL *same_sense_opc)
 {
     double Xo1, Yo1, Zo1, Ux1, Uy1, Uz1, Vx1, Vy1, Vz1;
     double Xo2, Yo2, Zo2, Ux2, Uy2, Uz2, Vx2, Vy2, Vz2;
@@ -856,9 +852,10 @@ CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface
     }
     else
     {
-        return csmmath_vectors_are_parallel(
+        return csmmath_unit_vectors_are_parallel_ex(
                         face1->A, face1->B, face1->C, face2->A, face2->B, face2->C,
-                        tolerances);
+                        tolerances,
+                        same_sense_opc);
     }
 }
 

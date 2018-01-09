@@ -945,10 +945,10 @@ static void i_finish_split(
     csmsetopcom_cleanup_solid(work_solid, solid_below_loc);
     
     csmsolid_redo_geometric_face_data(solid_above_loc);
-    csmsetopcom_merge_faces_inside_faces(solid_above_loc, tolerances);
+    csmsetopcom_correct_faces_after_joining_null_edges(solid_above_loc, tolerances);
     
     csmsolid_redo_geometric_face_data(solid_below_loc);
-    csmsetopcom_merge_faces_inside_faces(solid_below_loc, tolerances);
+    csmsetopcom_correct_faces_after_joining_null_edges(solid_below_loc, tolerances);
 
     if (csmdebug_debug_enabled() == CSMTRUE)
     {

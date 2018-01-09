@@ -249,7 +249,7 @@ CSMBOOL csmmath_vectors_are_parallel(
 CSMBOOL csmmath_unit_vectors_are_parallel_ex(
                         double Ux1, double Uy1, double Uz1, double Ux2, double Uy2, double Uz2,
                         const struct csmtolerance_t *tolerance,
-                        CSMBOOL *same_sense)
+                        CSMBOOL *same_sense_opt)
 {
     double dot_product;
     
@@ -260,12 +260,12 @@ CSMBOOL csmmath_unit_vectors_are_parallel_ex(
     
     if (csmmath_fabs(1. - csmmath_fabs(dot_product)) < csmtolerance_dot_product_parallel_vectors(tolerance))
     {
-        *same_sense = IS_TRUE(dot_product > 0.);
+        ASSIGN_OPTIONAL_VALUE(same_sense_opt, IS_TRUE(dot_product > 0.));
         return CSMTRUE;
     }
     else
     {
-        *same_sense = CSMFALSE;
+        ASSIGN_OPTIONAL_VALUE(same_sense_opt, CSMFALSE);
         return CSMFALSE;
     }
 }

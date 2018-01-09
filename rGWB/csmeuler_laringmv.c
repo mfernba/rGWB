@@ -30,14 +30,6 @@ void csmeuler_laringmv(
     iterator_face1 = csmface_floops(face1);
     num_iteraciones = 0;
     
-    /*
-    if (csmface_id(face1) == 1525 && csmface_id(face2) == 1960)
-    {
-        csmface_redo_geometric_generated_data(face2);
-        csmdebug_show_face(face1, face2);
-    }
-    */
-    
     do
     {
         struct csmloop_t *next_loop;

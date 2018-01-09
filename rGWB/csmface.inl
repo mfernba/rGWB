@@ -75,7 +75,7 @@ CSMBOOL csmface_is_coplanar_to_plane(
                         const struct csmtolerance_t *tolerances,
                         CSMBOOL *same_orientation);
 
-CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances);
+CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances, CSMBOOL *same_sense_opc);
 
 CSMBOOL csmface_are_coplanar_faces_at_common_base_vertex(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances);
 
