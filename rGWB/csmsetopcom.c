@@ -1328,8 +1328,10 @@ void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid
 {
     CSMBOOL there_are_changes;
     unsigned long no_iters;
+    CSMBOOL inner_area_loops_processed;
     
     no_iters = 0;
+    inner_area_loops_processed = CSMFALSE;
     
     do
     {
@@ -1339,10 +1341,15 @@ void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid
         there_are_changes = CSMFALSE;
         
         csmsolid_redo_geometric_face_data(solid);
-        
-        csmdebug_print_debug_info("Extract positive inner area loops from faces...\n");
-        i_extract_inner_positive_area_loops_from_faces(solid, tolerances, &there_are_changes);
-        csmsolid_debug_print_debug(solid, CSMFALSE);
+    
+        if (inner_area_loops_processed == CSMFALSE)
+        {
+            csmdebug_print_debug_info("Extract positive inner area loops from faces...\n");
+            i_extract_inner_positive_area_loops_from_faces(solid, tolerances, &there_are_changes);
+            csmsolid_debug_print_debug(solid, CSMFALSE);
+            
+            inner_area_loops_processed = CSMTRUE;
+        }
 
         csmdebug_print_debug_info("Merging faces...\n");
         i_merge_faces_inside_faces(solid, tolerances, &there_are_changes);
