@@ -3790,7 +3790,8 @@ static void i_test_sweep_path4(void)
                         0., 0., 1., 32,
                         3., 5,
                         0., 0., 0., 1., 0., 0., 0., 1., 0.,
-                        shape);
+                        shape,
+                        CSMTRUE);
     
     solid = csmsweep_create_from_path(sweep_path);
     
@@ -3860,7 +3861,8 @@ static void i_test_sweep_path5(void)
                         0., 0., bolt_radius, no_points_circle,
                         factor * 0.0015, 1,
                         0., 0., 0., 1., 0., 0., 0., 1., 0.,
-                        shape);
+                        shape,
+                        CSMTRUE);
     
         solid_thread = csmsweep_create_from_path(sweep_path);
         i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_thread);
@@ -3968,7 +3970,8 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
                         0., 0., bolt_radius, no_points_circle_thread,
                         factor * (2. * thread_size + margin_between_threads), no_threads,
                         0., 0., 0.5 * thread_size, 1., 0., 0., 0., 1., 0.,
-                        shape);
+                        shape,
+                        CSMTRUE);
         }
         else
         {
@@ -3976,7 +3979,8 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
                         0., 0., 0.98 * bolt_radius, no_points_circle_thread,
                         factor * (2. * thread_size + margin_between_threads), no_threads,
                         0., 0., 0.5 * thread_size, 1., 0., 0., 0., 1., 0.,
-                        shape);
+                        shape,
+                        CSMTRUE);
         }
     
         solid_thread = csmsweep_create_from_path(sweep_path);
@@ -4300,6 +4304,73 @@ static void i_test_torus2(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_twist(void)
+{
+    double shape_radius1, shape_radius2, helix_radius, cyl_radius;
+    struct csmshape2d_t *shape1, *shape2, *shape_cyl;
+    unsigned long no_points_circle;
+    struct csmsweep_path_t *sweep_path, *sweep_path2;
+    struct csmsolid_t *twisted_solid1, *twisted_solid2;
+    struct csmsolid_t *solid_res, *solid_aux, *solid_cyl;
+    
+    i_set_output_debug_file("i_test_twist.txt");
+    
+    shape_radius1 = 0.025;
+    shape_radius2 = 0.03; // If equal, fail
+    helix_radius = 0.1;
+    cyl_radius = 0.9 * helix_radius;
+    no_points_circle = 16;
+    
+    shape1 = csmbasicshape2d_circular_shape(shape_radius1, no_points_circle);
+    shape2 = csmbasicshape2d_circular_shape(shape_radius2, no_points_circle);
+    
+    sweep_path = csmsweep_new_helix_plane_path(
+                        0., 0., helix_radius, no_points_circle,
+                        0.2, 10,
+                        0., 0., 0, 1., 0., 0., 0., 1., 0.,
+                        shape1,
+                        CSMTRUE);
+    
+    twisted_solid1 = csmsweep_create_from_path(sweep_path);
+    i_assign_flat_material_to_solid(0.5, 0.5, 0.5, twisted_solid1);
+
+    sweep_path2 = csmsweep_new_helix_plane_path(
+                        0., 0., helix_radius, no_points_circle,
+                        0.2, 10,
+                        0., 0., 0, 1., 0., 0., 0., 1., 0.,
+                        shape2,
+                        CSMFALSE);
+    
+    twisted_solid2 = csmsweep_create_from_path(sweep_path2);
+    csmsolid_rotate(twisted_solid2, 0.5 * CSMMATH_PI, 0., 0., 0., 0., 0., 1.);
+    i_assign_flat_material_to_solid(0.5, 0.5, 0.5, twisted_solid2);
+    
+    csmdebug_set_viewer_results(twisted_solid1, twisted_solid2);
+    csmdebug_show_viewer();
+    
+    assert(csmsetop_union_A_and_B(twisted_solid1, twisted_solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    
+    shape_cyl = csmbasicshape2d_circular_shape(helix_radius, no_points_circle);
+    solid_cyl = csmsweep_create_solid_from_shape(shape_cyl, 0., 0., 2., 1., 0., 0., 0., 1., 0., shape_cyl, 0., 0., 0.0, 1., 0., 0., 0., 1., 0.);
+    i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_cyl);
+    
+    solid_aux = solid_res;
+    assert(csmsetop_union_A_and_B(solid_cyl, solid_aux, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+    
+    csmshape2d_free(&shape1);
+    csmshape2d_free(&shape2);
+    csmshape2d_free(&shape_cyl);
+    csmsweep_free_path(&sweep_path);
+    csmsweep_free_path(&sweep_path2);
+    csmsolid_free(&twisted_solid1);
+    csmsolid_free(&twisted_solid2);
+    csmsolid_free(&solid_res);
+    csmsolid_free(&solid_cyl);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -4336,8 +4407,9 @@ void csmtest_test(void)
         //i_test_union_no_null_edges1();
         //i_test_difference_no_null_edges1();
         //i_test_intersection_no_null_edges1();
-        i_test_torus2();
+        //i_test_torus2();
         //i_test_mechanichal7();
+        i_test_twist();
     }
     else
     {
@@ -4413,6 +4485,7 @@ void csmtest_test(void)
         i_test_intersection_no_null_edges1();
         
         i_test_torus2();
+        i_test_twist();
     }
     
     csmviewer_free(&viewer);

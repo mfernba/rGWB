@@ -1017,12 +1017,14 @@ static CSMBOOL i_is_loop_filled_by_face(struct csmloop_t *loop, struct csmloop_t
 static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmface_t *face, struct csmloop_t **loop1, struct csmloop_t **loop2)
 {
     struct csmloop_t *loop1_loc, *loop2_loc;
+    CSMBOOL equal_loops;
     struct csmhedge_t *he, *he_next;
     unsigned long no_iters;
     struct csmvertex_t *vertex;
     
     loop1_loc = ASIGNA_PUNTERO_PP_NO_NULL(loop1, struct csmloop_t);
     loop2_loc = ASIGNA_PUNTERO_PP_NO_NULL(loop2, struct csmloop_t);
+    equal_loops = IS_TRUE(loop1_loc == loop2_loc);
     
     he = csmloop_ledge(loop1_loc);
     no_iters = 0;
@@ -1052,7 +1054,10 @@ static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmfa
     assert(he == NULL);
     
     csmface_remove_loop(face, &loop1_loc);
-    csmface_remove_loop(face, &loop2_loc);
+    
+    if (equal_loops == CSMFALSE)
+        csmface_remove_loop(face, &loop2_loc);
+    
     csmsolid_remove_vertex(solid, &vertex);
 }
 
@@ -1369,7 +1374,7 @@ void csmsetopcom_move_face_to_solid(
                         struct csmface_t *face, struct csmsolid_t *face_solid,
                         struct csmsolid_t *destination_solid)
 {
-    assert(recursion_level < 10000);
+    assert(recursion_level < 1000000);
     
     if (csmface_fsolid(face) != destination_solid)
     {

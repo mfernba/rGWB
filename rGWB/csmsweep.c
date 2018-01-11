@@ -701,7 +701,8 @@ struct csmsweep_path_t *csmsweep_new_helix_plane_path(
                                 double one_helix_heigth, unsigned long no_helix,
                                 double Xo, double Yo, double Zo,
                                 double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
-                                const struct csmshape2d_t *shape)
+                                const struct csmshape2d_t *shape,
+                                CSMBOOL counterclockwise_sense)
 {
     double Wx, Wy, Wz;
     unsigned long i;
@@ -723,6 +724,9 @@ struct csmsweep_path_t *csmsweep_new_helix_plane_path(
     alpha = 0.;
     no_points_helix = no_points_circle + 1;
     incr_alpha = 2. * CSMMATH_PI / no_points_circle;
+    
+    if (counterclockwise_sense == CSMFALSE)
+        incr_alpha = -incr_alpha;
     
     current_heigth = 0;;
     incr_heigth = one_helix_heigth / no_points_circle;
@@ -806,6 +810,7 @@ struct csmsweep_path_t *csmsweep_new_helix_plane_path(
     needs_subdivide_faces = CSMTRUE;
     return i_new_sweeppath(&sweep_points, needs_subdivide_faces);
 }
+
 // --------------------------------------------------------------------------------
 
 void csmsweep_free_path(struct csmsweep_path_t **sweep_path)
