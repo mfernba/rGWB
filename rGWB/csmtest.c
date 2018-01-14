@@ -4315,8 +4315,8 @@ static void i_test_twist(void)
     
     i_set_output_debug_file("i_test_twist.txt");
     
-    shape_radius1 = 0.025;
-    shape_radius2 = 0.03; // If equal, fail
+    shape_radius1 = 0.03;
+    shape_radius2 = 0.03; // If equal, fail = 0.025
     helix_radius = 0.1;
     cyl_radius = 0.9 * helix_radius;
     no_points_circle = 16;
@@ -4374,7 +4374,7 @@ static void i_test_twist(void)
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
-    CSMBOOL process_all_test = CSMFALSE;
+    CSMBOOL process_all_test = CSMTRUE;
     
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);

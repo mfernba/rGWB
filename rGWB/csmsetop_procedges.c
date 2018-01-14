@@ -55,7 +55,6 @@ struct i_edge_intersection_t
     enum i_intersection_position_t intersection_position_at_edge;
     struct csmvertex_t *edge_vertex;
     double x_edge_interior, y_edge_interior, z_edge_interior;
-    double t_intersection_on_edge;
     double t_absolute_intersection_on_edge;
     
     struct csmface_t *face;
@@ -64,7 +63,7 @@ struct i_edge_intersection_t
     struct csmhedge_t *hit_hedge_at_face;
     double x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face;
     
-    const struct csmtolerance_t *tolerances;
+    double tolerance_equal_coords;
 };
 
 struct i_optimized_edge_data_t
@@ -85,14 +84,13 @@ CONSTRUCTOR(static struct i_edge_intersection_t *, i_create_edge_intersection, (
                         enum i_intersection_position_t intersection_position_at_edge,
                         struct csmvertex_t *edge_vertex,
                         double x_edge_interior, double y_edge_interior, double z_edge_interior,
-                        double t_intersection_on_edge,
                         double t_absolute_intersection_on_edge,
                         struct csmface_t *face,
                         enum i_type_edge_intersection_t edge_intersection_at_face,
                         struct csmvertex_t *hit_vertex_at_face,
                         struct csmhedge_t *hit_hedge_at_face,
                         double x_edge_interior_hedge_at_face, double y_edge_interior_hedge_at_face, double z_edge_interior_hedge_at_face,
-                        const struct csmtolerance_t *tolerances))
+                        double tolerance_equal_coords))
 {
     struct i_edge_intersection_t *edge_intersection;
     
@@ -106,7 +104,6 @@ CONSTRUCTOR(static struct i_edge_intersection_t *, i_create_edge_intersection, (
     edge_intersection->x_edge_interior = x_edge_interior;
     edge_intersection->y_edge_interior = y_edge_interior;
     edge_intersection->z_edge_interior = z_edge_interior;
-    edge_intersection->t_intersection_on_edge = t_intersection_on_edge;
     edge_intersection->t_absolute_intersection_on_edge = t_absolute_intersection_on_edge;
     
     edge_intersection->face = face;
@@ -117,7 +114,7 @@ CONSTRUCTOR(static struct i_edge_intersection_t *, i_create_edge_intersection, (
     edge_intersection->y_edge_interior_hedge_at_face = y_edge_interior_hedge_at_face;
     edge_intersection->z_edge_interior_hedge_at_face = z_edge_interior_hedge_at_face;
     
-    edge_intersection->tolerances = tolerances;
+    edge_intersection->tolerance_equal_coords = tolerance_equal_coords;
     
     return edge_intersection;
 }
@@ -247,42 +244,12 @@ static CSMBOOL i_equal_edge_intersection(const struct i_edge_intersection_t *edg
 {
     assert_no_null(edge_intersection1);
     assert_no_null(edge_intersection2);
+    assert(edge_intersection1->tolerance_equal_coords == edge_intersection2->tolerance_equal_coords);
     
-    if (csmmath_compare_doubles(
-                        edge_intersection1->t_absolute_intersection_on_edge, edge_intersection2->t_absolute_intersection_on_edge,
-                        csmtolerance_equal_coords(edge_intersection1->tolerances)) == CSMCOMPARE_EQUAL)
-    {
-        return CSMTRUE;
-    }
-    else
-    {
-        return CSMFALSE;
-    }
-    
-    /*
-    
-    if (edge_intersection1->intersection_position_at_edge != edge_intersection2->intersection_position_at_edge)
-        return CSMFALSE;
-    
-    switch (edge_intersection1->intersection_position_at_edge)
-    {
-        case i_INTERSECTION_POSITION_AT_EDGE_VERTEX:
-            
-            if (edge_intersection1->edge_vertex == edge_intersection2->edge_vertex)
-                return CSMTRUE;
-            else
-                return CSMFALSE;
-            
-        case i_INTERSECTION_POSITION_AT_EDGE_INTERIOR:
-
-            return csmmath_equal_coords(
+    return csmmath_equal_coords(
                         edge_intersection1->x_edge_interior, edge_intersection1->y_edge_interior, edge_intersection1->z_edge_interior,
                         edge_intersection2->x_edge_interior, edge_intersection2->y_edge_interior, edge_intersection2->z_edge_interior,
-                        csmtolerance_equal_coords(edge_intersection1->tolerances));
-            
-        default_error();
-    }
-    */
+                        edge_intersection1->tolerance_equal_coords);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -291,7 +258,6 @@ static void i_append_new_edge_intersection(
                         enum i_intersection_position_t intersection_position_at_edge,
                         struct csmvertex_t *edge_vertex,
                         double x_edge_interior, double y_edge_interior, double z_edge_interior,
-                        double t_intersection_on_edge,
                         double t_absolute_intersection_on_edge,
                         struct csmface_t *face,
                         enum csmmath_contaiment_point_loop_t type_of_containment_at_face,
@@ -306,6 +272,7 @@ static void i_append_new_edge_intersection(
     enum i_type_edge_intersection_t edge_intersection_at_face;
     struct i_edge_intersection_t *edge_intersection;
     unsigned long intersection_id;
+    double tolerance_equal_coords;
     
     generate_intersection = CSMTRUE;
     
@@ -338,6 +305,7 @@ static void i_append_new_edge_intersection(
     }
     
     intersection_id = csmid_new_id(id_new_intersection, NULL);
+    tolerance_equal_coords = csmtolerance_equal_coords(tolerances);
     
     edge_intersection = i_create_edge_intersection(
                         intersection_id,
@@ -345,14 +313,13 @@ static void i_append_new_edge_intersection(
                         intersection_position_at_edge,
                         edge_vertex,
                         x_edge_interior, y_edge_interior, z_edge_interior,
-                        t_intersection_on_edge,
                         t_absolute_intersection_on_edge,
                         face,
                         edge_intersection_at_face,
                         hit_vertex_at_face,
                         hit_hedge_at_face,
                         x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face,
-                        tolerances);
+                        tolerance_equal_coords);
     
     if (csmarrayc_contains_element_st(
                         edge_intersections, i_edge_intersection_t,
@@ -414,7 +381,7 @@ static void i_intersection_coords_at_hedge(
 
 static void i_append_intersection_between_vertex_A_and_face_B(
                         struct csmvertex_t *vertex, struct csmface_t *face_B,
-                        double t_vertex_on_edge, double t_absolute_vertex_on_edge,
+                        double t_absolute_vertex_on_edge,
                         const struct csmtolerance_t *tolerances,
                         unsigned long *id_new_intersection,
                         csmArrayStruct(i_edge_intersection_t) *edge_intersections)
@@ -452,7 +419,6 @@ static void i_append_intersection_between_vertex_A_and_face_B(
                         intersection_position_at_edge,
                         vertex,
                         x_edge_interior, y_edge_interior, z_edge_interior,
-                        t_vertex_on_edge,
                         t_absolute_vertex_on_edge,
                         face_B,
                         type_of_containment_at_face,
@@ -492,7 +458,7 @@ static void i_append_intersections_between_A_edge_and_B_face(
                 i_append_intersection_between_vertex_A_and_face_B(
                         optimized_edge_data->vertex_pos,
                         face_B,
-                        0., 0.,
+                        0.,
                         tolerances,
                         id_new_intersection,
                         edge_intersections);
@@ -503,7 +469,7 @@ static void i_append_intersections_between_A_edge_and_B_face(
                 i_append_intersection_between_vertex_A_and_face_B(
                         optimized_edge_data->vertex_neg,
                         face_B,
-                        1., optimized_edge_data->length,
+                        optimized_edge_data->length,
                         tolerances,
                         id_new_intersection,
                         edge_intersections);
@@ -555,7 +521,7 @@ static void i_append_intersections_between_A_edge_and_B_face(
                             intersection_position_at_edge,
                             edge_vertex,
                             x_inters, y_inters, z_inters,
-                            t, t * optimized_edge_data->length,
+                            t * optimized_edge_data->length,
                             face_B,
                             type_of_containment_at_face,
                             hit_vertex_at_face,
@@ -750,7 +716,7 @@ static void i_process_edge_intersections(
                         assert(csmmath_is_point_in_segment3D(
                                     edge_intersection->x_edge_interior, edge_intersection->y_edge_interior, edge_intersection->z_edge_interior,
                                     x1_esplit, y1_esplit, z1_esplit, x2_esplit, y2_esplit, z2_esplit,
-                                    csmtolerance_equal_coords(edge_intersection->tolerances),
+                                    edge_intersection->tolerance_equal_coords,
                                     NULL) == CSMTRUE);
                     }
                 
@@ -821,7 +787,7 @@ static void i_process_edge_intersections(
                         assert(csmmath_is_point_in_segment3D(
                                     edge_intersection->x_edge_interior_hedge_at_face, edge_intersection->y_edge_interior_hedge_at_face, edge_intersection->z_edge_interior_hedge_at_face,
                                     x1_esplit, y1_esplit, z1_esplit, x2_esplit, y2_esplit, z2_esplit,
-                                    csmtolerance_equal_coords(edge_intersection->tolerances),
+                                    edge_intersection->tolerance_equal_coords,
                                     NULL) == CSMTRUE);
                     }
                     
