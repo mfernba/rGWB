@@ -160,8 +160,8 @@ void csmsubdvfaces_subdivide_faces(struct csmsolid_t *solid)
     {
         struct csmhashtb_iterator(csmface_t) *face_iterator;
         
-        if (csmdebug_debug_enabled() == CSMTRUE)
-            csmsolid_debug_print_debug(solid, CSMTRUE);
+        //if (csmdebug_debug_enabled() == CSMTRUE)
+            //csmsolid_debug_print_debug(solid, CSMTRUE);
 
         face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
         faces_subdivided = CSMFALSE;

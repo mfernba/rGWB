@@ -1121,6 +1121,9 @@ static enum csmsetop_opresult_t i_set_operation(
     {
         struct csmsolid_t *solid_A_copy, *solid_B_copy;
     
+        if (csmdebug_debug_enabled() == CSMTRUE)
+            csmdebug_print_debug_info(">>> Perturbation pass %lu", no_perturbations);
+        
         solid_A_copy = csmsolid_duplicate(solid_A);
         csmsolid_set_name(solid_A_copy, "Solid A");
         
@@ -1197,10 +1200,10 @@ static enum csmsetop_opresult_t i_set_operation(
     {
         csmdebug_clear_debug_points();
         csmsolid_debug_print_debug(solid_res_loc, CSMTRUE);
+        
+        csmdebug_set_viewer_results(solid_res_loc, NULL);
+        csmdebug_show_viewer();
     }
-    
-    csmdebug_set_viewer_results(solid_res_loc, NULL);
-    csmdebug_show_viewer();
     
     *solid_res = solid_res_loc;
     

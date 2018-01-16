@@ -2529,6 +2529,33 @@ static void i_vtxvtx_append_null_edges(
 
 // ------------------------------------------------------------------------------------------
 
+static void i_print_vv_intersections(const csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections)
+{
+    unsigned long i, num_intersections;
+    
+    num_intersections = csmarrayc_count_st(vv_intersections, csmsetop_vtxvtx_inters_t);
+    
+    csmdebug_print_debug_info("**** List of VTX-VTX neighborhoods ***\n");
+    
+    for (i = 0; i < num_intersections; i++)
+    {
+        const struct csmsetop_vtxvtx_inters_t *vv_intersection;
+        char *description;
+        double x, y, z;
+        
+        vv_intersection = csmarrayc_get_const_st(vv_intersections, i, csmsetop_vtxvtx_inters_t);
+        assert_no_null(vv_intersection);
+        
+        csmvertex_get_coordenadas(vv_intersection->vertex_a, &x, &y, &z);
+        
+        description = copiafor_codigo6("[%lu] VV Intersection (%lf, %lf, %lf). Va %lu - Vb %lu", vv_intersection->intersection_id, x, y, z, csmvertex_id(vv_intersection->vertex_a), csmvertex_id(vv_intersection->vertex_b));
+        csmdebug_print_debug_info("%s\n", description);
+        csmstring_free(&description);
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmsetop_vtxvtx_append_null_edges(
                         const csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
                         enum csmsetop_operation_t set_operation,
@@ -2545,6 +2572,9 @@ void csmsetop_vtxvtx_append_null_edges(
     *improper_intersection_detected = CSMFALSE;
     
     csmdebug_clear_debug_points();
+    
+    if (csmdebug_debug_enabled() == CSMTRUE)
+        i_print_vv_intersections(vv_intersections);
     
     for (i = 0; i < num_intersections; i++)
     {

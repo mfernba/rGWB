@@ -73,7 +73,14 @@ void csmdebug_set_inters_sector(
                     CSMBOOL with_intersection_line, double Wx_inters, double Wy_inters, double Wz_inters,
                     double Ux1, double Uy1, double Uz1, double Vx1, double Vy1, double Vz1,
                     double Ux2, double Uy2, double Uz2, double Vx2, double Vy2, double Vz2);
-                                
+    
+CSMBOOL csmdebug_get_enable_face_edge_filter(void);
+void csmdebug_set_enable_face_edge_filter(CSMBOOL enabled);
+void csmdebug_add_edge_to_filter(unsigned long edge_id);
+void csmdebug_add_face_to_filter(unsigned long face_id);
+CSMBOOL csmdebug_draw_edge(unsigned long edge_id);
+CSMBOOL csmdebug_draw_face(unsigned long face_id);
+    
 void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics);
 
 

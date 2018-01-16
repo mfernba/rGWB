@@ -772,7 +772,7 @@ struct csmsweep_path_t *csmsweep_new_helix_plane_path(
 
             csmmath_vector_between_two_3D_points(x_i_3d, y_i_3d, z_i_3d, x_i_3d_next, y_i_3d_next, z_i_3d_next, &Ux_to_next, &Uy_to_next, &Uz_to_next);
             csmmath_make_unit_vector3D(&Ux_to_next, &Uy_to_next, &Uz_to_next);
-            
+
             if (i == 0 && j == 0)
             {
                 Ux_point = Ux_to_next;
@@ -881,11 +881,20 @@ static CSMBOOL i_points_are_equal(
 
 struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep_path)
 {
+    unsigned long start_id_of_new_element;
+    
+    start_id_of_new_element = 0;
+    return csmsweep_create_from_path_debug(sweep_path, start_id_of_new_element);
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t *sweep_path, unsigned long start_id_of_new_element)
+{
     struct csmsolid_t *solid;
     const struct i_sweep_point_t *initial_point, *end_point;
     struct csmtolerance_t *tolerances;
     unsigned long i, no_points;
-    unsigned long start_id_of_new_element;
     struct csmface_t *bottom_face_first_solid, *top_face_solid_prev;
     
     assert_no_null(sweep_path);
@@ -895,7 +904,6 @@ struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep
     tolerances = csmtolerance_new();
 
     solid = NULL;
-    start_id_of_new_element = 100000;
     
     bottom_face_first_solid = NULL;
     top_face_solid_prev = NULL;

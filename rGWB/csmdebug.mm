@@ -59,7 +59,7 @@ static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
 static int i_DEBUG_SCREEN = 0;
-static int i_DEBUG_VISUAL = 0;
+static int i_DEBUG_VISUAL = 1;
 static int i_DEBUG_FILE = 0;
 
 static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
@@ -418,6 +418,91 @@ void csmdebug_set_inters_sector(
 
 // --------------------------------------------------------------------------------
 
+static CSMBOOL i_FACE_EDGE_FILTER_ENABLED = CSMFALSE;
+
+static const unsigned long i_MAX_ELEMENTS_FILTER = 100;
+
+static unsigned long i_EDGE_FILTER[i_MAX_ELEMENTS_FILTER];
+static unsigned long i_NUM_EDGES_IN_FILTER = 0;
+
+static unsigned long i_FACE_FILTER[i_MAX_ELEMENTS_FILTER];
+static unsigned long i_NUM_FACES_IN_FILTER = 0;
+
+// --------------------------------------------------------------------------------
+
+CSMBOOL csmdebug_get_enable_face_edge_filter(void)
+{
+    return i_FACE_EDGE_FILTER_ENABLED;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_set_enable_face_edge_filter(CSMBOOL enabled)
+{
+    i_NUM_EDGES_IN_FILTER = 0;
+    i_NUM_FACES_IN_FILTER = 0;
+    
+    i_FACE_EDGE_FILTER_ENABLED = enabled;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_add_edge_to_filter(unsigned long edge_id)
+{
+    bsassert(i_NUM_EDGES_IN_FILTER < i_MAX_ELEMENTS_FILTER);
+    i_EDGE_FILTER[i_NUM_EDGES_IN_FILTER++] = edge_id;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_add_face_to_filter(unsigned long face_id)
+{
+    bsassert(i_NUM_FACES_IN_FILTER < i_MAX_ELEMENTS_FILTER);    
+    i_FACE_FILTER[i_NUM_FACES_IN_FILTER++] = face_id;
+}
+
+// --------------------------------------------------------------------------------
+
+CSMBOOL csmdebug_draw_edge(unsigned long edge_id)
+{
+    if (i_FACE_EDGE_FILTER_ENABLED == CSMFALSE)
+    {
+        return CSMTRUE;
+    }
+    else
+    {
+        for (unsigned long i = 0; i < i_NUM_EDGES_IN_FILTER; i++)
+        {
+            if (i_EDGE_FILTER[i] == edge_id)
+                return CSMTRUE;
+        }
+        
+        return CSMFALSE;
+    }
+}
+
+// --------------------------------------------------------------------------------
+
+CSMBOOL csmdebug_draw_face(unsigned long face_id)
+{
+    if (i_FACE_EDGE_FILTER_ENABLED == CSMFALSE)
+    {
+        return CSMTRUE;
+    }
+    else
+    {
+        for (unsigned long i = 0; i < i_NUM_FACES_IN_FILTER; i++)
+        {
+            if (i_FACE_FILTER[i] == face_id)
+                return CSMTRUE;
+        }
+        
+        return CSMFALSE;
+    }
+}
+
+// --------------------------------------------------------------------------------
+
 static void i_draw_inters_sector(const struct i_inters_sector_t *sector, struct bsgraphics2_t *graphics)
 {
     struct bsmaterial_t *mat1, *mat2;
@@ -498,7 +583,21 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
 	bsgraphics2_escr_punto3D(graphics, 0.04,     0,  0.05);
 	bsgraphics2_escr_punto3D(graphics, 0.085,     0,   0.1);
 */
+    /*
+    bsgraphics2_escr_punto3D(graphics, -0.063322, -0.063382, 0.300509);
     
+    bsgraphics2_append_desplazamiento_3D(graphics, -0.063322, -0.063382, 0.300509);
+    bsgraphics2_append_ejes_plano_pantalla(graphics);
+        bsgraphics2_escr_texto_mts(
+                graphics,
+                "P", 0., 0., 1., 0.,
+                BSGRAPHICS2_JUSTIFICACION_SUP_CEN,
+                BSGRAPHICS2_ESTILO_NORMAL,
+                0.2);
+
+    bsgraphics2_desapila_transformacion(graphics);
+    bsgraphics2_desapila_transformacion(graphics);
+    */
     /*
     bsgraphics2_escr_punto3D(graphics, -0.0324, -0.00264,   0.1);
     bsgraphics2_escr_punto3D(graphics, -0.0324,  0.00264,   0.1);

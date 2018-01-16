@@ -35,6 +35,7 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
     bsgraphics2_escr_punto3D(graphics, x, y, z);
     
+    /*
     if (csmvertex_id(vertex) == 113)
     {
         bsgraphics2_append_desplazamiento_3D(graphics, x, y, z);
@@ -49,6 +50,7 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
         bsgraphics2_desapila_transformacion(graphics);
         bsgraphics2_desapila_transformacion(graphics);
     }
+    */
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -69,6 +71,7 @@ static void i_draw_debug_info_hedge(
                         CSMBOOL is_ledge,
                         CSMBOOL draw_edge_info,
                         CSMBOOL is_null_face,
+                        CSMBOOL force_draw_edge,
                         struct bsgraphics2_t *graphics)
 {
     struct csmedge_t *edge;
@@ -85,7 +88,7 @@ static void i_draw_debug_info_hedge(
     else
         is_he_pos = CSMFALSE;
     
-    if (is_he_pos == CSMTRUE || is_null_face == CSMTRUE)
+    if (force_draw_edge == CSMTRUE || is_he_pos == CSMTRUE || is_null_face == CSMTRUE)
     {
         bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
         is_he_pos = CSMTRUE;
@@ -158,13 +161,16 @@ static void i_draw_debug_info_faces(
     
     while (csmhashtb_has_next(iterator, csmface_t) == CSMTRUE)
     {
+        unsigned long face_id;
         struct csmface_t *face;
         double A, B, C, D;
-        CSMBOOL is_null_face;
+        CSMBOOL is_null_face, draw_face;
         struct csmloop_t *floops;
         
-        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        csmhashtb_next_pair(iterator, &face_id, &face, csmface_t);
+        
         csmface_face_equation_info(face, &A, &B, &C, &D);
+        draw_face = csmdebug_draw_face(face_id);
         
         if (csmface_is_setop_null_face(face) == CSMTRUE)
         {
@@ -189,10 +195,19 @@ static void i_draw_debug_info_faces(
             
             do
             {
+                struct csmedge_t *he_edge;
                 struct csmhedge_t *he_next;
                 
+                he_edge = csmhedge_edge(he);
                 he_next = csmhedge_next(he);
-                i_draw_debug_info_hedge(he, he_next, A, B, C, is_ledge, draw_edge_info, is_null_face, graphics);
+                
+                if (csmdebug_draw_edge(csmedge_id(he_edge)) == CSMTRUE || draw_face == CSMTRUE)
+                {
+                    CSMBOOL force_draw_edge;
+                    
+                    force_draw_edge = csmdebug_get_enable_face_edge_filter();
+                    i_draw_debug_info_hedge(he, he_next, A, B, C, is_ledge, draw_edge_info, is_null_face, force_draw_edge, graphics);
+                }
                 
                 he = he_next;
                 is_ledge = CSMFALSE;
@@ -202,7 +217,8 @@ static void i_draw_debug_info_faces(
             floops = csmloop_next(floops);
         }
         
-        csmface_vis_draw_normal(face, graphics);
+        if (draw_face == CSMTRUE)
+            csmface_vis_draw_normal(face, graphics);
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
@@ -259,10 +275,13 @@ static void i_draw_solid_faces(
     
     while (csmhashtb_has_next(iterator, csmface_t) == CSMTRUE)
     {
+        unsigned long face_id;
         struct csmface_t *face;
         
-        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
-        csmface_vis_draw_solid(face, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
+        csmhashtb_next_pair(iterator, &face_id, &face, csmface_t);
+        
+        if (csmdebug_draw_face(face_id) == CSMTRUE)
+            csmface_vis_draw_solid(face, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
@@ -300,10 +319,13 @@ static void i_draw_border_edges(struct csmhashtb(csmedge_t) *sedges, CSMBOOL dra
     
     while (csmhashtb_has_next(iterator, csmedge_t) == CSMTRUE)
     {
+        unsigned long edge_id;
         struct csmedge_t *edge;
         
-        csmhashtb_next_pair(iterator, NULL, &edge, csmedge_t);
-        i_draw_border_edge(edge, draw_only_border_edges, graphics);
+        csmhashtb_next_pair(iterator, &edge_id, &edge, csmedge_t);
+        
+        if (csmdebug_draw_edge(edge_id) == CSMTRUE)
+            i_draw_border_edge(edge, draw_only_border_edges, graphics);
     }
     
     csmhashtb_free_iterator(&iterator, csmedge_t);

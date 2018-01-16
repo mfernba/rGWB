@@ -48,3 +48,4 @@ DLL_RGWB void csmsweep_append_point_to_path(
                                 struct csmshape2d_t **shape);
 
 DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmsweep_create_from_path, (const struct csmsweep_path_t *sweep_path));
+DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmsweep_create_from_path_debug, (const struct csmsweep_path_t *sweep_path, unsigned long start_id_of_new_element));

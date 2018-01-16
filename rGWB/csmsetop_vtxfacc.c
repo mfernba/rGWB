@@ -674,7 +674,7 @@ static void i_process_vf_inters(
             
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
             i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, fuzzy_face_tolerance, NULL, NULL, &cl_head_resp_plane);
-            assert(cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_OUT || cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
+            //assert(cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_OUT || cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
             
             if (csmdebug_debug_enabled() == CSMTRUE)
             {

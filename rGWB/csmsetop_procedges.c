@@ -136,9 +136,11 @@ static void i_append_new_vv_inters(
                         struct csmvertex_t *vertex_a, struct csmvertex_t *vertex_b,
                         CSMBOOL is_A_vs_B,
                         csmArrayStruct(csmsetop_vtxvtx_inters_t) *vv_intersections,
+                        double tolerance_equal_coords,
                         CSMBOOL *did_add_intersection)
 {
     assert_no_null(did_add_intersection);
+    assert(csmvertex_equal_coords(vertex_a, vertex_b, tolerance_equal_coords) == CSMTRUE);
     
     if (csmvertex_has_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CSMTRUE)
     {
@@ -198,7 +200,7 @@ static void i_append_common_vertices_solid_A_on_solid_B(
                 
                 intersection_id = csmid_new_id(id_new_intersection, NULL);
                 is_A_vs_B = CSMTRUE;
-                i_append_new_vv_inters(intersection_id, vertex_A, vertex_B, is_A_vs_B, vv_intersections, &did_add_intersection);
+                i_append_new_vv_inters(intersection_id, vertex_A, vertex_B, is_A_vs_B, vv_intersections, tolerance, &did_add_intersection);
                 assert(did_add_intersection == CSMTRUE);
                 
                 if (csmdebug_debug_enabled() == CSMTRUE)
@@ -485,11 +487,11 @@ static void i_append_intersections_between_A_edge_and_B_face(
                         optimized_edge_data->x2, optimized_edge_data->y2, optimized_edge_data->z2,
                         &x_inters, &y_inters, &z_inters, &t) == CSMTRUE)
             {
+                static unsigned long ninters = 0;
                 enum csmmath_contaiment_point_loop_t type_of_containment_at_face;
                 struct csmvertex_t *hit_vertex_at_face;
                 struct csmhedge_t *hit_hedge_at_face;
                 double t_relative_to_hit_hedge_at_face;
-                static unsigned long ninters = 0;
                 
                 hit_vertex_at_face = NULL;
                 hit_hedge_at_face = NULL;
@@ -497,39 +499,67 @@ static void i_append_intersections_between_A_edge_and_B_face(
                 ninters++;
                 
                 if (csmface_contains_point(
-                            face_B,
-                            x_inters, y_inters, z_inters,
-                            tolerances,
-                            &type_of_containment_at_face,
-                            &hit_vertex_at_face,
-                            &hit_hedge_at_face, &t_relative_to_hit_hedge_at_face) == CSMTRUE)
+                                face_B,
+                                x_inters, y_inters, z_inters,
+                                tolerances,
+                                &type_of_containment_at_face,
+                                &hit_vertex_at_face,
+                                &hit_hedge_at_face, &t_relative_to_hit_hedge_at_face) == CSMTRUE)
                 {
                     enum i_intersection_position_t intersection_position_at_edge;
                     struct csmvertex_t *edge_vertex;
                     double x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face;
-                    
-                    intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_INTERIOR;
-                    edge_vertex = NULL;
-                    
+                    double tolerance_equal_coords;
+
+                    tolerance_equal_coords = csmtolerance_equal_coords(tolerances);
+                
+                    if (csmmath_equal_coords(
+                                optimized_edge_data->x1, optimized_edge_data->y1, optimized_edge_data->z1,
+                                x_inters, y_inters, z_inters,
+                                tolerance_equal_coords) == CSMTRUE)
+                    {
+                        intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_VERTEX;
+                        
+                        edge_vertex = optimized_edge_data->vertex_pos;
+                        csmvertex_get_coordenadas(optimized_edge_data->vertex_pos, &x_inters, &y_inters, &z_inters);
+                        t = 0.;
+                    }
+                    else if (csmmath_equal_coords(
+                                optimized_edge_data->x2, optimized_edge_data->y2, optimized_edge_data->z2,
+                                x_inters, y_inters, z_inters,
+                                tolerance_equal_coords) == CSMTRUE)
+                    {
+                        intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_VERTEX;
+                        
+                        edge_vertex = optimized_edge_data->vertex_neg;
+                        csmvertex_get_coordenadas(optimized_edge_data->vertex_neg, &x_inters, &y_inters, &z_inters);
+                        t = 1.;
+                    }
+                    else
+                    {
+                        intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_INTERIOR;
+                        edge_vertex = NULL;
+                    }
+                        
                     i_intersection_coords_at_hedge(
-                            type_of_containment_at_face,
-                            hit_hedge_at_face,
-                            t_relative_to_hit_hedge_at_face,
-                            &x_edge_interior_hedge_at_face, &y_edge_interior_hedge_at_face, &z_edge_interior_hedge_at_face);
-                    
+                                type_of_containment_at_face,
+                                hit_hedge_at_face,
+                                t_relative_to_hit_hedge_at_face,
+                                &x_edge_interior_hedge_at_face, &y_edge_interior_hedge_at_face, &z_edge_interior_hedge_at_face);
+                        
                     i_append_new_edge_intersection(
-                            intersection_position_at_edge,
-                            edge_vertex,
-                            x_inters, y_inters, z_inters,
-                            t * optimized_edge_data->length,
-                            face_B,
-                            type_of_containment_at_face,
-                            hit_vertex_at_face,
-                            hit_hedge_at_face,
-                            x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face,
-                            tolerances,
-                            id_new_intersection,
-                            edge_intersections);
+                                intersection_position_at_edge,
+                                edge_vertex,
+                                x_inters, y_inters, z_inters,
+                                t * optimized_edge_data->length,
+                                face_B,
+                                type_of_containment_at_face,
+                                hit_vertex_at_face,
+                                hit_hedge_at_face,
+                                x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face,
+                                tolerances,
+                                id_new_intersection,
+                                edge_intersections);
                 }
             }
         }
@@ -713,6 +743,16 @@ static void i_process_edge_intersections(
             
                         csmedge_vertex_coordinates(edge_to_split, &x1_esplit, &y1_esplit, &z1_esplit, NULL, &x2_esplit, &y2_esplit, &z2_esplit, NULL);
                         
+                        assert(csmmath_equal_coords(
+                                    x1_esplit, y1_esplit, z1_esplit,
+                                    edge_intersection->x_edge_interior, edge_intersection->y_edge_interior, edge_intersection->z_edge_interior,
+                                    edge_intersection->tolerance_equal_coords) == CSMFALSE);
+
+                        assert(csmmath_equal_coords(
+                                    x2_esplit, y2_esplit, z2_esplit,
+                                    edge_intersection->x_edge_interior, edge_intersection->y_edge_interior, edge_intersection->z_edge_interior,
+                                    edge_intersection->tolerance_equal_coords) == CSMFALSE);
+                        
                         assert(csmmath_is_point_in_segment3D(
                                     edge_intersection->x_edge_interior, edge_intersection->y_edge_interior, edge_intersection->z_edge_interior,
                                     x1_esplit, y1_esplit, z1_esplit, x2_esplit, y2_esplit, z2_esplit,
@@ -757,7 +797,13 @@ static void i_process_edge_intersections(
                 {
                     CSMBOOL did_add_intersection;
                     
-                    i_append_new_vv_inters(edge_intersection->intersection_id, edge_vertex_intersection, edge_intersection->hit_vertex_at_face, is_A_vs_B, vv_intersections, &did_add_intersection);
+                    i_append_new_vv_inters(
+                                    edge_intersection->intersection_id,
+                                    edge_vertex_intersection, edge_intersection->hit_vertex_at_face,
+                                    is_A_vs_B,
+                                    vv_intersections,
+                                    edge_intersection->tolerance_equal_coords,
+                                    &did_add_intersection);
                     
                     if (did_add_intersection == CSMTRUE && csmdebug_debug_enabled() == CSMTRUE)
                     {
@@ -819,7 +865,7 @@ static void i_process_edge_intersections(
                                 &description);
                     }
                     
-                    i_append_new_vv_inters(edge_intersection->intersection_id, edge_vertex_intersection, new_vertex_on_hit_hedge, is_A_vs_B, vv_intersections, &did_add_intersection);
+                    i_append_new_vv_inters(edge_intersection->intersection_id, edge_vertex_intersection, new_vertex_on_hit_hedge, is_A_vs_B, vv_intersections, edge_intersection->tolerance_equal_coords, &did_add_intersection);
                     
                     if (did_add_intersection == CSMFALSE)
                         *did_find_non_manifold_operand_update = CSMTRUE;
