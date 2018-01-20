@@ -15,14 +15,12 @@ void csmbbox_maximize_coord(struct csmbbox_t *bbox, double x, double y, double z
 
 void csmbbox_maximize_bbox(struct csmbbox_t *bbox_maximizar, const struct csmbbox_t *bbox);
 
-void csmbbox_add_margin(struct csmbbox_t *bbox);
+void csmbbox_compute_bsphere_and_margins(struct csmbbox_t *bbox);
 
 void csmbbox_get_extension(
 	                    const struct csmbbox_t *bbox,
                         double *x_min, double *y_min, double *z_min,
                         double *x_max, double *y_max, double *z_max);
-
-double csmbbox_minimun_side_length(const struct csmbbox_t *bbox);
 
 CSMBOOL csmbbox_contains_point(const struct csmbbox_t *bbox, double x, double y, double z);
 

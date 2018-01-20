@@ -23,8 +23,8 @@ enum csmmath_dropped_coord_t
     CSMMATH_DROPPED_COORD_Z
 };
 
-#define CSMMATH_MIN(A, B) ((A) < (B)) ? (A): (B)
-#define CSMMATH_MAX(A, B) ((A) > (B)) ? (A): (B)
+#define CSMMATH_MIN(A, B) (((A) < (B)) ? (A): (B))
+#define CSMMATH_MAX(A, B) (((A) > (B)) ? (A): (B))
 
 #define CSMMATH_CUAD(X) ((X) * (X))
 

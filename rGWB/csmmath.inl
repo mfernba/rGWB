@@ -27,6 +27,8 @@ double csmmath_length_vector3D(double x, double y, double z);
 
 double csmmath_distance_3D(double x1, double y1, double z1, double x2, double y2, double z2);
 
+double csmmath_squared_distance_3D(double x1, double y1, double z1, double x2, double y2, double z2);
+
 void csmmath_make_unit_vector3D(double *Ux, double *Uy, double *Uz);
 
 void csmmath_vector_between_two_3D_points(double x1, double y1, double z1, double x2, double y2, double z2, double *Ux, double *Uy, double *Uz);

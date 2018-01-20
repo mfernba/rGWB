@@ -10,6 +10,7 @@
 
 #include "csmassert.inl"
 #include "csmmem.inl"
+#include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmtolerance.inl"
 
@@ -18,6 +19,9 @@ struct csmbbox_t
     CSMBOOL initialized;
     double x_min, y_min, z_min;
     double x_max, y_max, z_max;
+    
+    double x_center, y_center, z_center;
+    double radius_sq;
 };
 
 // ------------------------------------------------------------------------------------------
@@ -25,7 +29,8 @@ struct csmbbox_t
 CONSTRUCTOR(static struct csmbbox_t *, i_crea, (
                         CSMBOOL initialized,
                         double x_min, double y_min, double z_min,
-                        double x_max, double y_max, double z_max))
+                        double x_max, double y_max, double z_max,
+                        double x_center, double y_center, double z_center, double radius_sq))
 {
     struct csmbbox_t *bbox;
     
@@ -41,6 +46,11 @@ CONSTRUCTOR(static struct csmbbox_t *, i_crea, (
     bbox->y_max = y_max;
     bbox->z_max = z_max;
     
+    bbox->x_center = x_center;
+    bbox->y_center = y_center;
+    bbox->z_center = z_center;
+    bbox->radius_sq = radius_sq;
+    
     return bbox;
 }
 
@@ -51,7 +61,7 @@ struct csmbbox_t *csmbbox_create_empty_box(void)
     CSMBOOL initialized;
     
     initialized = CSMFALSE;
-    return i_crea(initialized, 0., 0., 0., 0., 0., 0.);
+    return i_crea(initialized, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -59,7 +69,11 @@ struct csmbbox_t *csmbbox_create_empty_box(void)
 struct csmbbox_t *csmbbox_copy(const struct csmbbox_t *bbox)
 {
     assert_no_null(bbox);
-    return i_crea(bbox->initialized, bbox->x_min, bbox->y_min, bbox->z_min, bbox->x_max, bbox->y_max, bbox->z_max);
+    
+    return i_crea(
+                bbox->initialized,
+                bbox->x_min, bbox->y_min, bbox->z_min, bbox->x_max, bbox->y_max, bbox->z_max,
+                bbox->x_center, bbox->y_center, bbox->z_center, bbox->radius_sq);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -87,6 +101,11 @@ void csmbbox_reset(struct csmbbox_t *bbox)
     bbox->x_max = 0.;
     bbox->y_max = 0.;
     bbox->z_max = 0.;
+    
+    bbox->x_center = 0.;
+    bbox->y_center = 0.;
+    bbox->z_center = 0.;
+    bbox->radius_sq = 0.;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -178,13 +197,22 @@ static void i_increase_coordinates(double *min, double *max)
 
 // ------------------------------------------------------------------------------------------
 
-void csmbbox_add_margin(struct csmbbox_t *bbox)
+void csmbbox_compute_bsphere_and_margins(struct csmbbox_t *bbox)
 {
+    double radius;
+    
     assert_no_null(bbox);
     
     i_increase_coordinates(&bbox->x_min, &bbox->x_max);
     i_increase_coordinates(&bbox->y_min, &bbox->y_max);
     i_increase_coordinates(&bbox->z_min, &bbox->z_max);
+    
+    bbox->x_center = 0.5 * (bbox->x_min + bbox->x_max);
+    bbox->y_center = 0.5 * (bbox->y_min + bbox->y_max);
+    bbox->z_center = 0.5 * (bbox->z_min + bbox->z_max);
+    
+    radius = 0.5 * CSMMATH_MAX(CSMMATH_MAX(bbox->x_max - bbox->x_min, bbox->y_max - bbox->y_min), bbox->z_max - bbox->z_min);
+    bbox->radius_sq = CSMMATH_CUAD(radius);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -277,20 +305,33 @@ static CSMBOOL i_exists_intersection_between_bbboxes(
 
 CSMBOOL csmbbox_intersects_with_other_bbox(const struct csmbbox_t *bbox1, const struct csmbbox_t *bbox2)
 {
+    double sq_distance;
+    
     assert_no_null(bbox1);
     assert_no_null(bbox2);
     
-    if (i_exists_intersection_between_bbboxes(
-                        bbox1->x_min, bbox1->y_min, bbox1->z_min, bbox1->x_max, bbox1->y_max, bbox1->z_max,
-                        bbox2->x_min, bbox2->y_min, bbox2->z_min, bbox2->x_max, bbox2->y_max, bbox2->z_max) == CSMTRUE)
+    sq_distance = csmmath_squared_distance_3D(
+                        bbox1->x_center, bbox1->y_center, bbox1->z_center,
+                        bbox2->x_center, bbox2->y_center, bbox2->z_center);
+    
+    if (sq_distance - 1.e-6 > (bbox1->radius_sq + bbox2->radius_sq))
     {
-        return CSMTRUE;
+        return CSMFALSE;
     }
     else
     {
-        return i_exists_intersection_between_bbboxes(
+        if (i_exists_intersection_between_bbboxes(
+                        bbox1->x_min, bbox1->y_min, bbox1->z_min, bbox1->x_max, bbox1->y_max, bbox1->z_max,
+                        bbox2->x_min, bbox2->y_min, bbox2->z_min, bbox2->x_max, bbox2->y_max, bbox2->z_max) == CSMTRUE)
+        {
+            return CSMTRUE;
+        }
+        else
+        {
+            return i_exists_intersection_between_bbboxes(
                         bbox2->x_min, bbox2->y_min, bbox2->z_min, bbox2->x_max, bbox2->y_max, bbox2->z_max,
                         bbox1->x_min, bbox1->y_min, bbox1->z_min, bbox1->x_max, bbox1->y_max, bbox1->z_max);
+        }
     }
 }
 

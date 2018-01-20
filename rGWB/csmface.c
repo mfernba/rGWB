@@ -346,7 +346,7 @@ static void i_compute_bounding_box(struct csmloop_t *floops, struct csmbbox_t *b
         
     } while (iterator != NULL);
     
-    csmbbox_add_margin(bbox);
+    csmbbox_compute_bsphere_and_margins(bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------

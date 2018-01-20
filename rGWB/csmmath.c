@@ -143,6 +143,13 @@ double csmmath_distance_3D(double x1, double y1, double z1, double x2, double y2
 
 // ------------------------------------------------------------------------------------------
 
+double csmmath_squared_distance_3D(double x1, double y1, double z1, double x2, double y2, double z2)
+{
+    return CSMMATH_CUAD(x2 - x1) + CSMMATH_CUAD(y2 - y1) + CSMMATH_CUAD(z2 - z1);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmmath_make_unit_vector3D(double *Ux, double *Uy, double *Uz)
 {
     double length;
