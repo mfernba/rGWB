@@ -745,7 +745,7 @@ struct csmsweep_path_t *csmsweep_new_helix_plane_path(
             double alpha_i_next, x_2d_next, y_2d_next, z_2d_next;
             double x_i_3d, y_i_3d, z_i_3d, x_i_3d_next, y_i_3d_next, z_i_3d_next;
             double Ux_to_next, Uy_to_next, Uz_to_next;
-            double Ux_point, Uy_point, Uz_point, Vx_point, Vy_point, Vz_point, Wx_point, Wy_point, Wz_point;
+            double Vx_point, Vy_point, Vz_point, Wx_point, Wy_point, Wz_point;
             struct csmshape2d_t *shape2d_copy;
             struct i_sweep_point_t *sweep_point;
             
@@ -775,11 +775,10 @@ struct csmsweep_path_t *csmsweep_new_helix_plane_path(
 
             if (i == 0 && j == 0)
             {
-                Ux_point = Ux_to_next;
-                Uy_point = Uy_to_next;
-                Uz_point = Uz_to_next;
-                
-                csmmath_cross_product3D(Wx, Wy, Wz, Ux_point, Uy_point, Uz_point, &Vx_point, &Vy_point, &Vz_point);
+                if (counterclockwise_sense == CSMTRUE)
+                    csmmath_cross_product3D(Wx, Wy, Wz, Ux_to_next, Uy_to_next, Uz_to_next, &Vx_point, &Vy_point, &Vz_point);
+                else
+                    csmmath_cross_product3D(Ux_to_next, Uy_to_next, Uz_to_next, Wx, Wy, Wz, &Vx_point, &Vy_point, &Vz_point);
             }
             else
             {
@@ -790,8 +789,18 @@ struct csmsweep_path_t *csmsweep_new_helix_plane_path(
             
             csmmath_make_unit_vector3D(&Vx_point, &Vy_point, &Vz_point);
 
-            csmmath_cross_product3D(Ux_to_next, Uy_to_next, Uz_to_next, Vx_point, Vy_point, Vz_point, &Wx_point, &Wy_point, &Wz_point);
-            csmmath_make_unit_vector3D(&Wx_point, &Wy_point, &Wz_point);
+            if (counterclockwise_sense == CSMTRUE)
+            {
+                Wx_point = Wx;
+                Wy_point = Wy;
+                Wz_point = Wz;
+            }
+            else
+            {
+                Wx_point = -Wx;
+                Wy_point = -Wy;
+                Wz_point = -Wz;
+            }
 
             shape2d_copy = csmshape2d_copy(shape);
             
@@ -944,7 +953,6 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
         }
         
         top_face_solid_prev = top_face_i;
-        //break;
     }
     
     initial_point = csmarrayc_get_const_st(sweep_path->sweep_points, 0, i_sweep_point_t);

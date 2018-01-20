@@ -516,7 +516,7 @@ static void i_test_divide_solido_rectangular_por_plano_medio(void)
     enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
-    i_set_output_debug_file("split1.txt");
+    i_set_output_debug_file("split1.she");
     
     shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
@@ -547,7 +547,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio(void)
     enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
-    i_set_output_debug_file("split_hueco_plano_medio.txt");
+    i_set_output_debug_file("split_hueco_plano_medio.she");
 
     shape2d = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
     
@@ -577,7 +577,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_medio2(void)
     enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
-    i_set_output_debug_file("split_hueco_plano_medio2.txt");
+    i_set_output_debug_file("split_hueco_plano_medio2.she");
     
     shape2d = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
     
@@ -613,7 +613,7 @@ static void i_test_divide_solido_rectangular_hueco_por_plano_superior(void)
     enum csmsplit_opresult_t split_result;
     struct csmsolid_t *solid_above, *solid_below;
     
-    i_set_output_debug_file("split_rectangular_hueco_por_plano_superior.txt");
+    i_set_output_debug_file("split_rectangular_hueco_por_plano_superior.she");
 
     shape2d = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
     shape2d = csmbasicshape2d_circular_hollow_shape(1., 0.367, 32);
@@ -676,7 +676,7 @@ static void i_test_union_solidos1(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("union_solidos1.txt");
+    i_set_output_debug_file("union_solidos1.she");
     
     shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
@@ -710,7 +710,7 @@ static void i_test_union_solidos2(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("union_solidos2.txt");
+    i_set_output_debug_file("union_solidos2.she");
     
     shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
     
@@ -924,7 +924,7 @@ static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d, *circular_shape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("inters_solidos3.txt");
+    i_set_output_debug_file("inters_solidos3.she");
 
     circular_shape2d = csmbasicshape2d_circular_shape(0.25, 4);
     //circular_shape2d = csmbasicshape2d_rectangular_shape_con_pto_inflexion(0.25, 0.25);
@@ -1197,7 +1197,7 @@ static void i_test_cilindro1(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("union_cilindro1.txt");
+    i_set_output_debug_file("union_cilindro1.she");
 
     cshape2d = csmbasicshape2d_circular_shape(0.55, 4);
     shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
@@ -1261,7 +1261,7 @@ static void i_test_cilindro2(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("test_cilindro1.txt");
+    i_set_output_debug_file("test_cilindro1.she");
 
     cshape2d = csmbasicshape2d_circular_shape(0.55, 4);
     shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
@@ -1324,7 +1324,7 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("test_cilindro5.txt");
+    i_set_output_debug_file("test_cilindro5.she");
 
     cshape2d = csmbasicshape2d_circular_shape(0.25, 4);
     shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
@@ -1380,7 +1380,7 @@ static void i_test_cilindro6(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("test_cilindro6.txt");
+    i_set_output_debug_file("test_cilindro6.she");
 
     cshape2d = csmbasicshape2d_circular_shape(0.50, 4);
     shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
@@ -1437,7 +1437,7 @@ static void i_test_cilindro7(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("test_cilindro7.txt");
+    i_set_output_debug_file("test_cilindro7.she");
 
     {
         double ax, ay;
@@ -1505,7 +1505,7 @@ static void i_test_cilindro3(struct csmviewer_t *viewer)
     struct csmsolid_t *solid1, *solid2, *solid_res;
     unsigned long no_sides_circle;
     
-    i_set_output_debug_file("inters_cilindro2.txt");
+    i_set_output_debug_file("inters_cilindro2.she");
 
     no_sides_circle = 32;
     
@@ -1601,7 +1601,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
     struct csmsolid_t *solid1, *solid2, *solid3, *solid_res;
     unsigned long no_points_circle;
     
-    i_set_output_debug_file("inters_cilindro2.txt");
+    i_set_output_debug_file("inters_cilindro2.she");
     csmdebug_set_enabled_by_code(CSMFALSE);
 
     no_points_circle = 32;
@@ -1741,7 +1741,7 @@ static void i_test_cilindro8(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("test_cilindro7.txt");
+    i_set_output_debug_file("test_cilindro7.she");
 
     {
         double ax, ay;
@@ -1809,7 +1809,7 @@ static void i_test_cilindro9(struct csmviewer_t *viewer)
     struct csmshape2d_t *shape2d, *cshape2d;
     struct csmsolid_t *solid1, *solid2, *solid_res;
     
-    i_set_output_debug_file("test_cilindro7.txt");
+    i_set_output_debug_file("test_cilindro7.she");
 
     {
         double ax, ay;
@@ -1902,7 +1902,7 @@ static void i_test_mechanical_part1(void)
     double ax, ay, main_part_length;
     struct csmshape2d_t *main_part_shape;
     
-    i_set_output_debug_file("mechanical1.txt");
+    i_set_output_debug_file("mechanical1.she");
     
     ax = 0.1;
     ay = 0.1;
@@ -2029,7 +2029,7 @@ static void i_test_mechanical_part1_redux(void)
     double ax, ay, main_part_length;
     struct csmshape2d_t *main_part_shape;
     
-    i_set_output_debug_file("mechanical1_redux.txt");
+    i_set_output_debug_file("mechanical1_redux.she");
     
     ax = 0.1;
     ay = 0.1;
@@ -2183,7 +2183,7 @@ static void i_test_mechanical_part2(void)
     struct csmshape2d_t *head_shape, *body_shape, *thread_shape;
     struct csmsolid_t *head_solid, *body_solid, *thread_solid, *bolt_solid;
     
-    i_set_output_debug_file("mechanical2.txt");
+    i_set_output_debug_file("mechanical2.she");
     
     ax = 0.025;
     ay = 0.1;
@@ -2994,7 +2994,7 @@ static void i_test_mechanical6bis(void)
     struct csmshape2d_t *shape1, *shape2_redux, *shape2;
     struct csmsolid_t *s1, *s2, *s3;
     
-    i_set_output_debug_file("test_mechanical7_redux.txt");
+    i_set_output_debug_file("test_mechanical7_redux.she");
     
     no_points_circle = 4;
     
@@ -3034,7 +3034,7 @@ static void i_test_mechanical6(void)
     struct csmshape2d_t *shape1, *shape2, *shape3;
     struct csmsolid_t *s1, *s1_aux, *s2, *s3;
     
-    i_set_output_debug_file("test_mechanical6.txt");
+    i_set_output_debug_file("test_mechanical6.she");
     
     //shape = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.5, 0.5);
     shape1 = csmbasicshape2d_circular_shape(1., 16);
@@ -3187,7 +3187,7 @@ static void i_test_mechanichal7(void)
     length = 1.;
     no_points_circle = 32;
     
-    i_set_output_debug_file("mechanical7.txt");
+    i_set_output_debug_file("mechanical7.she");
 
     csmdebug_set_enabled_by_code(CSMFALSE);
     
@@ -3575,7 +3575,7 @@ static void i_test_mechanichal7_simplified(void)
     struct csmsolid_t *solid1, *solid2;
     struct csmsolid_t *solid;
     
-    i_set_output_debug_file("mechanical7_simplified.txt");
+    i_set_output_debug_file("mechanical7_simplified.she");
     
     shape1 = csmbasicshape2d_rectangular_shape(1.1, 1.1);
     shape2 = csmbasicshape2d_rectangular_hollow_shape(1., 1., 0.9, 0.9);
@@ -3835,7 +3835,7 @@ static void i_test_sweep_path5(void)
     struct csmsolid_t *solid;
     struct csmsolid_t *solid_aux;
     
-    i_set_output_debug_file("sweep_path5.txt");
+    i_set_output_debug_file("sweep_path5.she");
     
     factor = 1.;
     bolt_diameter = factor * 0.05;
@@ -3844,7 +3844,7 @@ static void i_test_sweep_path5(void)
     no_threads = 10;
     
     //no_points_circle = 8;
-    no_points_circle = 4;
+    no_points_circle = 32;
 
     {
         struct csmshape2d_t *shape;
@@ -3859,12 +3859,12 @@ static void i_test_sweep_path5(void)
         
         sweep_path = csmsweep_new_helix_plane_path(
                         0., 0., bolt_radius, no_points_circle,
-                        factor * 0.0015, 1,
+                        factor * 0.015, 1,
                         0., 0., 0., 1., 0., 0., 0., 1., 0.,
                         shape,
                         CSMTRUE);
     
-        solid_thread = csmsweep_create_from_path(sweep_path);
+        solid_thread = csmsweep_create_from_path_debug(sweep_path, 100);
         i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_thread);
         
         csmdebug_set_viewer_results(solid_thread, NULL);
@@ -3893,7 +3893,25 @@ static void i_test_sweep_path5(void)
     
     csmdebug_set_viewer_results(solid, NULL);
     csmdebug_show_viewer();
+    
+    {
+        struct csmshape2d_t *shape;
+        struct csmsolid_t *block;
         
+        shape = csmbasicshape2d_rectangular_shape(2. * bolt_radius, 2. * bolt_radius);
+        block = csmsweep_create_solid_from_shape(shape, 0., 0., bolt_thread_length, 1., 0., 0., 0., 1., 0., shape, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+        
+        solid_aux = solid;
+        assert(csmsetop_difference_A_minus_B(block, solid, &solid) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+        
+        csmshape2d_free(&shape);
+        csmsolid_free(&block);
+    }
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
     csmsolid_free(&solid);
 }
 
@@ -3904,7 +3922,7 @@ static void i_test_inters_inner_segment(void)
     struct csmshape2d_t *shape1, *shape2;
     struct csmsolid_t *solid1, *solid2, *solid;
     
-    i_set_output_debug_file("test_inters_inner_segment.txt");
+    i_set_output_debug_file("test_inters_inner_segment.she");
     
     shape1 = csmbasicshape2d_C_shape(0.05, 0.1);
     solid1 = csmsweep_create_solid_from_shape(shape1, 0.1, 0., 0., 0., 1., 0., 0., 0., 1., shape1, 0., 0., 0., 0., 1., 0., 0., 0., 1.);
@@ -3937,7 +3955,7 @@ static void i_test_sweep_path6(CSMBOOL thread_is_outer)
     struct csmsolid_t *solid;
     struct csmsolid_t *solid_aux;
     
-    i_set_output_debug_file("sweep_path6.txt");
+    i_set_output_debug_file("sweep_path6.she");
     
     factor = 1.;
     bolt_diameter = factor * 0.032;
@@ -4255,7 +4273,7 @@ static void i_test_torus2(void)
     struct csmsolid_t *torus1, *torus2;
     struct csmsolid_t *solid_aux;
 
-    i_set_output_debug_file("torus2.txt");
+    i_set_output_debug_file("torus2.she");
 
     //csmdebug_set_enabled_by_code(CSMFALSE);
     
@@ -4314,14 +4332,14 @@ static void i_test_twist(void)
     struct csmsolid_t *twisted_solid1, *twisted_solid2;
     struct csmsolid_t *solid_res, *solid_aux, *solid_cyl;
     
-    i_set_output_debug_file("i_test_twist.txt");
+    i_set_output_debug_file("i_test_twist.she");
     
     shape_radius1 = 0.025;
-    shape_radius2 = 0.025; // If equal, fail = 0.025
+    shape_radius2 = 0.01; // If equal, fail = 0.025
     helix_radius = 0.1;
     cyl_radius = 0.9 * helix_radius;
-    no_points_circle = 16;
-    no_of_revolutions = 2;
+    no_points_circle = 24;
+    no_of_revolutions = 10;
     
     shape1 = csmbasicshape2d_circular_shape(shape_radius1, no_points_circle);
     shape2 = csmbasicshape2d_circular_shape(shape_radius2, no_points_circle);
@@ -4338,7 +4356,7 @@ static void i_test_twist(void)
 
     sweep_path2 = csmsweep_new_helix_plane_path(
                         0., 0., helix_radius, no_points_circle,
-                        0.2, no_of_revolutions,
+                        0.2, no_of_revolutions + 1,
                         0., 0., 0, 1., 0., 0., 0., 1., 0.,
                         shape2,
                         CSMFALSE);
@@ -4362,6 +4380,9 @@ static void i_test_twist(void)
     }
     csmdebug_set_enable_face_edge_filter(CSMFALSE);
     
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+    
     shape_cyl = csmbasicshape2d_circular_shape(helix_radius, no_points_circle);
     solid_cyl = csmsweep_create_solid_from_shape(shape_cyl, 0., 0., 2., 1., 0., 0., 0., 1., 0., shape_cyl, 0., 0., 0.0, 1., 0., 0., 0., 1., 0.);
     i_assign_flat_material_to_solid(0.5, 0.5, 0.5, solid_cyl);
@@ -4369,6 +4390,9 @@ static void i_test_twist(void)
     solid_aux = solid_res;
     assert(csmsetop_union_A_and_B(solid_cyl, solid_aux, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
+
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
     
     csmshape2d_free(&shape1);
     csmshape2d_free(&shape2);
