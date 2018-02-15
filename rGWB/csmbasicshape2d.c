@@ -171,3 +171,44 @@ struct csmshape2d_t *csmbasicshape2d_L_shape(double dim_x, double dim_y)
     return shape2d;
 }
 
+// ------------------------------------------------------------------------------------------
+
+struct csmshape2d_t *csmbasicshape2d_I_shape(
+                        double canto_alma, double espesor_alma,
+                        double canto_ala, double espesor_ala)
+{
+    struct csmshape2d_t *shape2d;
+    csmArrPoint2D *puntos;
+    double semi_canto_alma, semi_espesor_alma, semi_canto_ala, canto_int_ala;
+    
+    assert(canto_alma > 0.);
+    assert(espesor_alma > 0.);
+    assert(canto_ala > 0.);
+    assert(espesor_ala > 0.);
+    
+    semi_canto_alma = .5 * canto_alma;
+    semi_espesor_alma = .5 * espesor_alma;
+    semi_canto_ala = .5 * canto_ala;
+    canto_int_ala = .5 * canto_ala - .5 * espesor_alma;
+    
+    puntos = csmArrPoint2D_new(0);
+    
+    csmArrPoint2D_append(puntos, -semi_espesor_alma, -semi_canto_alma + espesor_ala);
+    csmArrPoint2D_append(puntos, -semi_canto_ala, -semi_canto_alma + espesor_ala);
+    csmArrPoint2D_append(puntos, -semi_canto_ala, -semi_canto_alma);
+    csmArrPoint2D_append(puntos,  semi_canto_ala, -semi_canto_alma);
+    csmArrPoint2D_append(puntos,  semi_canto_ala, -semi_canto_alma + espesor_ala);
+    csmArrPoint2D_append(puntos,  semi_espesor_alma, -semi_canto_alma + espesor_ala);
+    
+    csmArrPoint2D_append(puntos, semi_espesor_alma,  semi_canto_alma - espesor_ala);
+    csmArrPoint2D_append(puntos, semi_canto_ala,  semi_canto_alma - espesor_ala);
+    csmArrPoint2D_append(puntos, semi_canto_ala, semi_canto_alma);
+    csmArrPoint2D_append(puntos, -semi_canto_ala, semi_canto_alma);
+    csmArrPoint2D_append(puntos, -semi_canto_ala, semi_canto_alma - espesor_ala);
+    csmArrPoint2D_append(puntos, -semi_espesor_alma, semi_canto_alma - espesor_ala);
+    
+    shape2d = csmshape2d_new();
+    csmshape2d_append_new_polygon_with_points(shape2d, &puntos);
+    
+    return shape2d;
+}

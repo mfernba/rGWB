@@ -275,6 +275,28 @@ CSMBOOL csmshape2d_polygon_is_hole(const struct csmshape2d_t *shape2d, unsigned 
 
 // --------------------------------------------------------------------------------
 
+void csmshape2d_move(struct csmshape2d_t *shape2d, double dx, double dy)
+{
+	unsigned long i, num_polygons;
+    
+    assert_no_null(shape2d);
+	
+	num_polygons = csmarrayc_count_st(shape2d->polygons, i_polygon_t);
+	assert(num_polygons > 0);
+	
+	for (i = 0; i < num_polygons; i++)
+	{
+        const struct i_polygon_t *polygon;
+        
+        polygon = csmarrayc_get_const_st(shape2d->polygons, i, i_polygon_t);
+        assert_no_null(polygon);
+        
+        csmArrPoint2D_move(polygon->points, dx, dy);
+	}
+}
+
+// --------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct i_tesselator_vertex_t *, i_new_tesselator_vertex, (double x, double y, double Nx, double Ny, double Nz, CSMBOOL is_vertex_on_edge))
 {
     struct i_tesselator_vertex_t *tesselator_vertex;

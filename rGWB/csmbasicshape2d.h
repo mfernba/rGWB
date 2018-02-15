@@ -24,6 +24,10 @@ DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmbasicshape2d_C_shape, (double dim
 
 DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmbasicshape2d_L_shape, (double dim_x, double dim_y));
 
+DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmbasicshape2d_I_shape, (
+                        double canto_alma, double espesor_alma,
+                        double canto_ala, double espesor_ala));
+    
 #ifdef __cplusplus
 }
 #endif

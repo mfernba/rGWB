@@ -30,6 +30,11 @@ DLL_RGWB void csmshape2d_append_new_polygon_with_points(struct csmshape2d_t *sha
 DLL_RGWB void csmshape2d_append_new_polygon_with_points_and_normals(struct csmshape2d_t *shape2d, csmArrPoint2D **points, csmArrPoint3D **normals);
 
 
+// Transformations...
+
+DLL_RGWB void csmshape2d_move(struct csmshape2d_t *shape2d, double dx, double dy);
+
+    
 #ifdef __cplusplus
 }
 #endif
