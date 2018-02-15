@@ -27,6 +27,8 @@ DLL_RGWB void csmArrPoint2D_invert(csmArrPoint2D *array);
     
 DLL_RGWB double csmArrPoint2D_area(const csmArrPoint2D *array);
 
+DLL_RGWB void csmArrPoint2D_move(csmArrPoint2D *array, double dx, double dy);
+
 DLL_RGWB void csmArrPoint2D_append_circle_points(
 							csmArrPoint2D *array,
 							double x, double y, double radius,

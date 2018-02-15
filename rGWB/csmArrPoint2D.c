@@ -180,6 +180,24 @@ double csmArrPoint2D_area(const csmArrPoint2D *array)
 
 // ---------------------------------------------------------------------------
 
+void csmArrPoint2D_move(csmArrPoint2D *array, double dx, double dy)
+{
+	unsigned long i, num_array;
+
+	num_array = csmArrPoint2D_count(array);
+	assert(num_array >= 3);
+
+	for (i = 0; i < num_array; i++)
+	{
+		double x_i, y_i;
+
+		csmArrPoint2D_get(array, i, &x_i, &y_i);
+		csmArrPoint2D_set(array, i, x_i + dx, y_i + dy);
+	}
+}
+
+// ---------------------------------------------------------------------------
+
 void csmArrPoint2D_append_circle_points(
 							csmArrPoint2D *array,
 							double x, double y, double radius,
