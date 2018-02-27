@@ -20,6 +20,7 @@ void csmdebug_set_enabled_by_code(CSMBOOL enabled);
     
 CSMBOOL csmdebug_debug_enabled(void);
 
+CSMBOOL csmdebug_debug_visual_enabled(void);
     
 void csmdebug_begin_context(const char *context);
 

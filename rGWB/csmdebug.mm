@@ -58,9 +58,9 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 0;
+static int i_DEBUG_SCREEN = 1;
 static int i_DEBUG_VISUAL = 1;
-static int i_DEBUG_FILE = 0;
+static int i_DEBUG_FILE = 1;
 
 static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
 
@@ -114,6 +114,16 @@ CSMBOOL csmdebug_debug_enabled(void)
         return CSMFALSE;
     else
         return IS_TRUE(i_DEBUG_SCREEN == 1 || g_output_file != NULL);
+}
+
+// --------------------------------------------------------------------------------
+
+CSMBOOL csmdebug_debug_visual_enabled(void)
+{
+    if (i_DEBUG_IS_DISABLED_BY_CODE == 1)
+        return CSMFALSE;
+    else
+        return IS_TRUE(i_DEBUG_VISUAL == 1);
 }
 
 // --------------------------------------------------------------------------------
@@ -560,6 +570,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
 
     bsgraphics2_escr_color(graphics, debug_point_material);
     
+    //bsgraphics2_escr_punto3D(graphics, 0, -0.35,   0.5);
     //bsgraphics2_escr_punto3D(graphics, 0.0815685, 0.0565685, 0.3);
     //bsgraphics2_escr_punto3D(graphics, 0.0815685, 0.0565685, 0.3 + 1.e-3);
     
@@ -632,7 +643,7 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
                     g_Debug_points[i].text, 0., 0., 1., 0.,
                     justificacion,
                     BSGRAPHICS2_ESTILO_NORMAL,
-                    0.2);
+                    0.02);
         
             bsgraphics2_desapila_transformacion(graphics);
             bsgraphics2_desapila_transformacion(graphics);
