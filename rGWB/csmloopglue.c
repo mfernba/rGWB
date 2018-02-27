@@ -240,22 +240,35 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
 
         csmeuler_lmef(he_next, he_prev, NULL, NULL, NULL);
         
-        //if (csmdebug_debug_enabled() == CSMTRUE)
-           //csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(he_iterator)), CSMTRUE);
+        if (csmdebug_debug_enabled() == CSMTRUE)
+           csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(he_iterator)), CSMTRUE);
         
         he_iterator_next = csmhedge_next(he_iterator);
         he_iterator_next_mate = csmopbas_mate(he_iterator_next);
+        
+        if (csmdebug_debug_enabled() == CSMTRUE)
+            csmdebug_print_debug_info("loopglue lkev: (%lu, %lu)\n", csmhedge_id(he_iterator_next), csmhedge_id(he_iterator_next_mate));
+        
         csmeuler_lkev(&he_iterator_next, &he_iterator_next_mate, NULL, NULL, NULL, NULL);
         
         he_iterator_mate = csmopbas_mate(he_iterator);
+        
+        if (csmdebug_debug_enabled() == CSMTRUE)
+        {
+            csmsolid_debug_print_debug(csmface_fsolid(csmopbas_face_from_hedge(he_iterator)), CSMTRUE);
+            csmdebug_print_debug_info("loopglue lkef: (%lu, %lu)\n", csmhedge_id(he_iterator_mate), csmhedge_id(he_iterator));
+        }
+        
         csmeuler_lkef(&he_iterator_mate, &he_iterator);
 
-        //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(he_iterator), CSMTRUE);
+        if (csmdebug_debug_enabled() == CSMTRUE)
+            csmsolid_debug_print_debug(csmopbas_solid_from_hedge(he_iterator), CSMTRUE);
         
         he_iterator = he_next;
     }
 
-    //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(he_iterator), CSMTRUE);
+    if (csmdebug_debug_enabled() == CSMTRUE)
+        csmsolid_debug_print_debug(csmopbas_solid_from_hedge(he_iterator), CSMTRUE);
     
     he_iterator_mate = csmopbas_mate(he_iterator);
     csmeuler_lkef(&he_iterator_mate, &he_iterator);
@@ -296,6 +309,12 @@ void csmloopglue_merge_face_loops(
     loop1 = csmface_floops(face);
     loop2 = csmloop_next(loop1);
     assert_no_null(loop2);
+
+    if (csmdebug_debug_enabled() == CSMTRUE)
+    {
+        csmdebug_show_face(face, NULL);
+        csmdebug_print_debug_info("Begin loopglue, face %lu, loops %lu-%lu\n", csmface_id(face), csmloop_id(loop1), csmloop_id(loop2));
+    }
     
     did_find_compatible_loop2 = CSMFALSE;
     

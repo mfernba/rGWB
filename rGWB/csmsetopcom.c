@@ -374,8 +374,8 @@ void csmsetopcom_print_set_of_null_edges(const csmArrayStruct(csmedge_t) *set_of
         csmdebug_print_debug_info("]");
         
         csmdebug_print_debug_info(
-                "[%lu] (%5.3g, %5.3g, %5.3g)\t[he1, loop, face] = (%lu, %lu, %lu)\t[he2, loop, face] = (%lu, %lu, %lu)) \n",
-                csmedge_id(edge), x, y, z,
+                "[%lu] (%5lu, %5.3g, %5.3g, %5.3g)\t[he1, loop, face] = (%lu, %lu, %lu)\t[he2, loop, face] = (%lu, %lu, %lu)) \n",
+                csmedge_id(edge), csmvertex_id(vertex1), x, y, z,
                 csmhedge_id(he1), csmloop_id(csmhedge_loop((struct csmhedge_t *)he1)), csmface_id(csmopbas_face_from_hedge((struct csmhedge_t *)he1)),
                 csmhedge_id(he2), csmloop_id(csmhedge_loop((struct csmhedge_t *)he2)), csmface_id(csmopbas_face_from_hedge((struct csmhedge_t *)he2)));
     }
@@ -436,14 +436,146 @@ static CSMBOOL i_is_same_edge_by_ptr(const struct csmedge_t *edge1, const struct
 
 // ----------------------------------------------------------------------------------------------------
 
+static CSMBOOL i_setop_face_needs_to_be_merge_with_adjacent(struct csmface_t *face)
+{
+    struct csmloop_t *loop_iterator;
+    unsigned long no_unjoined_null_edges;
+
+    loop_iterator = csmface_floops(face);
+    no_unjoined_null_edges = 0;
+
+    while (loop_iterator != NULL)
+    {
+        struct csmloop_t *next_loop;
+        struct csmhedge_t *lhedge, *he_iterator;
+        unsigned long no_iters;
+        
+        next_loop = csmloop_next(loop_iterator);
+        
+        lhedge = csmloop_ledge(loop_iterator);
+        he_iterator = lhedge;
+        no_iters = 0;
+        
+        do
+        {
+            assert(no_iters < 100000);
+            no_iters++;
+            
+            if (csmhedge_setop_is_loose_end(he_iterator) == CSMTRUE
+                    && csmhedge_setop_is_loose_end_but_has_been_joined(he_iterator) == CSMFALSE)
+            {
+                no_unjoined_null_edges++;
+            }
+            
+            he_iterator = csmhedge_next(he_iterator);
+            
+        } while (he_iterator != lhedge && no_unjoined_null_edges < 2);
+        
+        loop_iterator = next_loop;
+        
+        if (no_unjoined_null_edges >= 2)
+            break;
+    }
+    
+    return IS_TRUE(no_unjoined_null_edges == 1);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static struct csmhedge_t *i_he_face1_with_mate_on_face2(struct csmface_t *face1, struct csmface_t *face2)
+{
+    struct csmloop_t *loop_iterator;
+
+    loop_iterator = csmface_floops(face1);
+
+    while (loop_iterator != NULL)
+    {
+        struct csmloop_t *next_loop;
+        struct csmhedge_t *lhedge, *he_iterator;
+        unsigned long no_iters;
+        
+        next_loop = csmloop_next(loop_iterator);
+        
+        lhedge = csmloop_ledge(loop_iterator);
+        he_iterator = lhedge;
+        no_iters = 0;
+        
+        do
+        {
+            struct csmhedge_t *mate_he;
+            
+            assert(no_iters < 100000);
+            no_iters++;
+            
+            mate_he = csmopbas_mate(he_iterator);
+            
+            if (csmopbas_face_from_hedge(mate_he) == face2)
+                return he_iterator;
+            
+            he_iterator = csmhedge_next(he_iterator);
+            
+        } while (he_iterator != lhedge);
+        
+        loop_iterator = next_loop;
+    }
+    
+    return NULL;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static CSMBOOL i_can_join_faces_by_common_edge(struct csmface_t *face1, struct csmface_t **face2)
+{
+    struct csmhedge_t *common_he;
+    
+    assert_no_null(face2);
+    
+    common_he = i_he_face1_with_mate_on_face2(face1, *face2);
+    
+    if (common_he != NULL)
+    {
+        struct csmhedge_t *mate_he;
+        
+        if (csmdebug_debug_enabled() == CSMTRUE)
+        {
+            csmface_debug_print_info_debug(face1, CSMTRUE, NULL);
+            csmface_debug_print_info_debug(*face2, CSMTRUE, NULL);
+
+            csmdebug_print_debug_info("\tMerging faces %lu, %lu. Unjoinable.\n", csmface_id(face1), csmface_id(*face2));
+        }
+        
+        mate_he = csmopbas_mate(common_he);
+        csmeuler_lkef(&common_he, &mate_he);
+
+        if (csmdebug_debug_enabled() == CSMTRUE)
+        {
+            csmdebug_print_debug_info("\tAfter merging remains %lu.\n", csmface_id(face1));
+            csmsolid_debug_print_debug(csmface_fsolid(face1), CSMTRUE);
+        }
+        
+        *face2 = NULL;
+        
+        return CSMTRUE;
+    }
+    else
+    {
+        return CSMFALSE;
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsetopcom_join_hedges(
                         struct csmhedge_t *he1, struct csmhedge_t *he2,
                         const struct csmtolerance_t *tolerances)
 {
     struct csmsolid_t *he1_solid;
-    struct csmface_t *old_face, *new_face;
+    struct csmface_t *old_face, *new_face, *second_new_face;
     struct csmhedge_t *he1_next, *he1_next_next;
     CSMBOOL original_loop_is_a_hole;
+    
+    assert(csmhedge_setop_is_loose_end(he1) == CSMTRUE);
+    assert(csmhedge_setop_is_loose_end(he2) == CSMTRUE);
     
     old_face = csmopbas_face_from_hedge(he1);
     he1_solid = csmface_fsolid(old_face);
@@ -533,7 +665,6 @@ void csmsetopcom_join_hedges(
     if (he1_next_next != he2)
     {
         struct csmloop_t *old_face_floops;
-        struct csmface_t *second_new_face;
 
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
@@ -561,7 +692,7 @@ void csmsetopcom_join_hedges(
         if (new_face != NULL && csmloop_next(old_face_floops) != NULL)
             csmeuler_laringmv(old_face, new_face, tolerances);
         
-         if (new_face != NULL && original_loop_is_a_hole == CSMTRUE)
+        if (new_face != NULL && original_loop_is_a_hole == CSMTRUE)
         {
             CSMBOOL did_move_some_loop;
             
@@ -571,6 +702,30 @@ void csmsetopcom_join_hedges(
                 csmsolid_remove_face(he1_solid, &new_face);
         }
     }
+    else
+    {
+        second_new_face = NULL;
+    }
+    
+    csmhedge_setop_set_is_loose_end_but_has_been_joined(he1, CSMTRUE);
+    csmhedge_setop_set_is_loose_end_but_has_been_joined(he2, CSMTRUE);
+
+    /*
+    if (i_setop_face_needs_to_be_merge_with_adjacent(old_face) == CSMTRUE)
+    {
+        CSMBOOL did_merge_faces;
+        
+        if (second_new_face != NULL)
+            did_merge_faces = i_can_join_faces_by_common_edge(old_face, &second_new_face);
+        else
+            did_merge_faces = CSMFALSE;
+        
+        if (new_face != NULL && did_merge_faces == CSMFALSE)
+            did_merge_faces = i_can_join_faces_by_common_edge(old_face, &new_face);
+        
+        assert(did_merge_faces == CSMTRUE);
+    }
+    */
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -582,6 +737,7 @@ void csmsetopcom_cut_he(
                     unsigned long *no_null_edges_deleted,
                     CSMBOOL *null_face_created_opt)
 {
+    unsigned long no_null_edges;
     CSMBOOL null_face_created_loc;
     CSMBOOL contains_element;
     unsigned long idx;
@@ -590,6 +746,8 @@ void csmsetopcom_cut_he(
     struct csmhedge_t *he1_edge, *he2_edge;
     struct csmloop_t *he1_loop, *he2_loop;
     
+    no_null_edges = csmarrayc_count_st(set_of_null_edges, csmedge_t);
+    assert(no_null_edges > 0);
     assert_no_null(no_null_edges_deleted);
     
     solid = csmopbas_solid_from_hedge(hedge);
@@ -1347,7 +1505,7 @@ void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid
         
         csmsolid_redo_geometric_face_data(solid);
     
-        if (inner_area_loops_processed == CSMFALSE)
+        //if (inner_area_loops_processed == CSMFALSE)
         {
             csmdebug_print_debug_info("Extract positive inner area loops from faces...\n");
             i_extract_inner_positive_area_loops_from_faces(solid, tolerances, &there_are_changes);

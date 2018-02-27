@@ -74,6 +74,14 @@ struct i_optimized_edge_data_t
     double length;
 };
 
+/*
+struct i_inters_vertex_t
+{
+    struct csmvertex_t *vertex;
+    struct csmhashtb(csmvertex_t) *overlapped_vertexs;
+};
+*/
+
 csmArrayStruct(i_edge_intersection_t);
 
 // ------------------------------------------------------------------------------------------
@@ -129,6 +137,51 @@ static void i_free_edge_intersection(struct i_edge_intersection_t **edge_interse
     FREE_PP(edge_intersection, struct i_edge_intersection_t);
 }
 
+/*
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct i_inters_vertex_t *, i_new_inters_vertex, (struct csmvertex_t *vertex, struct csmhashtb(csmvertex_t) **overlapped_vertexs))
+{
+    struct i_inters_vertex_t *inters_vertex;
+    
+    inters_vertex = MALLOC(struct i_inters_vertex_t);
+    
+    inters_vertex->vertex = vertex;
+    inters_vertex->overlapped_vertexs = ASIGNA_PUNTERO_PP_NO_NULL(overlapped_vertexs, struct csmhashtb(csmvertex_t));
+    
+    return inters_vertex;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_free_inters_vertex(struct i_inters_vertex_t **inters_vertex)
+{
+    assert_no_null(inters_vertex);
+    assert_no_null(*inters_vertex);
+    
+    csmhashtb_free(&(*inters_vertex)->overlapped_vertexs, csmvertex_t, NULL);
+    
+    FREE_PP(inters_vertex, struct i_inters_vertex_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct i_inters_vertex_t *, i_new_inters_vertex_empty, (struct csmvertex_t *vertex))
+{
+    struct csmhashtb(csmvertex_t) *overlapped_vertexs;
+    
+    overlapped_vertexs = csmhashtb_create_empty(csmvertex_t);
+    return i_new_inters_vertex(vertex, &overlapped_vertexs);
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmhashtb(i_inters_vertex_t) *, i_new_inters_vertex_table, (void))
+{
+    return csmhashtb_create_empty(i_inters_vertex_t);
+}
+*/
+
 // ------------------------------------------------------------------------------------------
 
 static void i_append_new_vv_inters(
@@ -140,7 +193,7 @@ static void i_append_new_vv_inters(
                         CSMBOOL *did_add_intersection)
 {
     assert_no_null(did_add_intersection);
-    assert(csmvertex_equal_coords(vertex_a, vertex_b, tolerance_equal_coords) == CSMTRUE);
+    assert(csmvertex_equal_coords(vertex_a, vertex_b, 2. * tolerance_equal_coords) == CSMTRUE);
     
     if (csmvertex_has_mask_attrib(vertex_a, CSMVERTEX_MASK_SETOP_COMMON_VERTEX) == CSMTRUE)
     {
@@ -487,7 +540,6 @@ static void i_append_intersections_between_A_edge_and_B_face(
                         optimized_edge_data->x2, optimized_edge_data->y2, optimized_edge_data->z2,
                         &x_inters, &y_inters, &z_inters, &t) == CSMTRUE)
             {
-                static unsigned long ninters = 0;
                 enum csmmath_contaiment_point_loop_t type_of_containment_at_face;
                 struct csmvertex_t *hit_vertex_at_face;
                 struct csmhedge_t *hit_hedge_at_face;
@@ -495,8 +547,6 @@ static void i_append_intersections_between_A_edge_and_B_face(
                 
                 hit_vertex_at_face = NULL;
                 hit_hedge_at_face = NULL;
-                
-                ninters++;
                 
                 if (csmface_contains_point(
                                 face_B,
