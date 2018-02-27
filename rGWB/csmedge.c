@@ -223,10 +223,25 @@ void csmedge_reverse_orientation(struct csmedge_t *edge)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmedge_clear_algorithm_mask(struct csmedge_t *edge)
+{
+    assert_no_null(edge);
+    
+    edge->setop_is_null_edge = CSMFALSE;
+    
+    csmhedge_clear_algorithm_mask(edge->he1);
+    csmhedge_clear_algorithm_mask(edge->he2);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CSMBOOL is_null_edge)
 {
     assert_no_null(edge);
+    
     edge->setop_is_null_edge = is_null_edge;
+    csmhedge_setop_set_loose_end(edge->he1, edge->setop_is_null_edge);
+    csmhedge_setop_set_loose_end(edge->he2, edge->setop_is_null_edge);
 }
 
 // ----------------------------------------------------------------------------------------------------

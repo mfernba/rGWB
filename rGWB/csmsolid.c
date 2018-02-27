@@ -386,7 +386,7 @@ static void i_clear_algorithm_edge_mask(struct csmhashtb(csmedge_t) *sedges)
         struct csmedge_t *edge;
         
         csmhashtb_next_pair(iterator, NULL, &edge, csmedge_t);
-        csmedge_setop_set_is_null_edge(edge, CSMFALSE);
+        csmedge_clear_algorithm_mask(edge);
     }
     
     csmhashtb_free_iterator(&iterator, csmedge_t);

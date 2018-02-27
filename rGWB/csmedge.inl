@@ -29,8 +29,9 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
 
 void csmedge_reverse_orientation(struct csmedge_t *edge);
 
-void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CSMBOOL is_null_edge);
+void csmedge_clear_algorithm_mask(struct csmedge_t *edge);
 
+void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CSMBOOL is_null_edge);
 CSMBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge);
 
 

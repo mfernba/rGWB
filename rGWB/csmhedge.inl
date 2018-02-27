@@ -32,6 +32,17 @@ void csmhedge_set_vertex(struct csmhedge_t *hedge, struct csmvertex_t *vertex);
 struct csmloop_t *csmhedge_loop(struct csmhedge_t *hedge);
 void csmhedge_set_loop(struct csmhedge_t *hedge, struct csmloop_t *loop);
 
+// Setop...
+
+void csmhedge_clear_algorithm_mask(struct csmhedge_t *hedge);
+
+void csmhedge_setop_set_loose_end(struct csmhedge_t *hedge, CSMBOOL is_loose_end);
+CSMBOOL csmhedge_setop_is_loose_end(const struct csmhedge_t *hedge);
+
+void csmhedge_setop_set_is_loose_end_but_has_been_joined(struct csmhedge_t *hedge, CSMBOOL setop_is_loose_end_but_has_been_joined);
+CSMBOOL csmhedge_setop_is_loose_end_but_has_been_joined(const struct csmhedge_t *hedge);
+
+
 // Lista...
 
 struct csmhedge_t *csmhedge_next(struct csmhedge_t *hedge);

@@ -1,7 +1,6 @@
 // Half-Edge...
 
 #include "csmhedge.inl"
-#include "csmhedge.tli"
 
 #include "csmhashtb.inl"
 #include "csmnode.inl"
@@ -10,6 +9,18 @@
 #include "csmassert.inl"
 #include "csmid.inl"
 #include "csmmem.inl"
+
+struct csmhedge_t
+{
+    struct csmnode_t clase_base;
+    
+    struct csmedge_t *edge;
+    struct csmvertex_t *vertex;
+    struct csmloop_t *loop;
+
+    CSMBOOL setop_is_loose_end;
+    CSMBOOL setop_is_loose_end_but_has_been_joined;
+};
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -27,7 +38,9 @@ CONSTRUCTOR(static struct csmhedge_t *, i_crea, (
                         unsigned long id,
                         struct csmedge_t *edge,
                         struct csmvertex_t *vertex,
-                        struct csmloop_t *loop))
+                        struct csmloop_t *loop,
+                        CSMBOOL setop_is_loose_end,
+                        CSMBOOL setop_is_loose_end_but_has_been_joined))
 {
     struct csmhedge_t *hedge;
     
@@ -38,6 +51,9 @@ CONSTRUCTOR(static struct csmhedge_t *, i_crea, (
     hedge->edge = edge;
     hedge->vertex = vertex;
     hedge->loop = loop;
+    
+    hedge->setop_is_loose_end = setop_is_loose_end;
+    hedge->setop_is_loose_end_but_has_been_joined = setop_is_loose_end_but_has_been_joined;
     
     return hedge;
 }
@@ -50,6 +66,7 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
     struct csmedge_t *edge;
     struct csmvertex_t *vertex;
     struct csmloop_t *loop;
+    CSMBOOL setop_is_loose_end, setop_is_loose_end_but_has_been_joined;
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
 
@@ -57,7 +74,10 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
     vertex = NULL;
     loop = NULL;
     
-    return i_crea(id, edge, vertex, loop);
+    setop_is_loose_end = CSMFALSE;
+    setop_is_loose_end_but_has_been_joined = CSMFALSE;
+    
+    return i_crea(id, edge, vertex, loop, setop_is_loose_end, setop_is_loose_end_but_has_been_joined);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -67,13 +87,16 @@ CONSTRUCTOR(static struct csmhedge_t *, i_duplicate_hedge, (struct csmloop_t *lo
     unsigned long id;
     struct csmedge_t *edge;
     struct csmvertex_t *vertex;
+    CSMBOOL setop_is_loose_end, setop_is_loose_end_but_has_been_joined;
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
 
     edge = NULL;
     vertex = NULL;
+    setop_is_loose_end = CSMFALSE;
+    setop_is_loose_end_but_has_been_joined = CSMFALSE;
     
-    return i_crea(id, edge, vertex, loop);
+    return i_crea(id, edge, vertex, loop, setop_is_loose_end, setop_is_loose_end_but_has_been_joined);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -97,6 +120,8 @@ struct csmhedge_t *csmhedge_duplicate(
     
     id_old_vertex = csmvertex_id(hedge->vertex);
     new_hedge->vertex = csmhashtb_ptr_for_id(relation_svertexs_old_to_new, id_old_vertex, csmvertex_t);
+    new_hedge->setop_is_loose_end = hedge->setop_is_loose_end;
+    new_hedge->setop_is_loose_end_but_has_been_joined = hedge->setop_is_loose_end_but_has_been_joined;
     
     if (csmvertex_hedge(hedge->vertex) == hedge)
         csmvertex_set_hedge(new_hedge->vertex, new_hedge);
@@ -186,6 +211,50 @@ void csmhedge_set_loop(struct csmhedge_t *hedge, struct csmloop_t *loop)
 {
     assert_no_null(hedge);
     hedge->loop = loop;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmhedge_clear_algorithm_mask(struct csmhedge_t *hedge)
+{
+    assert_no_null(hedge);
+    
+    hedge->setop_is_loose_end = CSMFALSE;
+    hedge->setop_is_loose_end_but_has_been_joined = CSMFALSE;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmhedge_setop_set_loose_end(struct csmhedge_t *hedge, CSMBOOL is_loose_end)
+{
+    assert_no_null(hedge);
+    
+    hedge->setop_is_loose_end = is_loose_end;
+    hedge->setop_is_loose_end_but_has_been_joined = CSMFALSE;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CSMBOOL csmhedge_setop_is_loose_end(const struct csmhedge_t *hedge)
+{
+    assert_no_null(hedge);
+    return hedge->setop_is_loose_end;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmhedge_setop_set_is_loose_end_but_has_been_joined(struct csmhedge_t *hedge, CSMBOOL setop_is_loose_end_but_has_been_joined)
+{
+    assert_no_null(hedge);
+    hedge->setop_is_loose_end_but_has_been_joined = setop_is_loose_end_but_has_been_joined;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CSMBOOL csmhedge_setop_is_loose_end_but_has_been_joined(const struct csmhedge_t *hedge)
+{
+    assert_no_null(hedge);
+    return hedge->setop_is_loose_end_but_has_been_joined;
 }
 
 // ----------------------------------------------------------------------------------------------------
