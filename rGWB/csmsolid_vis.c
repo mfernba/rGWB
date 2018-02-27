@@ -35,8 +35,7 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
     csmvertex_get_coordenadas(vertex, &x, &y, &z);
     bsgraphics2_escr_punto3D(graphics, x, y, z);
     
-    /*
-    if (csmvertex_id(vertex) == 113)
+    if (csmvertex_id(vertex) == 1881 || csmvertex_id(vertex) == 1711 || csmvertex_id(vertex) == 1833 || csmvertex_id(vertex) == 867)
     {
         bsgraphics2_append_desplazamiento_3D(graphics, x, y, z);
         bsgraphics2_append_ejes_plano_pantalla(graphics);
@@ -44,13 +43,12 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
             char *texto;
             
             texto = copiafor_codigo1("%lu", csmvertex_id(vertex));
-            bsgraphics2_escr_texto_mts(graphics, texto, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.0002);
+            bsgraphics2_escr_texto_mts(graphics, texto, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.002);
             csmstring_free(&texto);
         }
         bsgraphics2_desapila_transformacion(graphics);
         bsgraphics2_desapila_transformacion(graphics);
     }
-    */
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -115,7 +113,7 @@ static void i_draw_debug_info_hedge(
             if (length > 0.)
             {
                 bsgraphics2_append_ejes_2D(graphics, x1, y1, z1, Ux, Uy, Uz, Vx, Vy, Vz);
-                bsgraphics2_escr_texto_mts(graphics, "***", 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.02);
+                bsgraphics2_escr_texto_mts(graphics, "***", 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_IZQ, BSGRAPHICS2_ESTILO_NORMAL, 0.005);
                 bsgraphics2_desapila_transformacion(graphics);
             }
            
@@ -137,7 +135,7 @@ static void i_draw_debug_info_hedge(
                 else
                     bsgraphics2_append_ejes_plano_pantalla(graphics);
                 
-                bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.025);
+                bsgraphics2_escr_texto_mts(graphics, description, 0., 0., 1., 0., BSGRAPHICS2_JUSTIFICACION_INF_CEN, BSGRAPHICS2_ESTILO_NORMAL, 0.005);
                 
                 bsgraphics2_desapila_transformacion(graphics);
             }
@@ -251,12 +249,82 @@ static void i_draw_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, s
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_draw_null_edge(struct csmedge_t *edge, struct bsgraphics2_t *graphics)
+{
+    if (csmedge_setop_is_null_edge(edge) == CSMTRUE)
+    {
+        double x1, y1, z1, x2, y2, z2;
+    
+        csmedge_vertex_coordinates(edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
+        
+        if (csmmath_distance_3D(x1, y1, z1, x2, y2, z2) < 1.e-6)
+        {
+            struct csmhedge_t *he1, *he1_prev, *he1_prev_prev;
+            
+            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+            he1_prev = csmhedge_prev(he1);
+            he1_prev_prev = csmhedge_prev(he1_prev);
+            
+            if (he1_prev_prev == he1)
+            {
+                
+            }
+            else
+            {
+                double x_prev, y_prev, z_prev;
+                double Ux, Uy, Uz, length;
+                double x, y, z;
+                
+                if (csmedge_setop_is_null_edge(csmhedge_edge(he1_prev)) == CSMTRUE)
+                    he1_prev = he1_prev_prev;
+
+                if (csmedge_setop_is_null_edge(csmhedge_edge(he1_prev)) == CSMTRUE)
+                    he1_prev = csmhedge_prev(he1_prev);
+                
+                csmvertex_get_coordenadas(csmhedge_vertex(he1_prev), &x_prev, &y_prev, &z_prev);
+                csmmath_unit_vector_between_two_3D_points(x1, y1, z1, x_prev, y_prev, z_prev, &Ux, &Uy, &Uz);
+                
+                length = csmmath_distance_3D(x1, y1, z1, x_prev, y_prev, z_prev);
+                csmmath_move_point(x1, y1, z1, Ux, Uy, Uz, 0.25 * length, &x, &y, &z);
+                
+                bsgraphics2_escr_grosor_linea(graphics, BSGRAPHICS2_GROSOR_TREMENDAMENTE_GRUESO);
+                bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x, y, z);
+            }
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_draw_null_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgraphics2_t *graphics)
+{
+    struct csmhashtb_iterator(csmedge_t) *iterator;
+    
+    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    
+    while (csmhashtb_has_next(iterator, csmedge_t) == CSMTRUE)
+    {
+        unsigned long edge_id;
+        struct csmedge_t *edge;
+        
+        csmhashtb_next_pair(iterator, &edge_id, &edge, csmedge_t);
+        
+        if (csmdebug_draw_edge(edge_id) == CSMTRUE)
+            i_draw_null_edge(edge, graphics);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_vis_draw_debug_info(struct csmsolid_t *solido, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics)
 {
     assert_no_null(solido);
     
     i_draw_debug_info_vertexs(solido->svertexs, graphics);
     i_draw_debug_info_faces(solido->sfaces, draw_edge_info, graphics);
+    i_draw_null_edges(solido->sedges, graphics);
 }
 
 // ----------------------------------------------------------------------------------------------------

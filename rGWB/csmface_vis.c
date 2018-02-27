@@ -295,7 +295,7 @@ void csmface_vis_draw_edges(
         
         if (loop_iterator == face->flout)
         {
-            assert(loop_area > 0.);
+            assert(loop_area >= 0.);
             bsgraphics2_escr_color(graphics, outer_loop);
         }
         else
