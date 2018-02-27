@@ -118,7 +118,7 @@ static CSMBOOL i_there_are_only_null_edges_that_cannot_be_matched(csmArrayStruct
             struct csmhedge_t *he2;
             
             edge_j = csmarrayc_get_st(set_of_null_edges, j, csmedge_t);
-            he2 = csmedge_hedge_lado(edge_i, CSMEDGE_LADO_HEDGE_NEG);
+            he2 = csmedge_hedge_lado(edge_j, CSMEDGE_LADO_HEDGE_NEG);
             
             if (csmsetopcom_hedges_are_neighbors(he1, he2) == CSMTRUE)
                 return CSMTRUE;
@@ -224,6 +224,8 @@ static void i_append_null_edges_to_debug_view(csmArrayStruct(csmedge_t) *set_of_
         char *description;
         
         null_edge = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
+        assert(csmedge_setop_is_null_edge(null_edge) == CSMTRUE);
+        
         csmedge_vertex_coordinates(null_edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
         
         description = csmstring_duplicate("ne");
@@ -298,11 +300,11 @@ static void i_join_null_edges(
         csmsolid_debug_print_debug(solid_B, CSMTRUE);
         
         i_append_null_edges_to_debug_view(set_of_null_edges_A);
-        //csmdebug_show_viewer();
+        csmdebug_show_viewer();
         csmdebug_clear_debug_points();
     }
     
-    csmdebug_block_print_solid();
+    //csmdebug_block_print_solid();
     
     for (i = 0; i < no_null_edges; i++)
     {
@@ -350,6 +352,9 @@ static void i_join_null_edges(
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2b), loose_ends_B) == CSMFALSE)
                 i_cut_he_solid_B(h2b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h2b);
+
+            //if (csmdebug_debug_enabled() == CSMTRUE)
+                //csmdebug_show_viewer();
             
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
@@ -375,6 +380,9 @@ static void i_join_null_edges(
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1b), loose_ends_B) == CSMFALSE)
                 i_cut_he_solid_B(h1b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h1b);
+         
+            //if (csmdebug_debug_enabled() == CSMTRUE)
+                //csmdebug_show_viewer();
             
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
@@ -418,6 +426,9 @@ static void i_join_null_edges(
     
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
+        csmdebug_set_viewer_parameters(solid_A, NULL);
+        csmdebug_show_viewer();
+        
         i_print_null_faces(solid_A, set_of_null_faces_A_loc);
         i_print_null_faces(solid_B, set_of_null_faces_B_loc);
     }
@@ -464,9 +475,9 @@ static void i_join_null_edges(
         null_edges_that_cannot_be_matched_B = i_there_are_only_null_edges_that_cannot_be_matched(set_of_null_edges_B);
      
         if (null_edges_that_cannot_be_matched_A == CSMTRUE || null_edges_that_cannot_be_matched_B == CSMTRUE)
-            did_join_all_null_edges_loc = CSMTRUE;
-        else
             did_join_all_null_edges_loc = CSMFALSE;
+        else
+            did_join_all_null_edges_loc = CSMTRUE;
         
         /*
          if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
@@ -1122,7 +1133,7 @@ static enum csmsetop_opresult_t i_set_operation(
         struct csmsolid_t *solid_A_copy, *solid_B_copy;
     
         if (csmdebug_debug_enabled() == CSMTRUE)
-            csmdebug_print_debug_info(">>> Perturbation pass %lu", no_perturbations);
+            csmdebug_print_debug_info(">>> Perturbation pass %lu\n", no_perturbations);
         
         solid_A_copy = csmsolid_duplicate(solid_A);
         csmsolid_set_name(solid_A_copy, "Solid A");
@@ -1166,7 +1177,10 @@ static enum csmsetop_opresult_t i_set_operation(
                 
             case CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS:
             
-                apply_perturbation = CSMTRUE;
+                if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
+                    apply_perturbation = CSMFALSE;
+                else
+                    apply_perturbation = CSMTRUE;
                 break;
                 
             default_error();
@@ -1191,7 +1205,7 @@ static enum csmsetop_opresult_t i_set_operation(
         csmsolid_free(&solid_A_copy);
         csmsolid_free(&solid_B_copy);
         
-    } while (result != CSMSETOP_OPRESULT_OK && no_perturbations < i_NUM_MAX_PERTURBATIONS);
+    } while (result != CSMSETOP_OPRESULT_OK && apply_perturbation == CSMTRUE && no_perturbations < i_NUM_MAX_PERTURBATIONS);
 
     if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
         assert(no_perturbations < i_NUM_MAX_PERTURBATIONS);

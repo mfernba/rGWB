@@ -659,6 +659,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
             }
             
             csmarrayc_append_element_st(set_of_null_edges, null_edge, csmedge_t);
+            csmedge_setop_set_is_null_edge(null_edge, CSMTRUE);
             
             if (csmdebug_debug_enabled() == CSMTRUE)
                 csmedge_debug_print_debug_info(null_edge, CSMTRUE);
