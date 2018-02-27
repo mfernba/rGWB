@@ -298,7 +298,6 @@
 		55308C251F920D1800353A68 /* csmsolid_vis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmsolid_vis.h; sourceTree = "<group>"; };
 		55308C281F92122500353A68 /* csmedge_debug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmedge_debug.c; sourceTree = "<group>"; };
 		55308C291F92122500353A68 /* csmedge_debug.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmedge_debug.inl; sourceTree = "<group>"; };
-		55308C2C1F92158300353A68 /* csmhedge.tli */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmhedge.tli; sourceTree = "<group>"; };
 		55308C311F92161F00353A68 /* csmvertex_debug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmvertex_debug.c; sourceTree = "<group>"; };
 		55308C321F92161F00353A68 /* csmvertex_debug.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmvertex_debug.inl; sourceTree = "<group>"; };
 		55308C351F921A5600353A68 /* csmtest_array.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmtest_array.c; sourceTree = "<group>"; };
@@ -648,7 +647,6 @@
 				551327741EC3B06800F2B04D /* csmvertex.hxx */,
 				5579547C1E5E1403000FC91E /* csmhedge.inl */,
 				5579547B1E5E1403000FC91E /* csmhedge.c */,
-				55308C2C1F92158300353A68 /* csmhedge.tli */,
 				5579548B1E5E41C1000FC91E /* csmedge.inl */,
 				5579548A1E5E41C1000FC91E /* csmedge.c */,
 				5579548E1E5E42BB000FC91E /* csmedge.tli */,
