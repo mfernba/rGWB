@@ -263,7 +263,9 @@ void csmviewer_set_results(struct csmviewer_t *viewer, struct csmsolid_t *solid1
 void csmviewer_show(struct csmviewer_t *viewer)
 {
     bsassert_not_null(viewer);
-    i_show_viewer(viewer);
+    
+    if (csmdebug_debug_visual_enabled() == CSMTRUE)
+        i_show_viewer(viewer);
 }
 
 // ------------------------------------------------------------------------------------------
