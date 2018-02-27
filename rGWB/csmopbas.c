@@ -217,7 +217,6 @@ CSMBOOL csmopbas_is_wide_hedge(
                         &Ux_cross_prev_next, &Uy_cross_prev_next, &Uz_cross_prev_next);
         
         dot_product = csmmath_dot_product3D(Ux_cross_prev_next, Uy_cross_prev_next, Uz_cross_prev_next, A, B, C);
-        is_wide = IS_TRUE(dot_product > 0.);
         
         if (dot_product > 0.)
         {
