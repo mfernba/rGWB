@@ -69,14 +69,14 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
 (\
     (void)((csmArrayStruct(type) *)array == array),\
     (void)((struct type *)dato == dato),\
-    (void)csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (void *)(&(dato)))\
+    (void)csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (unsigned char *)(&(dato)))\
 )
 
 #define csmarrayc_append_element_const_st(array, dato, type)\
 (\
     (void)((const csmArrayStruct(type) *)array == array),\
     (void)((const struct type *)dato == dato),\
-    (void)csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (void *)(&(dato)))\
+    (void)csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (unsigned char *)(&(dato)))\
 )
 
 #define csmarrayc_contains_element_st(array, array_type, search_data, search_data_type, func_match_condition, idx_opt)\
@@ -103,14 +103,14 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
 (\
     (void)((csmArrayStruct(type) *)array == array),\
     (void)((struct type *)element == element),\
-    csmarrayc_dontuse_set_element((struct csmarrayc_t *)array, idx, (void *)(element))\
+    csmarrayc_dontuse_set_element((struct csmarrayc_t *)array, idx, (unsigned char *)(element))\
 )
 
 #define csmarrayc_set_const_st(array, idx, element, type)\
 (\
     (void)((const csmArrayStruct(type) *)array == array),\
     (void)((struct type *)element == element),\
-    csmarrayc_dontuse_set_element((struct csmarrayc_t *)array, idx, (void *)(element))\
+    csmarrayc_dontuse_set_element((struct csmarrayc_t *)array, idx, (unsigned char *)(element))\
 )
 
 #define csmarrayc_delete_element_st(array, idx, type, func_free)\
