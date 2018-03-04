@@ -451,7 +451,7 @@
 			name = Debug;
 			sourceTree = "<group>";
 		};
-		550765CA1F92051400E6BD2E /* Half-Edge Data Structured Visualization */ = {
+		550765CA1F92051400E6BD2E /* Half-Edge Data Structure Visualization */ = {
 			isa = PBXGroup;
 			children = (
 				55308C191F9209BC00353A68 /* csmface_vis.inl */,
@@ -459,7 +459,7 @@
 				55308C251F920D1800353A68 /* csmsolid_vis.h */,
 				55308C241F920D1800353A68 /* csmsolid_vis.c */,
 			);
-			name = "Half-Edge Data Structured Visualization";
+			name = "Half-Edge Data Structure Visualization";
 			sourceTree = "<group>";
 		};
 		5507A6261E6B8721008B9F73 /* Test */ = {
@@ -512,9 +512,13 @@
 			name = Common;
 			sourceTree = "<group>";
 		};
-		551D47551FC1CCC7004F3B43 /* Setop */ = {
+		551D47551FC1CCC7004F3B43 /* Boolean operations */ = {
 			isa = PBXGroup;
 			children = (
+				5513277B1ECBA0CC00F2B04D /* csmsetop.h */,
+				553E63E81FF69E0600A15475 /* csmsetop.hxx */,
+				5513277A1ECBA0CC00F2B04D /* csmsetop.c */,
+				55EA991C1ED38C22006C063C /* csmsetop.tli */,
 				55EA99221ED38FCD006C063C /* csmsetop_procedges.inl */,
 				55EA99211ED38FCD006C063C /* csmsetop_procedges.c */,
 				55EA99191ED389C0006C063C /* csmsetop_vtxfacc.inl */,
@@ -522,7 +526,7 @@
 				55EA991E1ED38E66006C063C /* csmsetop_vtxvtx.inl */,
 				55EA991D1ED38E66006C063C /* csmsetop_vtxvtx.c */,
 			);
-			name = Setop;
+			name = "Boolean operations";
 			sourceTree = "<group>";
 		};
 		551D47561FC1CD1A004F3B43 /* 2D Tools */ = {
@@ -576,22 +580,11 @@
 			isa = PBXGroup;
 			children = (
 				551327791ECB9F7400F2B04D /* Common */,
-				551D47551FC1CCC7004F3B43 /* Setop */,
-				559452851F79A0E5002AF198 /* csmquadrics.h */,
-				559452841F79A0E5002AF198 /* csmquadrics.c */,
-				5570129F1E8328E400DFC490 /* csmsweep.h */,
-				5570129E1E8328E400DFC490 /* csmsweep.c */,
-				55B54B751FBA4C5E00DE5833 /* csmexplode.c */,
-				55B54B761FBA4C5E00DE5833 /* csmexplode.h */,
-				55089F4D1E8996B500B9570B /* csmglue.h */,
-				55089F4C1E8996B500B9570B /* csmglue.c */,
-				55244B291EAA57C4006F546E /* csmsplit.h */,
-				553E63E61FF6990400A15475 /* csmsplit.hxx */,
-				55244B281EAA57C4006F546E /* csmsplit.c */,
-				5513277B1ECBA0CC00F2B04D /* csmsetop.h */,
-				553E63E81FF69E0600A15475 /* csmsetop.hxx */,
-				5513277A1ECBA0CC00F2B04D /* csmsetop.c */,
-				55EA991C1ED38C22006C063C /* csmsetop.tli */,
+				551D47551FC1CCC7004F3B43 /* Boolean operations */,
+				55F9B851204CA1F800BCC56E /* Solid generation */,
+				55F9B856204CA21000BCC56E /* Exploding a solid with several shells */,
+				55F9B855204CA20800BCC56E /* Glue by common face */,
+				55F9B857204CA23500BCC56E /* Splitting by a plane */,
 			);
 			name = Algorithms;
 			sourceTree = "<group>";
@@ -629,7 +622,7 @@
 				557954A71E60D0F7000FC91E /* Low Level Euler Operators */,
 				557954891E5E41A0000FC91E /* Half-Edge Data Structure */,
 				55308C091F92071500353A68 /* Half-Edge Data Structure Debug */,
-				550765CA1F92051400E6BD2E /* Half-Edge Data Structured Visualization */,
+				550765CA1F92051400E6BD2E /* Half-Edge Data Structure Visualization */,
 				5507A6261E6B8721008B9F73 /* Test */,
 			);
 			path = rGWB;
@@ -759,6 +752,45 @@
 				5598D6191F24E8AF00EA1876 /* basicGraphics.xcodeproj */,
 			);
 			name = Dependencies;
+			sourceTree = "<group>";
+		};
+		55F9B851204CA1F800BCC56E /* Solid generation */ = {
+			isa = PBXGroup;
+			children = (
+				559452851F79A0E5002AF198 /* csmquadrics.h */,
+				559452841F79A0E5002AF198 /* csmquadrics.c */,
+				5570129F1E8328E400DFC490 /* csmsweep.h */,
+				5570129E1E8328E400DFC490 /* csmsweep.c */,
+			);
+			name = "Solid generation";
+			sourceTree = "<group>";
+		};
+		55F9B855204CA20800BCC56E /* Glue by common face */ = {
+			isa = PBXGroup;
+			children = (
+				55089F4D1E8996B500B9570B /* csmglue.h */,
+				55089F4C1E8996B500B9570B /* csmglue.c */,
+			);
+			name = "Glue by common face";
+			sourceTree = "<group>";
+		};
+		55F9B856204CA21000BCC56E /* Exploding a solid with several shells */ = {
+			isa = PBXGroup;
+			children = (
+				55B54B751FBA4C5E00DE5833 /* csmexplode.c */,
+				55B54B761FBA4C5E00DE5833 /* csmexplode.h */,
+			);
+			name = "Exploding a solid with several shells";
+			sourceTree = "<group>";
+		};
+		55F9B857204CA23500BCC56E /* Splitting by a plane */ = {
+			isa = PBXGroup;
+			children = (
+				55244B291EAA57C4006F546E /* csmsplit.h */,
+				553E63E61FF6990400A15475 /* csmsplit.hxx */,
+				55244B281EAA57C4006F546E /* csmsplit.c */,
+			);
+			name = "Splitting by a plane";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
