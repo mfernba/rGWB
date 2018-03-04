@@ -8,13 +8,12 @@
 
 #include "csmeuler_laringmv.inl"
 
+#include "csmassert.inl"
 #include "csmdebug.inl"
-#include "csmloop.inl"
 #include "csmface.inl"
 #include "csmhedge.inl"
+#include "csmloop.inl"
 #include "csmvertex.inl"
-
-#include "csmassert.inl"
 
 // ------------------------------------------------------------------------------------------
 

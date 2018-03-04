@@ -3,18 +3,18 @@
 #include "csmsubdvfaces.inl"
 
 #include "csmassert.inl"
-#include "csmhedge.inl"
+#include "csmdebug.inl"
 #include "csmeuler_lmef.inl"
 #include "csmeuler_lmev.inl"
-#include "csmloop.inl"
-#include "csmmath.inl"
-#include "csmdebug.inl"
 #include "csmface.inl"
 #include "csmface_debug.inl"
 #include "csmhashtb.inl"
+#include "csmhedge.inl"
+#include "csmloop.inl"
+#include "csmmath.inl"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 #include "csmsolid.tli"
+#include "csmsolid_debug.inl"
 #include "csmvertex.inl"
 
 // ------------------------------------------------------------------------------------------

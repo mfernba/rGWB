@@ -6,6 +6,7 @@
 
 #include "csmeuler_lmev.inl"
 
+#include "csmassert.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
 #include "csmhedge.inl"
@@ -14,8 +15,6 @@
 #include "csmopbas.inl"
 #include "csmsolid.inl"
 #include "csmvertex.inl"
-
-#include "csmassert.inl"
 
 // ----------------------------------------------------------------------------------------------------
 

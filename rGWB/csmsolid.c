@@ -10,6 +10,7 @@
 #include "csmsolid.inl"
 #include "csmsolid.tli"
 
+#include "csmassert.inl"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
@@ -17,17 +18,16 @@
 #include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
+#include "csmid.inl"
 #include "csmloop.inl"
 #include "csmmaterial.inl"
-#include "csmnode.inl"
 #include "csmmath.inl"
+#include "csmmem.inl"
+#include "csmnode.inl"
+#include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmtransform.inl"
 #include "csmvertex.inl"
-#include "csmassert.inl"
-#include "csmid.inl"
-#include "csmmem.inl"
-#include "csmstring.inl"
 
 struct i_item_t;
 struct csmhashtb(i_item_t);

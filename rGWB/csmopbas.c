@@ -2,19 +2,18 @@
 
 #include "csmopbas.inl"
 
+#include "csmassert.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmmath.inl"
+#include "csmmem.inl"
 #include "csmnode.inl"
 #include "csmsolid.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
-
-#include "csmassert.inl"
-#include "csmmem.inl"
 
 // ------------------------------------------------------------------------------------------
 

@@ -5,12 +5,11 @@
 
 #include "csmeuler_lmfkrh.inl"
 
+#include "csmassert.inl"
 #include "csmface.inl"
 #include "csmloop.inl"
-#include "csmsolid.inl"
-
-#include "csmassert.inl"
 #include "csmmem.inl"
+#include "csmsolid.inl"
 
 // --------------------------------------------------------------------------------
 

@@ -9,6 +9,7 @@
 #include "csmsolid_vis.h"
 #include "csmsolid.tli"
 
+#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -18,9 +19,8 @@
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmmath.inl"
-#include "csmvertex.inl"
-#include "csmassert.inl"
 #include "csmstring.inl"
+#include "csmvertex.inl"
 
 #include <basicGraphics/bsgraphics2.h>
 

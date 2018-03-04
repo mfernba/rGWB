@@ -12,8 +12,8 @@
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmnode.inl"
-#include "csmvertex.inl"
 #include "csmsolid.inl"
+#include "csmvertex.inl"
 
 // ----------------------------------------------------------------------------------------------------
 

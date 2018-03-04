@@ -8,14 +8,13 @@
 
 #include "csmeuler_kvfs.inl"
 
+#include "csmassert.inl"
+#include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmloop.inl"
 #include "csmnode.inl"
-#include "csmface.inl"
 #include "csmsolid.tli"
 #include "csmvertex.inl"
-
-#include "csmassert.inl"
 
 // ----------------------------------------------------------------------------------------------------
 

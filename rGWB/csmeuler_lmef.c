@@ -14,17 +14,16 @@
 
 #include "csmeuler_lmef.inl"
 
+#include "csmassert.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
+#include "csmmem.inl"
 #include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmsolid.inl"
 #include "csmvertex.inl"
-
-#include "csmassert.inl"
-#include "csmmem.inl"
 
 // --------------------------------------------------------------------------------
 

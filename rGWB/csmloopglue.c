@@ -8,22 +8,21 @@
 
 #include "csmloopglue.inl"
 
-#include "csmface.inl"
-#include "csmhedge.inl"
+#include "csmassert.inl"
+#include "csmdebug.inl"
+#include "csmeuler_lkef.inl"
+#include "csmeuler_lkev.inl"
 #include "csmeuler_lkfmrh.inl"
 #include "csmeuler_lmef.inl"
 #include "csmeuler_lmekr.inl"
-#include "csmeuler_lkef.inl"
-#include "csmeuler_lkev.inl"
+#include "csmface.inl"
+#include "csmhedge.inl"
 #include "csmloop.inl"
+#include "csmmem.inl"
 #include "csmopbas.inl"
 #include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
-
-#include "csmassert.inl"
-#include "csmmem.inl"
-#include "csmdebug.inl"
 
 // ----------------------------------------------------------------------------------------------------
 

@@ -8,13 +8,11 @@
 
 #include "csmglue.h"
 
+#include "csmassert.inl"
 #include "csmloopglue.inl"
-
+#include "csmmem.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
-
-#include "csmassert.inl"
-#include "csmmem.inl"
 #include "csmtolerance.inl"
 
 // ----------------------------------------------------------------------------------------------------

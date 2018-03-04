@@ -8,26 +8,25 @@
 
 #include "csmquadrics.h"
 
+#include "csmassert.inl"
 #include "csmeuler_lkev.inl"
 #include "csmeuler_lmef.inl"
 #include "csmeuler_lmev.inl"
 #include "csmeuler_mvfs.inl"
-#include "csmmath.inl"
 #include "csmface.inl"
+#include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmloopglue.inl"
-#include "csmopbas.inl"
-#include "csmsolid.h"
-#include "csmsolid.inl"
-#include "csmvertex.inl"
-#include "csmassert.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmmem.inl"
-#include "csmtolerance.inl"
+#include "csmopbas.inl"
+#include "csmsolid.h"
+#include "csmsolid.inl"
 #include "csmsurface.inl"
-#include "csmhashtb.inl"
+#include "csmtolerance.inl"
+#include "csmvertex.inl"
 
 // --------------------------------------------------------------------------------
 
