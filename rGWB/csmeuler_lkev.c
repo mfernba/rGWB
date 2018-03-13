@@ -67,7 +67,7 @@ void csmeuler_lkev(
         assert(num_iteraciones < 10000);
         num_iteraciones++;
         
-        assert(csmhedge_vertex(he_iterator) == vertex_to_delete);
+        //assert(csmhedge_vertex(he_iterator) == vertex_to_delete);
         csmhedge_set_vertex(he_iterator, vertex_to_retain);
         
         he_iterator = csmhedge_next(csmopbas_mate(he_iterator));

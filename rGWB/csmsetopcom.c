@@ -1126,6 +1126,131 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_assign_he_old_vertex_to_new_vertex(struct csmvertex_t *old_vertex, struct csmhedge_t *skip_hedge, struct csmvertex_t *new_vertex)
+{
+    struct csmhedge_t *initial_hedge, *he;
+    
+    initial_hedge = csmvertex_hedge(old_vertex);
+    he = initial_hedge;
+    
+    do
+    {
+        if (he != skip_hedge)
+            csmhedge_set_vertex(he, new_vertex);
+        
+        he = csmhedge_next(csmopbas_mate(he));
+        
+    } while (he != initial_hedge);
+}
+
+// ----------------------------------------------------------------------------------------------------
+// Non-manifold cases can't be corrected using euler operators because they're defined for 2-manifold cases
+// So its necessary a direct manipulation of the data structure
+
+static void i_correct_non_manifold_edges_null_face(struct csmface_t *face)
+{
+    struct csmloop_t *flout;
+    CSMBOOL there_are_changes;
+    unsigned long no_iters;
+    
+    flout = csmface_flout(face);
+    assert(csmloop_next(csmface_floops(face)) == NULL);
+    
+    no_iters = 0;
+    
+    do
+    {
+        struct csmhedge_t *ledge;
+        struct csmhedge_t *he_iterator;
+        unsigned long no_iters2;
+        
+        assert(no_iters < 100);
+        no_iters++;
+        
+        there_are_changes = CSMFALSE;
+        
+        ledge = csmloop_ledge(flout);
+        he_iterator = ledge;
+        
+        no_iters2 = 0;
+        
+        do
+        {
+            struct csmhedge_t *he_iterator_mate;
+            
+            assert(no_iters2 < 1000);
+            no_iters2++;
+            
+            he_iterator_mate = csmopbas_mate(he_iterator);
+            
+            if (csmopbas_face_from_hedge(he_iterator_mate) == face)
+            {
+                struct csmsolid_t *solid;
+                struct csmhedge_t *he_iterator_mate_next;
+                
+                assert(csmhedge_next(he_iterator) != he_iterator_mate);
+                assert(csmhedge_next(he_iterator_mate) != he_iterator);
+                
+                solid = csmface_fsolid(face);
+                he_iterator_mate_next = csmhedge_next(he_iterator_mate);
+                
+                if (csmhedge_vertex(he_iterator) == csmhedge_vertex(he_iterator_mate_next))
+                {
+                    struct csmvertex_t *v1;
+                    double x1, y1, z1;
+                    struct csmvertex_t *split_v1;
+                    
+                    if (csmdebug_debug_enabled() == CSMTRUE)
+                        csmface_debug_print_info_debug(face, CSMFALSE, NULL);
+                    
+                    v1 = csmhedge_vertex(he_iterator);
+                    csmvertex_set_hedge(v1, he_iterator);
+                    
+                    csmvertex_get_coordenadas(v1, &x1, &y1, &z1);
+                    csmsolid_append_new_vertex(solid, x1, y1, z1, &split_v1);
+                    i_assign_he_old_vertex_to_new_vertex(v1, he_iterator, split_v1);
+                    
+                    there_are_changes = CSMTRUE;
+                }
+            }
+            
+            if (there_are_changes == CSMTRUE)
+            {
+                if (csmdebug_debug_enabled() == CSMTRUE)
+                    csmface_debug_print_info_debug(face, CSMFALSE, NULL);
+                
+                break;
+            }
+            else
+            {
+                he_iterator = csmhedge_next(he_iterator);
+            }
+            
+        } while (he_iterator != ledge);
+        
+    } while (there_are_changes == CSMTRUE);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_correct_non_manifold_edges_null_faces(csmArrayStruct(csmface_t) *set_of_null_faces)
+{
+    unsigned long i, num_null_faces;
+    
+    num_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
+    assert(num_null_faces > 0);
+    
+    for (i = 0; i < num_null_faces; i++)
+    {
+        struct csmface_t *null_face;
+        
+        null_face = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
+        i_correct_non_manifold_edges_null_face(null_face);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static CSMBOOL i_is_loop_filled_by_face(struct csmloop_t *loop, struct csmloop_t **opposed_loop)
 {
     CSMBOOL is_filled_by_face;

@@ -139,11 +139,25 @@ void csmeuler_lkef(struct csmhedge_t **he1, struct csmhedge_t **he2)
     assert(*he1 != *he2);
 
     old_he2_face = csmopbas_face_from_hedge(*he2);
-    
-    i_move_all_loops_from_he2_face1_to_he1_face(*he1, *he2);
-    i_merge_halfegdes_loops_isolating_edge(he1, he2);
-    
     face_solid = csmface_fsolid(old_he2_face);
+    
+    if (csmopbas_face_from_hedge(*he1) == old_he2_face)
+    {
+        struct csmedge_t *edge;
+    
+        edge = csmhedge_edge(*he1);
+        assert(edge == csmhedge_edge(*he2));
+    
+        csmopbas_delhe(he1, NULL, NULL);
+        csmopbas_delhe(he2, NULL, NULL);
+        csmsolid_remove_edge(face_solid, &edge);
+    }
+    else
+    {
+        i_move_all_loops_from_he2_face1_to_he1_face(*he1, *he2);
+        i_merge_halfegdes_loops_isolating_edge(he1, he2);
+    }
+    
     csmsolid_remove_face(face_solid, &old_he2_face);
 }
 
