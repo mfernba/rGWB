@@ -1150,13 +1150,14 @@ static void i_assign_he_old_vertex_to_new_vertex(struct csmvertex_t *old_vertex,
 static void i_correct_non_manifold_edges_null_face(struct csmface_t *face)
 {
     struct csmloop_t *flout;
-    CSMBOOL there_are_changes;
+    CSMBOOL there_are_changes, did_make_changes;
     unsigned long no_iters;
     
     flout = csmface_flout(face);
-    assert(csmloop_next(csmface_floops(face)) == NULL);
+    //assert(csmloop_next(csmface_floops(face)) == NULL);
     
     no_iters = 0;
+    did_make_changes = CSMFALSE;
     
     do
     {
@@ -1176,12 +1177,13 @@ static void i_correct_non_manifold_edges_null_face(struct csmface_t *face)
         
         do
         {
-            struct csmhedge_t *he_iterator_mate;
+            struct csmhedge_t *he_iterator_mate, *he_iterator_next;
             
-            assert(no_iters2 < 1000);
+            assert(no_iters2 < 100000);
             no_iters2++;
             
             he_iterator_mate = csmopbas_mate(he_iterator);
+            he_iterator_next = csmhedge_next(he_iterator);
             
             if (csmopbas_face_from_hedge(he_iterator_mate) == face)
             {
@@ -1211,6 +1213,7 @@ static void i_correct_non_manifold_edges_null_face(struct csmface_t *face)
                     i_assign_he_old_vertex_to_new_vertex(v1, he_iterator, split_v1);
                     
                     there_are_changes = CSMTRUE;
+                    did_make_changes = CSMTRUE;
                 }
             }
             
@@ -1223,7 +1226,7 @@ static void i_correct_non_manifold_edges_null_face(struct csmface_t *face)
             }
             else
             {
-                he_iterator = csmhedge_next(he_iterator);
+                he_iterator = he_iterator_next;
             }
             
         } while (he_iterator != ledge);

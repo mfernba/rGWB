@@ -15,4 +15,3 @@ void csmsetop_join_null_edges(
                         csmArrayStruct(csmface_t) **set_of_null_faces_A,
                         csmArrayStruct(csmface_t) **set_of_null_faces_B,
                         CSMBOOL *did_join_all_null_edges);
-

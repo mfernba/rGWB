@@ -241,6 +241,59 @@ static void i_validate_edges_belong_to_solid(struct csmsolid_t *solid, csmArrayS
 }
 
 // ----------------------------------------------------------------------------------------------------
+/*
+static void i_join_directly_related_loose_ends(
+                        csmArrayStruct(csmhedge_t) *loose_ends_A, csmArrayStruct(csmhedge_t) *loose_ends_B,
+                        const struct csmtolerance_t *tolerances,
+                        csmArrayStruct(csmface_t) *set_of_null_faces_A,
+                        csmArrayStruct(csmface_t) *set_of_null_faces_B)
+{
+    unsigned long no_iters;
+    CSMBOOL there_are_changes;
+    
+    no_iters = 0;
+    there_are_changes = CSMFALSE;
+    
+    do
+    {
+        unsigned long i, no_loose_ends;
+        
+        no_loose_ends = csmarrayc_count_st(loose_ends_A, csmhedge_t);
+        assert(no_loose_ends == csmarrayc_count_st(loose_ends_B, csmhedge_t));
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        there_are_changes = CSMFALSE;
+        
+        for (i = 0; i < no_loose_ends; i++)
+        {
+            struct csmhedge_t *loose_end_a_i, *loose_end_b_i;
+            unsigned long j;
+            
+            loose_end_a_i = csmarrayc_get_st(loose_ends_A, i, csmhedge_t);
+            loose_end_b_i = csmarrayc_get_st(loose_ends_B, i, csmhedge_t);
+            
+            for (j = i + 1; j < no_loose_ends; j++)
+            {
+                struct csmhedge_t *loose_end_a_j, *loose_end_b_j;
+                
+                loose_end_a_j = csmarrayc_get_st(loose_ends_A, j, csmhedge_t);
+                loose_end_b_j = csmarrayc_get_st(loose_ends_B, j, csmhedge_t);
+                
+                if (csmsetopcom_hedges_are_neighbors(loose_end_a_i, loose_end_a_j) == CSMTRUE
+                        && csmsetopcom_hedges_are_neighbors(loose_end_b_i, loose_end_a_j) == CSMTRUE)
+                {
+                    
+                }
+                
+            }
+        }
+        
+    } while (there_are_changes == CSMTRUE);
+}
+*/
+
+// ----------------------------------------------------------------------------------------------------
 
 void csmsetop_join_null_edges(
                         struct csmsolid_t *solid_A, csmArrayStruct(csmedge_t) *set_of_null_edges_A,
@@ -479,3 +532,4 @@ void csmsetop_join_null_edges(
     csmarrayc_free_st(&loose_ends_A, csmhedge_t, NULL);
     csmarrayc_free_st(&loose_ends_B, csmhedge_t, NULL);
 }
+

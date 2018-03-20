@@ -1653,12 +1653,14 @@ static void i_test_cilindro7_redux(struct csmviewer_t *viewer)
                         cshape2d, 1.,  2., 0.75, -1., 0., 0., 0., 0., 1.,
                         cshape2d, 1., -2., 0.75, -1., 0., 0., 0., 0., 1.,
                         1000);
+
+    csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmviewer_set_results(viewer, solid_res, NULL);
+    csmviewer_show(viewer);
+    csmsolid_free(&solid_res);
     
     /*
-        assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
-        csmviewer_set_results(viewer, solid_res, NULL);
-        csmviewer_show(viewer);
-        csmsolid_free(&solid_res);
     
         assert(csmsetop_intersection_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
         csmviewer_set_results(viewer, solid_res, NULL);
@@ -1943,7 +1945,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
             desp = 0.5;
             csmsolid_move(solid_below, A * desp, B * desp, C * desp);
             
-            csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE); // Delete
+            //csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE); // Delete
             csmdebug_set_enabled_by_code(CSMTRUE);
             csmdebug_unblock_print_solid();
             i_set_output_debug_file("inters_cilindro2_last_step.she");
@@ -4751,7 +4753,7 @@ static void i_test_difference1(struct csmviewer_t *viewer)
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
-    CSMBOOL process_all_test = CSMFALSE;
+    CSMBOOL process_all_test = CSMTRUE;
     
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
@@ -4780,7 +4782,7 @@ void csmtest_test(void)
         
         //++>i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
         //i_test_cilindro6(viewer); // --> Intersecciones non-manifold. No falla si se permiten perturbaciones
-        i_test_cilindro7(viewer);
+        //i_test_cilindro7(viewer);
         i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
         
         //i_test_difference1(viewer);
@@ -4833,15 +4835,14 @@ void csmtest_test(void)
         i_test_multiple_solidos1(viewer);
         i_test_multiple_solidos2(viewer);
         i_test_multiple_solidos3(viewer);
-        
         i_test_cilindro1(viewer);
         i_test_cilindro2(viewer);
         i_test_cilindro3(viewer);
         
-        //i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
+        i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
         i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
-        //i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
-        //i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
+        i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
+        i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
         i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
         
         //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
