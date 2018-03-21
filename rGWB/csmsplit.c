@@ -4,27 +4,17 @@
 #include "csmsplit.hxx"
 
 #include "csmarrayc.inl"
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmedge_debug.inl"
-#include "csmeuler_laringmv.inl"
-#include "csmeuler_lkef.inl"
-#include "csmeuler_lkemr.inl"
-#include "csmeuler_lkfmrh.inl"
-#include "csmeuler_lmef.inl"
-#include "csmeuler_lmekr.inl"
 #include "csmeuler_lmev.inl"
-#include "csmeuler_lmfkrh.inl"
 #include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
-#include "csmloop.inl"
 #include "csmmaterial.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-#include "csmmem.inl"
 #include "csmopbas.inl"
 #include "csmsetopcom.inl"
 #include "csmsolid.h"
@@ -34,6 +24,14 @@
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 enum i_position_t
 {
@@ -404,10 +402,7 @@ static void i_reclassify_on_edge_vertex_neighborhood(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_reclassify_on_edges_vertex_neighborhood(
-                        double A, double B, double C, double D,
-                        const struct csmtolerance_t *tolerances,
-                        csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
+static void i_reclassify_on_edges_vertex_neighborhood(csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
     
@@ -591,7 +586,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
     i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, tolerances, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Sectors", vertex, vertex_neighborhood);
     
-    i_reclassify_on_edges_vertex_neighborhood(A, B, C, D, tolerances, vertex_neighborhood);
+    i_reclassify_on_edges_vertex_neighborhood(vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Edges", vertex, vertex_neighborhood);
     
     if (i_could_locate_begin_sequence(vertex_neighborhood, &start_idx) == CSMTRUE)

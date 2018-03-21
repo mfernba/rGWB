@@ -9,8 +9,13 @@
 #include "csmvertex_debug.inl"
 #include "csmvertex.tli"
 
-#include "csmassert.inl"
 #include "csmdebug.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

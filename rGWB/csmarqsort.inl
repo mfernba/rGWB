@@ -6,6 +6,6 @@
 //  Copyright © 2017 Manuel Fernández. All rights reserved.
 //
 
-#include <stdlib.h>
+#include "csmfwddecl.hxx"
 
 void csmarqsort(void *aa, size_t n, size_t es, void *cmp_data, int (*cmp)(const void *, const void *, const void *));

@@ -9,7 +9,6 @@
 #include "csmsetop_procedges.inl"
 
 #include "csmarrayc.inl"
-#include "csmassert.inl"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
@@ -22,17 +21,25 @@
 #include "csmid.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-#include "csmmem.inl"
 #include "csmopbas.inl"
 #include "csmsetop.tli"
 #include "csmsetop_vtxfacc.inl"
 #include "csmsetop_vtxvtx.inl"
 #include "csmsolid.inl"
 #include "csmsolid_debug.inl"
-#include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#include "csmstring.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#include "copiafor.h"
+#endif
 
 enum i_intersection_position_t
 {

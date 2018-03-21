@@ -8,7 +8,13 @@
 
 #include "csmid.inl"
 
+#include "csmfwddecl.hxx"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

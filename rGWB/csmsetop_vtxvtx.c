@@ -3,7 +3,6 @@
 #include "csmsetop_vtxvtx.inl"
 
 #include "csmarrayc.inl"
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -13,13 +12,21 @@
 #include "csmhedge.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-#include "csmmem.inl"
 #include "csmopbas.inl"
 #include "csmsetop.tli"
 #include "csmsetopcom.inl"
 #include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#include "copiafor.h"
+#endif
 
 csmArrayStruct(i_neighborhood_t);
 csmArrayStruct(i_inters_sectors_t);
@@ -62,6 +69,7 @@ struct i_inters_sectors_t
     CSMBOOL intersect;
 };
 
+/*
 enum i_nonmanifold_intersect_sequence_t
 {
     i_NONMANIFOLD_INTERSECT_SEQUENCE_IN_ON,
@@ -69,6 +77,7 @@ enum i_nonmanifold_intersect_sequence_t
     i_NONMANIFOLD_INTERSECT_SEQUENCE_OUT_ON,
     i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_OUT
 };
+*/
 
 // ------------------------------------------------------------------------------------------
 
@@ -352,6 +361,7 @@ static enum csmsetop_classify_resp_solid_t i_classify_vector_resp_sector(
     double dot_product;
     
     assert_no_null(neighborhood);
+    UNREFERENCED(tolerances);
     
     neighborhood_face = csmopbas_face_from_hedge(neighborhood->he);
     
@@ -622,7 +632,7 @@ static CSMBOOL i_sectors_overlap(
 }
 
 // ------------------------------------------------------------------------------------------
-
+/*
 static void i_debug_show_inters_sectors(
                         const struct i_neighborhood_t *neighborhood_a, const struct i_neighborhood_t *neighborhood_b,
                         unsigned long intersection_id,
@@ -649,7 +659,7 @@ static void i_debug_show_inters_sectors(
         csmdebug_clear_inters_sector();
     }
 }
-
+*/
 // ------------------------------------------------------------------------------------------
 
 static CSMBOOL i_exists_intersection_between_sectors(
@@ -659,6 +669,7 @@ static CSMBOOL i_exists_intersection_between_sectors(
 {
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
+    UNREFERENCED(intersection_id);
 
     if (csmface_are_coplanar_faces_at_common_base_vertex(neighborhood_a->face, neighborhood_b->face, tolerances) == CSMTRUE)
     {
@@ -849,6 +860,7 @@ static void i_generate_neighboorhoods(
     *neighborhood_intersections = neighborhood_intersections_loc;
 }
 
+/*
 // ------------------------------------------------------------------------------------------
 
 static CSMBOOL i_must_look_for_non_manifold_intersection(
@@ -1100,7 +1112,7 @@ static void i_discard_non_manifold_intersections(
         }
     }
 }
-
+*/
 // ------------------------------------------------------------------------------------------
 
 static void i_correct_impossible_classifications_due_to_precision_errors(
@@ -2308,8 +2320,6 @@ static void i_separateEdgeSequence(
     
     if (csmhedge_vertex(from) != csmhedge_vertex(to))
     {
-        struct csmhedge_t *from_prv, *to_prv;
-        
         from_prv = csmhedge_prev(from);
         to_prv = csmhedge_prev(to);
         

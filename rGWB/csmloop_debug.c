@@ -9,7 +9,6 @@
 #include "csmloop_debug.inl"
 #include "csmloop.tli"
 
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -17,6 +16,13 @@
 #include "csmhedge.inl"
 #include "csmstring.inl"
 #include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#include "copiafor.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

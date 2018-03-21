@@ -8,13 +8,17 @@
 
 #include "csmeuler_kvfs.inl"
 
-#include "csmassert.inl"
 #include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmloop.inl"
-#include "csmnode.inl"
 #include "csmsolid.tli"
 #include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

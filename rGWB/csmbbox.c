@@ -8,11 +8,16 @@
 
 #include "csmbbox.inl"
 
-#include "csmassert.inl"
-#include "csmmem.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-#include "csmtolerance.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 struct csmbbox_t
 {

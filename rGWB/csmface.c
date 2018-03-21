@@ -7,16 +7,21 @@
 #include "csmloop.inl"
 #include "csmhedge.inl"
 #include "csmmath.inl"
+#include "csmmath.tli"
 #include "csmmaterial.inl"
 #include "csmnode.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
-#include "csmassert.inl"
 #include "csmid.inl"
-#include "csmmem.inl"
-#include "csmmath.inl"
-#include "csmmath.tli"
 #include "csmsurface.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // ------------------------------------------------------------------------------------------
 
@@ -356,6 +361,7 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
     register struct csmloop_t *iterator;
     unsigned long num_iters;
     double max_distance_to_plane;
+    double tolerance_point_on_plane;
     
     iterator = floops;
     num_iters = 0;
@@ -378,7 +384,8 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
         
     } while (iterator != NULL);
     
-    return CSMMATH_MAX(1.01 * max_distance_to_plane, csmtolerance_default_point_on_plane());
+    tolerance_point_on_plane = csmtolerance_default_point_on_plane();
+    return CSMMATH_MAX(1.01 * max_distance_to_plane, tolerance_point_on_plane);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -805,11 +812,20 @@ CSMBOOL csmface_is_coplanar_to_plane(
                         tolerances) == CSMTRUE)
     {
         double dot;
-        
-        is_coplanar = CSMTRUE;
-        
+        double D_loc;
+
         dot = csmmath_dot_product3D(face->A, face->B, face->C, A, B, C);
         same_orientation_loc = (dot > 0.0) ? CSMTRUE: CSMFALSE;
+        
+        if (same_orientation_loc == CSMTRUE)
+            D_loc = D;
+        else
+            D_loc = -D;
+            
+        if (csmmath_compare_doubles(face->D, D_loc, csmtolerance_point_on_plane(tolerances)) == CSMCOMPARE_EQUAL)
+            is_coplanar = CSMTRUE;
+        else
+            is_coplanar = CSMFALSE;
     }
     else
     {

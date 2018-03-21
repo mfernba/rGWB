@@ -3,13 +3,18 @@
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
-#include "csmassert.inl"
-#include "csmdebug.inl"
 #include "csmhashtb.inl"
 #include "csmid.inl"
 #include "csmmath.inl"
-#include "csmmem.inl"
 #include "csmtransform.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

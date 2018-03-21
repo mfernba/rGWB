@@ -8,17 +8,19 @@
 #include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmnode.inl"
-#include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmhedge.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
-#include "csmassert.inl"
 #include "csmid.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
 #include "csmmem.inl"
-#include "csmstring.inl"
-#include "csmmath.inl"
-#include "csmmath.tli"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -292,6 +294,7 @@ double csmloop_max_distance_to_plane(
     double max_distance_to_plane;
     register struct csmhedge_t *iterator;
     unsigned long num_iteraciones;
+    double tolerance_point_on_plane;
     
     assert_no_null(loop);
     
@@ -319,7 +322,8 @@ double csmloop_max_distance_to_plane(
         
     } while (iterator != loop->ledge);
     
-    return CSMMATH_MAX(max_distance_to_plane, csmtolerance_default_point_on_plane());
+    tolerance_point_on_plane = csmtolerance_default_point_on_plane();
+    return CSMMATH_MAX(max_distance_to_plane, tolerance_point_on_plane);
 }
 
 // ----------------------------------------------------------------------------------------------------

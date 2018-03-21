@@ -3,13 +3,18 @@
 #include "csmexplode.h"
 
 #include "csmarrayc.inl"
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmhashtb.inl"
 #include "csmsetopcom.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmsolid_debug.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // --------------------------------------------------------------------------------
 

@@ -2,9 +2,15 @@
 
 #include "csmtransform.inl"
 
-#include "csmassert.inl"
 #include "csmmath.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
 #include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 struct csmtransform_t
 {

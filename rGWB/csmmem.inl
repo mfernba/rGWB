@@ -10,6 +10,8 @@
 //  Basic memory management module.
 //
 
+#ifdef __STANDALONE_DISTRIBUTABLE
+
 #include <stddef.h>
 
 void *csmmem_dontuse_malloc(size_t n_bytes);
@@ -38,3 +40,8 @@ void *csmmem_dontuse_dereference_optional_memory(void **data);
     ((type **)data == data),\
     (type *)csmmem_dontuse_dereference_optional_memory((void **)data)\
 )
+
+
+#endif
+
+

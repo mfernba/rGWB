@@ -3,12 +3,18 @@
 #include "csmedge.inl"
 #include "csmedge.tli"
 
-#include "csmassert.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
-#include "csmmem.inl"
 #include "csmid.inl"
 #include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // --------------------------------------------------------------------------------------------------------------
 

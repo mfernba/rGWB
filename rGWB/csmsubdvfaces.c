@@ -2,10 +2,8 @@
 
 #include "csmsubdvfaces.inl"
 
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmeuler_lmef.inl"
-#include "csmeuler_lmev.inl"
 #include "csmface.inl"
 #include "csmface_debug.inl"
 #include "csmhashtb.inl"
@@ -14,8 +12,13 @@
 #include "csmmath.inl"
 #include "csmsolid.inl"
 #include "csmsolid.tli"
-#include "csmsolid_debug.inl"
 #include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // ------------------------------------------------------------------------------------------
 

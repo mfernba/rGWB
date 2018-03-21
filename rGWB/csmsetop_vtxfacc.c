@@ -3,7 +3,6 @@
 #include "csmsetop_vtxfacc.inl"
 
 #include "csmarrayc.inl"
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -11,20 +10,25 @@
 #include "csmeuler_lkemr.inl"
 #include "csmeuler_lmev.inl"
 #include "csmface.inl"
-#include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-#include "csmmem.inl"
 #include "csmopbas.inl"
 #include "csmsetop.tli"
 #include "csmsetopcom.inl"
-#include "csmsolid.tli"
-#include "csmstring.inl"
-#include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#include "csmstring.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#include "copiafor.h"
+#endif
 
 struct csmsetop_vtxfacc_inters_t
 {
@@ -361,7 +365,7 @@ static void i_reclassify_on_edge_vertex_neighborhood(
         {
              if (a_vs_b == CSMSETOP_A_VS_B)
                 new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-            else
+             else
                 new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
             
             //new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
@@ -388,9 +392,7 @@ static void i_reclassify_on_edge_vertex_neighborhood(
 // ----------------------------------------------------------------------------------------------------
 
 static void i_reclassify_on_edges_vertex_neighborhood(
-                        double A, double B, double C, double D,
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
-                        const struct csmtolerance_t *tolerances,
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
@@ -536,7 +538,7 @@ static void i_print_debug_info_vertex_neighborhood(
         unsigned long i, num_sectors;
         
         csmvertex_get_coordenadas(vertex, &x, &y, &z);
-        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g) Pl. (%g, %g, %g):\n", description, csmvertex_id(vertex), x, y, z, A, B, C);
+        csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g) Pl. (%g, %g, %g, %g):\n", description, csmvertex_id(vertex), x, y, z, A, B, C, D);
         
         num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
         
@@ -627,7 +629,7 @@ static void i_process_vf_inters(
     i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, tolerances, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Sectors", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
-    i_reclassify_on_edges_vertex_neighborhood(A, B, C, D, set_operation, a_vs_b, tolerances, vertex_neighborhood);
+    i_reclassify_on_edges_vertex_neighborhood(set_operation, a_vs_b, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Edges", vf_inters->vertex, A, B, C, D, vertex_neighborhood);
     
     //csmdebug_show_viewer();

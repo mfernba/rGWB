@@ -9,12 +9,17 @@
 #include "csmface_debug.inl"
 #include "csmface.tli"
 
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmloop.inl"
 #include "csmloop_debug.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -45,6 +50,18 @@ void csmface_debug_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no
     else
     {
         compute_loop_area = CSMFALSE;
+
+        Xo = 0;
+        Yo = 0;
+        Zo = 0;
+
+        Ux = 0;
+        Uy = 0;
+        Uz = 0;
+
+        Vx = 0;
+        Vy = 0;
+        Vz = 0;
     }
     
     loop_iterator = face->floops;

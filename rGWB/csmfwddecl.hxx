@@ -15,19 +15,24 @@
 extern "C" {
 #endif
 
+#define IS_TRUE(condicion) ((condicion) ? CSMTRUE: CSMFALSE)
+#define ASSIGN_OPTIONAL_VALUE(a, b) if ((a) != NULL) *(a) = (b)
+#define INVERT_BOOLEAN(valor) (((valor) == CSMTRUE) ? CSMFALSE: CSMTRUE)
+
+#include "csmmath.tli"
+#include "csmhashtb.hxx"
+#include "csmarrayc.hxx"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>
 
 #define CONSTRUCTOR(type, name, params) type name params
-
-#define IS_TRUE(condicion) (condicion) ? CSMTRUE: CSMFALSE
-
-#define ASSIGN_OPTIONAL_VALUE(a, b) if ((a) != NULL) *(a) = (b)
+#define UNREFERENCED(x) (void)(x)
 
 #define DLL_RGWB
-
-#define INVERT_BOOLEAN(valor) (((valor) == CSMTRUE) ? CSMFALSE: CSMTRUE)
 
 struct csmnode_t;
 struct csmvertex_t;
@@ -61,14 +66,11 @@ struct csmtransform_t;
 struct bsgraphics2_t;
 struct csmviewer_t;
 
-#include "csmhashtb.hxx"
 struct csmhashtb(csmface_t);
 struct csmhashtb(csmedge_t);
 struct csmhashtb(csmvertex_t);
 struct csmhashtb(csmhedge_t);
 
-
-#include "csmarrayc.hxx"
 csmArrayStruct(csmvertex_t);
 csmArrayStruct(csmedge_t);
 csmArrayStruct(csmface_t);
@@ -83,8 +85,29 @@ struct bsmaterial_t;
     
 csmArrPoint2D;
 csmArrPoint3D;
+
+#else
     
-#include "csmmath.tli"
+#include "intsafe.hxx"
+#include "windows.tlh"
+    
+#define csmshape2d_t Contorno2D
+#define csmshape2d_polygon_count Cnt2D_GetNumPoligonos
+#define csmshape2d_point_polygon_count Cnt2D_Plg2D_GetNumPuntos
+#define csmshape2d_polygon_is_hole i_polygon_is_hole
+#define csmshape2d_point_polygon_coords Cnt2D_Plg2D_GetPunto
+#define csmshape2d_copy Cnt2D_Copiar
+#define csmshape2d_free Cnt2D_Destruir
+
+#define csmArrPoint2D ArrPunto2D
+#define csmArrPoint2D_new arr_CreaPunto2D
+#define csmArrPoint2D_count arr_NumElemsPunto2D
+#define csmArrPoint2D_get arr_GetPunto2D
+#define csmArrPoint2D_free arr_DestruyePunto2D
+    
+#define ASSIGN_OPTIONAL_VALUE ASIGNA_OPC
+    
+#endif
 
 #ifdef __cplusplus
 }

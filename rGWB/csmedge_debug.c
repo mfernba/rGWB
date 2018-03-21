@@ -9,10 +9,15 @@
 #include "csmedge_debug.inl"
 #include "csmedge.tli"
 
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmhedge.inl"
 #include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

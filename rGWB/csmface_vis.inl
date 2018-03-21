@@ -8,6 +8,8 @@
 
 #include "csmfwddecl.hxx"
 
+#ifdef __STANDALONE_DISTRIBUTABLE
+
 void csmface_vis_draw_solid(
                     struct csmface_t *face,
                     CSMBOOL draw_solid_face,
@@ -25,3 +27,12 @@ void csmface_vis_draw_edges(
                         const struct bsmaterial_t *inner_non_hole_loop,
                         struct bsgraphics2_t *graphics);
 
+
+#else
+
+void csmface_vis_append_datos_mesh(
+                    struct csmface_t *face,
+                    ArrPunto3D *puntos, ArrPunto3D *normales, ArrBool *es_borde,
+                    ArrEnum(cplan_tipo_primitiva_t) *tipo_primitivas, ArrPuntero(ArrULong) *inds_caras);
+
+#endif

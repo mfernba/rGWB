@@ -1,3 +1,5 @@
+/*lint -save -w0*/
+
 #include "csmarqsort.inl"
 
 /*    $OpenBSD: qsort.c,v 1.10 2005/08/08 08:05:37 espie Exp $ */
@@ -29,8 +31,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include <sys/types.h>
-#include <stdlib.h>
 
 static __inline char *med3(char *, char *, char *, void *, int (*)(const void *, const void *, const void *));
 static __inline void swapfunc(char *, char *, long, int);
@@ -152,3 +152,5 @@ loop:    SWAPINIT(a, es);
         goto loop;
     }
 }
+
+/*lint -restore*/

@@ -10,7 +10,6 @@
 #include "csmsolid.inl"
 #include "csmsolid.tli"
 
-#include "csmassert.inl"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
@@ -18,16 +17,21 @@
 #include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
-#include "csmid.inl"
 #include "csmloop.inl"
 #include "csmmaterial.inl"
 #include "csmmath.inl"
-#include "csmmem.inl"
-#include "csmnode.inl"
 #include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmtransform.inl"
 #include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 struct i_item_t;
 struct csmhashtb(i_item_t);
@@ -305,6 +309,8 @@ void csmsolid_free(struct csmsolid_t **solido)
 
     if ((*solido)->visz_material_opt != NULL)
         csmmaterial_free(&(*solido)->visz_material_opt);
+
+    csmbbox_free(&(*solido)->bbox);
     
     FREE_PP(solido, struct csmsolid_t);
 }
@@ -480,7 +486,7 @@ static void i_nousar_move_elements_between_tables(
                         func_reassign_id,\
                         table_destination,\
                         type)\
-(\
+(/*lint -save -e505*/\
     ((struct csmhashtb(type) *)table_origin == table_origin),\
     ((struct csmhashtb(type) *)table_destination == table_destination),\
     i_CHECK_FUNC_REASSIGN_ID(func_reassign_id, type),\
@@ -489,7 +495,7 @@ static void i_nousar_move_elements_between_tables(
                         id_nuevo_elemento,\
                         (i_FPtr_reassign_id)func_reassign_id,\
                         (struct csmhashtb(i_item_t) *)table_destination)\
-)
+)/*lint -restore*/
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -985,6 +991,9 @@ double csmsolid_volume(const struct csmsolid_t *solid)
                 double x_next, y_next, z_next;
                 double Ux_cross, Uy_cross, Uz_cross;
 
+                assert(num_he_iterations < 100000);
+                num_he_iterations++;
+
                 csmvertex_get_coordenadas(csmhedge_vertex(he2), &x2, &y2, &z2);
                 csmmath_cross_product3D(x2, y2, z2, x1, y1, z1, &Ux_cross, &Uy_cross, &Uz_cross);
 
@@ -1064,7 +1073,7 @@ CSMBOOL csmsolid_does_solid_contain_point(const struct csmsolid_t *solid, double
     do
     {
         double x_baricenter_ref_face, y_baricenter_ref_face, z_baricenter_ref_face;
-        double face_tolerance;
+        double ref_face_tolerance;
         const struct csmface_t *reference_face;
         
         assert(no_iters < 100000);
@@ -1074,9 +1083,9 @@ CSMBOOL csmsolid_does_solid_contain_point(const struct csmsolid_t *solid, double
         assert_no_null(reference_face);
         
         csmface_face_baricenter(reference_face, &x_baricenter_ref_face, &y_baricenter_ref_face, &z_baricenter_ref_face);
-        face_tolerance = csmface_tolerace(reference_face);
+        ref_face_tolerance = csmface_tolerace(reference_face);
         
-        if (csmmath_equal_coords(x, y, z, x_baricenter_ref_face, y_baricenter_ref_face, z_baricenter_ref_face, face_tolerance) == CSMTRUE)
+        if (csmmath_equal_coords(x, y, z, x_baricenter_ref_face, y_baricenter_ref_face, z_baricenter_ref_face, ref_face_tolerance) == CSMTRUE)
         {
             is_point_inside_solid = CSMTRUE;
             retry = CSMFALSE;

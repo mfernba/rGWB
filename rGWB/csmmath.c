@@ -9,10 +9,20 @@
 #include "csmmath.inl"
 #include "csmmath.tli"
 
-#include "csmassert.inl"
 #include "csmmath.tli"
 #include "csmtolerance.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
 #include <math.h>
+#else
+#include "cyassert.h"
+#include "standarc.h"
+#endif
+
+double __cdecl sqrt(double);
+double __cdecl cosh(double);
+double __cdecl sinh(double);
 
 // ------------------------------------------------------------------------------------------
 
@@ -687,16 +697,6 @@ void csmmath_implicit_plane_equation(
 	csmmath_make_unit_vector3D(A, B, C);
 	
 	*D = -csmmath_dot_product3D(*A, *B, *C, Xo, Yo, Zo);
-}
-
-//-------------------------------------------------------------------------------------------
-
-static void i_anula_valores_despreciables(double *valor)
-{
-	assert_no_null(valor);
-	
-	if (csmmath_fabs(*valor) < 1.e-20)
-		*valor = 0.;
 }
 
 //-------------------------------------------------------------------------------------------

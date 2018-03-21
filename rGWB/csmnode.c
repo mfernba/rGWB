@@ -8,9 +8,15 @@
 
 #include "csmnode.inl"
 
+#include "csmstring.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
-#include "csmstring.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // ------------------------------------------------------------------------------------------
 
@@ -187,12 +193,12 @@ void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived
 {
     struct csmnode_derivada_t *head_node_derived_loc;
     struct csmnode_t *first_node, *head_node;
-    unsigned long no_of_deleted_nodes;
+    //unsigned long no_of_deleted_nodes;
     
     head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_derivada_t);
     head_node = (struct csmnode_t *)head_node_derived_loc;
     first_node = head_node;
-    no_of_deleted_nodes = 0;
+    //no_of_deleted_nodes = 0;
     
     do
     {
@@ -207,7 +213,7 @@ void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived
             next_node = NULL;
         
         csmnode_destruye(&head_node);
-        no_of_deleted_nodes++;
+        //no_of_deleted_nodes++;
         
         head_node = next_node;
         

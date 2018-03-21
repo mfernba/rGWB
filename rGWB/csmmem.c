@@ -6,6 +6,8 @@
 //  Copyright (c) 2015 manueru. All rights reserved.
 //
 
+#ifdef __STANDALONE_DISTRIBUTABLE
+
 #include "csmmem.inl"
 
 #include "csmassert.inl"
@@ -78,7 +80,7 @@ void *csmmem_dontuse_dereference_optional_memory(void **data)
     }
 }
 
-
+#endif
 
 
 

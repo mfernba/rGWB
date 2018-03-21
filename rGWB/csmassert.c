@@ -6,7 +6,10 @@
 //  Copyright (c) 2015 manueru. All rights reserved.
 //
 
+#ifdef __STANDALONE_DISTRIBUTABLE
+
 #include "csmassert.inl"
+
 
 #include "csmdebug.inl"
 
@@ -31,3 +34,5 @@ void csmassert_dontuse_default_error(const char *file, int line)
     fprintf(stderr, "Solid modeler switch case not handled at FILE: %s\nLINE: %d\n", file, line);
     _Exit(-1);
 }
+
+#endif

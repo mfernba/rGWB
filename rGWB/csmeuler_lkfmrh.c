@@ -6,11 +6,17 @@
 
 #include "csmeuler_lkfmrh.inl"
 
-#include "csmassert.inl"
 #include "csmface.inl"
 #include "csmloop.inl"
-#include "csmmem.inl"
 #include "csmsolid.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // --------------------------------------------------------------------------------
 

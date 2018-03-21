@@ -8,12 +8,18 @@
 
 #include "csmglue.h"
 
-#include "csmassert.inl"
 #include "csmloopglue.inl"
-#include "csmmem.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmtolerance.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

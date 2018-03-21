@@ -15,30 +15,59 @@
 
 #include "csmsweep.h"
 
-#include "csmArrPoint2D.h"
-#include "csmArrPoint3D.h"
 #include "csmarrayc.inl"
-#include "csmassert.inl"
-#include "csmeuler_lkemr.inl"
-#include "csmeuler_lkfmrh.inl"
-#include "csmeuler_lmef.inl"
-#include "csmeuler_lmev.inl"
-#include "csmeuler_lmfkrh.inl"
-#include "csmeuler_mvfs.inl"
-#include "csmface.inl"
+#include "csmmath.inl"
 #include "csmgeom.inl"
-#include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmloopglue.inl"
-#include "csmmath.inl"
-#include "csmmem.inl"
+#include "csmface.inl"
+#include "csmhedge.inl"
 #include "csmopbas.inl"
-#include "csmshape2d.h"
-#include "csmshape2d.inl"
+#include "csmeuler_mvfs.inl"
+#include "csmeuler_lmev.inl"
+#include "csmeuler_lmef.inl"
+#include "csmeuler_lkemr.inl"
+#include "csmeuler_lkfmrh.inl"
+#include "csmeuler_lmfkrh.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
-#include "csmsubdvfaces.inl"
 #include "csmtolerance.inl"
+#include "csmsubdvfaces.inl"
+
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+
+#include "csmArrPoint2D.h"
+#include "csmArrPoint3D.h"
+#include "csmassert.inl"
+#include "csmmem.inl"
+#include "csmshape2d.h"
+#include "csmshape2d.inl"
+
+#else
+
+#include "a_pto2d.h"
+#include "cont2d.h"
+#include "cyassert.h"
+#include "cypespy.h"
+#include "defmath.tlh"
+
+//------------------------------------------------------------------------
+
+static CSMBOOL i_polygon_is_hole(const struct Contorno2D *shape2d, unsigned long idx)
+{
+    double area;
+
+    area = Cnt2D_Plg2D_GetArea(shape2d, idx);
+
+    if (area < 0.)
+        return CSMTRUE;
+    else
+        return CSMFALSE;
+}
+
+#endif
+
 
 csmArrayStruct(csmhedge_t);
 
@@ -239,9 +268,7 @@ static void i_create_hedges_from_bottom_to_top_face(
 
 // --------------------------------------------------------------------------------
 
-static void i_create_lateral_faces(
-                        csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face,
-                        struct csmsolid_t *solid)
+static void i_create_lateral_faces(csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face)
 {
     unsigned long num_hedges;
     unsigned long num_iters;
@@ -278,7 +305,6 @@ static void i_create_lateral_faces(
 // --------------------------------------------------------------------------------
 
 static void i_append_holes_to_solid(
-                        struct csmsolid_t *solid,
                         struct csmface_t *top_face, struct csmface_t *bottom_face,
                         unsigned long idx_hole_loop,
                         const struct csmshape2d_t *shape2d_top,
@@ -343,7 +369,7 @@ static void i_append_holes_to_solid(
 
     //csmsolid_debug_print_debug(solid, CSMTRUE);
     
-    i_create_lateral_faces(hedges_from_vertexs_bottom_face, solid);
+    i_create_lateral_faces(hedges_from_vertexs_bottom_face);
  
     //csmsolid_debug_print_debug(solid, CSMTRUE);
     
@@ -357,7 +383,6 @@ static void i_append_holes_to_solid(
 // --------------------------------------------------------------------------------
 
 static void i_append_holes_to_solid_if_proceed(
-                        struct csmsolid_t *solid,
                         struct csmface_t *top_face, struct csmface_t *bottom_face,
                         const struct csmshape2d_t *shape2d_top,
                         double Xo_top, double Yo_top, double Zo_top,
@@ -377,12 +402,11 @@ static void i_append_holes_to_solid_if_proceed(
         CSMBOOL is_hole_loop;
         
         is_hole_loop = csmshape2d_polygon_is_hole(shape2d_top, i);
-        assert(is_hole_loop == csmshape2d_polygon_is_hole(shape2d_bot, i) == CSMTRUE);
+        assert(is_hole_loop == csmshape2d_polygon_is_hole(shape2d_bot, i));
         
         if (is_hole_loop == CSMTRUE)
         {
             i_append_holes_to_solid(
-                        solid,
                         top_face, bottom_face,
                         i,
                         shape2d_top,
@@ -433,7 +457,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
 
     //csmsolid_debug_print_debug(solid, CSMTRUE);
     
-    i_create_lateral_faces(hedges_from_vertexs_bottom_face, solid);
+    i_create_lateral_faces(hedges_from_vertexs_bottom_face);
 
     //csmsolid_debug_print_debug(solid, CSMTRUE);
     
@@ -469,7 +493,6 @@ struct csmsolid_t *csmsweep_create_solid_from_shape(
                         &bottom_face, &top_face);
     
     i_append_holes_to_solid_if_proceed(
-                        solid,
                         top_face, bottom_face,
                         shape2d_top,
                         Xo_top, Yo_top, Zo_top,
@@ -506,7 +529,6 @@ struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
                         &bottom_face, &top_face);
     
     i_append_holes_to_solid_if_proceed(
-                        solid,
                         top_face, bottom_face,
                         shape2d_top,
                         Xo_top, Yo_top, Zo_top,
@@ -621,7 +643,12 @@ struct csmsweep_path_t *csmsweep_new_elliptical_plane_path(
     csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx, &Wy, &Wz);
     
     points = csmArrPoint2D_new(0);
-    csmArrPoint2D_append_elipse_points(points, x, y, radius_x, radius_y, no_points_circle, CSMFALSE);
+    
+    #ifdef __STANDALONE_DISTRIBUTABLE
+        csmArrPoint2D_append_elipse_points(points, x, y, radius_x, radius_y, no_points_circle, CSMFALSE);
+    #else
+        arr_AnyadirArcoElipsePunto2D(points, x, y, radius_x, radius_y, 0., 2. * PI, 0., FALSO, no_points_circle);
+    #endif
     
     no_points = csmArrPoint2D_count(points);
     assert(no_points >= 3);
@@ -711,6 +738,8 @@ struct csmsweep_path_t *csmsweep_new_helix_plane_path(
     double Ux_prev, Uy_prev, Uz_prev;
     CSMBOOL needs_subdivide_faces;
     
+    UNREFERENCED(x);
+    UNREFERENCED(y);
     assert(radius > 0.);
     assert(no_points_circle > 0);
     assert(one_helix_heigth > 0.);
@@ -964,6 +993,7 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
         csmsubdvfaces_subdivide_faces(solid);
     
     csmsolid_redo_geometric_face_data(solid);
+    csmtolerance_free(&tolerances);
 
     return solid;
 }

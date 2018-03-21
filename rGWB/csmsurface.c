@@ -8,10 +8,15 @@
 
 #include "csmsurface.inl"
 
+#include "csmmath.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
-#include "csmmath.inl"
-#include "csmtolerance.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 enum i_type_t
 {
@@ -20,7 +25,7 @@ enum i_type_t
     i_TYPE_CONE,
     i_TYPE_CYLINDER,
     i_TYPE_TORUS,
-    i_TYPE_HYPERBOLOID,
+    i_TYPE_HYPERBOLOID
 };
 
 struct i_ellipsoid_t
@@ -86,6 +91,7 @@ struct csmsurface_t *csmsurface_new_ellipsoid(double radius_x, double radius_y, 
     struct csmsurface_t *surface;
     
     surface = i_new(i_TYPE_ELLIPSOID);
+    assert_no_null(surface);
     
     surface->ellipsoid.rx = radius_x;
     surface->ellipsoid.ry = radius_y;
@@ -101,6 +107,7 @@ struct csmsurface_t *csmsurface_new_cylinder(double heigth, double radius)
     struct csmsurface_t *surface;
     
     surface = i_new(i_TYPE_CONE);
+    assert_no_null(surface);
     
     surface->cone_or_cylinder.heigth = heigth;
     surface->cone_or_cylinder.radius = radius;
@@ -115,6 +122,7 @@ struct csmsurface_t *csmsurface_new_cone(double heigth, double radius)
     struct csmsurface_t *surface;
     
     surface = i_new(i_TYPE_CONE);
+    assert_no_null(surface);
     
     surface->cone_or_cylinder.heigth = heigth;
     surface->cone_or_cylinder.radius = radius;
@@ -129,6 +137,7 @@ struct csmsurface_t *csmsurface_new_torus(double R, double r)
     struct csmsurface_t *surface;
     
     surface = i_new(i_TYPE_TORUS);
+    assert_no_null(surface);
     
     surface->torus.R = R;
     surface->torus.r = r;
@@ -143,6 +152,7 @@ struct csmsurface_t *csmsurface_new_hyperboloid(double a, double c)
     struct csmsurface_t *surface;
     
     surface = i_new(i_TYPE_HYPERBOLOID);
+    assert_no_null(surface);
     
     surface->hyperboloid.a = a;
     surface->hyperboloid.c = c;

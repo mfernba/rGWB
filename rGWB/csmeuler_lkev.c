@@ -6,16 +6,18 @@
  
 #include "csmeuler_lkev.inl"
 
-#include "csmassert.inl"
 #include "csmedge.tli"
-#include "csmface.inl"
 #include "csmhedge.inl"
-#include "csmloop.inl"
-#include "csmmem.inl"
-#include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmsolid.inl"
-#include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

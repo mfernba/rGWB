@@ -2,12 +2,25 @@
 
 #include "csmarrayc.inl"
 
-#include "csmassert.inl"
 #include "csmarqsort.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+
+#include "csmassert.inl"
 #include "csmmem.inl"
 #include <string.h>
 
-static const char i_DEBUG_MASK = 0xFA;
+#else
+
+#include "cyassert.h"
+#include "cypespy.h"
+#include "standarc.h"
+
+#define malloc cypespy_nousar_malloc
+
+#endif
+
+#define i_DEBUG_MASK ((char)0xFA)
 static const size_t i_INITIAL_CAPACITY = 100;
 
 struct csmarrayc_t
@@ -18,7 +31,7 @@ struct csmarrayc_t
     size_t no_elems;
     size_t capacity;
     
-    unsigned char *ptr_data;
+    char *ptr_data;
     size_t element_data_size;
 };
 
@@ -52,7 +65,7 @@ static struct csmarrayc_t *i_new(
                                   unsigned short is_pointer_array,
                                   size_t no_elems,
                                   size_t capacity,
-                                  unsigned char **ptr_data,
+                                  char **ptr_data,
                                   size_t element_data_size)
 {
     struct csmarrayc_t *array;
@@ -63,7 +76,7 @@ static struct csmarrayc_t *i_new(
     
     array->no_elems = no_elems;
     array->capacity = capacity;
-    array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(ptr_data, unsigned char);
+    array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(ptr_data, char);
     array->element_data_size = element_data_size;
     array->debug_mask = i_DEBUG_MASK;
     
@@ -79,7 +92,7 @@ struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacity_inicial, siz
     CSMBOOL is_pointer_array;
     size_t no_elems;
     size_t capacity;
-    unsigned char *ptr_data;
+    char *ptr_data;
     
     is_pointer_array = CSMTRUE;
     
@@ -94,7 +107,7 @@ struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacity_inicial, siz
         capacity = capacity_inicial;
     }
     
-    ptr_data = (unsigned char *)malloc(element_data_size * capacity);
+    ptr_data = (char *)malloc(element_data_size * capacity);
     
     return i_new(is_pointer_array, no_elems, capacity, &ptr_data, element_data_size);
 }
@@ -104,20 +117,20 @@ struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacity_inicial, siz
 struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *array, csmarrayc_FPtr_copy_struct func_copy_element)
 {
     size_t i, offset;
-    unsigned char *ptr_data;
+    char *ptr_data;
     
     assert_no_null(array);
     assert_no_null(func_copy_element);
     
-    ptr_data = (unsigned char *)malloc(array->element_data_size * array->no_elems);
+    ptr_data = (char *)malloc(array->element_data_size * array->no_elems);
     offset = 0;
     
     for (i = 0; i < array->no_elems; i++)
     {
-        const unsigned char *element;
-        unsigned char *element_copy;
+        const char *element;
+        char *element_copy;
         
-        element = *(unsigned char **)(array->ptr_data + offset);
+        element = *(char **)(array->ptr_data + offset);
         element_copy = func_copy_element(element);
         
         memcpy(ptr_data + offset, &element_copy, array->element_data_size);
@@ -137,7 +150,7 @@ void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_stru
     
     if ((*array)->is_pointer_array == CSMTRUE && func_free_struct != NULL)
     {
-        void *ptr_data;
+        char *ptr_data;
         unsigned long i, offset;
         
         ptr_data = (*array)->ptr_data;
@@ -145,12 +158,12 @@ void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_stru
         
         for (i = 0; i < (*array)->no_elems; i++)
         {
-            func_free_struct(((unsigned char **)(ptr_data + offset)));
+            func_free_struct(((char **)(ptr_data + offset)));
             offset += (*array)->element_data_size;
         }
     }
 
-    FREE_PP(&(*array)->ptr_data, unsigned char);
+    FREE_PP(&(*array)->ptr_data, char);
     
     FREE_PP(array, struct csmarrayc_t);
 }
@@ -172,18 +185,18 @@ void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato)
     if (array->capacity == array->no_elems)
     {
         size_t new_capacity;
-        unsigned char *ptr_data_extended;
+        char *ptr_data_extended;
         
         new_capacity = array->capacity + (3 * array->capacity) / 2;
-        ptr_data_extended = (unsigned char *)malloc(new_capacity * array->element_data_size);
+        ptr_data_extended = (char *)malloc(new_capacity * array->element_data_size);
         assert_no_null(ptr_data_extended);
         
         //memset(ptr_data_extended, 0xFF, new_capacity * array->element_data_size);
         memcpy(ptr_data_extended, array->ptr_data, array->no_elems * array->element_data_size);
         
-        FREE_PP(&array->ptr_data, unsigned char);
+        FREE_PP(&array->ptr_data, char);
         
-        array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_data_extended, unsigned char);
+        array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_data_extended, char);
         array->capacity = new_capacity;;
     }
     
@@ -223,9 +236,9 @@ CSMBOOL csmarrayc_dontuse_contains_element(
     
     for (i = 0; i < array->no_elems; i++)
     {
-        const unsigned char *element;
+        const char *element;
         
-        element = *(unsigned char **)(array->ptr_data + offset);
+        element = *(char **)(array->ptr_data + offset);
         
         if (func_match_condition(element, search_data) == CSMTRUE)
         {
@@ -252,7 +265,7 @@ void *csmarrayc_dontuse_get(struct csmarrayc_t *array, unsigned long idx)
     assert(idx < array->no_elems);
     
     offset = array->element_data_size * idx;
-    return (unsigned char *)(*(unsigned char **)(array->ptr_data + offset));
+    return (void *)(*(char **)(array->ptr_data + offset));
 }
 
 // ---------------------------------------------------------------------------------
@@ -267,7 +280,7 @@ void csmarrayc_dontuse_delete_element(struct csmarrayc_t *array, unsigned long i
     offset = array->element_data_size * idx;
     
     if (func_free != NULL)
-        func_free((unsigned char **)(array->ptr_data + offset));
+        func_free((char **)(array->ptr_data + offset));
     
     if (idx < array->no_elems - 1)
     {
@@ -289,7 +302,7 @@ static int i_cmp_function_ptr(const void *cmp_data_void, const void *e1, const v
     cmp_data = (struct i_cmp_data_t *)cmp_data_void;
     assert_no_null(cmp_data);
     
-    return (int)cmp_data->func_compare(*(unsigned char **)e1, *(unsigned char **)e2);
+    return (int)cmp_data->func_compare(*(void **)e1, *(void **)e2);
 }
 
 // ---------------------------------------------------------------------------------
@@ -351,10 +364,10 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array)
 		
 		while (idx1 < idx2)
 		{
-            const unsigned char *element1, *element2;
+            const char *element1, *element2;
             
-            element1 = *(unsigned char **)(array->ptr_data + idx1 * array->element_data_size);
-            element2 = *(unsigned char **)(array->ptr_data + idx2 * array->element_data_size);
+            element1 = *(char **)(array->ptr_data + idx1 * array->element_data_size);
+            element2 = *(char **)(array->ptr_data + idx2 * array->element_data_size);
             
             memcpy(array->ptr_data + idx1 * array->element_data_size, &element2, array->element_data_size);
             memcpy(array->ptr_data + idx2 * array->element_data_size, &element1, array->element_data_size);

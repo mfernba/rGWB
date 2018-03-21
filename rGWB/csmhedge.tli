@@ -1,0 +1,21 @@
+
+//
+//  csmhedge.tli.h
+//  rGWB
+//
+//  Created by Manuel Fernandez on 14/10/17.
+//  Copyright © 2017 Manuel Fernández. All rights reserved.
+//
+
+#include "csmfwddecl.hxx"
+#include "csmnode.hxx"
+
+struct csmhedge_t
+{
+    struct csmnode_t clase_base;
+    
+    struct csmedge_t *edge;
+    struct csmvertex_t *vertex;
+    struct csmloop_t *loop;
+};
+

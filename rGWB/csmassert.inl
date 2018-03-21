@@ -10,6 +10,8 @@
 //  Assertion management module.
 //
 
+#ifdef __STANDALONE_DISTRIBUTABLE
+
 #undef assert
 #include "csmfwddecl.hxx"
 
@@ -19,3 +21,5 @@ void csmassert_dontuse_assertion_failed(const char *file, int line, const char *
 
 void csmassert_dontuse_default_error(const char *file, int line) __attribute__ ((noreturn));
 #define default_error() csmassert_dontuse_default_error(__FILE__, __LINE__)
+
+#endif

@@ -9,7 +9,6 @@
 #include "csmsetop_join.inl"
 
 #include "csmarrayc.inl"
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -17,10 +16,15 @@
 #include "csmhedge.inl"
 #include "csmopbas.inl"
 #include "csmsetopcom.inl"
-#include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmsolid_debug.inl"
 #include "csmstring.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // ------------------------------------------------------------------------------------------
 
@@ -146,6 +150,8 @@ static void i_cut_he(
                     CSMBOOL *null_face_created_opt)
 {
     CSMBOOL null_face_created_loc;
+
+    UNREFERENCED(is_solid_A);
     
     csmsetopcom_cut_he(hedge, set_of_null_edges, set_of_null_faces, no_null_edges_deleted, &null_face_created_loc);
     
@@ -441,6 +447,7 @@ void csmsetop_join_null_edges(
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
         
+        /*
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
             if (null_face_created_h1a == CSMTRUE || null_face_created_h1b || null_face_created_h12a == CSMTRUE
@@ -460,6 +467,7 @@ void csmsetop_join_null_edges(
                 //csmdebug_show_viewer();
             }
         }
+        */
     }
     
     csmdebug_unblock_print_solid();

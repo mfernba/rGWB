@@ -3,7 +3,6 @@
 #include "csmsetopcom.inl"
 
 #include "csmarrayc.inl"
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -20,9 +19,7 @@
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
-#include "csmloopglue.inl"
 #include "csmmath.inl"
-#include "csmmem.inl"
 #include "csmopbas.inl"
 #include "csmsetop.tli"
 #include "csmsolid.inl"
@@ -31,6 +28,14 @@
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 struct i_pair_null_edges_t
 {
@@ -435,7 +440,7 @@ static CSMBOOL i_is_same_edge_by_ptr(const struct csmedge_t *edge1, const struct
 }
 
 // ----------------------------------------------------------------------------------------------------
-
+/*
 static CSMBOOL i_setop_face_needs_to_be_merge_with_adjacent(struct csmface_t *face)
 {
     struct csmloop_t *loop_iterator;
@@ -479,9 +484,9 @@ static CSMBOOL i_setop_face_needs_to_be_merge_with_adjacent(struct csmface_t *fa
     
     return IS_TRUE(no_unjoined_null_edges == 1);
 }
-
+*/
 // ----------------------------------------------------------------------------------------------------
-
+/*
 static struct csmhedge_t *i_he_face1_with_mate_on_face2(struct csmface_t *face1, struct csmface_t *face2)
 {
     struct csmloop_t *loop_iterator;
@@ -521,9 +526,9 @@ static struct csmhedge_t *i_he_face1_with_mate_on_face2(struct csmface_t *face1,
     
     return NULL;
 }
-
+*/
 // ----------------------------------------------------------------------------------------------------
-
+/*
 static CSMBOOL i_can_join_faces_by_common_edge(struct csmface_t *face1, struct csmface_t **face2)
 {
     struct csmhedge_t *common_he;
@@ -562,7 +567,7 @@ static CSMBOOL i_can_join_faces_by_common_edge(struct csmface_t *face1, struct c
         return CSMFALSE;
     }
 }
-
+*/
 // ----------------------------------------------------------------------------------------------------
 
 void csmsetopcom_join_hedges(
@@ -1078,10 +1083,8 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(
                     && csmarrayc_contains_element_st(set_of_null_faces, csmface_t, face, struct csmface_t, i_face_equal_ptr, NULL) == CSMFALSE)
             {
                 unsigned long idx_first_in_face, i;
-                CSMBOOL did_remove_face;
                 
                 idx_first_in_face = num_null_faces / 2 ;
-                did_remove_face = CSMFALSE;
                 
                 for (i = idx_first_in_face; i < num_null_faces; i++)
                 {
@@ -1150,14 +1153,13 @@ static void i_assign_he_old_vertex_to_new_vertex(struct csmvertex_t *old_vertex,
 static void i_correct_non_manifold_edges_null_face(struct csmface_t *face)
 {
     struct csmloop_t *flout;
-    CSMBOOL there_are_changes, did_make_changes;
+    CSMBOOL there_are_changes;
     unsigned long no_iters;
     
     flout = csmface_flout(face);
     //assert(csmloop_next(csmface_floops(face)) == NULL);
     
     no_iters = 0;
-    did_make_changes = CSMFALSE;
     
     do
     {
@@ -1213,7 +1215,6 @@ static void i_correct_non_manifold_edges_null_face(struct csmface_t *face)
                     i_assign_he_old_vertex_to_new_vertex(v1, he_iterator, split_v1);
                     
                     there_are_changes = CSMTRUE;
-                    did_make_changes = CSMTRUE;
                 }
             }
             
@@ -1318,14 +1319,11 @@ static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmfa
     do
     {
         struct csmhedge_t *he_mate;
-        struct csmedge_t *he_edge;
         
         assert(no_iters < 10000);
         no_iters++;
         
         he_next = csmhedge_next(he);
-        
-        he_edge = csmhedge_edge(he);
         he_mate = csmopbas_mate(he);
         
         csmeuler_lkev(&he, &he_mate, NULL, NULL, NULL, NULL);
@@ -1373,6 +1371,8 @@ static void i_delete_holes_filled_by_faces(struct csmsolid_t *solid, const struc
 {
     CSMBOOL there_are_changes;
     CSMBOOL changed_loc;
+
+    UNREFERENCED(tolerances);
     
     changed_loc = CSMFALSE;
     
@@ -1619,10 +1619,8 @@ void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid
 {
     CSMBOOL there_are_changes;
     unsigned long no_iters;
-    CSMBOOL inner_area_loops_processed;
     
     no_iters = 0;
-    inner_area_loops_processed = CSMFALSE;
     
     do
     {
@@ -1633,15 +1631,10 @@ void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid
         
         csmsolid_redo_geometric_face_data(solid);
     
-        //if (inner_area_loops_processed == CSMFALSE)
-        {
-            csmdebug_print_debug_info("Extract positive inner area loops from faces...\n");
-            i_extract_inner_positive_area_loops_from_faces(solid, tolerances, &there_are_changes);
-            csmsolid_debug_print_debug(solid, CSMFALSE);
+        csmdebug_print_debug_info("Extract positive inner area loops from faces...\n");
+        i_extract_inner_positive_area_loops_from_faces(solid, tolerances, &there_are_changes);
+        csmsolid_debug_print_debug(solid, CSMFALSE);
             
-            inner_area_loops_processed = CSMTRUE;
-        }
-
         csmdebug_print_debug_info("Merging faces...\n");
         i_merge_faces_inside_faces(solid, tolerances, &there_are_changes);
         csmsolid_debug_print_debug(solid, CSMFALSE);

@@ -8,7 +8,6 @@
 
 #include "csmquadrics.h"
 
-#include "csmassert.inl"
 #include "csmeuler_lkev.inl"
 #include "csmeuler_lmef.inl"
 #include "csmeuler_lmev.inl"
@@ -20,13 +19,20 @@
 #include "csmloopglue.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
-#include "csmmem.inl"
 #include "csmopbas.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmsurface.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 // --------------------------------------------------------------------------------
 

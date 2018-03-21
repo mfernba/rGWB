@@ -1,4 +1,4 @@
-//
+/*lint -save -w0*/
 
 //  csmhashtb.c
 //  rGWB
@@ -11,8 +11,13 @@
 
 #include "csmuthash.hxx"
 
+#ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 struct csmhashtb_item_t
 {
@@ -237,4 +242,4 @@ void csmhashtb_nousar_next_pair(struct csmhashtb_iterator_t *iterator, unsigned 
     iterator->next_item = iterator->next_item->hh.next;
 }
 
-
+/*lint -restore*/

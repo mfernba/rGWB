@@ -4,10 +4,8 @@
 #include "csmsetop.tli"
 
 #include "csmarrayc.inl"
-#include "csmassert.inl"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
-#include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmeuler_lkfmrh.inl"
 #include "csmeuler_lmfkrh.inl"
@@ -17,9 +15,6 @@
 #include "csmloop.inl"
 #include "csmloopglue.inl"
 #include "csmmaterial.inl"
-#include "csmmath.inl"
-#include "csmmem.inl"
-#include "csmnode.inl"
 #include "csmopbas.inl"
 #include "csmsetop_join.inl"
 #include "csmsetop_procedges.inl"
@@ -33,6 +28,13 @@
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#include "copiafor.h"
+#endif
 
 static const unsigned long i_NUM_MAX_PERTURBATIONS = 10;
 
@@ -784,12 +786,42 @@ enum csmsetop_opresult_t csmsetop_difference_A_minus_B(const struct csmsolid_t *
 
 // ------------------------------------------------------------------------------------------
 
+static enum csmsetop_opresult_t i_conmutative_set_operation(
+                        enum csmsetop_operation_t set_operation,
+                        const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, 
+                        struct csmsolid_t **solid_res)
+{
+    enum csmsetop_opresult_t res;
+    
+    assert(set_operation == CSMSETOP_OPERATION_UNION || set_operation == CSMSETOP_OPERATION_INTERSECTION);
+    
+    res = i_set_operation(set_operation, solid_A, solid_B, solid_res);
+
+    switch (res)
+    {
+        case CSMSETOP_OPRESULT_OK:
+        case CSMSETOP_OPRESULT_NON_MANIFOLD_OPERAND:
+            break;
+
+        case CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS:
+
+            res = i_set_operation(set_operation, solid_B, solid_A, solid_res);
+            break;
+
+        default_error();
+    }
+
+    return res;
+}
+
+// ------------------------------------------------------------------------------------------
+
 enum csmsetop_opresult_t csmsetop_union_A_and_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, struct csmsolid_t **solid_res)
 {
     enum csmsetop_operation_t set_operation;
     
     set_operation = CSMSETOP_OPERATION_UNION;
-    return i_set_operation(set_operation, solid_A, solid_B, solid_res);
+    return i_conmutative_set_operation(set_operation, solid_A, solid_B, solid_res);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -799,5 +831,5 @@ enum csmsetop_opresult_t csmsetop_intersection_A_and_B(const struct csmsolid_t *
     enum csmsetop_operation_t set_operation;
     
     set_operation = CSMSETOP_OPERATION_INTERSECTION;
-    return i_set_operation(set_operation, solid_A, solid_B, solid_res);
+    return i_conmutative_set_operation(set_operation, solid_A, solid_B, solid_res);
 }

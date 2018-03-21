@@ -6,9 +6,15 @@
 #include "csmnode.inl"
 #include "csmvertex.inl"
 
-#include "csmassert.inl"
 #include "csmid.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
 #include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 struct csmhedge_t
 {

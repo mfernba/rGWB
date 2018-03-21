@@ -9,10 +9,8 @@
 #include "csmsolid_debug.inl"
 #include "csmsolid.tli"
 
-#include "csmassert.inl"
 #include "csmdebug.inl"
 #include "csmhashtb.inl"
-#include "csmedge.inl"
 #include "csmedge_debug.inl"
 #include "csmface.inl"
 #include "csmface_debug.inl"
@@ -20,6 +18,12 @@
 #include "csmnode.inl"
 #include "csmvertex.inl"
 #include "csmvertex_debug.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 

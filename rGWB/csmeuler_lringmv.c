@@ -2,11 +2,14 @@
 
 #include "csmeuler_lringmv.inl"
 
-#include "csmassert.inl"
 #include "csmface.inl"
 #include "csmloop.inl"
-#include "csmmem.inl"
-#include "csmsolid.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+#include "csmassert.inl"
+#else
+#include "cyassert.h"
+#endif
 
 // --------------------------------------------------------------------------------
 

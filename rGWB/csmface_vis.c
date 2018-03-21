@@ -9,28 +9,45 @@
 #include "csmface_vis.inl"
 #include "csmface.tli"
 
+#include "csmloop.inl"
+#include "csmhedge.inl"
+#include "csmface.inl"
+#include "csmvertex.inl"
+#include "csmmath.inl"
+#include "csmmath.tli"
+#include "csmgeom.inl"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
+
 #include "csmArrPoint2D.h"
 #include "csmArrPoint3D.h"
 #include "csmassert.inl"
 #include "csmedge.inl"
-#include "csmface.inl"
-#include "csmgeom.inl"
-#include "csmhedge.inl"
 #include "csmid.inl"
-#include "csmloop.inl"
 #include "csmmaterial.tli"
-#include "csmmath.inl"
-#include "csmmath.tli"
 #include "csmmem.inl"
 #include "csmnode.inl"
 #include "csmshape2d.h"
 #include "csmshape2d.inl"
 #include "csmsurface.inl"
 #include "csmtolerance.inl"
-#include "csmvertex.inl"
 
 #include <basicSystem/bsmaterial.h>
 #include <basicGraphics/bsgraphics2.h>
+#else
+
+#include "a_bool.h"
+#include "a_pto2d.h"
+#include "a_pto3d.h"
+#include "a_punter.h"
+#include "a_ulong.h"
+#include "cyassert.h"
+#include "cypemesh.h"
+#include "ebageom.h"
+
+#endif
+
+#ifdef __STANDALONE_DISTRIBUTABLE
 
 // ------------------------------------------------------------------------------------------
 
@@ -325,3 +342,171 @@ void csmface_vis_draw_edges(
         loop_iterator = csmloop_next(loop_iterator);
     }
 }
+
+#else
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_vis_append_loop_to_shape(
+                        struct csmloop_t *loop,
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        ArrPuntero(ArrPunto3D) *poligonos_3d_cara)
+{
+    struct csmhedge_t *ledge, *iterator;
+    unsigned long num_iteraciones;
+    ArrPunto3D *points;
+    ArrPunto2D *points_2d;
+    
+    assert_no_null(loop);
+    
+    ledge = csmloop_ledge(loop);
+    iterator = ledge;
+    num_iteraciones = 0;
+    
+    points = arr_CreaPunto3D(0);
+    points_2d = arr_CreaPunto2D(0);
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x_3d, y_3d, z_3d;
+        double x_2d, y_2d;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
+
+        arr_AppendPunto3D(points, x_3d, y_3d, z_3d);
+        
+        csmgeom_project_coords_3d_to_2d(
+                        Xo, Yo, Zo,
+                        Ux, Uy, Uz, Vx, Vy, Vz,
+                        x_3d, y_3d, z_3d,
+                        &x_2d, &y_2d);
+
+        arr_AppendPunto2D(points_2d, x_2d, y_2d);
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != ledge);
+    
+    if (arr_NumElemsPunto3D(points) >= 3 && csmmath_fabs(arr_CalcularAreaPunto2D(points_2d)) > 0.)
+    {
+        ebageom_invierte_puntos3D(points);
+        arr_AppendPunteroTD(poligonos_3d_cara, points, ArrPunto3D);
+    }
+    else
+    {
+        arr_DestruyePunto3D(&points);
+    }
+
+    arr_DestruyePunto2D(&points_2d);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_desplaza_indices_vertices(ArrULong *indices_vertices, unsigned long num_vertices_solido)
+{
+    unsigned long i, num_vertices;
+
+    num_vertices = arr_NumElemsULong(indices_vertices);
+
+    for (i = 0; i < num_vertices; i++)
+    {
+        unsigned long indice;
+
+        indice = arr_GetULong(indices_vertices, i);
+        arr_SetULong(indices_vertices, i, indice + num_vertices_solido);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_desplaza_array_indices_vertices(ArrPuntero(ArrULong) *inds_caras, unsigned long num_vertices_solido)
+{
+    unsigned long i, num_caras;
+
+    num_caras = arr_NumElemsPunteroTD(inds_caras, ArrULong);
+
+    for (i = 0; i < num_caras; i++)
+    {
+        ArrULong *indices_vertices_cara;
+
+        indices_vertices_cara = arr_GetPunteroTD(inds_caras, i, ArrULong);
+        i_desplaza_indices_vertices(indices_vertices_cara, num_vertices_solido);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_vis_append_datos_mesh(
+                    struct csmface_t *face,
+                    ArrPunto3D *puntos, ArrPunto3D *normales, ArrBool *es_borde,
+                    ArrEnum(cplan_tipo_primitiva_t) *tipo_primitivas, ArrPuntero(ArrULong) *inds_caras)
+{
+    double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
+    struct csmloop_t *flout, *loop_iterator;
+    ArrPuntero(ArrPunto3D) *poligonos_3d_cara;
+    
+    assert_no_null(face);
+
+    csmmath_plane_axis_from_implicit_plane_equation(
+                        face->A, face->B, face->C, face->D,
+                        &Xo, &Yo, &Zo,
+                        &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
+
+    poligonos_3d_cara = arr_CreaPunteroTD(0, ArrPunto3D);
+
+    flout = csmface_flout(face);
+    i_vis_append_loop_to_shape(flout, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+
+    loop_iterator = csmface_floops(face);
+        
+    while (loop_iterator != NULL)
+    {
+        if (loop_iterator != flout)
+            i_vis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+
+        loop_iterator = csmloop_next(loop_iterator);
+    }
+        
+    if (arr_NumElemsPunteroTD(poligonos_3d_cara, ArrPunto3D) > 0)
+    {
+        unsigned long num_vertices_solido;
+        ArrPunto3D *puntos_cara, *normales_cara;
+        ArrBool *es_borde_cara;
+        ArrEnum(cplan_tipo_primitiva_t) *tipo_primitivas_cara;
+        ArrPuntero(ArrULong) *inds_caras_cara;
+
+        num_vertices_solido = arr_NumElemsPunto3D(puntos);
+        assert(num_vertices_solido == arr_NumElemsPunto3D(normales));
+        assert(num_vertices_solido == arr_NumElemsBOOL(es_borde));
+
+        cypemesh_genera_contorno(
+                        poligonos_3d_cara,
+                        &puntos_cara, &normales_cara, &es_borde_cara,
+                        &tipo_primitivas_cara,
+                        &inds_caras_cara);
+
+        i_desplaza_array_indices_vertices(inds_caras_cara, num_vertices_solido);
+
+        arr_ConcatenaPunto3D(puntos, puntos_cara);
+        arr_ConcatenaPunto3D(normales, normales_cara);
+        arr_ConcatenaBOOL(es_borde, es_borde_cara);
+        arr_ConcatenaEnum(tipo_primitivas, tipo_primitivas_cara, cplan_tipo_primitiva_t);
+        arr_ConcatenaEstructurasTD(inds_caras, inds_caras_cara, ArrULong, NULL);
+
+        arr_DestruyePunto3D(&puntos_cara);
+        arr_DestruyePunto3D(&normales_cara);
+        arr_DestruyeBOOL(&es_borde_cara);
+        arr_DestruyeEnum(&tipo_primitivas_cara, cplan_tipo_primitiva_t);
+        arr_DestruyeEstructurasTD(&inds_caras_cara, ArrULong, NULL);
+    }
+
+    arr_DestruyeEstructurasTD(&poligonos_3d_cara, ArrPunto3D, arr_DestruyePunto3D);
+}
+
+#endif
