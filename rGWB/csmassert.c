@@ -10,9 +10,7 @@
 
 #include "csmassert.inl"
 
-
 #include "csmdebug.inl"
-
 #include <stdio.h>
 #include <stdlib.h>
 

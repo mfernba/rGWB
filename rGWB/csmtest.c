@@ -2963,6 +2963,43 @@ static void i_test_sphere4(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_sphere5(void)
+{
+    struct csmsolid_t *cono;
+    struct csmsolid_t *block;
+    struct csmsolid_t *res;
+    
+    //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
+    cono = csmquadrics_create_sphere(
+                        0.5,
+                        4,
+                        4,
+                        -3., 0., 0.,
+                        1., 0., 0., 0., 1., 0.,
+                        1);
+
+    csmdebug_set_viewer_results(cono, NULL);
+    //csmdebug_show_viewer();
+    
+    {
+        struct csmshape2d_t *block_shape;
+        
+        block_shape = csmbasicshape2d_rectangular_shape(10., 0.2);
+        
+        block = csmsweep_create_solid_from_shape_debug(
+                        block_shape, 0., 0., 3.,  1., 0., 0., 0., 1., 0.,
+                        block_shape, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        10000);
+    }
+    
+    assert(csmsetop_difference_A_minus_B(block, cono, &res) == CSMSETOP_OPRESULT_OK);
+    
+    csmdebug_set_viewer_results(res, NULL);
+    csmdebug_show_viewer();
+}
+
+// ------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmsolid_t *, i_split_solid_ang_get_division, (
 	                    const struct csmsolid_t *solid,
                         double Xo, double Yo, double Zo,
@@ -4753,7 +4790,7 @@ static void i_test_difference1(struct csmviewer_t *viewer)
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
-    CSMBOOL process_all_test = CSMTRUE;
+    CSMBOOL process_all_test = CSMFALSE;
     
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
@@ -4778,7 +4815,9 @@ void csmtest_test(void)
     
     if (process_all_test == CSMFALSE)
     {
-        //csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+        i_test_sphere5();
+        
         
         //++>i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
         //i_test_cilindro6(viewer); // --> Intersecciones non-manifold. No falla si se permiten perturbaciones
