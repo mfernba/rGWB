@@ -1,7 +1,7 @@
 # rGWB
-An implementation of Martti Mäntyllä's Geometric WorkBench
+An implementation of Martti Mäntylä's Geometric WorkBench
 
-![Test case](https://github.com/mfernba/rGWB/blob/master/Screenshots/Virtual%20sector%20test.png)
+![Test case](https://github.com/mfernba/rGWB/blob/master/Screenshots/Cylindrical%20part%20with%20holes%20.png)
 
 IMPORTANT: Some parts of the system are tied to other tools I developed in the past, so don't expect (for now) that it compiles for you. 
 You will need to provide your own implementation for the csmdebug.c.inl module and for the csmviewer.c.h module (or comment both). 
@@ -23,6 +23,8 @@ This implementations allows:
   - Explode solids with several shells (csmexplode.h)
   
 Look at Screenshots to get some sense of what can be done.
+
+![Test case](https://github.com/mfernba/rGWB/blob/master/Screenshots/Virtual%20sector%20test.png)
 
 Non-manifold solids: This is a 2-manifold modeler, but non-manifold solids can be produced as a consequence of the solid operation used. In such case, the algorithms may fail if you use the solid in another operations. This is an extension I will do in the future.
 
