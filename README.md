@@ -1,7 +1,7 @@
 # rGWB
 An implementation of Martti Mäntyllä's Geometric WorkBench
 
-![Test case](https://github.com/mfernba/rGWB/Screenshots/bolt.png)
+![Test case](https://github.com/mfernba/rGWB/blob/master/Screenshots/Virtual%20sector%20test.png)
 
 IMPORTANT: Some parts of the system are tied to other tools I developed in the past, so don't expect (for now) that it compiles for you. 
 You will need to provide your own implementation for the csmdebug.c.inl module and for the csmviewer.c.h module (or comment both). 
