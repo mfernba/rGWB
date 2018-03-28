@@ -346,6 +346,7 @@ static void i_reclassify_on_sectors_vertex_neighborhood(
 static void i_reclassify_on_edge_vertex_neighborhood(
                         struct i_neighborhood_t *hedge_neighborhood,
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
+                        CSMBOOL contains_virtual_on_sector,
                         struct i_neighborhood_t *prev_hedge_neighborhood,
                         struct i_neighborhood_t *next_hedge_neighborhood)
 {
@@ -361,23 +362,20 @@ static void i_reclassify_on_edge_vertex_neighborhood(
         {
             new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
         }
-        else if (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+        else if ((prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+                    || (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN))
         {
-             if (a_vs_b == CSMSETOP_A_VS_B)
-                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-             else
-                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-            
-            //new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-        }
-        else if (prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
-        {
-            if (a_vs_b == CSMSETOP_A_VS_B)
-                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            if (contains_virtual_on_sector == CSMTRUE)
+            {
+                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT : CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            }
             else
-                new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-            
-            //new_position = CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+            {
+                if (a_vs_b == CSMSETOP_A_VS_B)
+                    new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
+                else
+                    new_position = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
+            }
         }
         else
         {
@@ -391,13 +389,40 @@ static void i_reclassify_on_edge_vertex_neighborhood(
 
 // ----------------------------------------------------------------------------------------------------
 
+static CSMBOOL i_contains_virtual_on_sector(const csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
+{
+    unsigned long i, num_sectors;
+    unsigned long no_on_edges;
+    
+    num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
+    no_on_edges = 0;
+    
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_neighborhood_t *hedge_neighborhood;
+        
+        hedge_neighborhood = csmarrayc_get_st(vertex_neighborhood, i, i_neighborhood_t);
+        assert_no_null(hedge_neighborhood);
+        
+        if (hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+            no_on_edges++;
+    }
+    
+    return IS_TRUE(no_on_edges >= 2);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_reclassify_on_edges_vertex_neighborhood(
                         enum csmsetop_operation_t set_operation, enum csmsetop_a_vs_b_t a_vs_b,
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
     unsigned long i, num_sectors;
+    CSMBOOL contains_virtual_on_sector;
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
+    
+    contains_virtual_on_sector = i_contains_virtual_on_sector(vertex_neighborhood);
     
     for (i = 0; i < num_sectors; i++)
     {
@@ -420,6 +445,7 @@ static void i_reclassify_on_edges_vertex_neighborhood(
         i_reclassify_on_edge_vertex_neighborhood(
                         hedge_neighborhood,
                         set_operation, a_vs_b,
+                        contains_virtual_on_sector,
                         prev_hedge_neighborhood,
                         next_hedge_neighborhood);
     }

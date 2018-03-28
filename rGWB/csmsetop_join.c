@@ -474,7 +474,7 @@ void csmsetop_join_null_edges(
     
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
-        csmdebug_set_viewer_parameters(solid_A, NULL);
+        csmdebug_set_viewer_parameters(solid_A, solid_B);
         csmdebug_show_viewer();
         
         i_print_null_faces(solid_A, set_of_null_faces_A_loc);

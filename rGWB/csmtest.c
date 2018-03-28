@@ -2967,16 +2967,20 @@ static void i_test_sphere5(void)
 {
     struct csmsolid_t *cono;
     struct csmsolid_t *block;
-    struct csmsolid_t *res;
+    struct csmsolid_t *res, *solid_aux;
+    
+    i_set_output_debug_file("sphere5.she");
     
     //toroide = csmquadrics_create_torus(3., .75, 3, 0., 0., 0., 1., 0., 0., 0., 1., 0., 0);
     cono = csmquadrics_create_sphere(
                         0.5,
-                        4,
-                        4,
+                        16,
+                        16,
                         -3., 0., 0.,
                         1., 0., 0., 0., 1., 0.,
                         1);
+
+    i_assign_flat_material_to_solid(1., 0., 0., cono);
 
     csmdebug_set_viewer_results(cono, NULL);
     //csmdebug_show_viewer();
@@ -2990,12 +2994,73 @@ static void i_test_sphere5(void)
                         block_shape, 0., 0., 3.,  1., 0., 0., 0., 1., 0.,
                         block_shape, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
                         10000);
+        
+        i_assign_flat_material_to_solid(.5, .5, .5, block);
+
     }
+    
+    assert(csmsetop_union_A_and_B(block, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&res);
+    
+    assert(csmsetop_intersection_A_and_B(block, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&res);
     
     assert(csmsetop_difference_A_minus_B(block, cono, &res) == CSMSETOP_OPRESULT_OK);
     
+    csmsolid_move(cono, 6., 0., 0.);
+    solid_aux = res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+    
+    csmsolid_move(cono, 0., 0., 3.);
+    solid_aux = res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmsolid_move(cono, -6., 0., 0.);
+    solid_aux = res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmsolid_move(cono, 0., 0., -1.5);
+    solid_aux = res;
+    assert(csmsetop_union_A_and_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmsolid_move(cono, 6., 0., 0.);
+    solid_aux = res;
+    assert(csmsetop_union_A_and_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmsolid_move(cono, -4.5, 0., 0.);
+    solid_aux = res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmsolid_move(cono, 0.75, 0., 0.);
+    solid_aux = res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmsolid_move(cono, 0.75, 0., 0.);
+    solid_aux = res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmsolid_move(cono, 0.75, 0., 0.);
+    solid_aux = res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+
+    csmsolid_move(cono, 0.75, 0., 0.);
+    solid_aux = res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, cono, &res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+    
     csmdebug_set_viewer_results(res, NULL);
     csmdebug_show_viewer();
+    
+    csmsolid_free(&res);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -4798,31 +4863,34 @@ void csmtest_test(void)
     //csmtest_array_test1();
     //csmtest_array_test2();
     
-    /*
     i_test_crea_destruye_solido_vacio();
     i_test_basico_solido_una_arista();
     i_test_crea_lamina();
-    i_test_crea_lamina_con_hueco();
+    //i_test_crea_lamina_con_hueco();
     i_test_crea_hexaedro();
     i_test_crea_hexaedro_y_copia();
     i_test_tabla_hash();
     i_test_solid_from_shape2D();
     i_test_solid_from_shape2D_with_hole();
     i_test_union_solidos_por_loopglue();
-    */
 
-    csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
-    
     if (process_all_test == CSMFALSE)
     {
+        csmdebug_enable_visual_debug();
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
-        i_test_sphere5();
         
+        //i_test_multiple_solidos1(viewer);
+        //i_test_multiple_solidos2(viewer);
+        //i_test_multiple_solidos3(viewer);
+        
+        //i_test_mechanichal7_simplified();
+        //i_test_mechanichal7();
+        i_test_sphere5();
         
         //++>i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
         //i_test_cilindro6(viewer); // --> Intersecciones non-manifold. No falla si se permiten perturbaciones
         //i_test_cilindro7(viewer);
-        i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
+        //i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
         
         //i_test_difference1(viewer);
         
@@ -4853,6 +4921,8 @@ void csmtest_test(void)
     }
     else
     {
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+
         i_test_divide_solido_rectangular_hueco_por_plano_medio();
         i_test_divide_solido_rectangular_hueco_por_plano_medio2();
         i_test_divide_solido_rectangular_hueco_por_plano_superior();
@@ -4878,11 +4948,17 @@ void csmtest_test(void)
         i_test_cilindro2(viewer);
         i_test_cilindro3(viewer);
         
-        i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
-        i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
-        i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
-        i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
-        i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
+        {
+            i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
+            i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
+            i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
+            i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
+            i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
+        }
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+        
+        i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
         
         //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
                                   // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
@@ -4895,12 +4971,12 @@ void csmtest_test(void)
         
         i_test_toroide();
         i_test_cono();
+        
         i_test_sphere();
-
         i_test_sphere2();
         i_test_sphere3();
-        
         i_test_sphere4();
+        i_test_sphere5();
         
         i_test_mechanical5();
         i_test_mechanical6bis();
@@ -4910,15 +4986,32 @@ void csmtest_test(void)
         i_test_mechanichal7();
         
         i_test_ellipsoid();
-        i_test_paraboloid_one_sheet();
+        
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
+        {
+            i_test_paraboloid_one_sheet();
+        }
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
         
         i_test_sweep_path1();
         i_test_sweep_path2();
         i_test_sweep_path3();
         i_test_sweep_path4();
-        i_test_sweep_path5();
+
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
+        {
+            i_test_sweep_path5();
+        }
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+        
         i_test_sweep_path6(CSMTRUE);
-        i_test_sweep_path6(CSMFALSE);
+        
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
+        {
+            i_test_sweep_path6(CSMFALSE);
+        }
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+        
         i_test_inters_inner_segment();
         
         i_test_union_no_null_edges1();
@@ -4926,7 +5019,12 @@ void csmtest_test(void)
         i_test_intersection_no_null_edges1();
         
         i_test_torus2();
-        i_test_twist();
+        
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
+        {
+            i_test_twist();
+        }
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
         
         i_test_difference1(viewer);
 

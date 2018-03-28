@@ -748,7 +748,7 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
         intersect = CSMTRUE;
     }
     
-    assert(intersect == CSMTRUE);
+    //assert(intersect == CSMTRUE);
     
     return i_create_inters_sectors(
                        idx_nba, idx_nbb,
