@@ -85,6 +85,12 @@ void csmeuler_lmef(
     
     csmloop_set_ledge(new_loop, new_he1);
     csmloop_set_ledge(csmhedge_loop(he2), new_he2);
+    
+    if (he1 == he2)
+    {
+        assert(csmhedge_loop(new_he1) == csmhedge_loop(he2));
+        csmhedge_set_loop(new_he1, new_loop);
+    }
 
     ASSIGN_OPTIONAL_VALUE(new_face_opc, new_face);
     ASSIGN_OPTIONAL_VALUE(new_he_pos_opc, new_he2);
