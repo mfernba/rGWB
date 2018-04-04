@@ -670,7 +670,8 @@ static void i_process_vf_inters(
 
         num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
         assert(num_sectors > 0);
-        
+
+        /* (idx + 1) % num_sectors to avoid selecting wide edge twice in presence of other candidates - test_union_5() for a simple debug */
         idx = start_idx;
         head_neighborhood = csmarrayc_get_st(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
         
@@ -714,6 +715,17 @@ static void i_process_vf_inters(
                 description = copiafor_codigo3("NE (%g, %g, %g)", x_split, y_split, z_split);
                 csmdebug_append_debug_point(x_split, y_split, z_split, &description);
             }
+            
+            /*
+                In the split case, null edges are oriente from below the splitting plane to above, so outer loop of null faces corresponds to face of solid above.
+                In setop case, face normal points to the interior of the solid. If null edge oriented from in to out, outer loop of null face corresponds to the
+                part inside the solid. I.e. in case of union, we get the part inside the other solid, not the outside.
+             
+                We need to create null edges from out to in in order to get the correct outer loop of the null face.
+             
+                GWB algorithms rely on a careful implementation of euler operators and null edge orientations.
+             
+             */
             
             csmeuler_lmev(head_neighborhood->hedge, tail_neighborhood->hedge, x_split, y_split, z_split, &split_vertex, &null_edge, NULL, NULL);
             csmedge_setop_set_is_null_edge(null_edge, CSMTRUE);
