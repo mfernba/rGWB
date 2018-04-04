@@ -683,7 +683,6 @@ static void i_process_vf_inters(
             double x_split, y_split, z_split;
             struct csmvertex_t *split_vertex;
             struct csmedge_t *null_edge;
-            enum csmsetop_classify_resp_solid_t cl_head_resp_plane;
             
             assert_no_null(head_neighborhood);
             assert(num_iters < 100000);
@@ -701,8 +700,6 @@ static void i_process_vf_inters(
             assert_no_null(tail_neighborhood);
             
             csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
-            i_classify_hedge_respect_to_plane(head_neighborhood->hedge, A, B, C, D, fuzzy_face_tolerance, NULL, NULL, &cl_head_resp_plane);
-            //assert(cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_OUT || cl_head_resp_plane == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
             
             if (csmdebug_debug_enabled() == CSMTRUE)
             {
