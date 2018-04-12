@@ -318,7 +318,7 @@ void csmloopglue_merge_face_loops(
 
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
-        csmdebug_show_face(face, NULL);
+        //csmdebug_show_face(face, NULL);
         csmdebug_print_debug_info("Begin loopglue, face %lu, loops %lu-%lu\n", csmface_id(face), csmloop_id(loop1), csmloop_id(loop2));
     }
     

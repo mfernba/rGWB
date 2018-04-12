@@ -55,6 +55,8 @@ CSMBOOL csmface_is_point_interior_to_face(
                         double x, double y, double z,
                         const struct csmtolerance_t *tolerances);
 
+CSMBOOL csmface_is_vertex_used_by_hedge_on_face(const struct csmface_t *face, const struct csmvertex_t *vertex);
+
 enum csmcompare_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex);
 
 CSMBOOL csmface_exists_intersection_between_line_and_face_plane(

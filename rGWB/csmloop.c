@@ -655,6 +655,37 @@ CSMBOOL csmloop_is_point_inside_loop(
 
 // --------------------------------------------------------------------------------------------------------------
 
+CSMBOOL csmloop_is_vertex_used_by_hedge_on_loop(const struct csmloop_t *loop, const struct csmvertex_t *vertex)
+{
+    register struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    
+    assert_no_null(loop);
+    
+    iterator = loop->ledge;
+    num_iteraciones = 0;
+    
+    do
+    {
+        struct csmvertex_t *he_vertex;
+        
+        assert(num_iteraciones < 10000);
+        num_iteraciones++;
+        
+        he_vertex = csmhedge_vertex(iterator);
+        
+        if (csmvertex_id(he_vertex) == csmvertex_id(vertex))
+            return CSMTRUE;
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != loop->ledge);
+    
+    return CSMFALSE;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 CSMBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib)
 {
     register struct csmhedge_t *iterator;

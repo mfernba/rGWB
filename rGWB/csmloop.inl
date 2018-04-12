@@ -44,6 +44,8 @@ CSMBOOL csmloop_is_point_inside_loop(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 
+CSMBOOL csmloop_is_vertex_used_by_hedge_on_loop(const struct csmloop_t *loop, const struct csmvertex_t *vertex);
+
 CSMBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib);
 
 CSMBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop);

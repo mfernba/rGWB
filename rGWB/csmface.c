@@ -665,6 +665,27 @@ CSMBOOL csmface_is_point_interior_to_face(
 
 // ------------------------------------------------------------------------------------------
 
+CSMBOOL csmface_is_vertex_used_by_hedge_on_face(const struct csmface_t *face, const struct csmvertex_t *vertex)
+{
+    assert_no_null(face);
+    
+    struct csmloop_t *loop_iterator;
+            
+    loop_iterator = face->floops;
+    
+    while (loop_iterator != NULL)
+    {
+        if (csmloop_is_vertex_used_by_hedge_on_loop(loop_iterator, vertex) == CSMTRUE)
+            return CSMTRUE;
+    
+        loop_iterator = csmloop_next(loop_iterator);
+    }
+    
+    return CSMFALSE;
+}
+
+// ------------------------------------------------------------------------------------------
+
 enum csmcompare_t csmface_classify_vertex_relative_to_face(const struct csmface_t *face, const struct csmvertex_t *vertex)
 {
     double x, y, z;

@@ -182,6 +182,23 @@ void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lad
 
 // ----------------------------------------------------------------------------------------------------
 
+enum csmedge_lado_hedge_t csmedge_hedge_side(const struct csmedge_t *edge, const struct csmhedge_t *hedge)
+{
+    assert_no_null(edge);
+    
+    if (edge->he1 == hedge)
+    {
+        return CSMEDGE_LADO_HEDGE_POS;
+    }
+    else
+    {
+        assert(edge->he2 == hedge);
+        return CSMEDGE_LADO_HEDGE_NEG;
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmedge_remove_hedge(struct csmedge_t *edge, struct csmhedge_t *hedge)
 {
     assert_no_null(edge);
