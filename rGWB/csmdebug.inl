@@ -15,7 +15,9 @@ extern "C" {
 void csmdebug_set_treat_improper_solid_operations_as_errors(CSMBOOL value);
     
 CSMBOOL csmdebug_get_treat_improper_solid_operations_as_errors(void);
-    
+
+void csmdebug_configure_for_fast_testing(void);
+
 void csmdebug_set_enabled_by_code(CSMBOOL enabled);
 
 void csmdebug_enable_visual_debug(void);
@@ -23,7 +25,11 @@ void csmdebug_enable_visual_debug(void);
 CSMBOOL csmdebug_debug_enabled(void);
 
 CSMBOOL csmdebug_debug_visual_enabled(void);
-    
+
+void csmdebug_set_setop_debug_level(unsigned long debug_level);
+
+CSMBOOL csmdebug_setop_show_debug_level(unsigned long debug_level);
+
 void csmdebug_begin_context(const char *context);
 
 void csmdebug_end_context(void);

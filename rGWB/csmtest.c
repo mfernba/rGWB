@@ -1689,7 +1689,7 @@ static void i_test_cilindro7_redux(struct csmviewer_t *viewer)
                         cshape2d, 1., -2., 0.75, -1., 0., 0., 0., 0., 1.,
                         1000);
 
-    csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
     assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
     csmviewer_set_results(viewer, solid_res, NULL);
     csmviewer_show(viewer);
@@ -1862,7 +1862,7 @@ static void i_test_cilindro4(struct csmviewer_t *viewer)
     i_set_output_debug_file("inters_cilindro4.she");
     csmdebug_set_enabled_by_code(CSMFALSE);
 
-    no_points_circle = 4;
+    no_points_circle = 32;
     
     //cshape2d = csmbasicshape2d_rectangular_shape(0.80, 0.80);
     cshape2d = csmbasicshape2d_circular_shape(0.40, no_points_circle);
@@ -4942,6 +4942,9 @@ void csmtest_test(void)
     
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
+    
+    //process_all_test = CSMTRUE;
+    //csmdebug_configure_for_fast_testing();
     
     //csmtest_array_test1();
     //csmtest_array_test2();

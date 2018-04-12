@@ -31,6 +31,7 @@ extern "C"
 static char i_CONTEXT_STACK[i_MAX_NUM_CONTEXTS][i_MAX_LENGTH_CONTEXT_NAME];
 static unsigned long i_NO_STACKED_CONTEXTS = 0;
 static int g_INITIALIZED = 0;
+static unsigned long i_SETIOP_DEBUG_LEVEL = 0;
 
 #define i_MAX_NUM_POINTS 100000
 #define i_MAX_DESCRIPTION_LENGHT 256
@@ -58,9 +59,9 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 0;
-static int i_DEBUG_VISUAL = 0;
-static int i_DEBUG_FILE = 0;
+static int i_DEBUG_SCREEN = 1;
+static int i_DEBUG_VISUAL = 1;
+static int i_DEBUG_FILE = 1;
 
 static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
 
@@ -98,6 +99,15 @@ CSMBOOL csmdebug_get_treat_improper_solid_operations_as_errors(void)
 
 // --------------------------------------------------------------------------------
 
+void csmdebug_configure_for_fast_testing(void)
+{
+    i_DEBUG_SCREEN = 0;
+    i_DEBUG_VISUAL = 0;
+    i_DEBUG_FILE = 0;
+}
+
+// --------------------------------------------------------------------------------
+
 void csmdebug_set_enabled_by_code(CSMBOOL enabled)
 {
     if (enabled == CSMTRUE)
@@ -131,6 +141,30 @@ CSMBOOL csmdebug_debug_visual_enabled(void)
         return CSMFALSE;
     else
         return IS_TRUE(i_DEBUG_VISUAL == 1);
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_set_setop_debug_level(unsigned long debug_level)
+{
+    i_SETIOP_DEBUG_LEVEL = debug_level;
+}
+
+// --------------------------------------------------------------------------------
+
+CSMBOOL csmdebug_setop_show_debug_level(unsigned long debug_level)
+{
+    if (csmdebug_debug_enabled() == CSMFALSE)
+    {
+        return CSMFALSE;
+    }
+    else
+    {
+        if (i_SETIOP_DEBUG_LEVEL >= debug_level)
+            return CSMTRUE;
+        else
+            return CSMFALSE;
+    }
 }
 
 // --------------------------------------------------------------------------------
