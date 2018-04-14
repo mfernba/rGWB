@@ -419,12 +419,17 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
         {
             csmdebug_print_debug_info("[i_join_pendant_loose_ends_by_modifying_topology] Iteration: %lu\n", no_iters);
             
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_A, loose_ends_A);
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_B, loose_ends_B);
+            
             csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
             
             csmdebug_print_debug_info("*** joining loose ends by modifying topology\n");
             csmsolid_debug_print_debug(solid_A, CSMTRUE);
             csmsolid_debug_print_debug(solid_B, CSMTRUE);
+            
+            //csmdebug_show_viewer();
         }
         
         there_are_changes = CSMFALSE;
@@ -496,8 +501,8 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
                         if (csmsetopcom_is_loose_end(csmopbas_mate(loose_end_b_j), loose_ends_B) == CSMFALSE)
                             i_cut_he_solid_B(loose_end_b_j, set_of_null_edges_B, set_of_null_faces_B, no_null_edges_deleted_B, NULL);
                         
-                        if (csmdebug_debug_enabled() == CSMTRUE)
-                            csmdebug_show_viewer();
+                        //if (csmdebug_debug_enabled() == CSMTRUE)
+                            //csmdebug_show_viewer();
                         
                         there_are_changes = CSMTRUE;
                         break;
@@ -510,6 +515,9 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
         }
         
     } while (there_are_changes == CSMTRUE);
+    
+    //if (csmdebug_debug_enabled() == CSMTRUE)
+        //csmdebug_show_viewer();
 }
 
 

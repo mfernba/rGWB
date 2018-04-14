@@ -422,6 +422,7 @@ static void i_reclassify_on_edges_vertex_neighborhood(
     
     num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
     
+    // Because of the new 'i_join_pendant_loose_ends_by_modifying_topology', it's not necessary for the original cases, at least.
     contains_virtual_on_sector = i_contains_virtual_on_sector(vertex_neighborhood);
     
     for (i = 0; i < num_sectors; i++)
