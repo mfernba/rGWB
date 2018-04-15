@@ -2,6 +2,10 @@
 
 #include "csmfwddecl.hxx"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmsweep_create_solid_from_shape, (
                                 const struct csmshape2d_t *shape2d_top,
                                 double Xo_top, double Yo_top, double Zo_top,
@@ -49,3 +53,7 @@ DLL_RGWB void csmsweep_append_point_to_path(
 
 DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmsweep_create_from_path, (const struct csmsweep_path_t *sweep_path));
 DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmsweep_create_from_path_debug, (const struct csmsweep_path_t *sweep_path, unsigned long start_id_of_new_element));
+
+#ifdef __cplusplus
+}
+#endif

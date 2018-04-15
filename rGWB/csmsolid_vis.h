@@ -8,6 +8,10 @@
 
 #include "csmfwddecl.hxx"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef __STANDALONE_DISTRIBUTABLE
 
 DLL_RGWB void csmsolid_vis_draw_debug_info(struct csmsolid_t *solido, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics);
@@ -29,4 +33,8 @@ DLL_RGWB void csmsolid_vis_datos_mesh(
                         ArrEnum(cplan_tipo_primitiva_t) **tipo_primitivas, ArrPuntero(ArrULong) **inds_caras,
                         ArrPuntero(ArrPunto3D) **lineas_contorno_opc);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

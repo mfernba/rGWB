@@ -8,6 +8,10 @@
 
 #include "csmfwddecl.hxx"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmquadrics_create_torus, (
                         double R, unsigned long no_points_circle_R,
                         double r, unsigned long no_points_circle_r,
@@ -45,3 +49,6 @@ DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmquadrics_create_hyperbolid_one_shee
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
                         unsigned long start_id_of_new_element));
 
+#ifdef __cplusplus
+}
+#endif
