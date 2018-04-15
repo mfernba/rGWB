@@ -9,6 +9,7 @@
 #include "csmoptree.h"
 #include "csmoptree.hxx"
 
+#include "csmid.inl"
 #include "csmsetop.h"
 #include "csmsetop.hxx"
 #include "csmsolid.h"
@@ -68,6 +69,8 @@ union operand_t
 
 struct csmoptree_t
 {
+    unsigned long node_id;
+    
     enum i_type_t type;
     union operand_t operands;
     
@@ -80,11 +83,13 @@ static const enum csmoptree_result_t i_UNEVALUATED_RESULT = (enum csmoptree_resu
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmoptree_t *, i_new, (enum i_type_t type, enum csmoptree_result_t evaluation_result, struct csmsolid_t **solid_result))
+CONSTRUCTOR(static struct csmoptree_t *, i_new, (unsigned long node_id, enum i_type_t type, enum csmoptree_result_t evaluation_result, struct csmsolid_t **solid_result))
 {
     struct csmoptree_t *optree;
     
     optree = MALLOC(struct csmoptree_t);
+    
+    optree->node_id = node_id;
     
     optree->type = type;
     
@@ -140,13 +145,14 @@ void csmoptree_free(struct csmoptree_t **optree)
 
 CONSTRUCTOR(static struct csmoptree_t *, i_new_unevaluated_optree, (enum i_type_t type))
 {
+    unsigned long node_id;
     struct csmsolid_t *solid_result;
     enum csmoptree_result_t evaluation_result;
     
     solid_result = NULL;
     evaluation_result = i_UNEVALUATED_RESULT;
     
-    return i_new(type, evaluation_result, &solid_result);
+    return i_new(node_id, type, evaluation_result, &solid_result);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -459,8 +465,43 @@ static void i_evaluate_node(struct csmoptree_t *node)
         }
             
         default_error();
-            
     }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_assign_node_id(struct csmoptree_t *node, unsigned long *id_new_element)
+{
+    assert_no_null(node);
+    
+    switch (node->type)
+    {
+        case i_TYPE_SOLID:
+            break;
+        
+        case i_TYPE_OPERATION_SETOP_UNION:
+        case i_TYPE_OPERATION_SETOP_DIFFERENCE:
+        case i_TYPE_OPERATION_SETOP_INTERSECTION:
+        
+            i_assign_node_id(node->operands.setop_operation.node1, id_new_element);
+            i_assign_node_id(node->operands.setop_operation.node2, id_new_element);
+            break;
+
+        case i_TYPE_OPERATION_SPLIT_ABOVE:
+        case i_TYPE_OPERATION_SPLIT_BELOW:
+        
+            i_assign_node_id(node->operands.split_plane.node, id_new_element);
+            break;
+            
+        case i_TYPE_OPERATION_GENERAL_TRANSFORM:
+        
+            i_assign_node_id(node->operands.transform.node, id_new_element);
+            break;
+            
+        default_error();
+    }
+    
+    node->node_id = csmid_new_id(id_new_element, NULL);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -472,7 +513,14 @@ enum csmoptree_result_t csmoptree_evaluate(struct csmoptree_t *node, struct csms
     assert_no_null(node);
     
     if (node->evaluation_result == i_UNEVALUATED_RESULT)
+    {
+        unsigned long id_new_element;
+        
+        id_new_element = 0;
+        i_assign_node_id(node, &id_new_element);
+        
         i_evaluate_node(node);
+    }
         
     if (node->solid_result != NULL)
         solid_loc = csmsolid_duplicate(node->solid_result);
