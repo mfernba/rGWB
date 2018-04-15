@@ -511,6 +511,7 @@ enum csmoptree_result_t csmoptree_evaluate(struct csmoptree_t *node, struct csms
     struct csmsolid_t *solid_loc;
     
     assert_no_null(node);
+    assert_no_null(solid);
     
     if (node->evaluation_result == i_UNEVALUATED_RESULT)
     {
