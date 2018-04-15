@@ -149,6 +149,7 @@ CONSTRUCTOR(static struct csmoptree_t *, i_new_unevaluated_optree, (enum i_type_
     struct csmsolid_t *solid_result;
     enum csmoptree_result_t evaluation_result;
     
+    node_id = 0;
     solid_result = NULL;
     evaluation_result = i_UNEVALUATED_RESULT;
     
