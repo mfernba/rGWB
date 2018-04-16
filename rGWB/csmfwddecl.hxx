@@ -16,7 +16,6 @@ extern "C" {
 #endif
 
 #define IS_TRUE(condicion) ((condicion) ? CSMTRUE: CSMFALSE)
-#define ASSIGN_OPTIONAL_VALUE(a, b) if ((a) != NULL) *(a) = (b)
 #define INVERT_BOOLEAN(valor) (((valor) == CSMTRUE) ? CSMFALSE: CSMTRUE)
 
 #include "csmmath.tli"
@@ -31,7 +30,8 @@ extern "C" {
 
 #define CONSTRUCTOR(type, name, params) type name params
 #define UNREFERENCED(x) (void)(x)
-
+#define ASSIGN_OPTIONAL_VALUE(a, b) if ((a) != NULL) *(a) = (b)
+    
 #define DLL_RGWB
 
 struct csmnode_t;

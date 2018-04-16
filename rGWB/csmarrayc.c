@@ -178,6 +178,42 @@ size_t csmarrayc_dontuse_count(const struct csmarrayc_t *array)
 
 // ---------------------------------------------------------------------------------
 
+void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *dato)
+{
+    size_t offset_pos, offset_pos_next, bytes_elems_to_move;
+    
+    i_integrity(array);
+    
+    if (array->capacity == array->no_elems)
+    {
+        size_t new_capacity;
+        char *ptr_data_extended;
+        
+        new_capacity = array->capacity + (3 * array->capacity) / 2;
+        ptr_data_extended = (char *)malloc(new_capacity * array->element_data_size);
+        assert_no_null(ptr_data_extended);
+        
+        //memset(ptr_data_extended, 0xFF, new_capacity * array->element_data_size);
+        memcpy(ptr_data_extended, array->ptr_data, array->no_elems * array->element_data_size);
+        
+        FREE_PP(&array->ptr_data, char);
+        
+        array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_data_extended, char);
+        array->capacity = new_capacity;
+    }
+    
+    offset_pos = pos * array->element_data_size;
+    offset_pos_next = (pos + 1 )* array->element_data_size;
+    bytes_elems_to_move = (array->no_elems - pos) * array->element_data_size;
+    
+    memmove(array->ptr_data + offset_pos_next, array->ptr_data + offset_pos, bytes_elems_to_move);
+    
+    memcpy(array->ptr_data + offset_pos, dato, array->element_data_size);
+    array->no_elems++;
+}
+
+// ---------------------------------------------------------------------------------
+
 void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato)
 {
     i_integrity(array);

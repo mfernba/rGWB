@@ -707,8 +707,8 @@ void csmsetop_join_null_edges(
         csmdebug_set_viewer_parameters(solid_A, solid_B);
         csmdebug_show_viewer();
         
-        //i_print_null_faces(solid_A, set_of_null_faces_A_loc);
-        //i_print_null_faces(solid_B, set_of_null_faces_B_loc);
+        i_print_null_faces(solid_A, set_of_null_faces_A_loc);
+        i_print_null_faces(solid_B, set_of_null_faces_B_loc);
     }
     
     csmsetopcom_postprocess_join_edges(solid_A);

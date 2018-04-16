@@ -164,6 +164,9 @@
 		55EA99241ED38FCD006C063C /* csmsetop_procedges.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55EA99221ED38FCD006C063C /* csmsetop_procedges.inl */; };
 		55F83C6A1FC4A33B009DBBEF /* csmsurface.c in Sources */ = {isa = PBXBuildFile; fileRef = 55F83C681FC4A33B009DBBEF /* csmsurface.c */; };
 		55F83C6B1FC4A33B009DBBEF /* csmsurface.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55F83C691FC4A33B009DBBEF /* csmsurface.inl */; };
+		55FA851720853B7200FB00EE /* csmstmodeler.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FA851520853B7200FB00EE /* csmstmodeler.c */; };
+		55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851620853B7200FB00EE /* csmstmodeler.h */; };
+		55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -396,6 +399,9 @@
 		55EA99221ED38FCD006C063C /* csmsetop_procedges.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsetop_procedges.inl; sourceTree = "<group>"; };
 		55F83C681FC4A33B009DBBEF /* csmsurface.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmsurface.c; sourceTree = "<group>"; };
 		55F83C691FC4A33B009DBBEF /* csmsurface.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmsurface.inl; sourceTree = "<group>"; };
+		55FA851520853B7200FB00EE /* csmstmodeler.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmstmodeler.c; sourceTree = "<group>"; };
+		55FA851620853B7200FB00EE /* csmstmodeler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmstmodeler.h; sourceTree = "<group>"; };
+		55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmstmodeler.hxx; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -745,6 +751,9 @@
 				5589F1EB2083EBE200526923 /* csmoptree.h */,
 				5589F1EE2083EFE400526923 /* csmoptree.hxx */,
 				5589F1EA2083EBE200526923 /* csmoptree.c */,
+				55FA851620853B7200FB00EE /* csmstmodeler.h */,
+				55FA851520853B7200FB00EE /* csmstmodeler.c */,
+				55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */,
 			);
 			name = "Solid building utilities";
 			sourceTree = "<group>";
@@ -825,6 +834,7 @@
 			files = (
 				55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */,
 				55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */,
+				55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */,
 				55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */,
 				5579545D1E5DB074000FC91E /* rGWB.h in Headers */,
 				55308C231F920BCD00353A68 /* csmsolid_debug.inl in Headers */,
@@ -874,6 +884,7 @@
 				557954781E5E0694000FC91E /* csmid.inl in Headers */,
 				55A984411FBE434A009F7516 /* csmArrPoint2D.hxx in Headers */,
 				553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */,
+				55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */,
 				55308C381F921A5600353A68 /* csmtest_array.inl in Headers */,
 				551D475A1FC1CD50004F3B43 /* csmshape2d.h in Headers */,
 				5507A5C71E6624E7008B9F73 /* csmopbas.inl in Headers */,
@@ -1089,6 +1100,7 @@
 				5589F1EC2083EBE200526923 /* csmoptree.c in Sources */,
 				557954811E5E1AA9000FC91E /* csmnode.c in Sources */,
 				5507A6F21E7B450C008B9F73 /* csmhashtb.c in Sources */,
+				55FA851720853B7200FB00EE /* csmstmodeler.c in Sources */,
 				55308C221F920BCD00353A68 /* csmsolid_debug.c in Sources */,
 				5598D6131F24E7F600EA1876 /* csmviewer.mm in Sources */,
 				5507A67C1E73484D008B9F73 /* csmeuler_lmekr.c in Sources */,

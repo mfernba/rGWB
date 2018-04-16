@@ -11,6 +11,8 @@ void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_stru
 
 size_t csmarrayc_dontuse_count(const struct csmarrayc_t *array);
 
+void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *dato);
+
 void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato);
 
 void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *dato);
@@ -64,6 +66,13 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
     (void)((csmArrayStruct(type) *)array == array),\
     csmarrayc_dontuse_count((const struct csmarrayc_t *)array)\
 )
+
+#define csmarrayc_insert_element_st(array, pos, dato, type)\
+(/*lint -save -e505*/\
+    (void)((csmArrayStruct(type) *)array == array),\
+    (void)((struct type *)dato == dato),\
+    csmarrayc_dontuse_insert_element((struct csmarrayc_t *)array, pos, (void *)(&(dato)))\
+)/*lint -restore*/
 
 #define csmarrayc_append_element_st(array, dato, type)\
 (/*lint -save -e505*/\

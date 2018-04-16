@@ -667,10 +667,10 @@ CSMBOOL csmface_is_point_interior_to_face(
 
 CSMBOOL csmface_is_vertex_used_by_hedge_on_face(const struct csmface_t *face, const struct csmvertex_t *vertex)
 {
+    struct csmloop_t *loop_iterator;
+    
     assert_no_null(face);
     
-    struct csmloop_t *loop_iterator;
-            
     loop_iterator = face->floops;
     
     while (loop_iterator != NULL)
