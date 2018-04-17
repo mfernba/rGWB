@@ -229,6 +229,8 @@ struct csmoptree_t *csmoptree_new_node_split_and_get_above(double A, double B, d
     optree->operands.split_plane.C = C;
     optree->operands.split_plane.D = D;
     
+    optree->operands.split_plane.node = ASIGNA_PUNTERO_PP_NO_NULL(node, struct csmoptree_t);
+
     return optree;
 }
                      
