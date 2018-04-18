@@ -1301,13 +1301,15 @@ static CSMBOOL i_is_loop_filled_by_face(struct csmloop_t *loop, struct csmloop_t
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmface_t *face, struct csmloop_t **loop1, struct csmloop_t **loop2)
+static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmface_t **face, struct csmloop_t **loop1, struct csmloop_t **loop2)
 {
     struct csmloop_t *loop1_loc, *loop2_loc;
     CSMBOOL equal_loops;
     struct csmhedge_t *he, *he_next;
     unsigned long no_iters;
     struct csmvertex_t *vertex;
+    
+    assert_no_null(face);
     
     loop1_loc = ASIGNA_PUNTERO_PP_NO_NULL(loop1, struct csmloop_t);
     loop2_loc = ASIGNA_PUNTERO_PP_NO_NULL(loop2, struct csmloop_t);
@@ -1337,10 +1339,13 @@ static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmfa
     csmopbas_delhe(&he, NULL, &he);
     assert(he == NULL);
     
-    csmface_remove_loop(face, &loop1_loc);
+    csmface_remove_loop(*face, &loop1_loc);
     
     if (equal_loops == CSMFALSE)
-        csmface_remove_loop(face, &loop2_loc);
+        csmface_remove_loop(*face, &loop2_loc);
+    
+    if (csmface_floops(*face) == NULL)
+        csmsolid_remove_face(solid, face);
     
     csmsolid_remove_vertex(solid, &vertex);
 }
@@ -1361,8 +1366,10 @@ static void i_remove_hole_filled_by_face(struct csmsolid_t *solid, struct csmfac
     loop2 = csmloop_next(loop1);
     assert(csmloop_next(loop2) == NULL);
     
-    i_remove_loops_erasing_hedges(solid, face, &loop1, &loop2);
-    csmsolid_remove_face(solid, &face);
+    i_remove_loops_erasing_hedges(solid, &face, &loop1, &loop2);
+    
+    if (face != NULL)
+        csmsolid_remove_face(solid, &face);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1412,7 +1419,7 @@ static void i_delete_holes_filled_by_faces(struct csmsolid_t *solid, const struc
                         
                         if (face == opposed_face)
                         {
-                            i_remove_loops_erasing_hedges(solid, face, &loop_iterator, &opposed_loop);
+                            i_remove_loops_erasing_hedges(solid, &face, &loop_iterator, &opposed_loop);
                             break;
                         }
                         else
