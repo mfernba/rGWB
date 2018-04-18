@@ -10,6 +10,7 @@
 #include "csmhedge.inl"
 #include "csmopbas.inl"
 #include "csmsolid.inl"
+#include "csmvertex.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -73,6 +74,17 @@ void csmeuler_lkev(
         csmhedge_set_vertex(he_iterator, vertex_to_retain);
         
         he_iterator = csmhedge_next(csmopbas_mate(he_iterator));
+    }
+    
+    if (csmvertex_hedge(vertex_to_retain) == he2_loc)
+    {
+        struct csmhedge_t *he2_mate_next;
+        
+        he2_mate_next = csmhedge_next(csmopbas_mate(he2_loc));
+        assert(csmhedge_vertex(he2_mate_next) == vertex_to_retain);
+        assert(he2_mate_next != he1_loc);
+        
+        csmvertex_set_hedge(vertex_to_retain, he2_mate_next);
     }
     
     csmopbas_delhe(&he1_loc, he1_prev_opc, he1_next_opc);
