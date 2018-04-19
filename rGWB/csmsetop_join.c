@@ -16,6 +16,7 @@
 #include "csmeuler_lmef.inl"
 #include "csmface.inl"
 #include "csmhedge.inl"
+#include "csmloop.inl"
 #include "csmopbas.inl"
 #include "csmsetopcom.inl"
 #include "csmsolid.inl"
@@ -520,6 +521,44 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
         //csmdebug_show_viewer();
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+static CSMBOOL i_null_face_has_only_two_loops(struct csmface_t *null_face)
+{
+    struct csmloop_t *loop1, *loop2;
+
+    loop1 = csmface_floops(null_face);
+    assert_no_null(loop1);
+
+    loop2 = csmloop_next(loop1);
+    assert_no_null(loop2);
+    
+    if (csmloop_next(loop2) == NULL)
+        return CSMTRUE;
+    else
+        return CSMFALSE;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CSMBOOL i_null_faces_are_correct(csmArrayStruct(csmface_t) *set_of_null_faces)
+{
+    unsigned long i, no_null_faces;
+
+    no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
+
+    for (i = 0; i < no_null_faces; i++)
+    {
+        struct csmface_t *null_face;
+        
+        null_face = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
+
+        if (i_null_face_has_only_two_loops(null_face) == CSMFALSE)
+            return CSMFALSE;
+    }
+
+    return CSMTRUE;
+}
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -761,6 +800,20 @@ void csmsetop_join_null_edges(
          if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
             assert(null_edges_that_cannot_be_matched_A == CSMTRUE || null_edges_that_cannot_be_matched_B == CSMTRUE);
          */
+    }
+    
+    if (did_join_all_null_edges_loc == CSMTRUE)
+    {
+        if (i_null_faces_are_correct(set_of_null_faces_A_loc) == CSMFALSE || i_null_faces_are_correct(set_of_null_faces_B_loc) == CSMFALSE)
+        {
+            did_join_all_null_edges_loc = CSMFALSE;
+
+            csmarrayc_free_st(&set_of_null_faces_A_loc, csmface_t, NULL);
+            set_of_null_faces_A_loc = csmarrayc_new_st_array(0, csmface_t);
+
+            csmarrayc_free_st(&set_of_null_faces_B_loc, csmface_t, NULL);
+            set_of_null_faces_B_loc = csmarrayc_new_st_array(0, csmface_t);
+        }
     }
     
     *set_of_null_faces_A = set_of_null_faces_A_loc;
