@@ -558,4 +558,59 @@ void csmsolid_vis_datos_mesh(
         *lineas_contorno_opc = i_lineas_contorno(solid->sedges);
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+static void i_append_linea_arista(struct csmedge_t *edge, ArrPuntero(ArrPunto3D) *lineas_contorno)
+{
+    struct csmhedge_t *he1, *he2;
+    struct csmface_t *face_he1, *face_he2;
+    double x1, y1, z1, x2, y2, z2;
+
+    csmedge_vertex_coordinates(edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
+    
+    if (csmmath_distance_3D(x1, y1, z1, x2, y2, z2) > 0)
+    {
+        ArrPunto3D *linea_contorno;
+
+        linea_contorno = arr_CreaPunto3D(2);
+        arr_SetPunto3D(linea_contorno, 0, x1, y1, z1);
+        arr_SetPunto3D(linea_contorno, 1, x2, y2, z2);
+
+        arr_AppendPunteroTD(lineas_contorno, linea_contorno, ArrPunto3D);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static ArrPuntero(ArrPunto3D) *, i_lineas_aristas, (struct csmhashtb(csmedge_t) *sedges))
+{
+    ArrPuntero(ArrPunto3D) *lineas_contorno;
+    struct csmhashtb_iterator(csmedge_t) *iterator;
+    
+    lineas_contorno = arr_CreaPunteroTD(0, ArrPunto3D);
+    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    
+    while (csmhashtb_has_next(iterator, csmedge_t) == CSMTRUE)
+    {
+        unsigned long edge_id;
+        struct csmedge_t *edge;
+        
+        csmhashtb_next_pair(iterator, &edge_id, &edge, csmedge_t);
+        i_append_linea_arista(edge, lineas_contorno);
+    }
+    
+    csmhashtb_free_iterator(&iterator, csmedge_t);
+
+    return lineas_contorno;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+ArrPuntero(ArrPunto3D) *csmsolid_vis_datos_lineas(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+
+    csmsolid_redo_geometric_generated_data(solid);
+    return i_lineas_aristas(solid->sedges);
+}
 #endif
