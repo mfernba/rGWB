@@ -29,6 +29,7 @@
 #include "csmeuler_lkemr.inl"
 #include "csmeuler_lkfmrh.inl"
 #include "csmeuler_lmfkrh.inl"
+#include "csmsimplifysolid.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmtolerance.inl"
@@ -501,6 +502,8 @@ struct csmsolid_t *csmsweep_create_solid_from_shape(
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
 
+    csmsimplifysolid_simplify(solid);
+    
     return solid;
 }
 
@@ -537,6 +540,8 @@ struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
 
+    csmsimplifysolid_simplify(solid);
+    
     return solid;
 }
 
@@ -993,6 +998,8 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
         csmsubdvfaces_subdivide_faces(solid);
     
     csmsolid_redo_geometric_face_data(solid);
+    csmsimplifysolid_simplify(solid);
+    
     csmtolerance_free(&tolerances);
 
     return solid;

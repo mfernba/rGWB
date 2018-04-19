@@ -4935,6 +4935,190 @@ static void i_test_difference3(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_difference8(void)
+{
+    struct csmshape2d_t *shape0, *shape1, *shape2;
+    struct csmsolid_t *solid0, *solid1, *solid2;
+    struct csmsolid_t *solid_res;
+    
+    i_set_output_debug_file("test_difference_8");
+
+    {
+        csmArrPoint2D *points;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, 0., 0.0);
+        csmArrPoint2D_append(points, 8., 0.0);
+        csmArrPoint2D_append(points, 8., 0.1);
+        csmArrPoint2D_append(points, 0., 0.1);
+        
+        shape0 = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape0, &points);
+    }
+    
+    solid0 = csmsweep_create_solid_from_shape_debug(
+                        shape0,
+                        0., 0., 0.8, 1., 0., 0., 0., 1., 0.,
+                        shape0,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    {
+        csmArrPoint2D *points;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, 0., 0.1);
+        csmArrPoint2D_append(points, 5., 0.1);
+        csmArrPoint2D_append(points, 7., 0.1);
+        csmArrPoint2D_append(points, 7., 0.0);
+        csmArrPoint2D_append(points, 10., 0.0);
+        csmArrPoint2D_append(points, 10., 0.5);
+        csmArrPoint2D_append(points,  0., 0.5);
+        
+        shape1 = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape1, &points);
+        
+        solid1 = csmsweep_create_solid_from_shape_debug(
+                        shape1,
+                        0., 0., 0.25, 1., 0., 0., 0., 1., 0.,
+                        shape1,
+                        0., 0., -0.25, 1., 0., 0., 0., 1., 0.,
+                        0);
+    }
+
+    {
+        csmArrPoint2D *points;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, 0., 0.0);
+        csmArrPoint2D_append(points, 8., 0.0);
+        csmArrPoint2D_append(points, 10., 0.);
+        csmArrPoint2D_append(points, 10., 0.5);
+        csmArrPoint2D_append(points,  0., 0.5);
+        
+        shape2 = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape2, &points);
+        
+        solid2 = csmsweep_create_solid_from_shape_debug(
+                        shape2,
+                        0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                        shape2,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    }
+
+    //csmdebug_set_enabled_by_code(CSMFALSE);
+    
+    assert(csmsetop_difference_A_minus_B(solid2, solid0, &solid2) == CSMSETOP_OPRESULT_OK);
+
+    /*{
+        csmArrPoint2D *points;
+        struct csmsolid_t *solid3;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, 5.25, 0.0);
+        csmArrPoint2D_append(points, 6.25, 0.0);
+        csmArrPoint2D_append(points, 6.25, 0.15);
+        csmArrPoint2D_append(points, 5.25, 0.15);
+        
+        shape2 = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape2, &points);
+        
+        solid3 = csmsweep_create_solid_from_shape_debug(
+                        shape2,
+                        0., 0., 0.25, 1., 0., 0., 0., 1., 0.,
+                        shape2,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+        
+        assert(csmsetop_difference_A_minus_B(solid1, solid3, &solid1) == CSMSETOP_OPRESULT_OK);
+    }*/
+    
+    assert(csmsetop_difference_A_minus_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+
+    csmdebug_set_enabled_by_code(CSMTRUE);
+    csmdebug_print_debug_info("*** solid2 - solid1");
+    
+    assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer(); 
+    
+    csmshape2d_free(&shape0);
+    csmsolid_free(&solid0);
+    csmshape2d_free(&shape1);
+    csmsolid_free(&solid1);
+    csmshape2d_free(&shape2);
+    csmsolid_free(&solid2);
+    csmsolid_free(&solid_res);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_difference8_redux(void)
+{
+    struct csmshape2d_t *shape1, *shape2;
+    struct csmsolid_t *solid1, *solid2;
+    struct csmsolid_t *solid_res;
+    
+    i_set_output_debug_file("test_difference_8_redux");
+
+    {
+        csmArrPoint2D *points;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, 0., 0.0);
+        csmArrPoint2D_append(points, 5., 0.0);
+        csmArrPoint2D_append(points, 7., 0.0);
+        csmArrPoint2D_append(points, 10., 0.0);
+        csmArrPoint2D_append(points, 10., 0.5);
+        csmArrPoint2D_append(points,  0., 0.5);
+        
+        shape1 = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape1, &points);
+        
+        solid1 = csmsweep_create_solid_from_shape_debug(
+                        shape1,
+                        0., 0., 0.25, 1., 0., 0., 0., 1., 0.,
+                        shape1,
+                        0., 0., -0.25, 1., 0., 0., 0., 1., 0.,
+                        0);
+    }
+
+    {
+        csmArrPoint2D *points;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, 0., 0.0);
+        csmArrPoint2D_append(points, 10., 0.);
+        csmArrPoint2D_append(points, 10., 0.5);
+        csmArrPoint2D_append(points,  0., 0.5);
+        
+        shape2 = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape2, &points);
+        
+        solid2 = csmsweep_create_solid_from_shape_debug(
+                        shape2,
+                        0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                        shape2,
+                        0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    }
+
+    assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+    
+    csmshape2d_free(&shape1);
+    csmsolid_free(&solid1);
+    csmshape2d_free(&shape2);
+    csmsolid_free(&solid2);
+    csmsolid_free(&solid_res);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -4943,7 +5127,13 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    i_test_sphere5();
+    i_test_cilindro4(viewer);
+    //i_test_union_solidos1(viewer);
+    //i_test_sweep_path6(CSMFALSE);
+    //i_test_difference8();
+    //i_test_difference8_redux();
+    //return;
+    //i_test_sphere5();
     //i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
 
     process_all_test = CSMTRUE;
@@ -5042,6 +5232,8 @@ void csmtest_test(void)
         i_test_cilindro1(viewer);
         i_test_cilindro2(viewer);
         i_test_cilindro3(viewer);
+        //i_test_difference8();
+        //i_test_difference8_redux();
         
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         {

@@ -16,6 +16,8 @@ void csmdebug_set_treat_improper_solid_operations_as_errors(CSMBOOL value);
     
 CSMBOOL csmdebug_get_treat_improper_solid_operations_as_errors(void);
 
+void csmdebug_set_debug_screen(CSMBOOL value);
+    
 void csmdebug_configure_for_fast_testing(void);
 
 void csmdebug_set_enabled_by_code(CSMBOOL enabled);

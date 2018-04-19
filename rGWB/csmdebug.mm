@@ -59,9 +59,9 @@ static i_FPtr_func_set_parameters g_func_set_viewer_parameters = NULL;
 static i_FPtr_func_set_parameters g_func_set_viewer_results = NULL;
 
 static int i_DEBUG_IS_DISABLED_BY_CODE = 0;
-static int i_DEBUG_SCREEN = 1;
+static int i_DEBUG_SCREEN = 0;
 static int i_DEBUG_VISUAL = 1;
-static int i_DEBUG_FILE = 1;
+static int i_DEBUG_FILE = 0;
 
 static int i_DEBUG_PRINT_SOLID_BLOCKED = 0;
 
@@ -95,6 +95,13 @@ void csmdebug_set_treat_improper_solid_operations_as_errors(CSMBOOL value)
 CSMBOOL csmdebug_get_treat_improper_solid_operations_as_errors(void)
 {
     return i_TREAT_IMPROPER_SOLID_OPERATIONS_AS_ERRORS;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_set_debug_screen(CSMBOOL value)
+{
+    i_DEBUG_SCREEN = value;
 }
 
 // --------------------------------------------------------------------------------

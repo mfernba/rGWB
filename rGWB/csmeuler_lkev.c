@@ -6,10 +6,12 @@
  
 #include "csmeuler_lkev.inl"
 
+#include "csmdebug.inl"
 #include "csmedge.tli"
 #include "csmhedge.inl"
 #include "csmopbas.inl"
 #include "csmsolid.inl"
+#include "csmsolid_debug.inl"
 #include "csmvertex.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
@@ -28,6 +30,7 @@ void csmeuler_lkev(
                 struct csmhedge_t **he2_prev_opc, struct csmhedge_t **he2_next_opc)
 {
     struct csmhedge_t *he1_loc, *he2_loc;
+    struct csmhedge_t *he_vertex_to_retain;
     struct csmsolid_t *hes_solid;
     struct csmvertex_t *vertex_to_retain, *vertex_to_delete;
     register struct csmhedge_t *he_iterator;
@@ -64,6 +67,7 @@ void csmeuler_lkev(
     
     he_iterator = csmhedge_next(he2_loc);
     num_iteraciones = 0;
+    he_vertex_to_retain = NULL;
     
     while (he_iterator != he1_loc)
     {
@@ -73,23 +77,37 @@ void csmeuler_lkev(
         //assert(csmhedge_vertex(he_iterator) == vertex_to_delete);
         csmhedge_set_vertex(he_iterator, vertex_to_retain);
         
+        if (he_vertex_to_retain == NULL)
+            he_vertex_to_retain = he_iterator;
+        
         he_iterator = csmhedge_next(csmopbas_mate(he_iterator));
     }
     
     if (csmvertex_hedge(vertex_to_retain) == he2_loc)
     {
-        struct csmhedge_t *he2_mate_next;
+        assert(he_vertex_to_retain != he2_loc);
         
-        he2_mate_next = csmhedge_next(csmopbas_mate(he2_loc));
-        assert(csmhedge_vertex(he2_mate_next) == vertex_to_retain);
-        assert(he2_mate_next != he1_loc);
+        if (he_vertex_to_retain == NULL)
+        {
+            csmdebug_set_debug_screen(CSMTRUE);
+            csmsolid_debug_print_debug(hes_solid, CSMTRUE);
+        }
         
-        csmvertex_set_hedge(vertex_to_retain, he2_mate_next);
+        assert(csmhedge_vertex(he_vertex_to_retain) == vertex_to_retain);
+        
+        csmvertex_set_hedge(vertex_to_retain, he_vertex_to_retain);
     }
     
     csmopbas_delhe(&he1_loc, he1_prev_opc, he1_next_opc);
     csmopbas_delhe(&he2_loc, he2_prev_opc, he2_next_opc);
     csmsolid_remove_edge(hes_solid, &edge);
+    
+    if (csmvertex_hedge(vertex_to_retain) == NULL)
+    {
+        double a;
+        
+        a = 0.;
+    }
     
     if (delete_vertex == CSMTRUE)
         csmsolid_remove_vertex(hes_solid, &vertex_to_delete);

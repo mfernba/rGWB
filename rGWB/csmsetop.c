@@ -21,6 +21,7 @@
 #include "csmsetop_vtxfacc.inl"
 #include "csmsetop_vtxvtx.inl"
 #include "csmsetopcom.inl"
+#include "csmsimplifysolid.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmsolid_debug.inl"
@@ -427,6 +428,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     
     csmsolid_clear_algorithm_data(result);
     csmsolid_redo_geometric_face_data(result);
+    csmsimplifysolid_simplify(result);
+    
     csmdebug_set_viewer_results(result, NULL);
     
     return result;

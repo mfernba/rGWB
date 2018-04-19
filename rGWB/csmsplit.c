@@ -17,6 +17,7 @@
 #include "csmmath.tli"
 #include "csmopbas.inl"
 #include "csmsetopcom.inl"
+#include "csmsimplifysolid.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmsolid.tli"
@@ -1048,6 +1049,12 @@ enum csmsplit_opresult_t csmsplit_split_solid(
             if (volume_above > 1.e-6 || volume_below > 1.e-6)
             {
                 operation_result = CSMSPLIT_OPRESULT_OK;
+            
+                if (volume_above > 1.e-6)
+                    csmsimplifysolid_simplify(solid_above_loc);
+                
+                if (volume_below > 1.e-6)
+                    csmsimplifysolid_simplify(solid_below_loc);
             }
             else
             {
