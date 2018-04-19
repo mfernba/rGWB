@@ -9,6 +9,7 @@
 #include "csmloop.inl"
 #include "csmmath.inl"
 #include "csmnode.inl"
+#include "csmtolerance.inl"
 #include "csmvertex.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
@@ -178,6 +179,58 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
 
 // ------------------------------------------------------------------------------------------
 
+static CSMBOOL i_is_null_edge(struct csmhedge_t *he, const struct csmtolerance_t *tolerances)
+{
+    struct csmvertex_t *vertex, *vertex_nxt;
+    
+    vertex = csmhedge_vertex(he);
+    vertex_nxt = csmhedge_vertex(csmhedge_next(he));
+    
+    return csmvertex_equal_coords(vertex, vertex_nxt, csmtolerance_equal_coords(tolerances));
+}
+
+// ------------------------------------------------------------------------------------------
+
+static struct csmhedge_t *i_get_prev_no_null_hedge(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
+{
+    struct csmhedge_t *hedge_prev;
+
+    hedge_prev = csmhedge_prev(hedge);
+
+    while (i_is_null_edge(hedge_prev, tolerances) == CSMTRUE)
+        hedge_prev = csmhedge_prev(hedge_prev);
+
+    return hedge_prev;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CSMBOOL i_hedges_equal_coords(struct csmhedge_t *he1, struct csmhedge_t *he2, const struct csmtolerance_t *tolerances)
+{
+    struct csmvertex_t *vertex, *vertex_nxt;
+    
+    vertex = csmhedge_vertex(he1);
+    vertex_nxt = csmhedge_vertex(he2);
+    
+    return csmvertex_equal_coords(vertex, vertex_nxt, csmtolerance_equal_coords(tolerances));
+}
+
+// ------------------------------------------------------------------------------------------
+
+static struct csmhedge_t *i_get_next_no_null_hedge(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
+{
+    struct csmhedge_t *hedge_next;
+
+    hedge_next = csmhedge_next(hedge);
+
+    while (i_hedges_equal_coords(hedge, hedge_next, tolerances) == CSMTRUE)
+        hedge_next = csmhedge_next(hedge_next);
+
+    return hedge_next;
+}
+
+// ------------------------------------------------------------------------------------------
+
 CSMBOOL csmopbas_is_wide_hedge(
                         struct csmhedge_t *hedge,
                         const struct csmtolerance_t *tolerances,
@@ -194,11 +247,11 @@ CSMBOOL csmopbas_is_wide_hedge(
 
     vertex = csmhedge_vertex(hedge);
     
-    hedge_prev = csmhedge_prev(hedge);
+    hedge_prev = i_get_prev_no_null_hedge(hedge, tolerances);
     vertex_prev = csmhedge_vertex(hedge_prev);
     csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_prev, &Ux_to_prev, &Uy_to_prev, &Uz_to_prev);
     
-    hedge_next = csmhedge_next(hedge);
+    hedge_next = i_get_next_no_null_hedge(hedge, tolerances);
     vertex_next = csmhedge_vertex(hedge_next);
     csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_next, &Ux_to_next, &Uy_to_next, &Uz_to_next);
     
@@ -248,6 +301,7 @@ CSMBOOL csmopbas_is_wide_hedge(
     
     return is_wide;
 }
+
 
 
 
