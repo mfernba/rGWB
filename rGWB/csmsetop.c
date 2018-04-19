@@ -723,9 +723,14 @@ static enum csmsetop_opresult_t i_set_operation(
         switch (result)
         {
             case CSMSETOP_OPRESULT_OK:
-            case CSMSETOP_OPRESULT_NON_MANIFOLD_OPERAND:
                 
                 apply_perturbation = CSMFALSE;
+                break;
+                
+            case CSMSETOP_OPRESULT_NON_MANIFOLD_OPERAND:
+                
+                if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
+                    apply_perturbation = CSMFALSE;
                 break;
                 
             case CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS:

@@ -5127,7 +5127,9 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    i_test_cilindro4(viewer);
+    i_test_sweep_path6(CSMFALSE);
+    
+    //i_test_cilindro4(viewer);
     //i_test_union_solidos1(viewer);
     //i_test_sweep_path6(CSMFALSE);
     //i_test_difference8();
