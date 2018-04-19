@@ -77,7 +77,7 @@ void csmeuler_lkev(
         //assert(csmhedge_vertex(he_iterator) == vertex_to_delete);
         csmhedge_set_vertex(he_iterator, vertex_to_retain);
         
-        if (he_vertex_to_retain == NULL)
+        if (he_vertex_to_retain == NULL && he_iterator != he2_loc)
             he_vertex_to_retain = he_iterator;
         
         he_iterator = csmhedge_next(csmopbas_mate(he_iterator));
@@ -87,13 +87,8 @@ void csmeuler_lkev(
     {
         assert(he_vertex_to_retain != he2_loc);
         
-        if (he_vertex_to_retain == NULL)
-        {
-            csmdebug_set_debug_screen(CSMTRUE);
-            csmsolid_debug_print_debug(hes_solid, CSMTRUE);
-        }
-        
-        assert(csmhedge_vertex(he_vertex_to_retain) == vertex_to_retain);
+        if (he_vertex_to_retain != NULL)
+            assert(csmhedge_vertex(he_vertex_to_retain) == vertex_to_retain);
         
         csmvertex_set_hedge(vertex_to_retain, he_vertex_to_retain);
     }
@@ -101,13 +96,6 @@ void csmeuler_lkev(
     csmopbas_delhe(&he1_loc, he1_prev_opc, he1_next_opc);
     csmopbas_delhe(&he2_loc, he2_prev_opc, he2_next_opc);
     csmsolid_remove_edge(hes_solid, &edge);
-    
-    if (csmvertex_hedge(vertex_to_retain) == NULL)
-    {
-        double a;
-        
-        a = 0.;
-    }
     
     if (delete_vertex == CSMTRUE)
         csmsolid_remove_vertex(hes_solid, &vertex_to_delete);
