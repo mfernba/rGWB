@@ -5220,7 +5220,7 @@ static void i_test_facetedbrep1(struct csmviewer_t *viewer)
     result = csmfacbrep2solid_build(builder, &solid);
     assert(result == CSMFACBREP2SOLID_RESULT_OK);
     
-    csmviewer_set_results(viewer, solid, NULL);
+    csmviewer_set_parameters(viewer, solid, NULL);
     csmviewer_show(viewer);
     
     csmfacbrep2solid_free(&builder);

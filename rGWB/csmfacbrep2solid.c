@@ -800,6 +800,22 @@ static void i_generate_loop_solid_loop(
         
         i_generate_loop_point_solid_hedge(loop_point, loop->sloop, id_new_element, vertexs);
     }
+    
+    for (i = 0; i < no_points; i++)
+    {
+        struct i_loop_point_t *loop_point, *loop_point_next;
+        
+        loop_point = csmarrayc_get_st(loop->points, i, i_loop_point_t);
+        assert_no_null(loop_point);
+        assert_no_null(loop_point->shedge);
+        
+        loop_point_next = csmarrayc_get_st(loop->points, (i + 1) % no_points , i_loop_point_t);
+        assert_no_null(loop_point_next);
+        assert_no_null(loop_point_next->shedge);
+        
+        csmhedge_set_next(loop_point->shedge, loop_point_next->shedge);
+        csmhedge_set_prev(loop_point_next->shedge, loop_point->shedge);
+    }
 }
 
 // ------------------------------------------------------------------------------------------
