@@ -156,7 +156,8 @@ static void i_free_loop(struct csmfacbrep2solid_loop_t **loop)
 
 CONSTRUCTOR(static struct csmfacbrep2solid_face_t *, i_new_face, (
                         struct csmfacbrep2solid_loop_t **outer_loop,
-                        csmArrayStruct(csmfacbrep2solid_loop_t) **inner_loops))
+                        csmArrayStruct(csmfacbrep2solid_loop_t) **inner_loops,
+                        struct csmface_t *sface))
 {
     struct csmfacbrep2solid_face_t *face;
     
@@ -164,6 +165,8 @@ CONSTRUCTOR(static struct csmfacbrep2solid_face_t *, i_new_face, (
     
     face->outer_loop = ASIGNA_PUNTERO_PP(outer_loop, struct csmfacbrep2solid_loop_t);
     face->inner_loops = ASIGNA_PUNTERO_PP(inner_loops, csmArrayStruct(csmfacbrep2solid_loop_t));
+    
+    face->sface = sface;
     
     return face;
 }
@@ -269,11 +272,13 @@ struct csmfacbrep2solid_face_t *csmfacbrep2solid_new_face(void)
 {
     struct csmfacbrep2solid_loop_t *outer_loop;
     csmArrayStruct(csmfacbrep2solid_loop_t) *inner_loops;
+    struct csmface_t *sface;
     
     outer_loop = NULL;
     inner_loops = csmarrayc_new_st_array(0, csmfacbrep2solid_loop_t);
+    sface = NULL;
     
-    return i_new_face(&outer_loop, &inner_loops);
+    return i_new_face(&outer_loop, &inner_loops, sface);
 }
 
 // ------------------------------------------------------------------------------------------

@@ -785,8 +785,6 @@ void csmloop_geometric_center_3d(struct csmloop_t *loop, double *x, double *y, d
 struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop)
 {
     assert_no_null(loop);
-    assert_no_null(loop->ledge);
-    
     return loop->ledge;
 }
 
