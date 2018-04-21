@@ -12,11 +12,13 @@
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
+#include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmhedge.tli"
 #include "csmloop.inl"
 #include "csmmath.inl"
 #include "csmnode.inl"
+#include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmsimplifysolid.inl"
 #include "csmvertex.inl"
@@ -65,6 +67,8 @@ struct csmfacbrep2solid_face_t
 struct i_vertex_t
 {
     double x, y, z;
+    
+    unsigned long no_uses;
     struct csmvertex_t *svertex;
 };
 
@@ -188,7 +192,10 @@ static void i_free_face(struct csmfacbrep2solid_face_t **face)
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct i_vertex_t *, i_new_vertex, (double x, double y, double z))
+CONSTRUCTOR(static struct i_vertex_t *, i_new_vertex, (
+                        double x, double y, double z,
+                        unsigned long no_uses,
+                        struct csmvertex_t *svertex))
 {
     struct i_vertex_t *vertex;
     
@@ -197,6 +204,9 @@ CONSTRUCTOR(static struct i_vertex_t *, i_new_vertex, (double x, double y, doubl
     vertex->x = x;
     vertex->y = y;
     vertex->z = z;
+    
+    vertex->no_uses = no_uses;
+    vertex->svertex = svertex;
     
     return vertex;
 }
@@ -300,8 +310,6 @@ void csmfacbrep2solid_append_inner_loop_to_face(struct csmfacbrep2solid_face_t *
     assert_no_null(face);
     
     inner_loop_loc = ASIGNA_PUNTERO_PP_NO_NULL(inner_loop, struct csmfacbrep2solid_loop_t);
-    csmfacbrep2solid_reverse(face->outer_loop);
-    
     csmarrayc_append_element_st(face->inner_loops, inner_loop_loc, csmfacbrep2solid_loop_t);
 }
 
@@ -358,14 +366,15 @@ static unsigned long i_get_vertex_idx_for_point(
     
     for (i = 0; i < no_points; i++)
     {
-        const struct i_vertex_t *vertex;
+        struct i_vertex_t *vertex;
         
-        vertex = csmarrayc_get_const_st(vertexs, i, i_vertex_t);
+        vertex = csmarrayc_get_st(vertexs, i, i_vertex_t);
         assert_no_null(vertex);
         
         if (csmmath_equal_coords(x, y, z, vertex->x, vertex->y, vertex->z, tolerance) == CSMTRUE)
         {
             vertex_idx = i;
+            vertex->no_uses++;
             break;
         }
     }
@@ -373,8 +382,13 @@ static unsigned long i_get_vertex_idx_for_point(
     if (vertex_idx == ULONG_MAX)
     {
         struct i_vertex_t *vertex;
+        unsigned long no_uses;
+        struct csmvertex_t *svertex;
         
-        vertex = i_new_vertex(x, y, z);
+        no_uses = 1;
+        svertex = NULL;
+        
+        vertex = i_new_vertex(x, y, z, no_uses, svertex);
         csmarrayc_append_element_st(vertexs, vertex, i_vertex_t);
         
         vertex_idx = csmarrayc_count_st(vertexs, i_vertex_t) - 1;
@@ -925,6 +939,16 @@ static CSMBOOL i_is_incomplete_edge(const struct i_edge_t *edge, const struct i_
 
 // ------------------------------------------------------------------------------------------
 
+static CSMBOOL i_is_non_manifold_vertex(const struct i_vertex_t *vertex, const struct i_null_value_t *null_value)
+{
+    assert_no_null(vertex);
+    assert(null_value == NULL);
+    
+    return IS_TRUE(vertex->no_uses < 3);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_reverse_face_loop_because_csm_outer_loop_points_to_interior(struct csmfacbrep2solid_loop_t *loop)
 {
     assert_no_null(loop);
@@ -973,6 +997,63 @@ static void i_reverse_faces_loops_because_csm_outer_loop_points_to_interior(csmA
 
 // ------------------------------------------------------------------------------------------
 
+static CSMBOOL i_check_inner_loop_orientation(struct csmsolid_t *solid)
+{
+    CSMBOOL inner_loop_orientation_correct;
+    struct csmhashtb_iterator(csmface_t) *face_iterator_i;
+    
+    inner_loop_orientation_correct = CSMTRUE;
+    face_iterator_i = csmsolid_face_iterator(solid);
+        
+    while (csmhashtb_has_next(face_iterator_i, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+    
+        csmhashtb_next_pair(face_iterator_i, NULL, &face, csmface_t);
+        
+        if (csmface_has_holes(face) == CSMTRUE)
+        {
+            struct csmloop_t *face_flout, *face_floops, *loop_iterator;
+    
+            face_flout = csmface_flout(face);
+            face_floops = csmface_floops(face);
+            loop_iterator = face_floops;
+        
+            do
+            {
+                struct csmloop_t *next_loop;
+                
+                next_loop = csmloop_next(loop_iterator);
+                
+                if (loop_iterator != face_flout)
+                {
+                    double loop_area;
+                    
+                    loop_area = csmface_loop_area_in_face(face, loop_iterator);
+                    
+                    if (loop_area > 0.)
+                    {
+                        inner_loop_orientation_correct = CSMFALSE;
+                        break;
+                    }
+                }
+                
+                loop_iterator = next_loop;
+                
+            } while (loop_iterator != NULL);
+            
+            if (inner_loop_orientation_correct == CSMFALSE)
+                break;
+        }
+    }
+        
+    csmhashtb_free_iterator(&face_iterator_i, csmface_t);
+    
+    return inner_loop_orientation_correct;
+}
+
+// ------------------------------------------------------------------------------------------
+
 enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t *builder, struct csmsolid_t **solid)
 {
     enum csmfacbrep2solid_result_t result;
@@ -1003,7 +1084,8 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
         }
         else
         {
-            if (csmarrayc_contains_element_st(edges, i_edge_t, NULL, struct i_null_value_t, i_is_incomplete_edge, NULL) == CSMTRUE)
+            if (csmarrayc_contains_element_st(edges, i_edge_t, NULL, struct i_null_value_t, i_is_incomplete_edge, NULL) == CSMTRUE
+                    || csmarrayc_contains_element_st(builder->vertexs, i_vertex_t, NULL, struct i_null_value_t, i_is_non_manifold_vertex, NULL) == CSMTRUE)
             {
                 result = CSMFACBREP2SOLID_RESULT_MALFORMED_FACETED_BREP;
                 solid_loc = NULL;
@@ -1012,7 +1094,6 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
             {
                 unsigned long i;
                 
-                result = CSMFACBREP2SOLID_RESULT_OK;
                 solid_loc = csmsolid_crea_vacio(builder->id_new_element);
                 
                 i_generate_solid_vertexs(builder->vertexs, solid_loc);
@@ -1028,6 +1109,16 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
                 i_generate_solid_hedges(edges, builder->faces, &builder->id_new_element, solid_loc);
                 
                 csmsimplifysolid_simplify(solid_loc);
+                
+                if (i_check_inner_loop_orientation(solid_loc) == CSMTRUE)
+                {
+                    result = CSMFACBREP2SOLID_RESULT_OK;
+                }
+                else
+                {
+                    result = CSMFACBREP2SOLID_RESULT_INCONSISTENT_INNER_LOOP_ORIENTATION;
+                    csmsolid_free(&solid_loc);
+                }
             }
             
             csmarrayc_free_st(&edges, i_edge_t, i_free_edge);

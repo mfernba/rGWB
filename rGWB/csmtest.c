@@ -5222,6 +5222,179 @@ static void i_test_facetedbrep1(struct csmviewer_t *viewer)
     
     csmviewer_set_parameters(viewer, solid, NULL);
     csmviewer_show(viewer);
+
+    csmviewer_set_results(viewer, solid, NULL);
+    csmviewer_show(viewer);
+    
+    csmfacbrep2solid_free(&builder);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_append_face_with_void_to_faceted_brep_face(
+                        struct csmfacbrep2solid_t *builder,
+                        csmArrPoint3D **loop_points, csmArrPoint3D **void_points)
+{
+    struct csmfacbrep2solid_face_t *face;
+    
+    face = csmfacbrep2solid_new_face();
+    i_append_loop_to_faceted_brep_face(face, loop_points, CSMTRUE);
+    i_append_loop_to_faceted_brep_face(face, void_points, CSMFALSE);
+    
+    csmfacbrep2solid_append_face(builder, &face);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_facetedbrep2(struct csmviewer_t *viewer, CSMBOOL test_error)
+{
+    struct csmfacbrep2solid_t *builder;
+    csmArrPoint3D *loop_points, *void_points;
+    enum csmfacbrep2solid_result_t result;
+    struct csmsolid_t *solid;
+    
+    builder = csmfacbrep2solid_new(1.e-6, CSMTRUE);
+    
+    {
+        loop_points = csmArrPoint3D_new(0);
+        csmArrPoint3D_append(loop_points, 0., 0., 0.);
+        csmArrPoint3D_append(loop_points, 1., 0., 0.);
+        csmArrPoint3D_append(loop_points, 1., 0., 1.);
+        csmArrPoint3D_append(loop_points, 0., 0., 1.);
+        
+        void_points = csmArrPoint3D_new(0);
+        csmArrPoint3D_append(void_points, 0.25, 0., 0.25);
+        csmArrPoint3D_append(void_points, 0.75, 0., 0.25);
+        csmArrPoint3D_append(void_points, 0.75, 0., 0.75);
+        csmArrPoint3D_append(void_points, 0.25, 0., 0.75);
+        csmArrPoint3D_invert(void_points);
+        
+        i_append_face_with_void_to_faceted_brep_face(builder, &loop_points, &void_points);
+    }
+    
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 1., 0., 0.);
+    csmArrPoint3D_append(loop_points, 1., 1., 0.);
+    csmArrPoint3D_append(loop_points, 1., 1., 1.);
+    csmArrPoint3D_append(loop_points, 1., 0., 1.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+
+    {
+        loop_points = csmArrPoint3D_new(0);
+        csmArrPoint3D_append(loop_points, 1., 1., 0.);
+        csmArrPoint3D_append(loop_points, 0., 1., 0.);
+        csmArrPoint3D_append(loop_points, 0., 1., 1.);
+        csmArrPoint3D_append(loop_points, 1., 1., 1.);
+        
+        void_points = csmArrPoint3D_new(0);
+        csmArrPoint3D_append(void_points, 0.25, 1., 0.25);
+        csmArrPoint3D_append(void_points, 0.75, 1., 0.25);
+        csmArrPoint3D_append(void_points, 0.75, 1., 0.75);
+        csmArrPoint3D_append(void_points, 0.25, 1., 0.75);
+        //csmArrPoint3D_invert(void_points);
+        
+        i_append_face_with_void_to_faceted_brep_face(builder, &loop_points, &void_points);
+    }
+
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 0., 0., 0.);
+    csmArrPoint3D_append(loop_points, 0., 0., 1.);
+    csmArrPoint3D_append(loop_points, 0., 1., 1.);
+    csmArrPoint3D_append(loop_points, 0., 1., 0.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 0., 0., 0.);
+    csmArrPoint3D_append(loop_points, 0., 1., 0.);
+    csmArrPoint3D_append(loop_points, 1., 1., 0.);
+    csmArrPoint3D_append(loop_points, 1., 0., 0.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+    
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 0., 0., 1.);
+    csmArrPoint3D_append(loop_points, 1., 0., 1.);
+    csmArrPoint3D_append(loop_points, 1., 1., 1.);
+    csmArrPoint3D_append(loop_points, 0., 1., 1.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+    
+    if (test_error == CSMTRUE)
+    {
+        result = csmfacbrep2solid_build(builder, &solid);
+        assert(result == CSMFACBREP2SOLID_RESULT_MALFORMED_FACETED_BREP);
+    }
+    else
+    {
+        {
+            loop_points = csmArrPoint3D_new(0);
+            csmArrPoint3D_append(loop_points, 0.75, 0., 0.25);
+            csmArrPoint3D_append(loop_points, 0.75, 1., 0.25);
+            csmArrPoint3D_append(loop_points, 0.75, 1., 0.75);
+            csmArrPoint3D_append(loop_points, 0.75, 0., 0.75);
+            csmArrPoint3D_invert(loop_points);
+            
+            i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+        }
+
+        {
+            loop_points = csmArrPoint3D_new(0);
+            csmArrPoint3D_append(loop_points, 0.25, 0., 0.25);
+            csmArrPoint3D_append(loop_points, 0.25, 1., 0.25);
+            csmArrPoint3D_append(loop_points, 0.25, 1., 0.75);
+            csmArrPoint3D_append(loop_points, 0.25, 0., 0.75);
+            
+            i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+        }
+        
+        {
+            loop_points = csmArrPoint3D_new(0);
+            csmArrPoint3D_append(loop_points, 0.25, 0., 0.75);
+            csmArrPoint3D_append(loop_points, 0.75, 0., 0.75);
+            csmArrPoint3D_append(loop_points, 0.75, 1., 0.75);
+            csmArrPoint3D_append(loop_points, 0.25, 1., 0.75);
+            csmArrPoint3D_invert(loop_points);
+            
+            i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+        }
+
+        {
+            loop_points = csmArrPoint3D_new(0);
+            csmArrPoint3D_append(loop_points, 0.25, 0., 0.25);
+            csmArrPoint3D_append(loop_points, 0.75, 0., 0.25);
+            csmArrPoint3D_append(loop_points, 0.75, 1., 0.25);
+            csmArrPoint3D_append(loop_points, 0.25, 1., 0.25);
+            
+            i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+        }
+        
+        result = csmfacbrep2solid_build(builder, &solid);
+        assert(result == CSMFACBREP2SOLID_RESULT_OK);
+
+        csmsolid_debug_print_debug(solid, CSMTRUE);
+        
+        csmviewer_set_results(viewer, NULL, NULL);
+        csmviewer_set_parameters(viewer, solid, NULL);
+        csmviewer_show(viewer);
+
+        csmviewer_set_results(viewer, solid, NULL);
+        csmviewer_show(viewer);
+
+        {
+            struct csmshape2d_t *shape;
+            struct csmsolid_t *diff_solid;
+            struct csmsolid_t *solid_res;
+            
+            shape = csmbasicshape2d_circular_hollow_shape(0.5, 0.25, 32);
+            diff_solid = csmsweep_create_solid_from_shape(shape, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+            
+            assert(csmsetop_difference_A_minus_B(solid, diff_solid, &solid_res) == CSMSETOP_OPRESULT_OK);
+            
+            csmshape2d_free(&shape);
+            csmsolid_free(&diff_solid);
+            csmsolid_free(&solid_res);
+        }
+        
+        csmsolid_free(&solid);
+    }
     
     csmfacbrep2solid_free(&builder);
 }
@@ -5236,7 +5409,7 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    i_test_facetedbrep1(viewer);
+    i_test_facetedbrep2(viewer, CSMFALSE);
     return;
     
     process_all_test = CSMTRUE;
@@ -5261,50 +5434,10 @@ void csmtest_test(void)
         csmdebug_enable_visual_debug();
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
         
-        //i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
-        //i_test_union_solidos5(viewer);
+        i_test_difference8();
+        i_test_difference8_redux();
         
-        //i_test_multiple_solidos1(viewer);
-        //i_test_multiple_solidos2(viewer);
-        //i_test_multiple_solidos3(viewer);
-        
-        //i_test_mechanichal7_simplified();
-        //i_test_mechanichal7();
         i_test_sphere5();
-        
-        //i_test_difference3();
-        
-        //i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
-        //i_test_cilindro6(viewer); // --> Intersecciones non-manifold. No falla si se permiten perturbaciones
-        //i_test_cilindro7(viewer);
-        //i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
-        
-        //i_test_difference1(viewer);
-        
-        //i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
-        //i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
-        //i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
-        //i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
-        
-        //i_test_union_solidos4(viewer);
-        //i_test_cilindro4(viewer); ---> revisar bien
-        
-        //i_test_mechanical_part1();
-        //i_test_mechanical_part1_redux();
-        //i_test_cilindro4(viewer);
-        //i_test_sweep_path6(CSMTRUE);
-        //i_test_paraboloid_one_sheet();
-        //i_test_union_no_null_edges1();
-        //i_test_difference_no_null_edges1();
-        //i_test_intersection_no_null_edges1();
-        //i_test_torus2();
-        //i_test_mechanichal7();
-        //i_test_sweep_path5();
-        //i_test_sweep_path6(CSMTRUE);
-        //i_test_sweep_path6(CSMFALSE);
-        //i_test_inters_inner_segment();
-        //i_test_union_no_null_edges1();
-        //i_test_twist();
     }
     else
     {
@@ -5335,8 +5468,8 @@ void csmtest_test(void)
         i_test_cilindro1(viewer);
         i_test_cilindro2(viewer);
         i_test_cilindro3(viewer);
-        //i_test_difference8();
-        //i_test_difference8_redux();
+        i_test_difference8();
+        i_test_difference8_redux();
         
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         {
@@ -5417,6 +5550,10 @@ void csmtest_test(void)
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
         
         i_test_difference1(viewer);
+        
+        i_test_facetedbrep1(viewer);
+        i_test_facetedbrep2(viewer, CSMTRUE);
+        i_test_facetedbrep2(viewer, CSMFALSE);
 
     }
     
