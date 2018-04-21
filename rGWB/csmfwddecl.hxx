@@ -48,6 +48,9 @@ struct csmshape2d_t;
 struct csmsurface_t;
 struct csmsweep_path_t;
 struct csmoptree_t;
+struct csmfacbrep2solid_t;
+struct csmfacbrep2solid_face_t;
+struct csmfacbrep2solid_loop_t;
     
 #ifdef __cplusplus
 enum csmedge_lado_hedge_t: int;
