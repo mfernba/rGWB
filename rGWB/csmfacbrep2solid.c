@@ -56,8 +56,6 @@ struct csmfacbrep2solid_loop_t
 
 struct csmfacbrep2solid_face_t
 {
-    double Wx, Wy, Wz;
-    
     struct csmfacbrep2solid_loop_t *outer_loop;
     csmArrayStruct(csmfacbrep2solid_loop_t) *inner_loops;
     
@@ -72,12 +70,13 @@ struct i_vertex_t
 
 struct csmfacbrep2solid_t
 {
+    double equal_points_tolerance;
+    CSMBOOL face_normal_point_out_of_solid;
+    
     unsigned long id_new_element;
     
     csmArrayStruct(csmfacbrep2solid_face_t) *faces;
     csmArrayStruct(i_vertex_t) *vertexs;
-    
-    double equal_points_tolerance;
 };
 
 struct i_hedge_id_t
@@ -156,17 +155,12 @@ static void i_free_loop(struct csmfacbrep2solid_loop_t **loop)
 // ------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmfacbrep2solid_face_t *, i_new_face, (
-                        double Wx, double Wy, double Wz,
                         struct csmfacbrep2solid_loop_t **outer_loop,
                         csmArrayStruct(csmfacbrep2solid_loop_t) **inner_loops))
 {
     struct csmfacbrep2solid_face_t *face;
     
     face = MALLOC(struct csmfacbrep2solid_face_t);
-    
-    face->Wx = Wx;
-    face->Wy = Wy;
-    face->Wz = Wz;
     
     face->outer_loop = ASIGNA_PUNTERO_PP(outer_loop, struct csmfacbrep2solid_loop_t);
     face->inner_loops = ASIGNA_PUNTERO_PP(inner_loops, csmArrayStruct(csmfacbrep2solid_loop_t));
@@ -217,28 +211,30 @@ static void i_free_vertex(struct i_vertex_t **vertex)
 // ------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmfacbrep2solid_t *, i_new_facbrep2solid, (
+                        double equal_points_tolerance,
+                        CSMBOOL face_normal_point_out_of_solid,
                         unsigned long id_new_element,
                         csmArrayStruct(csmfacbrep2solid_face_t) **faces,
-                        csmArrayStruct(i_vertex_t) **vertexs,
-                        double equal_points_tolerance))
+                        csmArrayStruct(i_vertex_t) **vertexs))
 {
     struct csmfacbrep2solid_t *builder;
     
     builder = MALLOC(struct csmfacbrep2solid_t);
     
+    builder->equal_points_tolerance = equal_points_tolerance;
+    builder->face_normal_point_out_of_solid = face_normal_point_out_of_solid;
+
     builder->id_new_element = id_new_element;
     
     builder->faces = ASIGNA_PUNTERO_PP(faces, csmArrayStruct(csmfacbrep2solid_face_t));
     builder->vertexs = ASIGNA_PUNTERO_PP(vertexs, csmArrayStruct(i_vertex_t));
-    
-    builder->equal_points_tolerance = equal_points_tolerance;
     
     return builder;
 }
 
 // ------------------------------------------------------------------------------------------
 
-struct csmfacbrep2solid_t *csmfacbrep2solid_new(double equal_points_tolerance)
+struct csmfacbrep2solid_t *csmfacbrep2solid_new(double equal_points_tolerance, CSMBOOL face_normal_point_out_of_solid)
 {
     unsigned long id_new_element;
     csmArrayStruct(csmfacbrep2solid_face_t) *faces;
@@ -251,7 +247,7 @@ struct csmfacbrep2solid_t *csmfacbrep2solid_new(double equal_points_tolerance)
     faces = csmarrayc_new_st_array(0, csmfacbrep2solid_face_t);
     vertexs = csmarrayc_new_st_array(0, i_vertex_t);
     
-    return i_new_facbrep2solid(id_new_element, &faces, &vertexs, equal_points_tolerance);
+    return i_new_facbrep2solid(equal_points_tolerance, face_normal_point_out_of_solid, id_new_element, &faces, &vertexs);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -269,7 +265,7 @@ void csmfacbrep2solid_free(struct csmfacbrep2solid_t **builder)
 
 // ------------------------------------------------------------------------------------------
 
-struct csmfacbrep2solid_face_t *csmfacbrep2solid_new_face(double Nx, double Ny, double Nz)
+struct csmfacbrep2solid_face_t *csmfacbrep2solid_new_face(void)
 {
     struct csmfacbrep2solid_loop_t *outer_loop;
     csmArrayStruct(csmfacbrep2solid_loop_t) *inner_loops;
@@ -277,7 +273,7 @@ struct csmfacbrep2solid_face_t *csmfacbrep2solid_new_face(double Nx, double Ny, 
     outer_loop = NULL;
     inner_loops = csmarrayc_new_st_array(0, csmfacbrep2solid_loop_t);
     
-    return i_new_face(Nx, Ny, Nz, &outer_loop, &inner_loops);
+    return i_new_face(&outer_loop, &inner_loops);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -299,6 +295,8 @@ void csmfacbrep2solid_append_inner_loop_to_face(struct csmfacbrep2solid_face_t *
     assert_no_null(face);
     
     inner_loop_loc = ASIGNA_PUNTERO_PP_NO_NULL(inner_loop, struct csmfacbrep2solid_loop_t);
+    csmfacbrep2solid_reverse(face->outer_loop);
+    
     csmarrayc_append_element_st(face->inner_loops, inner_loop_loc, csmfacbrep2solid_loop_t);
 }
 
@@ -328,6 +326,16 @@ void csmfacbrep2solid_append_point_to_loop(struct csmfacbrep2solid_loop_t *loop,
     point = i_new_loop_point(x, y, z, ULONG_MAX, ULONG_MAX, shedge);
     
     csmarrayc_append_element_st(loop->points, point, i_loop_point_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmfacbrep2solid_reverse(struct csmfacbrep2solid_loop_t *loop)
+{
+    assert_no_null(loop);
+    assert(loop->sloop == NULL);
+    
+    csmarrayc_invert(loop->points, i_loop_point_t);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -896,6 +904,54 @@ static CSMBOOL i_is_incomplete_edge(const struct i_edge_t *edge, const struct i_
 
 // ------------------------------------------------------------------------------------------
 
+static void i_reverse_face_loop_because_csm_outer_loop_points_to_interior(struct csmfacbrep2solid_loop_t *loop)
+{
+    assert_no_null(loop);
+    csmarrayc_invert(loop->points, i_loop_point_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_reverse_face_loops_because_csm_outer_loop_points_to_interior(struct csmfacbrep2solid_face_t *face)
+{
+    unsigned long i, no_inner_loops;
+    
+    assert_no_null(face);
+    assert(face->sface == NULL);
+    assert(face->outer_loop != NULL);
+    
+    i_reverse_face_loop_because_csm_outer_loop_points_to_interior(face->outer_loop);
+    
+    no_inner_loops = csmarrayc_count_st(face->inner_loops, csmfacbrep2solid_loop_t);
+    
+    for (i = 0; i < no_inner_loops; i++)
+    {
+        struct csmfacbrep2solid_loop_t *inner_loop;
+        
+        inner_loop = csmarrayc_get_st(face->inner_loops, i, csmfacbrep2solid_loop_t);
+        i_reverse_face_loop_because_csm_outer_loop_points_to_interior(inner_loop);
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_reverse_faces_loops_because_csm_outer_loop_points_to_interior(csmArrayStruct(csmfacbrep2solid_face_t) *faces)
+{
+    unsigned long i, no_faces;
+    
+    no_faces = csmarrayc_count_st(faces, csmfacbrep2solid_face_t);
+    
+    for (i = 0; i < no_faces; i++)
+    {
+        struct csmfacbrep2solid_face_t *face;
+        
+        face = csmarrayc_get_st(faces, i, csmfacbrep2solid_face_t);
+        i_reverse_face_loops_because_csm_outer_loop_points_to_interior(face);
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t *builder, struct csmsolid_t **solid)
 {
     enum csmfacbrep2solid_result_t result;
@@ -915,6 +971,9 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
     else
     {
         csmArrayStruct(i_edge_t) *edges;
+        
+        if (builder->face_normal_point_out_of_solid == CSMTRUE)
+            i_reverse_faces_loops_because_csm_outer_loop_points_to_interior(builder->faces);
         
         if (i_did_generate_edge_list(builder->faces, &edges) == CSMFALSE)
         {
