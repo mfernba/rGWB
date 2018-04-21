@@ -40,6 +40,8 @@
 #include "csmtest_array.inl"
 #include "csmtolerance.inl"
 #include "csmviewer.inl"
+#include "csmfacbrep2solid.h"
+#include "csmArrPoint3D.h"
 
 // ------------------------------------------------------------------------------------------
 
@@ -5119,6 +5121,113 @@ static void i_test_difference8_redux(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_append_loop_to_faceted_brep_face(
+                        struct csmfacbrep2solid_face_t *face,
+                        csmArrPoint3D **loop_points, CSMBOOL is_outer)
+{
+    unsigned long i, no_points;
+    struct csmfacbrep2solid_loop_t *loop;
+    
+    assert_no_null(loop_points);
+    no_points = csmArrPoint3D_count(*loop_points);
+    assert(no_points >= 3);
+    
+    loop = csmfacbrep2solid_new_loop();
+    
+    for (i = 0; i < no_points; i++)
+    {
+        double x, y, z;
+        
+        csmArrPoint3D_get(*loop_points, i, &x, &y, &z);
+        csmfacbrep2solid_append_point_to_loop(loop, x, y, z);
+    }
+
+    if (is_outer == CSMTRUE)
+        csmfacbrep2solid_append_outer_loop_to_face(face, &loop);
+    else
+        csmfacbrep2solid_append_inner_loop_to_face(face, &loop);
+    
+    csmArrPoint3D_free(loop_points);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_append_face_withoud_voids_to_faceted_brep_face(
+                        struct csmfacbrep2solid_t *builder,
+                        csmArrPoint3D **loop_points)
+{
+    struct csmfacbrep2solid_face_t *face;
+    
+    face = csmfacbrep2solid_new_face();
+    i_append_loop_to_faceted_brep_face(face, loop_points, CSMTRUE);
+    
+    csmfacbrep2solid_append_face(builder, &face);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_facetedbrep1(struct csmviewer_t *viewer)
+{
+    struct csmfacbrep2solid_t *builder;
+    csmArrPoint3D *loop_points;
+    enum csmfacbrep2solid_result_t result;
+    struct csmsolid_t *solid;
+    
+    builder = csmfacbrep2solid_new(1.e-6, CSMTRUE);
+    
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 0., 0., 0.);
+    csmArrPoint3D_append(loop_points, 1., 0., 0.);
+    csmArrPoint3D_append(loop_points, 1., 0., 1.);
+    csmArrPoint3D_append(loop_points, 0., 0., 1.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+    
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 1., 0., 0.);
+    csmArrPoint3D_append(loop_points, 1., 1., 0.);
+    csmArrPoint3D_append(loop_points, 1., 1., 1.);
+    csmArrPoint3D_append(loop_points, 1., 0., 1.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 1., 1., 0.);
+    csmArrPoint3D_append(loop_points, 0., 1., 0.);
+    csmArrPoint3D_append(loop_points, 0., 1., 1.);
+    csmArrPoint3D_append(loop_points, 1., 1., 1.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 0., 0., 0.);
+    csmArrPoint3D_append(loop_points, 0., 0., 1.);
+    csmArrPoint3D_append(loop_points, 0., 1., 1.);
+    csmArrPoint3D_append(loop_points, 0., 1., 0.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 0., 0., 0.);
+    csmArrPoint3D_append(loop_points, 0., 1., 0.);
+    csmArrPoint3D_append(loop_points, 1., 1., 0.);
+    csmArrPoint3D_append(loop_points, 1., 0., 0.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+    
+    loop_points = csmArrPoint3D_new(0);
+    csmArrPoint3D_append(loop_points, 0., 0., 1.);
+    csmArrPoint3D_append(loop_points, 1., 0., 1.);
+    csmArrPoint3D_append(loop_points, 1., 1., 1.);
+    csmArrPoint3D_append(loop_points, 0., 1., 1.);
+    i_append_face_withoud_voids_to_faceted_brep_face(builder, &loop_points);
+    
+    result = csmfacbrep2solid_build(builder, &solid);
+    assert(result == CSMFACBREP2SOLID_RESULT_OK);
+    
+    csmviewer_set_results(viewer, solid, NULL);
+    csmviewer_show(viewer);
+    
+    csmfacbrep2solid_free(&builder);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -5127,17 +5236,9 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    i_test_sweep_path6(CSMFALSE);
+    i_test_facetedbrep1(viewer);
+    return;
     
-    //i_test_cilindro4(viewer);
-    //i_test_union_solidos1(viewer);
-    //i_test_sweep_path6(CSMFALSE);
-    //i_test_difference8();
-    //i_test_difference8_redux();
-    //return;
-    //i_test_sphere5();
-    //i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
-
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();
     
