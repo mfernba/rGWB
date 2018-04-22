@@ -1108,6 +1108,7 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
                 
                 i_generate_solid_hedges(edges, builder->faces, &builder->id_new_element, solid_loc);
                 
+                csmsolid_redo_geometric_generated_data(solid_loc);
                 csmsimplifysolid_simplify(solid_loc);
                 
                 if (i_check_inner_loop_orientation(solid_loc) == CSMTRUE)
