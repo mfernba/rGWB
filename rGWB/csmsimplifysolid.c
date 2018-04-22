@@ -20,6 +20,7 @@
 #include "csmopbas.inl"
 #include "csmtolerance.inl"
 #include "csmsolid.inl"
+#include "csmsolid_debug.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
@@ -34,10 +35,16 @@
 static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances)
 {
     CSMBOOL there_are_changes;
+    unsigned long no_iters;
+    
+    no_iters = 0;
     
     do
     {
         struct csmhashtb_iterator(csmedge_t) *edge_iterator;
+        
+        assert(no_iters < 10000);
+        no_iters++;
         
         edge_iterator = csmsolid_edge_iterator(solid);
         there_are_changes = CSMFALSE;
@@ -140,7 +147,7 @@ static void i_delete_redundant_vertexs(struct csmsolid_t *solid)
                     csmeuler_lkev(&he1, &he1_mate, NULL, NULL, NULL, NULL);
                     there_are_changes = CSMTRUE;
                     
-                    //csmsolid_debug_print_debug(solid, CSMTRUE);
+                    csmsolid_debug_print_debug(solid, CSMTRUE);
                     break;
                 }
             }
@@ -155,14 +162,26 @@ static void i_delete_redundant_vertexs(struct csmsolid_t *solid)
 
 void csmsimplifysolid_simplify(struct csmsolid_t *solid)
 {
+    /*
     struct csmtolerance_t *tolerances;
     
     tolerances = csmtolerance_new();
     
     csmsolid_redo_geometric_face_data(solid);
+    csmdebug_print_debug_info("Before simplification...\n");
+    csmsolid_debug_print_debug(solid, CSMTRUE);
     
-    //i_delete_redundant_faces(solid, tolerances);
-    //i_delete_redundant_vertexs(solid);
+    csmsolid_debug_print_debug(solid, CSMTRUE);
+    
+    csmdebug_print_debug_info("Deleting coplanar faces...\n");
+    i_delete_redundant_faces(solid, tolerances);
+    
+    csmdebug_print_debug_info("Deleting vertexs...\n");
+    i_delete_redundant_vertexs(solid);
+
+    csmdebug_print_debug_info("After simplification...\n");
+    csmsolid_debug_print_debug(solid, CSMTRUE);
     
     csmtolerance_free(&tolerances);
+    */
 }

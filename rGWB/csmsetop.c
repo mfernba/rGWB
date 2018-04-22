@@ -401,12 +401,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     csmsolid_finish_cleanup(solid_B);
     csmsolid_finish_cleanup(result);    
     
-    csmsolid_debug_print_debug(result, CSMFALSE);
+    csmsolid_debug_print_debug(result, CSMTRUE);
     //csmsolid_debug_print_debug(solid_A, CSMFALSE);
     //csmsolid_debug_print_debug(solid_B, CSMFALSE);
 
-    csmsetopcom_correct_non_manifold_edges_null_faces(set_of_null_faces_A);
-    csmsetopcom_correct_non_manifold_edges_null_faces(set_of_null_faces_B);
+    csmsolid_debug_print_debug(result, CSMTRUE);
     
     for (i = 0; i < half_no_null_faces; i++)
     {

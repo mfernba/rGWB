@@ -179,10 +179,10 @@ static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graph
         struct bsmaterial_t *material;
             
         material = bsmaterial_crea_rgba(0., 1., 0., 1.);
-        i_draw_solid_with_material(viewer->solid_res1, CSMFALSE, CSMFALSE, &material, graphics);
+        i_draw_solid_with_material(viewer->solid_res1, CSMTRUE, CSMFALSE, &material, graphics);
 
         material = bsmaterial_crea_rgba(0., 0., 1., 1.);
-        i_draw_solid_with_material(viewer->solid_res2, CSMFALSE, CSMFALSE, &material, graphics);
+        i_draw_solid_with_material(viewer->solid_res2, CSMTRUE, CSMFALSE, &material, graphics);
     }
     else
     {

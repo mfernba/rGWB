@@ -517,8 +517,19 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
         
     } while (there_are_changes == CSMTRUE);
     
-    //if (csmdebug_debug_enabled() == CSMTRUE)
-        //csmdebug_show_viewer();
+    if (csmdebug_debug_enabled() == CSMTRUE)
+    {
+        if (csmarrayc_count_st(loose_ends_A, csmhedge_t) > 0 || csmarrayc_count_st(loose_ends_B, csmhedge_t) > 0)
+        {
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_A, loose_ends_A);
+            csmsetopcom_print_set_of_null_edges(set_of_null_edges_B, loose_ends_B);
+            
+            csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
+            csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
+            
+            //csmdebug_show_viewer();
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------

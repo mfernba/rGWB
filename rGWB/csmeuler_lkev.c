@@ -59,8 +59,8 @@ void csmeuler_lkev(
     }
     else
     {
-        assert(csmhedge_next(csmhedge_next(he1_loc)) == he1_loc);
-        assert(csmhedge_next(csmhedge_next(he2_loc)) == he2_loc);
+        //assert(csmhedge_next(csmhedge_next(he1_loc)) == he1_loc);
+        //assert(csmhedge_next(csmhedge_next(he2_loc)) == he2_loc);
         
         delete_vertex = CSMFALSE;
     }
@@ -74,7 +74,7 @@ void csmeuler_lkev(
         assert(num_iteraciones < 10000);
         num_iteraciones++;
         
-        //assert(csmhedge_vertex(he_iterator) == vertex_to_delete);
+        assert(csmhedge_vertex(he_iterator) == vertex_to_delete);
         csmhedge_set_vertex(he_iterator, vertex_to_retain);
         
         if (he_vertex_to_retain == NULL && he_iterator != he2_loc)

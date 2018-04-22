@@ -1759,6 +1759,57 @@ static void i_test_cilindro7_redux(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_cilindro7_redux2(struct csmviewer_t *viewer)
+{
+    struct csmshape2d_t *shape2d, *cshape2d;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    
+    i_set_output_debug_file("test_cilindro7_redux2.she");
+
+    {
+        double ax, ay;
+        csmArrPoint2D *points;
+        
+        ax = 0.5;
+        ay = 0.5;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, -0.5 * ax, -0.5 * ay);
+        csmArrPoint2D_append(points,  0.5 * ax, -0.5 * ay);
+        csmArrPoint2D_append(points,  0., 0.5 * ay);
+        
+        cshape2d = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(cshape2d, &points);
+    }
+    
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
+    
+    // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1., 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, 1.,  2., 0.75, -1., 0., 0., 0., 0., 1.,
+                        cshape2d, 1., -2., 0.75, -1., 0., 0., 0., 0., 1.,
+                        1000);
+    
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+        csmviewer_set_results(viewer, solid_res, NULL);
+        csmviewer_show(viewer);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
+
+    csmsolid_debug_print_debug(solid1, CSMTRUE);
+    csmsolid_debug_print_debug(solid2, CSMTRUE);
+    
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_cilindro3(struct csmviewer_t *viewer)
 {
     struct csmshape2d_t *shape2d, *cshape2d;
@@ -3611,7 +3662,7 @@ static void i_test_mechanichal7(void)
     
     i_set_output_debug_file("mechanical7.she");
 
-    csmdebug_set_enabled_by_code(CSMFALSE);
+    //csmdebug_set_enabled_by_code(CSMFALSE);
     
     i_test7_edge_spheres(radius, thick, no_points_circle, &hsphere_left, &hsphere_rigth);
     
@@ -3668,10 +3719,14 @@ static void i_test_mechanichal7(void)
         csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
     }
     
+    //csmdebug_set_enabled_by_code(CSMTRUE);
+    
     solid_aux = solid;
     assert(csmsetop_union_A_and_B(solid, top_block, &solid) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_aux);
     csmsolid_free(&top_block);
+
+    csmdebug_set_enabled_by_code(CSMFALSE);
     
     {
         double outer_radius, inner_radius;
@@ -5369,21 +5424,21 @@ static void i_test_facetedbrep2(struct csmviewer_t *viewer, CSMBOOL test_error)
         result = csmfacbrep2solid_build(builder, &solid);
         assert(result == CSMFACBREP2SOLID_RESULT_OK);
 
-        csmsolid_debug_print_debug(solid, CSMTRUE);
-        
+        //csmsolid_debug_print_debug(solid, CSMTRUE);
+        /*
         csmviewer_set_results(viewer, NULL, NULL);
         csmviewer_set_parameters(viewer, solid, NULL);
         csmviewer_show(viewer);
 
         csmviewer_set_results(viewer, solid, NULL);
         csmviewer_show(viewer);
-
+         */
         {
             struct csmshape2d_t *shape;
             struct csmsolid_t *diff_solid;
             struct csmsolid_t *solid_res;
             
-            shape = csmbasicshape2d_circular_hollow_shape(0.5, 0.25, 32);
+            shape = csmbasicshape2d_circular_hollow_shape(0.5, 0.25, 8);
             diff_solid = csmsweep_create_solid_from_shape(shape, 0., 0., 1., 1., 0., 0., 0., 1., 0., shape, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
             
             assert(csmsetop_difference_A_minus_B(solid, diff_solid, &solid_res) == CSMSETOP_OPRESULT_OK);
@@ -5409,8 +5464,10 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    i_test_facetedbrep2(viewer, CSMFALSE);
-    return;
+    //i_test_mechanichal7();
+    i_test_cilindro7_redux2(viewer);
+    //i_test_facetedbrep2(viewer, CSMFALSE);
+    //return;
     
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();
@@ -5468,8 +5525,8 @@ void csmtest_test(void)
         i_test_cilindro1(viewer);
         i_test_cilindro2(viewer);
         i_test_cilindro3(viewer);
-        i_test_difference8();
-        i_test_difference8_redux();
+        //i_test_difference8();
+        //i_test_difference8_redux();
         
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         {
@@ -5553,8 +5610,9 @@ void csmtest_test(void)
         
         i_test_facetedbrep1(viewer);
         i_test_facetedbrep2(viewer, CSMTRUE);
+        
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         i_test_facetedbrep2(viewer, CSMFALSE);
-
     }
     
     csmviewer_free(&viewer);

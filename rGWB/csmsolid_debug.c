@@ -54,7 +54,7 @@ static void i_print_debug_info_edges(struct csmhashtb(csmedge_t) *sedges, CSMBOO
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CSMBOOL assert_si_no_es_integro)
+static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CSMBOOL assert_si_no_es_integro, CSMBOOL show_info)
 {
     struct csmhedge_t *hedge;
     
@@ -64,22 +64,32 @@ static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CSMBOOL assert
     
     if (hedge != NULL)
     {
-        csmdebug_print_debug_info("He %6lu", csmnode_id(CSMNODE(hedge)));
+        if (show_info == CSMTRUE)
+            csmdebug_print_debug_info("He %6lu", csmnode_id(CSMNODE(hedge)));
         
         if (assert_si_no_es_integro == CSMTRUE)
+        {
+            if (show_info == CSMFALSE)
+                csmdebug_print_debug_info("He %6lu", csmnode_id(CSMNODE(hedge)));
+            
             assert(csmhedge_vertex(hedge) == vertex);
+        }
     }
     else
     {
-        csmdebug_print_debug_info("He (null)");
+        assert(assert_si_no_es_integro == CSMFALSE);
+        
+        if (show_info == CSMTRUE)
+            csmdebug_print_debug_info("He (null)");
     }
     
-    csmdebug_print_debug_info("\n");
+    if (show_info == CSMTRUE)
+        csmdebug_print_debug_info("\n");
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_print_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, CSMBOOL assert_si_no_es_integro, unsigned long *num_vertexs)
+static void i_print_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, CSMBOOL assert_si_no_es_integro, CSMBOOL show_info, unsigned long *num_vertexs)
 {
     struct csmhashtb_iterator(csmvertex_t) *iterator;
     unsigned long num_iters;
@@ -99,7 +109,7 @@ static void i_print_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, 
         num_iters++;
         
         csmhashtb_next_pair(iterator, NULL, &vertex, csmvertex_t);
-        i_print_debug_info_vertex(vertex, assert_si_no_es_integro);
+        i_print_debug_info_vertex(vertex, show_info, assert_si_no_es_integro);
         (*num_vertexs)++;
     }
     
@@ -152,9 +162,11 @@ static void i_print_info_debug_faces(
 
 void csmsolid_debug_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_es_integro)
 {
+    assert_si_no_es_integro = CSMTRUE;
+    
     if (csmdebug_debug_enabled() == CSMTRUE && csmdebug_is_print_solid_unblocked() == CSMTRUE)
     {
-        unsigned long num_faces, num_holes;
+        unsigned long num_faces, num_holes, num_vertexs;
         
         assert_no_null(solido);
         
@@ -169,6 +181,10 @@ void csmsolid_debug_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_
         i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
         csmdebug_print_debug_info("\n");
 
+        csmdebug_print_debug_info("Vertex table\n");
+        i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, CSMFALSE, &num_vertexs);
+        csmdebug_print_debug_info("\n");
+        
         csmdebug_end_context();
         
         /*
@@ -188,6 +204,8 @@ void csmsolid_debug_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_
 
 void csmsolid_debug_print_complete_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_es_integro)
 {
+    assert_si_no_es_integro = CSMFALSE;
+    
     if (csmdebug_debug_enabled() == CSMTRUE && csmdebug_is_print_solid_unblocked() == CSMTRUE)
     {
         unsigned long num_faces, num_vertexs, num_edges, num_holes;
@@ -210,7 +228,7 @@ void csmsolid_debug_print_complete_debug(struct csmsolid_t *solido, CSMBOOL asse
         csmdebug_print_debug_info("\n");
         
         csmdebug_print_debug_info("Vertex table\n");
-        i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, &num_vertexs);
+        //i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, CSMTRUE, &num_vertexs);
         csmdebug_print_debug_info("\n");
         
         csmdebug_end_context();
