@@ -1051,10 +1051,10 @@ enum csmsplit_opresult_t csmsplit_split_solid(
                 operation_result = CSMSPLIT_OPRESULT_OK;
             
                 if (volume_above > 1.e-6)
-                    csmsimplifysolid_simplify(solid_above_loc);
+                    csmsimplifysolid_simplify(solid_above_loc, tolerances);
                 
                 if (volume_below > 1.e-6)
-                    csmsimplifysolid_simplify(solid_below_loc);
+                    csmsimplifysolid_simplify(solid_below_loc, tolerances);
             }
             else
             {

@@ -91,12 +91,18 @@ void csmloop_debug_print_info_debug(
             
             if (he_mate != NULL)
             {
+                struct csmloop_t *he_mate_loop;
+                
+                he_mate_loop = csmhedge_loop(he_mate);
+                assert_no_null(he_mate_loop);
+                
                 csmdebug_print_debug_info(
-                    "\t\t(%3s %4lu [edge %6lu. Mate: %4lu], %4lu, %6.6f, %6.6f, %6.6f, %d) %s\n",
+                    "\t\t(%3s %4lu [edge %6lu. Mate: %4lu (%4lu)], %4lu, %6.6f, %6.6f, %6.6f, %d) %s\n",
                     he_position,
                     csmnode_id(CSMNODE(iterator)),
                     csmnode_id(CSMNODE(edge)),
                     csmnode_id(CSMNODE(he_mate)),
+                    he_mate_loop->clase_base.id,
                     csmnode_id(CSMNODE(vertex)),
                     x, y, z,
                     IS_TRUE(csmhedge_loop(iterator) == loop),

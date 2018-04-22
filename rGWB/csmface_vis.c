@@ -274,7 +274,7 @@ void csmface_vis_draw_normal(struct csmface_t *face, struct bsgraphics2_t *graph
     
     csmloop_geometric_center_3d(face->flout, &x_geometric_center, &y_geometric_center, &z_geometric_center);
     
-    disp = 0.05;
+    disp = 0.005;
     bsgraphics2_escr_linea3D(
                         graphics,
                         x_geometric_center, y_geometric_center, z_geometric_center,
@@ -328,12 +328,16 @@ void csmface_vis_draw_edges(
         do
         {
             struct csmedge_t *edge;
-            double x1, y1, z1, x2, y2, z2;
             
             edge = csmhedge_edge(he);
-            csmedge_vertex_coordinates(edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
             
-            bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
+            if (edge != NULL)
+            {
+                double x1, y1, z1, x2, y2, z2;
+                
+                csmedge_vertex_coordinates(edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
+                bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x2, y2, z2);
+            }
             
             he = csmhedge_next(he);
         }

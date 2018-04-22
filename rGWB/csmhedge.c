@@ -34,7 +34,7 @@ static void i_csmhedge_destruye(struct csmhedge_t **hedge)
 {
     assert_no_null(hedge);
     assert_no_null(*hedge);
-
+    
     FREE_PP(hedge, struct csmhedge_t);
 }
 

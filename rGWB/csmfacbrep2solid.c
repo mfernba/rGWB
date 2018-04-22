@@ -21,6 +21,7 @@
 #include "csmsolid.h"
 #include "csmsolid.inl"
 #include "csmsimplifysolid.inl"
+#include "csmtolerance.inl"
 #include "csmvertex.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
@@ -1093,6 +1094,7 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
             else
             {
                 unsigned long i;
+                struct csmtolerance_t *tolerances;
                 
                 solid_loc = csmsolid_crea_vacio(builder->id_new_element);
                 
@@ -1108,8 +1110,8 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
                 
                 i_generate_solid_hedges(edges, builder->faces, &builder->id_new_element, solid_loc);
                 
-                csmsolid_redo_geometric_generated_data(solid_loc);
-                csmsimplifysolid_simplify(solid_loc);
+                tolerances = csmtolerance_new();
+                csmsimplifysolid_simplify(solid_loc, tolerances);
                 
                 if (i_check_inner_loop_orientation(solid_loc) == CSMTRUE)
                 {
@@ -1120,6 +1122,8 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
                     result = CSMFACBREP2SOLID_RESULT_INCONSISTENT_INNER_LOOP_ORIENTATION;
                     csmsolid_free(&solid_loc);
                 }
+                
+                csmtolerance_free(&tolerances);
             }
             
             csmarrayc_free_st(&edges, i_edge_t, i_free_edge);

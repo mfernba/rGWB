@@ -8,4 +8,4 @@
 
 #include "csmfwddecl.hxx"
 
-void csmsimplifysolid_simplify(struct csmsolid_t *solid);
+void csmsimplifysolid_simplify(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances);

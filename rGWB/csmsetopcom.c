@@ -14,6 +14,7 @@
 #include "csmeuler_lmef.inl"
 #include "csmeuler_lmekr.inl"
 #include "csmeuler_lmfkrh.inl"
+#include "csmeuler_lringmv.inl"
 #include "csmface.inl"
 #include "csmface_debug.inl"
 #include "csmhashtb.inl"
@@ -785,7 +786,7 @@ void csmsetopcom_cut_he(
             csmsolid_debug_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
         }
         
-        csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL);
+        csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL, NULL);
         
         if (csmdebug_debug_enabled() == CSMTRUE)
             csmsolid_debug_print_debug(solid, CSMTRUE);
@@ -1161,6 +1162,7 @@ static CSMBOOL i_is_loop_filled_by_face(struct csmloop_t *loop, struct csmloop_t
         else if (he_iterator_mate_loop != opposed_loop_loc)
         {
             is_filled_by_face = CSMFALSE;
+            opposed_loop_loc = NULL;
             break;
         }
         
@@ -1185,6 +1187,9 @@ static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmfa
     
     assert_no_null(face);
     
+    //csmdebug_set_debug_screen(CSMTRUE);
+    //csmface_debug_print_info_debug(*face, CSMTRUE, NULL);
+    
     loop1_loc = ASIGNA_PUNTERO_PP_NO_NULL(loop1, struct csmloop_t);
     loop2_loc = ASIGNA_PUNTERO_PP_NO_NULL(loop2, struct csmloop_t);
     equal_loops = IS_TRUE(loop1_loc == loop2_loc);
@@ -1201,6 +1206,7 @@ static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmfa
         
         he_next = csmhedge_next(he);
         he_mate = csmopbas_mate(he);
+        assert(csmhedge_loop(he_mate) == loop2_loc);
         
         csmeuler_lkev(&he, &he_mate, NULL, NULL, NULL, NULL);
         
@@ -1286,22 +1292,57 @@ static void i_delete_holes_filled_by_faces(struct csmsolid_t *solid, const struc
                     
                     if (i_is_loop_filled_by_face(loop_iterator, &opposed_loop) == CSMTRUE)
                     {
-                        struct csmface_t *opposed_face;
-                        
-                        opposed_face = csmloop_lface(opposed_loop);
-                        there_are_changes = CSMTRUE;
-                        
-                        if (face == opposed_face)
-                        {
-                            i_remove_loops_erasing_hedges(solid, &face, &loop_iterator, &opposed_loop);
-                            break;
-                        }
-                        else
-                        {
-                            assert(csmface_has_holes(opposed_face) == CSMFALSE);
+                        CSMBOOL is_other_loop_filled_by_face;
+                        struct csmloop_t *opposed_loop_fill;
 
-                            csmface_add_loop_while_removing_from_old(opposed_face, loop_iterator);
-                            i_remove_hole_filled_by_face(solid, opposed_face);
+                        //csmdebug_set_debug_screen(CSMTRUE);
+                        //csmface_debug_print_info_debug(face, CSMTRUE, NULL);
+                        //csmface_debug_print_info_debug(csmloop_lface(opposed_loop), CSMTRUE, NULL);
+                        
+                        is_other_loop_filled_by_face = i_is_loop_filled_by_face(opposed_loop, &opposed_loop_fill);
+                        assert(is_other_loop_filled_by_face == CSMTRUE);
+                        assert(loop_iterator == opposed_loop_fill);
+                        
+                        //csmdebug_set_debug_screen(CSMTRUE);
+                        //csmface_debug_print_info_debug(face, CSMTRUE, NULL);
+                        //csmface_debug_print_info_debug(csmloop_lface(opposed_loop), CSMTRUE, NULL);
+                        
+                        //csmdebug_show_face(face, NULL);
+                        //csmdebug_show_face(csmloop_lface(opposed_loop), NULL);
+                        //csmdebug_show_face(face, csmloop_lface(opposed_loop));
+                        
+                        {
+                            struct csmface_t *opposed_face;
+                            
+                            opposed_face = csmloop_lface(opposed_loop);
+                            assert(csmface_flout(opposed_face) == opposed_loop);
+                            
+                            there_are_changes = CSMTRUE;
+                            
+                            if (face == opposed_face)
+                            {
+                                i_remove_loops_erasing_hedges(solid, &face, &loop_iterator, &opposed_loop);
+                                break;
+                            }
+                            else
+                            {
+                                if (csmface_has_holes(opposed_face) == CSMTRUE)
+                                {
+                                    csmeuler_lringmv_move_all_loops_from_face1_to_face2(opposed_face, face);
+                                    csmsolid_remove_face(solid, &opposed_face);
+                                    
+                                    i_remove_loops_erasing_hedges(solid, &face, &loop_iterator, &opposed_loop);
+                                    assert(face != NULL);
+
+                                    csmface_reorient_loops_in_face(face, tolerances);
+                                }
+                                else
+                                {
+                                    csmface_add_loop_while_removing_from_old(opposed_face, loop_iterator);
+                                    i_remove_hole_filled_by_face(solid, opposed_face);
+                                    
+                                }
+                            }
                         }
                     }
                 }

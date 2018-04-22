@@ -622,7 +622,7 @@ static void i_mark_null_edge_on_face(
     if (csmdebug_debug_enabled() == CSMTRUE)
         csmdebug_print_debug_info("Companion edge %lu on other solid\n", csmedge_id(null_edge));
     
-    csmeuler_lkemr(&hedge_to_new_vertex, &hedge_from_new_vertex, NULL, &he_on_new_ring);
+    csmeuler_lkemr(&hedge_to_new_vertex, &hedge_from_new_vertex, NULL, &he_on_new_ring, NULL);
     
     assert(csmhedge_loop(he_on_new_ring) != flout);
     assert(old_flout_fledge_prev == csmhedge_prev(flout_fledge));

@@ -69,6 +69,16 @@ CSMBOOL csmface_is_loop_contained_in_face(
                         struct csmloop_t *loop,
                         const struct csmtolerance_t *tolerances);
 
+CSMBOOL csmface_is_point_interior_to_face_outer_loop(
+                        const struct csmface_t *face,
+                        double x, double y, double z,
+                        const struct csmtolerance_t *tolerances);
+
+CSMBOOL csmface_is_loop_contained_in_face_outer_loop(
+                        struct csmface_t *face,
+                        struct csmloop_t *loop,
+                        const struct csmtolerance_t *tolerances);
+
 double csmface_tolerace(const struct csmface_t *face);
 
 CSMBOOL csmface_is_coplanar_to_plane(
@@ -98,6 +108,8 @@ void csmface_face_equation_info(
 const struct csmbbox_t *csmface_bbox(const struct csmface_t *face);
 
 double csmface_loop_area_in_face(const struct csmface_t *face, const struct csmloop_t *loop);
+
+void csmface_reorient_loops_in_face(struct csmface_t *face, const struct csmtolerance_t *tolerances);
 
 
 // Topology...

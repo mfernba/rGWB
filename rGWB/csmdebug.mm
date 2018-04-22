@@ -99,6 +99,13 @@ CSMBOOL csmdebug_get_treat_improper_solid_operations_as_errors(void)
 
 // --------------------------------------------------------------------------------
 
+CSMBOOL csmdebug_get_debug_screen(void)
+{
+    return i_DEBUG_SCREEN;
+}
+
+// --------------------------------------------------------------------------------
+
 void csmdebug_set_debug_screen(CSMBOOL value)
 {
     i_DEBUG_SCREEN = value;

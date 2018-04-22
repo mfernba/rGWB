@@ -338,7 +338,7 @@ static void i_append_holes_to_solid(
     ledge = csmloop_ledge(bottom_face_outer_loop);
     
     csmeuler_lmev(ledge, ledge, x, y, z, NULL, NULL, &he_from_vertex, &he_to_vertex);
-    csmeuler_lkemr(&he_to_vertex, &he_from_vertex, NULL, &he_from_ring);
+    csmeuler_lkemr(&he_to_vertex, &he_from_vertex, NULL, &he_from_ring, NULL);
     
     original_ring_loop = csmhedge_loop(he_from_ring);
     
@@ -478,33 +478,17 @@ struct csmsolid_t *csmsweep_create_solid_from_shape(
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot)
 {
     unsigned long start_id_of_new_element;
-    struct csmsolid_t *solid;
-    struct csmface_t *bottom_face, *top_face;
     
     start_id_of_new_element = 0;
     
-    solid = i_create_solid_from_shape_without_holes(
+    return csmsweep_create_solid_from_shape_debug(
                         shape2d_top,
                         Xo_top, Yo_top, Zo_top,
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         shape2d_bot,
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
-                        start_id_of_new_element,
-                        &bottom_face, &top_face);
-    
-    i_append_holes_to_solid_if_proceed(
-                        top_face, bottom_face,
-                        shape2d_top,
-                        Xo_top, Yo_top, Zo_top,
-                        Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
-                        shape2d_bot,
-                        Xo_bot, Yo_bot, Zo_bot,
-                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
-
-    csmsimplifysolid_simplify(solid);
-    
-    return solid;
+                        start_id_of_new_element);
 }
 
 // --------------------------------------------------------------------------------
@@ -520,6 +504,7 @@ struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
 {
     struct csmsolid_t *solid;
     struct csmface_t *bottom_face, *top_face;
+    struct csmtolerance_t *tolerances;
     
     solid = i_create_solid_from_shape_without_holes(
                         shape2d_top,
@@ -540,7 +525,9 @@ struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
 
-    csmsimplifysolid_simplify(solid);
+    tolerances = csmtolerance_new();
+    csmsimplifysolid_simplify(solid, tolerances);
+    csmtolerance_free(&tolerances);
     
     return solid;
 }
@@ -997,8 +984,7 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
     if (sweep_path->needs_subdivide_faces == CSMTRUE)
         csmsubdvfaces_subdivide_faces(solid);
     
-    csmsolid_redo_geometric_face_data(solid);
-    csmsimplifysolid_simplify(solid);
+    csmsimplifysolid_simplify(solid, tolerances);
     
     csmtolerance_free(&tolerances);
 

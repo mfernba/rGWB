@@ -119,3 +119,4 @@ void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(
     
     ASSIGN_OPTIONAL_VALUE(did_move_some_loop_opt, did_move_some_loop_loc);
 }
+

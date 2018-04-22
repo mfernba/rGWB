@@ -171,7 +171,7 @@ static void i_test_crea_lamina_con_hueco(void)
         struct csmhedge_t *hedge_lado_neg, *hedge_lado_pos;
         
         csmeuler_lmev(he_pos, he_pos, 1., 1., 0., NULL, NULL, &he_from_vertex, &he_to_vertex);
-        csmeuler_lkemr(&he_to_vertex, &he_from_vertex, &he1_hole_pos_next, &he2_hole_pos_next);
+        csmeuler_lkemr(&he_to_vertex, &he_from_vertex, &he1_hole_pos_next, &he2_hole_pos_next, NULL);
         
         csmeuler_lmekr(he1_hole_pos_next, he2_hole_pos_next, &hedge_lado_neg, &hedge_lado_pos);
         csmeuler_lkev(&hedge_lado_neg, &hedge_lado_pos, &hedge_lado_neg, NULL, NULL, &hedge_lado_pos);
@@ -3858,6 +3858,109 @@ static void i_test_mechanichal7(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_mechanichal7_redux(void)
+{
+    struct csmsolid_t *solid;
+    struct csmsolid_t *solid_aux;
+    double radius, thick, length;
+    unsigned long no_points_circle;
+    struct csmsolid_t *hsphere_left, *hsphere_rigth;
+    struct csmsolid_t *body_cylinder;
+    struct csmsolid_t *top_block;
+    
+    radius = 0.2;
+    thick = 0.01;
+    length = 1.;
+    no_points_circle = 32;
+    
+    i_set_output_debug_file("mechanical7.she");
+
+    csmdebug_set_enabled_by_code(CSMFALSE);
+    
+    i_test7_edge_spheres(radius, thick, no_points_circle, &hsphere_left, &hsphere_rigth);
+    
+    csmsolid_move(hsphere_left,  -(0.5 * length), 0., 0.);
+    csmsolid_move(hsphere_rigth,  (0.5 * length), 0., 0.);
+    
+    i_test7_cylinder(radius, thick, length, no_points_circle, &body_cylinder);
+    
+    assert(csmsetop_union_A_and_B(hsphere_left, body_cylinder, &solid) == CSMSETOP_OPRESULT_OK);
+    
+    solid_aux = solid;
+    assert(csmsetop_union_A_and_B(solid, hsphere_rigth, &solid) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+    
+    //csmsolid_set_draw_only_border_edges(solid, CSMFALSE);
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    csmsolid_scale(solid, 1., 1.5, 1.);
+    i_assign_flat_material_to_solid(0.95, 0.95, 0.95, solid);
+    
+    top_block = i_create_planar_block(length + 3. * radius, 4. * radius, thick);
+    i_assign_flat_material_to_solid(0.95, 0.95, 0.95, top_block);
+    csmsolid_move(top_block, 0., 0., -0.5 * thick);
+
+    {
+        struct csmsolid_t *difference;
+        csmArrayStruct(csmsolid_t) *shells;
+        struct csmsolid_t *top_block_hole, *top_block_reduced;
+        
+        assert(csmsetop_difference_A_minus_B(top_block, solid, &difference) == CSMSETOP_OPRESULT_OK);
+        shells = csmexplode_explode_shells(difference);
+
+        top_block_hole = csmsolid_duplicate(csmarrayc_get_st(shells, 1, csmsolid_t));
+        
+        csmdebug_set_viewer_results(top_block_hole, NULL);
+        csmdebug_show_viewer();
+        
+        //csmsolid_free(&top_block);
+        //top_block = csmsolid_duplicate(top_block_hole);
+        //csmsolid_scale(top_block, 1.25, 1.25, 1.);
+        
+        top_block_reduced = csmsolid_duplicate(top_block);
+        csmsolid_scale(top_block_reduced, 0.95, 0.95, 1.);
+        csmsolid_move(top_block_reduced, 0., 0., -0.5 * thick);
+
+        solid_aux = top_block;
+        assert(csmsetop_difference_A_minus_B(top_block, top_block_reduced, &top_block) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+
+        csmdebug_set_viewer_results(top_block, NULL);
+        csmdebug_show_viewer();
+        
+        solid_aux = top_block;
+        assert(csmsetop_difference_A_minus_B(top_block, top_block_hole, &top_block) == CSMSETOP_OPRESULT_OK);
+        csmsolid_free(&solid_aux);
+
+        csmdebug_set_viewer_results(top_block, NULL);
+        csmdebug_show_viewer();
+        
+        csmsolid_free(&difference);
+        csmsolid_free(&top_block_reduced);
+        csmsolid_free(&top_block_hole);
+        csmarrayc_free_st(&shells, csmsolid_t, csmsolid_free);
+    }
+    
+    csmdebug_set_enabled_by_code(CSMTRUE);
+    
+    solid_aux = solid;
+    assert(csmsetop_union_A_and_B(solid, top_block, &solid) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_aux);
+    csmsolid_free(&top_block);
+
+    //csmsolid_set_draw_only_border_edges(solid, CSMFALSE);
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+ 
+    csmsolid_free(&hsphere_left);
+    csmsolid_free(&hsphere_rigth);
+    csmsolid_free(&body_cylinder);
+    csmsolid_free(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_ellipsoid(void)
 {
     struct csmsolid_t *ellipsoid;
@@ -5464,10 +5567,8 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    //i_test_mechanichal7();
-    i_test_cilindro7_redux2(viewer);
-    //i_test_facetedbrep2(viewer, CSMFALSE);
-    //return;
+    i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
+    return;
     
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();
@@ -5564,6 +5665,7 @@ void csmtest_test(void)
 
         i_test_mechanichal7_simplified();
         i_test_mechanichal7();
+        i_test_mechanichal7_redux();
         
         i_test_ellipsoid();
         

@@ -809,6 +809,81 @@ CSMBOOL csmface_is_loop_contained_in_face(
 
 // ------------------------------------------------------------------------------------------
 
+CSMBOOL csmface_is_point_interior_to_face_outer_loop(
+                        const struct csmface_t *face,
+                        double x, double y, double z,
+                        const struct csmtolerance_t *tolerances)
+{
+    assert_no_null(face);
+    
+    if (i_is_point_on_face_plane(
+                        x, y, z,
+                        face->A, face->B, face->C, face->D,
+                        face->fuzzy_epsilon,
+                        face->bbox) == CSMFALSE)
+    {
+        return CSMFALSE;
+    }
+    else
+    {
+        enum csmmath_contaiment_point_loop_t type_of_containment;
+    
+        if (csmloop_is_point_inside_loop(
+                        face->flout,
+                        x, y, z, face->dropped_coord,
+                        tolerances,
+                        &type_of_containment, NULL, NULL, NULL) == CSMFALSE)
+        {
+            return CSMFALSE;
+        }
+        else
+        {
+            return CSMTRUE;
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+CSMBOOL csmface_is_loop_contained_in_face_outer_loop(
+                        struct csmface_t *face,
+                        struct csmloop_t *loop,
+                        const struct csmtolerance_t *tolerances)
+{
+    register struct csmhedge_t *iterator;
+    unsigned long num_iteraciones;
+    
+    assert_no_null(face);
+    assert(face->flout != loop);
+    
+    iterator = csmloop_ledge(loop);
+    num_iteraciones = 0;
+    
+    do
+    {
+        struct csmvertex_t *vertex;
+        double x, y, z;
+        
+        assert(num_iteraciones < 100000);
+        num_iteraciones++;
+        
+        vertex = csmhedge_vertex(iterator);
+        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+
+        if (csmface_is_point_interior_to_face_outer_loop(face, x, y, z, tolerances) == CSMFALSE)
+        {
+            return CSMFALSE;
+        }
+        
+        iterator = csmhedge_next(iterator);
+        
+    } while (iterator != csmloop_ledge(loop));
+    
+    return CSMTRUE;
+}
+
+// ------------------------------------------------------------------------------------------
+
 double csmface_tolerace(const struct csmface_t *face)
 {
     assert_no_null(face);
@@ -991,6 +1066,41 @@ double csmface_loop_area_in_face(const struct csmface_t *face, const struct csml
                         &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
     
     return csmloop_compute_area(loop, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_reorient_loops_in_face(struct csmface_t *face, const struct csmtolerance_t *tolerances)
+{
+    struct csmloop_t *iterator;
+
+    assert_no_null(face);
+    csmface_redo_geometric_generated_data(face);
+    
+    iterator = face->floops;
+    
+    while (iterator != NULL)
+    {
+        double A_loop, B_loop, C_loop, D_loop, xc_loop, yc_loop, zc_loop;
+        CSMBOOL parallel, same_sense;
+
+        csmloop_face_equation(iterator, &A_loop, &B_loop, &C_loop, &D_loop, &xc_loop, &yc_loop, &zc_loop);
+
+        parallel = csmmath_unit_vectors_are_parallel_ex(face->A, face->B, face->C, A_loop, B_loop, C_loop, tolerances, &same_sense);
+        assert(parallel == CSMTRUE);
+        
+        if (iterator == csmface_flout(face))
+        {
+            assert(same_sense == CSMTRUE);
+        }
+        else
+        {
+            if (same_sense == CSMTRUE)
+                csmloop_revert_loop_orientation(iterator);
+        }
+        
+        iterator = csmloop_next(iterator);
+    }
 }
 
 // ------------------------------------------------------------------------------------------

@@ -27,7 +27,8 @@
 
 void csmeuler_lkemr(
                 struct csmhedge_t **he_to_ring, struct csmhedge_t **he_from_ring,
-                struct csmhedge_t **he_to_ring_next, struct csmhedge_t **he_from_ring_next)
+                struct csmhedge_t **he_to_ring_next, struct csmhedge_t **he_from_ring_next,
+                struct csmloop_t **new_loop_opt)
 {
     struct csmhedge_t *he1_loc, *he2_loc;
     struct csmedge_t *edge_to_remove;
@@ -93,6 +94,8 @@ void csmeuler_lkemr(
 
     he1_and_he2_solid = csmface_fsolid(he1_and_he2_face);
     csmsolid_remove_edge(he1_and_he2_solid, &edge_to_remove);
+    
+    ASSIGN_OPTIONAL_VALUE(new_loop_opt, new_loop);
 }
 
 

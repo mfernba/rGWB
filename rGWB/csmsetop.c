@@ -417,17 +417,17 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         csmeuler_lkfmrh(face_from_solid_A, &face_from_solid_B);
         csmloopglue_merge_face_loops(face_from_solid_A, tolerances);
     }
-    
-    csmsolid_redo_geometric_face_data(result);
+
+    //csmdebug_set_viewer_parameters(result, NULL);
+    //csmdebug_show_viewer();
 
     csmdebug_print_debug_info("After merging face loops...\n");
-    csmsolid_debug_print_debug(result, CSMFALSE);
+    csmsolid_debug_print_debug(result, CSMTRUE);
 
     csmsetopcom_correct_faces_after_joining_null_edges(result, tolerances);
     
     csmsolid_clear_algorithm_data(result);
-    csmsolid_redo_geometric_face_data(result);
-    csmsimplifysolid_simplify(result);
+    csmsimplifysolid_simplify(result, tolerances);
     
     csmdebug_set_viewer_results(result, NULL);
     
