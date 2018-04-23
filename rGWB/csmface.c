@@ -417,6 +417,8 @@ void csmface_redo_geometric_generated_data(struct csmface_t *face)
             max_tolerable_distance_inner_loop = 1.1 * csmloop_max_distance_to_plane(loop_iterator, face->A, face->B, face->C, face->D);
             max_tolerable_distance = CSMMATH_MAX(max_tolerable_distance, max_tolerable_distance_inner_loop);
         }
+        
+        loop_iterator = csmloop_next(loop_iterator);
     }
         
     face->fuzzy_epsilon = i_compute_fuzzy_epsilon_for_containing_test(face->A, face->B, face->C, face->D, max_tolerable_distance, face->floops);
