@@ -251,7 +251,26 @@ static void i_validate_edges_belong_to_solid(struct csmsolid_t *solid, csmArrayS
 
 // ----------------------------------------------------------------------------------------------------
 
-static CSMBOOL i_make_reachable_end_vertex_he1_occur_in_face_of_he2(struct csmhedge_t *he1, struct csmhedge_t *he2)
+static void i_replace_loose_end(
+                        struct csmhedge_t *he_to_replace, struct csmhedge_t *he_to_replacement,
+                        csmArrayStruct(csmhedge_t) *loose_ends)
+{
+    unsigned long idx;
+    
+    assert(csmhedge_setop_is_loose_end(he_to_replacement) == CSMFALSE);
+    
+    if (csmarrayc_contains_element_st(loose_ends, csmhedge_t, he_to_replace, struct csmhedge_t, csmhedge_id_igual, &idx) == CSMTRUE)
+    {
+        csmhedge_setop_set_loose_end(he_to_replacement, CSMTRUE);
+        csmarrayc_set_st(loose_ends, idx, he_to_replacement, csmhedge_t);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static CSMBOOL i_make_reachable_end_vertex_he1_occur_in_face_of_he2(
+                        struct csmhedge_t *he1, struct csmhedge_t *he2,
+                        csmArrayStruct(csmhedge_t) *loose_ends)
 {
     struct csmvertex_t *he1_end_vertex;
     struct csmface_t *he2_face;
@@ -285,6 +304,14 @@ static CSMBOOL i_make_reachable_end_vertex_he1_occur_in_face_of_he2(struct csmhe
         
             csmeuler_lmef(he1, he1_next_next, NULL, NULL, NULL);
             assert(he1_next == csmhedge_next(he1));
+            
+            if (csmhedge_setop_is_loose_end(he1_next_mate) == CSMTRUE)
+            {
+                struct csmhedge_t *he_mate_null_edge_replacement;
+                
+                he_mate_null_edge_replacement = csmhedge_prev(he1);
+                i_replace_loose_end(he1_next_mate, he_mate_null_edge_replacement, loose_ends);
+            }
         
             csmeuler_lkef(&he1_next_mate, &he1_next);
         }
@@ -295,7 +322,9 @@ static CSMBOOL i_make_reachable_end_vertex_he1_occur_in_face_of_he2(struct csmhe
 
 // ----------------------------------------------------------------------------------------------------
 
-static CSMBOOL i_make_reachable_start_vertex_he1_occur_in_face_of_he2(struct csmhedge_t *he1, struct csmhedge_t *he2)
+static CSMBOOL i_make_reachable_start_vertex_he1_occur_in_face_of_he2(
+                        struct csmhedge_t *he1, struct csmhedge_t *he2,
+                        csmArrayStruct(csmhedge_t) *loose_ends)
 {
     struct csmvertex_t *he1_start_vertex;
     struct csmface_t *he2_face;
@@ -329,6 +358,14 @@ static CSMBOOL i_make_reachable_start_vertex_he1_occur_in_face_of_he2(struct csm
         
             csmeuler_lmef(he1_prev, he1_next, NULL, NULL, NULL);
             assert(he1_prev == csmhedge_prev(he1));
+            
+            if (csmhedge_setop_is_loose_end(he1_prev_mate) == CSMTRUE)
+            {
+                struct csmhedge_t *he_mate_null_edge_replacement;
+                
+                he_mate_null_edge_replacement = csmhedge_next(he1);
+                i_replace_loose_end(he1_prev_mate, he_mate_null_edge_replacement, loose_ends);
+            }
         
             csmeuler_lkef(&he1_prev_mate, &he1_prev);
         }
@@ -341,7 +378,9 @@ static CSMBOOL i_make_reachable_start_vertex_he1_occur_in_face_of_he2(struct csm
 
 // ----------------------------------------------------------------------------------------------------
 
-static CSMBOOL i_could_make_hedges_reachable(struct csmhedge_t *he1, struct csmhedge_t *he2)
+static CSMBOOL i_could_make_hedges_reachable(
+                        struct csmhedge_t *he1, struct csmhedge_t *he2,
+                        csmArrayStruct(csmhedge_t) *loose_ends)
 {
     if (csmhedge_edge(he1) == csmhedge_edge(he2))
     {
@@ -358,11 +397,11 @@ static CSMBOOL i_could_make_hedges_reachable(struct csmhedge_t *he1, struct csmh
         {
             return CSMFALSE;
         }
-        else if (i_make_reachable_end_vertex_he1_occur_in_face_of_he2(he1, he2) == CSMTRUE)
+        else if (i_make_reachable_end_vertex_he1_occur_in_face_of_he2(he1, he2, loose_ends) == CSMTRUE)
         {
             return CSMTRUE;
         }
-        else if (i_make_reachable_start_vertex_he1_occur_in_face_of_he2(he1, he2) == CSMTRUE)
+        else if (i_make_reachable_start_vertex_he1_occur_in_face_of_he2(he1, he2, loose_ends) == CSMTRUE)
         {
             return CSMTRUE;
         }
@@ -464,12 +503,12 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
                     else if (reachable_a == CSMTRUE && reachable_b == CSMFALSE)
                     {
                         csmdebug_print_debug_info("Analyzing edges of solid B\n");
-                        all_hedges_reachable = i_could_make_hedges_reachable(loose_end_b_i, loose_end_b_j);
+                        all_hedges_reachable = i_could_make_hedges_reachable(loose_end_b_i, loose_end_b_j, loose_ends_B);
                     }
                     else if (reachable_a == CSMFALSE && reachable_b == CSMTRUE)
                     {
                         csmdebug_print_debug_info("Analyzing edges of solid A\n");
-                        all_hedges_reachable = i_could_make_hedges_reachable(loose_end_a_i, loose_end_a_j);
+                        all_hedges_reachable = i_could_make_hedges_reachable(loose_end_a_i, loose_end_a_j, loose_ends_A);
                     }
                     else
                     {
