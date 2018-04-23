@@ -5567,8 +5567,10 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
-    return;
+    i_test_cilindro4(viewer);
+    i_test_mechanichal7();
+    //i_test_cilindro7_redux2(viewer);
+    //return;
     
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();
@@ -5626,20 +5628,20 @@ void csmtest_test(void)
         i_test_cilindro1(viewer);
         i_test_cilindro2(viewer);
         i_test_cilindro3(viewer);
-        //i_test_difference8();
-        //i_test_difference8_redux();
+        i_test_difference8();
+        i_test_difference8_redux();
         
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         {
             i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
             i_test_cilindro5(viewer); // -- Intersecciones non-manifold.
             i_test_cilindro6(viewer); // --> Intersecciones non-manifold.
-            i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
+            //i_test_cilindro7(viewer); // --> Intersecciones non-manifold.
             i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
         }
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
         
-        i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
+        //i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
         
         //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
                                   // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara

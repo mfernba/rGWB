@@ -38,22 +38,78 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_simplify_loop(
-                        struct csmloop_t *loop,
-                        CSMBOOL is_inner_loop, struct csmloop_t *outer_loop,
-                        const struct csmtolerance_t *tolerances,
-                        CSMBOOL *changed,
-                        CSMBOOL *loop_has_been_killed_opt)
+static void i_delete_null_area_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances, CSMBOOL *changed)
 {
     CSMBOOL there_are_changes;
     unsigned long no_iters;
-    double tolerance_equal_coords;
-    CSMBOOL loop_has_been_killed;
     
-    tolerance_equal_coords = csmtolerance_equal_coords(tolerances);
+    assert_no_null(changed);
+    
+    csmdebug_print_debug_info("Deleting null area faces...\n");
     
     no_iters = 0;
-    loop_has_been_killed = CSMFALSE;
+    
+    do
+    {
+        struct csmhashtb_iterator(csmedge_t) *edge_iterator;
+        
+        assert(no_iters < 10000);
+        no_iters++;
+        
+        edge_iterator = csmsolid_edge_iterator(solid);
+        there_are_changes = CSMFALSE;
+        
+        while (csmhashtb_has_next(edge_iterator, csmedge_t) == CSMTRUE)
+        {
+            struct csmedge_t *edge;
+            struct csmhedge_t *he1, *he2;
+            struct csmface_t *face_he1, *face_he2;
+            double face_he1_area, face_he2_area;
+            
+            csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
+            
+            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+            face_he1 = csmopbas_face_from_hedge(he1);
+            face_he1_area = csmface_loop_area_in_face(face_he1, csmface_flout(face_he1));
+            
+            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+            face_he2 = csmopbas_face_from_hedge(he2);
+            face_he2_area = csmface_loop_area_in_face(face_he2, csmface_flout(face_he2));
+            
+            if (face_he1_area == 0. || face_he2_area == 0.)
+            {
+                if (face_he1_area == 0.)
+                {
+                    csmeuler_lkef(&he2, &he1);
+                    csmface_redo_geometric_generated_data(face_he2);
+                }
+                else
+                {
+                    csmeuler_lkef(&he1, &he2);
+                    csmface_redo_geometric_generated_data(face_he1);
+                }
+                
+                there_are_changes = CSMTRUE;
+                break;
+            }
+        }
+        
+        if (there_are_changes == CSMTRUE)
+            *changed = CSMTRUE;
+        
+        csmhashtb_free_iterator(&edge_iterator, csmedge_t);
+        
+    } while (there_are_changes == CSMTRUE);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_delete_overlaped_hedges_in_same_loop(struct csmloop_t *loop, CSMBOOL *changed)
+{
+    CSMBOOL there_are_changes;
+    unsigned long no_iters;
+    
+    no_iters = 0;
     
     do
     {
@@ -69,108 +125,53 @@ static void i_simplify_loop(
         
         do
         {
-            struct csmvertex_t *he_iterator_vertex;
-            struct csmhedge_t *he_next;
-            struct csmvertex_t *he_next_next_vertex;
+            struct csmhedge_t *he_iterator_mate;
             
-            he_next = csmhedge_next(he_iterator);
-            he_next_next_vertex = csmhedge_vertex(csmhedge_next(he_next));
+            he_iterator_mate = csmopbas_mate(he_iterator);
             
-            he_iterator_vertex = csmhedge_vertex(he_iterator);
-            
-            if (csmvertex_equal_coords(he_iterator_vertex, he_next_next_vertex, tolerance_equal_coords) == CSMTRUE)
+            if (csmhedge_loop(he_iterator_mate) == loop && csmhedge_next(he_iterator) == he_iterator_mate)
             {
-                struct csmhedge_t *he_next_mate;
-            
-                csmdebug_set_debug_screen(CSMTRUE);
-                
-                csmface_debug_print_info_debug(csmloop_lface(loop), CSMTRUE, NULL);
-                csmdebug_show_face(csmloop_lface(loop), NULL);
-
-                he_next_mate = csmopbas_mate(he_next);
-                
-                if (he_iterator == he_next)
+                if (csmdebug_debug_enabled() == CSMTRUE)
                 {
-                    struct csmhedge_t *flout_hedge;
-                    
-                    assert(csmhedge_prev(he_iterator) == he_iterator);
-                    
-                    if (is_inner_loop == CSMTRUE)
-                    {
-                        struct csmhedge_t *he1_aux, *he2_aux;
-                        
-                        flout_hedge = csmloop_ledge(outer_loop);
-                    
-                        csmeuler_lmekr(flout_hedge, he_iterator, &he1_aux, &he2_aux);
-                        csmeuler_lkev(&he_next, &he_next_mate, NULL, NULL, NULL, NULL);
-                        csmeuler_lkev(&he1_aux, &he2_aux, NULL, NULL, NULL, NULL);
-                    }
-                    else
-                    {
-                        csmface_debug_print_info_debug(csmloop_lface(csmhedge_loop(he_next_mate)), CSMTRUE, NULL);
-                        csmdebug_show_face(csmloop_lface(csmhedge_loop(he_next_mate)), NULL);
-                        
-                        csmeuler_lkef(&he_next_mate, &he_next);
-                    }
-                    
-                    loop_has_been_killed = CSMTRUE;
-                }
-                else
-                {
-                    csmeuler_lkev(&he_next, &he_next_mate, NULL, NULL, NULL, NULL);
-                    
-                    csmface_debug_print_info_debug(csmloop_lface(loop), CSMTRUE, NULL);
                     csmdebug_show_face(csmloop_lface(loop), NULL);
+                    csmface_debug_print_info_debug(csmloop_lface(loop), CSMTRUE, NULL);
                 }
+                
+                csmeuler_lkev(&he_iterator_mate, &he_iterator, NULL, NULL, NULL, NULL);
                 
                 there_are_changes = CSMTRUE;
+                
+                if (csmdebug_debug_enabled() == CSMTRUE)
+                {
+                    csmdebug_show_face(csmloop_lface(loop), NULL);
+                    csmface_debug_print_info_debug(csmloop_lface(loop), CSMTRUE, NULL);
+                }
             }
             else
             {
-                he_iterator = he_next;
+                he_iterator = csmhedge_next(he_iterator);
             }
             
-            if (there_are_changes == CSMTRUE || loop_has_been_killed == CSMTRUE)
+            if (there_are_changes == CSMTRUE)
+            {
+                *changed = CSMTRUE;
                 break;
+            }
             
-        }while (he_iterator != ledge);
+        } while (he_iterator != ledge);
         
-    } while (there_are_changes == CSMTRUE && loop_has_been_killed == CSMFALSE);
-    
-    ASSIGN_OPTIONAL_VALUE(loop_has_been_killed_opt, loop_has_been_killed);
+    } while (there_are_changes == CSMTRUE);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_simplify_face_loop(struct csmface_t *face, const struct csmtolerance_t *tolerances, CSMBOOL *changed, CSMBOOL *face_has_been_deleted)
+static void i_delete_overlaped_hedges_in_same_face_loop(struct csmface_t *face, CSMBOOL *changed)
 {
-    struct csmloop_t *face_floops, *loop_iterator;
+    struct csmloop_t *loop_iterator;
     struct csmloop_t *flout;
     
-    assert_no_null(face_has_been_deleted);
-    
-    csmdebug_print_debug_info("Simpliying face %lu...\n", csmface_id(face));
-    
-    face_floops = csmface_floops(face);
+    loop_iterator = csmface_floops(face);
     flout = csmface_flout(face);
-    
-    if (csmface_id(face) == 40)
-    {
-        if (csmdebug_debug_enabled() == CSMTRUE)
-        {
-            CSMBOOL state;
-            
-            state = csmdebug_get_debug_screen();
-            csmdebug_set_debug_screen(CSMTRUE);
-            
-            csmface_debug_print_info_debug(face, CSMTRUE, NULL);
-            csmdebug_show_face(face, NULL);
-            
-            csmdebug_set_debug_screen(state);
-        }
-    }
-    
-    loop_iterator = face_floops;
     
     while (loop_iterator != NULL)
     {
@@ -179,55 +180,12 @@ static void i_simplify_face_loop(struct csmface_t *face, const struct csmtoleran
         loop_next = csmloop_next(loop_iterator);
         
         if (loop_iterator != flout)
-        {
-            i_simplify_loop(loop_iterator, CSMTRUE, flout, tolerances, changed, NULL);
-        }
+            i_delete_overlaped_hedges_in_same_loop(loop_iterator, changed);
         
         loop_iterator = loop_next;
     }
     
-    i_simplify_loop(flout, CSMFALSE, NULL, tolerances, changed, face_has_been_deleted);
-    
-    if (*face_has_been_deleted == CSMTRUE)
-        csmdebug_print_debug_info("Face deleted\n");
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static void i_simplify_all_face_loops(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances, CSMBOOL *changed)
-{
-    CSMBOOL there_are_changes;
-    unsigned long no_iters;
-    
-    assert_no_null(changed);
-
-    csmdebug_print_debug_info("Simpliying faces...\n");
-    no_iters = 0;
-    
-    do
-    {
-        struct csmhashtb_iterator(csmface_t) *face_iterator;
-        
-        assert(no_iters < 10000);
-        no_iters++;
-        
-        face_iterator = csmsolid_face_iterator(solid);
-        there_are_changes = CSMFALSE;
-    
-        while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
-        {
-            struct csmface_t *face;
-        
-            csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
-            i_simplify_face_loop(face, tolerances, changed, &there_are_changes);
-            
-            if (there_are_changes == CSMTRUE)
-                break;
-        }
-
-        csmhashtb_free_iterator(&face_iterator, csmface_t);
-        
-    } while (there_are_changes == CSMTRUE);
+    i_delete_overlaped_hedges_in_same_loop(flout, changed);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -236,14 +194,12 @@ static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmt
 {
     CSMBOOL there_are_changes;
     unsigned long no_iters;
-    unsigned long no_deleted;
     
     assert_no_null(changed);
     
     csmdebug_print_debug_info("Deleting coplanar faces...\n");
     
     no_iters = 0;
-    no_deleted = 0;
     
     do
     {
@@ -269,50 +225,68 @@ static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmt
             
             he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
             face_he2 = csmopbas_face_from_hedge(he2);
-    
-            if (csmface_are_coplanar_faces(face_he1, face_he2, tolerances, &same_sense) == CSMTRUE && same_sense == CSMTRUE)
+            
+            if (csmface_flout(face_he1) == csmhedge_loop(he1) && csmface_flout(face_he2) == csmhedge_loop(he2))
             {
-                if (csmface_flout(face_he1) == csmhedge_loop(he1) && csmface_flout(face_he2) == csmhedge_loop(he2))
+                if (face_he1 == face_he2)
                 {
-                    if (face_he1 != face_he2)
-                    {
-                        csmeuler_lkef(&he1, &he2);
-                    }
-                    else
-                    {
-                        struct csmloop_t *outer_loop, *new_loop;
-                        double A, B, C, D, xc, yc, zc;
-                        
-                        outer_loop = csmface_flout(face_he1);
-                        csmloop_face_equation(outer_loop, &A, &B, &C, &D, &xc, &yc, &zc);
-
-                        csmdebug_show_face(face_he1, NULL);
-                        
-                        csmeuler_lkemr(&he1, &he2, NULL, NULL, &new_loop);
-                        
-                        if (csmface_is_loop_contained_in_face_outer_loop(face_he1, new_loop, tolerances) == CSMFALSE)
-                        {
-                            double A_new, B_new, C_new, D_new, xc_new, yc_new, zc_new;
-                            CSMBOOL parallel, same_sense;
-
-                            csmloop_face_equation(new_loop, &A_new, &B_new, &C_new, &D_new, &xc_new, &yc_new, &zc_new);
-                            
-                            parallel = csmmath_unit_vectors_are_parallel_ex(A, B, C, A_new, B_new, C_new, tolerances, &same_sense);
-                            assert(parallel == CSMTRUE);
-                            
-                            if (same_sense == CSMFALSE)
-                                csmloop_revert_loop_orientation(new_loop);
-                            
-                            csmeuler_lringmv(new_loop, face_he1, CSMTRUE);
-                            csmface_reorient_loops_in_face(face_he1, tolerances);
-                        }
-                    }
-                    
-                    csmface_redo_geometric_generated_data(face_he1);
-                    
-                    no_deleted++;
+                    struct csmloop_t *outer_loop, *new_loop;
+                    double A, B, C, D, xc, yc, zc;
                     
                     there_are_changes = CSMTRUE;
+                    
+                    outer_loop = csmface_flout(face_he1);
+                    csmloop_face_equation(outer_loop, &A, &B, &C, &D, &xc, &yc, &zc);
+
+                    if (csmdebug_debug_enabled() == CSMTRUE)
+                    {
+                        //csmdebug_set_debug_screen(CSMTRUE);
+                        csmsolid_debug_print_debug_forced(solid);
+                        csmdebug_show_face(face_he1, NULL);
+                    }
+                    
+                    csmeuler_lkemr(&he1, &he2, NULL, NULL, &new_loop);
+                    
+                    if (csmface_is_loop_contained_in_face_outer_loop(face_he1, new_loop, tolerances) == CSMFALSE)
+                    {
+                        double A_new, B_new, C_new, D_new, xc_new, yc_new, zc_new;
+                        CSMBOOL parallel, same_sense;
+
+                        csmloop_face_equation(new_loop, &A_new, &B_new, &C_new, &D_new, &xc_new, &yc_new, &zc_new);
+                        
+                        parallel = csmmath_unit_vectors_are_parallel_ex(A, B, C, A_new, B_new, C_new, tolerances, &same_sense);
+                        assert(parallel == CSMTRUE);
+                        
+                        if (same_sense == CSMFALSE)
+                            csmloop_revert_loop_orientation(new_loop);
+                        
+                        csmeuler_lringmv(new_loop, face_he1, CSMTRUE);
+                        csmface_reorient_loops_in_face(face_he1, tolerances);
+                    }
+                    
+                    if (csmdebug_debug_enabled() == CSMTRUE)
+                        csmdebug_show_face(face_he1, NULL);
+                }
+                else if (csmface_are_coplanar_faces(face_he1, face_he2, tolerances, &same_sense) == CSMTRUE && same_sense == CSMTRUE)
+                {
+                    there_are_changes = CSMTRUE;
+                    
+                    if (csmdebug_debug_enabled() == CSMTRUE)
+                    {
+                        csmsolid_debug_print_debug_forced(solid);
+                        csmdebug_show_face(face_he1, face_he2);
+                    }
+                
+                    csmeuler_lkef(&he1, &he2);
+                    
+                    if (csmdebug_debug_enabled() == CSMTRUE)
+                        csmdebug_show_face(face_he1, NULL);
+                }
+                
+                if (there_are_changes == CSMTRUE)
+                {
+                    i_delete_overlaped_hedges_in_same_face_loop(face_he1, changed);
+                    csmface_redo_geometric_generated_data(face_he1);
                     break;
                 }
             }
@@ -426,16 +400,18 @@ void csmsimplifysolid_simplify(struct csmsolid_t *solid, const struct csmtoleran
     }
         
     changed = CSMFALSE;
-    i_simplify_all_face_loops(solid, tolerances, &changed);
+    i_delete_null_area_faces(solid, tolerances, &changed);
     i_delete_redundant_faces(solid, tolerances, &changed);
     i_delete_redundant_vertexs(solid, &changed);
 
-    if (csmdebug_debug_enabled() == CSMTRUE)
+    if (changed == CSMTRUE && csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("After simplification...\n");
         csmsolid_debug_print_debug_forced(solid);
-    }
         
+        csmdebug_show_viewer();
+    }
+    
     if (changed == CSMTRUE)
         csmsolid_redo_geometric_face_data(solid);
 }
