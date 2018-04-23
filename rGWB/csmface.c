@@ -393,6 +393,7 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
 void csmface_redo_geometric_generated_data(struct csmface_t *face)
 {
     double max_tolerable_distance;
+    struct csmloop_t *loop_iterator;
     
     assert_no_null(face);
     assert_no_null(face->flout);
@@ -404,6 +405,20 @@ void csmface_redo_geometric_generated_data(struct csmface_t *face)
                         &face->x_center, &face->y_center, &face->z_center);
     
     max_tolerable_distance = 1.1 * csmloop_max_distance_to_plane(face->flout, face->A, face->B, face->C, face->D);
+    
+    loop_iterator = face->floops;
+    
+    while (loop_iterator != NULL)
+    {
+        if (loop_iterator != face->flout)
+        {
+            double max_tolerable_distance_inner_loop;
+            
+            max_tolerable_distance_inner_loop = 1.1 * csmloop_max_distance_to_plane(loop_iterator, face->A, face->B, face->C, face->D);
+            max_tolerable_distance = CSMMATH_MAX(max_tolerable_distance, max_tolerable_distance_inner_loop);
+        }
+    }
+        
     face->fuzzy_epsilon = i_compute_fuzzy_epsilon_for_containing_test(face->A, face->B, face->C, face->D, max_tolerable_distance, face->floops);
     face->dropped_coord = csmmath_dropped_coord(face->A, face->B, face->C);
     
