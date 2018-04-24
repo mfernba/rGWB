@@ -191,7 +191,7 @@ static CSMBOOL i_is_null_edge(struct csmhedge_t *he, const struct csmtolerance_t
 
 // ------------------------------------------------------------------------------------------
 
-static struct csmhedge_t *i_get_prev_no_null_hedge(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
+struct csmhedge_t *csmopbas_get_prev_no_null_hedge(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
 {
     struct csmhedge_t *hedge_prev;
 
@@ -217,7 +217,7 @@ static CSMBOOL i_hedges_equal_coords(struct csmhedge_t *he1, struct csmhedge_t *
 
 // ------------------------------------------------------------------------------------------
 
-static struct csmhedge_t *i_get_next_no_null_hedge(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
+struct csmhedge_t *csmopbas_get_next_no_null_hedge(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances)
 {
     struct csmhedge_t *hedge_next;
 
@@ -247,11 +247,11 @@ CSMBOOL csmopbas_is_wide_hedge(
 
     vertex = csmhedge_vertex(hedge);
     
-    hedge_prev = i_get_prev_no_null_hedge(hedge, tolerances);
+    hedge_prev = csmopbas_get_prev_no_null_hedge(hedge, tolerances);
     vertex_prev = csmhedge_vertex(hedge_prev);
     csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_prev, &Ux_to_prev, &Uy_to_prev, &Uz_to_prev);
     
-    hedge_next = i_get_next_no_null_hedge(hedge, tolerances);
+    hedge_next = csmopbas_get_next_no_null_hedge(hedge, tolerances);
     vertex_next = csmhedge_vertex(hedge_next);
     csmvertex_vector_from_vertex1_to_vertex2(vertex, vertex_next, &Ux_to_next, &Uy_to_next, &Uz_to_next);
     

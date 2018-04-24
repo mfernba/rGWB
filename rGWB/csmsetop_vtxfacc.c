@@ -379,7 +379,10 @@ static void i_reclassify_on_edge_vertex_neighborhood(
         }
         else
         {
+            #ifdef __STANDALONE_DISTRIBUTABLE
             assert(prev_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && next_hedge_neighborhood->position == CSMSETOP_CLASSIFY_RESP_SOLID_OUT);
+            #endif
+            
             new_position = CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
         }
         

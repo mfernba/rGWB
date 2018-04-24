@@ -33,6 +33,8 @@ DLL_RGWB void csmsolid_vis_datos_mesh(
                         ArrEnum(cplan_tipo_primitiva_t) **tipo_primitivas, ArrPuntero(ArrULong) **inds_caras,
                         ArrPuntero(ArrPunto3D) **lineas_contorno_opc);
 
+DLL_RGWB CONSTRUCTOR(ArrPuntero(ArrPunto3D) *, csmsolid_vis_datos_lineas, (struct csmsolid_t *solid));
+    
 #endif
 
 #ifdef __cplusplus

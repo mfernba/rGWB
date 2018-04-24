@@ -241,7 +241,7 @@ void csmsolid_debug_print_complete_debug(struct csmsolid_t *solido, CSMBOOL asse
     
     if (csmdebug_debug_enabled() == CSMTRUE && csmdebug_is_print_solid_unblocked() == CSMTRUE)
     {
-        unsigned long num_faces, num_vertexs, num_edges, num_holes;
+        unsigned long num_faces, num_edges, num_holes;
         
         assert_no_null(solido);
         

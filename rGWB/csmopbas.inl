@@ -26,6 +26,11 @@ void csmopbas_addhe(
 void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_opc, struct csmhedge_t **hedge_next_opc);
 
 
+struct csmhedge_t *csmopbas_get_prev_no_null_hedge(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances);
+
+struct csmhedge_t *csmopbas_get_next_no_null_hedge(struct csmhedge_t *hedge, const struct csmtolerance_t *tolerances);
+
+
 // Geometry...
 
 CSMBOOL csmopbas_is_wide_hedge(

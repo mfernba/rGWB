@@ -268,10 +268,10 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
         csmface_face_equation(he_iterator_face, &A, &B, &C, &D);
         face_tolerance = csmface_tolerace(he_iterator_face);
         
-        he_iterator_prv = csmhedge_prev(he_iterator);
+        he_iterator_prv = csmopbas_get_prev_no_null_hedge(he_iterator, tolerances);
         i_vector_to_he(he_iterator_prv, vertex, &Ux1, &Uy1, &Uz1);
         
-        he_iterator_nxt = csmhedge_next(he_iterator);
+        he_iterator_nxt = csmopbas_get_next_no_null_hedge(he_iterator, tolerances);
         i_vector_to_he(he_iterator_nxt, vertex, &Ux2, &Uy2, &Uz2);
 
         csmmath_cross_product3D(Ux1, Uy1, Uz1, Ux2, Uy2, Uz2, &Ux12, &Uy12, &Uz12);

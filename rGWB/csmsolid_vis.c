@@ -17,12 +17,12 @@
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
+#include "csmmath.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 
 #include "csmassert.inl"
 #include "csmdebug.inl"
-#include "csmmath.inl"
 #include "csmstring.inl"
 #include "csmvertex.inl"
 
@@ -562,8 +562,6 @@ void csmsolid_vis_datos_mesh(
 
 static void i_append_linea_arista(struct csmedge_t *edge, ArrPuntero(ArrPunto3D) *lineas_contorno)
 {
-    struct csmhedge_t *he1, *he2;
-    struct csmface_t *face_he1, *face_he2;
     double x1, y1, z1, x2, y2, z2;
 
     csmedge_vertex_coordinates(edge, &x1, &y1, &z1, NULL, &x2, &y2, &z2, NULL);
