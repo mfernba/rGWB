@@ -312,7 +312,15 @@ static CSMBOOL i_make_reachable_end_vertex_he1_occur_in_face_of_he2(
                 he_mate_null_edge_replacement = csmhedge_prev(he1);
                 i_replace_loose_end(he1_next_mate, he_mate_null_edge_replacement, loose_ends);
             }
-        
+
+            if (csmhedge_setop_is_loose_end(he1_next) == CSMTRUE)
+            {
+                struct csmhedge_t *he_mate_null_edge_replacement;
+                
+                he_mate_null_edge_replacement = csmopbas_mate(csmhedge_prev(he1));
+                i_replace_loose_end(he1_next_mate, he_mate_null_edge_replacement, loose_ends);
+            }
+            
             csmeuler_lkef(&he1_next_mate, &he1_next);
         }
 
@@ -366,7 +374,15 @@ static CSMBOOL i_make_reachable_start_vertex_he1_occur_in_face_of_he2(
                 he_mate_null_edge_replacement = csmhedge_next(he1);
                 i_replace_loose_end(he1_prev_mate, he_mate_null_edge_replacement, loose_ends);
             }
-        
+
+            if (csmhedge_setop_is_loose_end(he1_prev) == CSMTRUE)
+            {
+                struct csmhedge_t *he_mate_null_edge_replacement;
+                
+                he_mate_null_edge_replacement = csmopbas_mate(csmhedge_next(he1));
+                i_replace_loose_end(he1_prev_mate, he_mate_null_edge_replacement, loose_ends);
+            }
+            
             csmeuler_lkef(&he1_prev_mate, &he1_prev);
         }
 
