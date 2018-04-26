@@ -332,7 +332,7 @@ void csmarrayc_dontuse_delete_element(struct csmarrayc_t *array, unsigned long i
 
 // ---------------------------------------------------------------------------------
 
-static int i_cmp_function_ptr(const void *cmp_data_void, const void *e1, const void *e2)
+static int i_cmp_function_ptr(const void *e1, const void *e2, const void *cmp_data_void)
 {
     struct i_cmp_data_t *cmp_data;
     
@@ -358,7 +358,7 @@ void csmarrayc_dontuse_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare f
 
 // ---------------------------------------------------------------------------------
 
-static int i_cmp_function_ptr_1_extra(const void *cmp_data_void, const void *e1, const void *e2)
+static int i_cmp_function_ptr_1_extra(const void *e1, const void *e2, const void *cmp_data_void)
 {
     struct i_cmp_data_1_extra_t *cmp_data;
     

@@ -8,4 +8,4 @@
 
 #include "csmfwddecl.hxx"
 
-void csmarqsort(void *aa, size_t n, size_t es, void *cmp_data, int (*cmp)(const void *, const void *, const void *));
+void csmarqsort(void *const pbase, size_t total_elems, size_t size, void *arg, int (*cmp)(const void *e1, const void *e2, const void *data));

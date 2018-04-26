@@ -21,6 +21,8 @@ CSMBOOL csmdebug_get_debug_screen(void);
 void csmdebug_set_debug_screen(CSMBOOL value);
     
 void csmdebug_configure_for_fast_testing(void);
+    
+void csmdebug_configure(CSMBOOL debug_screen, CSMBOOL debug_visual, CSMBOOL debug_file);
 
 void csmdebug_set_enabled_by_code(CSMBOOL enabled);
 
