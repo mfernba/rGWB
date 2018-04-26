@@ -33,14 +33,14 @@
  */
 
 static __inline char *med3(char *, char *, char *, void *, int (*)(const void *, const void *, const void *));
-static __inline void swapfunc(char *, char *, long, int);
+static __inline void swapfunc(char *, char *, size_t, int);
 #define min(a, b)    (a) < (b) ? a : b
 
 /*
  * Qsort routine from Bentley & McIlroy's "Engineering a Sort Function".
  */
 #define swapcode(TYPE, parmi, parmj, n) {         \
-    long i = (n) / sizeof (TYPE);             \
+    size_t i = (n) / sizeof (TYPE);             \
     TYPE *pi = (TYPE *) (parmi);             \
     TYPE *pj = (TYPE *) (parmj);             \
     do {                         \
@@ -50,21 +50,21 @@ static __inline void swapfunc(char *, char *, long, int);
         } while (--i > 0);                \
 }
 
-#define SWAPINIT(a, es) swaptype = ((char *)a - (char *)0) % sizeof(long) || \
-    es % sizeof(long) ? 2 : es == sizeof(long)? 0 : 1;
+#define SWAPINIT(a, es) swaptype = ((char *)a - (char *)0) % sizeof(size_t) || \
+    es % sizeof(size_t) ? 2 : es == sizeof(size_t)? 0 : 1;
 
-static __inline void swapfunc(char *a, char *b, long n, int swaptype)
+static __inline void swapfunc(char *a, char *b, size_t n, int swaptype)
 {
     if (swaptype <= 1)
-        swapcode(long, a, b, n)
+        swapcode(size_t, a, b, n)
     else
         swapcode(char, a, b, n)
 }
 #define swap(a, b)                    \
     if (swaptype == 0) {                \
-        long t = *(long *)(a);            \
-        *(long *)(a) = *(long *)(b);        \
-        *(long *)(b) = t;            \
+        size_t t = *(size_t *)(a);            \
+        *(size_t *)(a) = *(size_t *)(b);        \
+        *(size_t *)(b) = t;            \
     } else                        \
         swapfunc(a, b, es, swaptype)
 #define vecswap(a, b, n)     if ((n) > 0) swapfunc(a, b, n, swaptype)
@@ -80,7 +80,8 @@ void csmarqsort(void *aa, size_t n, size_t es, void *cmp_data, int (*cmp)(const 
 {
     char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
     int swaptype;
-    long d, r, swap_cnt;
+    size_t d, swap_cnt;
+    int64_t r;
     char *a = aa;
 loop:    SWAPINIT(a, es);
     swap_cnt = 0;

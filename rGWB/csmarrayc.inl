@@ -3,13 +3,13 @@
 #include "csmarrayc.hxx"
 #include "csmfwddecl.hxx"
 
-struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacidad_inicial, size_t tamanyo_type_dato);
+struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(unsigned long capacidad_inicial, size_t tamanyo_type_dato);
 
 struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *array, csmarrayc_FPtr_copy_struct func_copy_element);
 
 void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_struct func_free_struct);
 
-size_t csmarrayc_dontuse_count(const struct csmarrayc_t *array);
+unsigned long csmarrayc_dontuse_count(const struct csmarrayc_t *array);
 
 void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *dato);
 

@@ -21,7 +21,7 @@
 #endif
 
 #define i_DEBUG_MASK ((char)0xFA)
-static const size_t i_INITIAL_CAPACITY = 100;
+static const unsigned long i_INITIAL_CAPACITY = 100;
 
 struct csmarrayc_t
 {
@@ -87,11 +87,10 @@ static struct csmarrayc_t *i_new(
 
 // ---------------------------------------------------------------------------------
 
-struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(size_t capacity_inicial, size_t element_data_size)
+struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(unsigned long capacity_inicial, size_t element_data_size)
 {
     CSMBOOL is_pointer_array;
-    size_t no_elems;
-    size_t capacity;
+    size_t no_elems, capacity;
     char *ptr_data;
     
     is_pointer_array = CSMTRUE;
@@ -151,7 +150,7 @@ void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_stru
     if ((*array)->is_pointer_array == CSMTRUE && func_free_struct != NULL)
     {
         char *ptr_data;
-        unsigned long i, offset;
+        size_t i, offset;
         
         ptr_data = (*array)->ptr_data;
         offset = 0;
@@ -170,10 +169,12 @@ void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_stru
 
 // ---------------------------------------------------------------------------------
 
-size_t csmarrayc_dontuse_count(const struct csmarrayc_t *array)
+unsigned long csmarrayc_dontuse_count(const struct csmarrayc_t *array)
 {
     i_integrity(array);
-    return array->no_elems;
+    assert(array->no_elems < ULONG_MAX);
+
+    return (unsigned long)array->no_elems;
 }
 
 // ---------------------------------------------------------------------------------
@@ -203,7 +204,7 @@ void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long p
     }
     
     offset_pos = pos * array->element_data_size;
-    offset_pos_next = (pos + 1 )* array->element_data_size;
+    offset_pos_next = (pos + (size_t)1 )* array->element_data_size;
     bytes_elems_to_move = (array->no_elems - pos) * array->element_data_size;
     
     memmove(array->ptr_data + offset_pos_next, array->ptr_data + offset_pos, bytes_elems_to_move);
@@ -261,7 +262,7 @@ CSMBOOL csmarrayc_dontuse_contains_element(
     CSMBOOL exists_element;
     unsigned long idx_loc;
     unsigned long i;
-    unsigned long offset;
+    size_t offset;
     
     assert_no_null(array);
     
@@ -295,7 +296,7 @@ CSMBOOL csmarrayc_dontuse_contains_element(
 
 void *csmarrayc_dontuse_get(struct csmarrayc_t *array, unsigned long idx)
 {
-    unsigned long offset;
+    size_t offset;
     
     assert_no_null(array);
     assert(idx < array->no_elems);
@@ -308,7 +309,7 @@ void *csmarrayc_dontuse_get(struct csmarrayc_t *array, unsigned long idx)
 
 void csmarrayc_dontuse_delete_element(struct csmarrayc_t *array, unsigned long idx, csmarrayc_FPtr_free_struct func_free)
 {
-    unsigned long offset;
+    size_t offset;
     
     assert_no_null(array);
     assert(idx < array->no_elems);
@@ -393,7 +394,7 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array)
 	
 	if (array->no_elems >= 2)
 	{
-		unsigned long idx1, idx2;
+		size_t idx1, idx2;
 		
 		idx1 = 0;
 		idx2 = array->no_elems - 1;
