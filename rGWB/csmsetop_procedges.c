@@ -729,9 +729,14 @@ static void i_update_splitted_hedge_on_intersections(
                         struct csmhedge_t *hit_hedge_at_face_to_replace, struct csmedge_t *hit_edge_at_face_replacement)
 {
     unsigned long i, num_intersections;
+    struct csmedge_t *hit_edge_at_face_to_replace;
+    struct csmhedge_t *mate_hit_hedge_at_face_to_replace;
     
     num_intersections = csmarrayc_count_st(edge_intersecctions, i_edge_intersection_t);
     assert(num_intersections > 0);
+
+    hit_edge_at_face_to_replace = csmhedge_edge(hit_hedge_at_face_to_replace);
+    mate_hit_hedge_at_face_to_replace = csmopbas_mate(hit_hedge_at_face_to_replace);
 
     for (i = start_idx; i < num_intersections; i++)
     {
@@ -744,12 +749,13 @@ static void i_update_splitted_hedge_on_intersections(
         {
             case i_TYPE_EDGE_INTERSECTION_INTERIOR_EDGE:
 
-                if (edge_intersection->hit_hedge_at_face == hit_hedge_at_face_to_replace)
+                if (edge_intersection->hit_hedge_at_face == hit_hedge_at_face_to_replace
+                        || edge_intersection->hit_hedge_at_face == mate_hit_hedge_at_face_to_replace)
                 {
                     double x1_esplit, y1_esplit, z1_esplit, x2_esplit, y2_esplit, z2_esplit;
 
                     csmedge_vertex_coordinates(
-                                csmhedge_edge(hit_hedge_at_face_to_replace), 
+                                hit_edge_at_face_to_replace,
                                 &x1_esplit, &y1_esplit, &z1_esplit, NULL, &x2_esplit, &y2_esplit, &z2_esplit, NULL);
 
                     if (csmmath_is_point_in_segment3D(
@@ -758,8 +764,10 @@ static void i_update_splitted_hedge_on_intersections(
                                 edge_intersection->tolerance_equal_coords,
                                 NULL) == CSMFALSE)
                     {
+                        struct csmhedge_t *he_replacement;
+
                         csmedge_vertex_coordinates(
-                                hit_edge_at_face_replacement, 
+                                hit_edge_at_face_replacement,
                                 &x1_esplit, &y1_esplit, &z1_esplit, NULL, &x2_esplit, &y2_esplit, &z2_esplit, NULL);
 
                         assert(csmmath_is_point_in_segment3D(
@@ -768,8 +776,23 @@ static void i_update_splitted_hedge_on_intersections(
                                 edge_intersection->tolerance_equal_coords,
                                 NULL) == CSMTRUE);
 
-                        edge_intersection->hit_hedge_at_face = csmedge_hedge_lado(hit_edge_at_face_replacement, CSMEDGE_LADO_HEDGE_POS);
-                        assert(hit_hedge_at_face_to_replace != edge_intersection->hit_hedge_at_face);
+                        he_replacement = csmedge_hedge_lado(hit_edge_at_face_replacement, CSMEDGE_LADO_HEDGE_POS);
+
+                        if (csmhedge_next(edge_intersection->hit_hedge_at_face) == he_replacement
+                                    || csmhedge_prev(edge_intersection->hit_hedge_at_face) == he_replacement)
+                        {
+                            edge_intersection->hit_hedge_at_face = he_replacement;
+                        }
+                        else
+                        {
+                            he_replacement = csmedge_hedge_lado(hit_edge_at_face_replacement, CSMEDGE_LADO_HEDGE_NEG);
+
+                            assert(csmhedge_next(edge_intersection->hit_hedge_at_face) == he_replacement
+                                    || csmhedge_prev(edge_intersection->hit_hedge_at_face) == he_replacement);
+                        }
+
+                        assert(hit_hedge_at_face_to_replace != he_replacement);
+                        edge_intersection->hit_hedge_at_face = he_replacement;
                     }
                 }
                 break;
