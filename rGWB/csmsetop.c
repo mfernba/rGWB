@@ -305,6 +305,51 @@ static void i_assign_result_material(
     }
 }
 
+// ----------------------------------------------------------------------------------------------------
+
+static CSMBOOL i_null_face_has_only_two_loops(struct csmface_t *null_face)
+{
+    struct csmloop_t *loop1, *loop2;
+
+    loop1 = csmface_floops(null_face);
+    assert_no_null(loop1);
+
+    loop2 = csmloop_next(loop1);
+
+    if (loop2 == NULL)
+    {
+        return CSMFALSE;
+    }
+    else
+    {
+        if (csmloop_next(loop2) == NULL)
+            return CSMTRUE;
+        else
+            return CSMFALSE;
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static CSMBOOL i_null_faces_are_correct(csmArrayStruct(csmface_t) *set_of_null_faces)
+{
+    unsigned long i, no_null_faces;
+
+    no_null_faces = csmarrayc_count_st(set_of_null_faces, csmface_t);
+
+    for (i = 0; i < no_null_faces; i++)
+    {
+        struct csmface_t *null_face;
+        
+        null_face = csmarrayc_get_st(set_of_null_faces, i, csmface_t);
+
+        if (i_null_face_has_only_two_loops(null_face) == CSMFALSE)
+            return CSMFALSE;
+    }
+
+    return CSMTRUE;
+}
+
 // ------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
@@ -314,8 +359,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
                         const struct csmtolerance_t *tolerances))
 {
     struct csmsolid_t *result;
-    unsigned long i, no_null_faces, half_no_null_faces;
-    unsigned long face_desp_a, face_desp_b;
+    unsigned long no_null_faces, half_no_null_faces;
     
     no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
     assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
@@ -327,109 +371,119 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
     i_convert_holes_attached_to_in_component_of_null_faces_in_faces(set_of_null_faces_B);
     i_convert_faces_attached_to_out_component_of_null_faces_in_faces_if_out_component_is_connected_to_itself(solid_B, tolerances, set_of_null_faces_B);
 
-    //csmdebug_show_viewer();
-    
-    i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_A);
-    i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_B);
-    no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
-    assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
-    assert(no_null_faces % 2 == 0);
-    
-    csmsolid_redo_geometric_face_data(solid_A);
-    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_A, tolerances);
-    csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_A, tolerances, set_of_null_faces_A);
-    
-    csmsolid_redo_geometric_face_data(solid_B);
-    csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_B, tolerances);
-    csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_B, tolerances, set_of_null_faces_B);
-
-    no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
-    assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
-    assert(no_null_faces > 0);
-    assert(no_null_faces % 2 == 0);
-    
-    half_no_null_faces = no_null_faces / 2;
-    
-    switch (set_operation)
+    if (i_null_faces_are_correct(set_of_null_faces_A) == CSMFALSE || i_null_faces_are_correct(set_of_null_faces_B) == CSMFALSE)
     {
-        case CSMSETOP_OPERATION_UNION:
-            
-            face_desp_a = 0;
-            face_desp_b = 0;
-            break;
-            
-        case CSMSETOP_OPERATION_DIFFERENCE:
-            
-            face_desp_a = 0;
-            face_desp_b = half_no_null_faces;
-
-            csmsolid_revert(solid_B);
-            break;
-            
-        case CSMSETOP_OPERATION_INTERSECTION:
-            
-            face_desp_a = half_no_null_faces;
-            face_desp_b = half_no_null_faces;            
-            break;
-            
-        default_error();
+        result = NULL;
     }
-    
-    csmsolid_debug_print_debug(solid_A, CSMFALSE);
-    csmsolid_debug_print_debug(solid_B, CSMFALSE);
-
-    csmsolid_prepare_for_cleanup(solid_A);
-    csmsolid_prepare_for_cleanup(solid_B);
-    
-    result = csmsolid_crea_vacio(0);
-    i_assign_result_material(solid_A, solid_B, result);
-    csmsolid_set_name(result, "Result");
-    
-    for (i = 0; i < half_no_null_faces; i++)
+    else
     {
-        struct csmface_t *face_from_solid_A, *face_from_solid_B;
+        unsigned long i;
+        unsigned long face_desp_a, face_desp_b;
+
+        //csmdebug_show_viewer();
+    
+        i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_A);
+        i_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces_B);
+        no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
+        assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
+        assert(no_null_faces % 2 == 0);
+    
+        csmsolid_redo_geometric_face_data(solid_A);
+        csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_A, tolerances);
+        csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_A, tolerances, set_of_null_faces_A);
+    
+        csmsolid_redo_geometric_face_data(solid_B);
+        csmsetopcom_reintroduce_holes_in_corresponding_faces(set_of_null_faces_B, tolerances);
+        csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(solid_B, tolerances, set_of_null_faces_B);
+
+        no_null_faces = csmarrayc_count_st(set_of_null_faces_A, csmface_t);
+        assert(no_null_faces == csmarrayc_count_st(set_of_null_faces_B, csmface_t));
+        assert(no_null_faces > 0);
+        assert(no_null_faces % 2 == 0);
+    
+        half_no_null_faces = no_null_faces / 2;
+    
+        switch (set_operation)
+        {
+            case CSMSETOP_OPERATION_UNION:
+            
+                face_desp_a = 0;
+                face_desp_b = 0;
+                break;
+            
+            case CSMSETOP_OPERATION_DIFFERENCE:
+            
+                face_desp_a = 0;
+                face_desp_b = half_no_null_faces;
+
+                csmsolid_revert(solid_B);
+                break;
+            
+            case CSMSETOP_OPERATION_INTERSECTION:
+            
+                face_desp_a = half_no_null_faces;
+                face_desp_b = half_no_null_faces;
+                break;
+            
+            default_error();
+        }
+    
+        csmsolid_debug_print_debug(solid_A, CSMFALSE);
+        csmsolid_debug_print_debug(solid_B, CSMFALSE);
+
+        csmsolid_prepare_for_cleanup(solid_A);
+        csmsolid_prepare_for_cleanup(solid_B);
+    
+        result = csmsolid_crea_vacio(0);
+        i_assign_result_material(solid_A, solid_B, result);
+        csmsolid_set_name(result, "Result");
+    
+        for (i = 0; i < half_no_null_faces; i++)
+        {
+            struct csmface_t *face_from_solid_A, *face_from_solid_B;
         
-        face_from_solid_A = csmarrayc_get_st(set_of_null_faces_A, i + face_desp_a, csmface_t);
-        csmsetopcom_move_face_to_solid(0, face_from_solid_A, solid_A, result);
+            face_from_solid_A = csmarrayc_get_st(set_of_null_faces_A, i + face_desp_a, csmface_t);
+            csmsetopcom_move_face_to_solid(0, face_from_solid_A, solid_A, result);
         
-        face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
-        csmsetopcom_move_face_to_solid(0, face_from_solid_B, solid_B, result);
+            face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
+            csmsetopcom_move_face_to_solid(0, face_from_solid_B, solid_B, result);
+        }
+    
+        csmsetopcom_cleanup_solid_setop(solid_A, solid_B, result);
+        csmsolid_finish_cleanup(solid_A);
+        csmsolid_finish_cleanup(solid_B);
+        csmsolid_finish_cleanup(result);
+    
+        csmsolid_debug_print_debug(result, CSMTRUE);
+        //csmsolid_debug_print_debug(solid_A, CSMFALSE);
+        //csmsolid_debug_print_debug(solid_B, CSMFALSE);
+
+        csmsolid_debug_print_debug(result, CSMTRUE);
+    
+        for (i = 0; i < half_no_null_faces; i++)
+        {
+            struct csmface_t *face_from_solid_A, *face_from_solid_B;
+        
+            face_from_solid_A = csmarrayc_get_st(set_of_null_faces_A, i + face_desp_a, csmface_t);
+            face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
+        
+            csmeuler_lkfmrh(face_from_solid_A, &face_from_solid_B);
+            csmloopglue_merge_face_loops(face_from_solid_A, tolerances);
+        }
+
+        //csmdebug_set_viewer_parameters(result, NULL);
+        //csmdebug_show_viewer();
+
+        csmdebug_print_debug_info("After merging face loops...\n");
+        csmsolid_debug_print_debug(result, CSMTRUE);
+
+        csmsetopcom_correct_faces_after_joining_null_edges(result, tolerances);
+    
+        csmsolid_clear_algorithm_data(result);
+        csmsimplifysolid_simplify(result, tolerances);
+    
+        csmdebug_set_viewer_results(result, NULL);
     }
-    
-    csmsetopcom_cleanup_solid_setop(solid_A, solid_B, result);
-    csmsolid_finish_cleanup(solid_A);
-    csmsolid_finish_cleanup(solid_B);
-    csmsolid_finish_cleanup(result);    
-    
-    csmsolid_debug_print_debug(result, CSMTRUE);
-    //csmsolid_debug_print_debug(solid_A, CSMFALSE);
-    //csmsolid_debug_print_debug(solid_B, CSMFALSE);
-
-    csmsolid_debug_print_debug(result, CSMTRUE);
-    
-    for (i = 0; i < half_no_null_faces; i++)
-    {
-        struct csmface_t *face_from_solid_A, *face_from_solid_B;
-        
-        face_from_solid_A = csmarrayc_get_st(set_of_null_faces_A, i + face_desp_a, csmface_t);
-        face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
-        
-        csmeuler_lkfmrh(face_from_solid_A, &face_from_solid_B);
-        csmloopglue_merge_face_loops(face_from_solid_A, tolerances);
-    }
-
-    //csmdebug_set_viewer_parameters(result, NULL);
-    //csmdebug_show_viewer();
-
-    csmdebug_print_debug_info("After merging face loops...\n");
-    csmsolid_debug_print_debug(result, CSMTRUE);
-
-    csmsetopcom_correct_faces_after_joining_null_edges(result, tolerances);
-    
-    csmsolid_clear_algorithm_data(result);
-    csmsimplifysolid_simplify(result, tolerances);
-    
-    csmdebug_set_viewer_results(result, NULL);
     
     return result;
 }
@@ -626,13 +680,21 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
                 }
                 else
                 {
-                    result = CSMSETOP_OPRESULT_OK;
-                    
                     solid_res_loc = i_finish_set_operation(
                                 set_operation,
                                 solid_A, set_of_null_faces_A,
                                 solid_B, set_of_null_faces_B,
                                 tolerances);
+
+                    if (solid_res_loc != NULL)
+                    {
+                        result = CSMSETOP_OPRESULT_OK;
+                    }
+                    else
+                    {
+                        result = CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS;
+                        solid_res_loc = NULL;
+                    }
                 }
                 
                 csmarrayc_free_st(&set_of_null_faces_A, csmface_t, NULL);
