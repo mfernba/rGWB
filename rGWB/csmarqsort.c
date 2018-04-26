@@ -80,7 +80,7 @@ void csmarqsort(void *aa, size_t n, size_t es, void *cmp_data, int (*cmp)(const 
 {
     char *pa, *pb, *pc, *pd, *pl, *pm, *pn;
     int swaptype;
-    size_t d, swap_cnt;    
+    size_t d, swap_cnt;
     #ifdef WIN64
     __int64 r;
     #else
