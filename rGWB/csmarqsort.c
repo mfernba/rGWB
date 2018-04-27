@@ -246,3 +246,4 @@ void csmarqsort(void *const pbase, size_t total_elems, size_t size, void *arg, i
   }
 }
 
+/*lint -restore*/
