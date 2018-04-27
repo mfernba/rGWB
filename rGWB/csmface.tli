@@ -23,5 +23,6 @@ struct csmface_t
     double x_center, y_center, z_center;
     
     CSMBOOL setop_is_null_face;
+    CSMBOOL setop_is_new_face;
 };
 

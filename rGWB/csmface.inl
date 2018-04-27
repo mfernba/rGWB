@@ -141,3 +141,5 @@ void csmface_clear_algorithm_mask(struct csmface_t *face);
 
 CSMBOOL csmface_is_setop_null_face(struct csmface_t *face);
 void csmface_mark_setop_null_face(struct csmface_t *face);
+
+CSMBOOL csmface_is_setop_new_face(struct csmface_t *face);

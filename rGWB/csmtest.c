@@ -5279,6 +5279,77 @@ static void i_test_difference8_redux(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_substract_rectangular_solid(
+                        double ax, double ay, double depth,
+                        double Xo, double Yo, double Zo,
+                        struct csmsolid_t **solid_res)
+{
+    struct csmshape2d_t *shape1;
+    csmArrPoint2D *points;
+    struct csmsolid_t *solid_aux, *solid_to_substract;
+
+    points = csmArrPoint2D_new(0);
+    csmArrPoint2D_append(points, -.5 * ax, -.5 * ay);
+    csmArrPoint2D_append(points,  .5 * ax, -.5 * ay);
+    csmArrPoint2D_append(points,  .5 * ax,  .5 * ay);
+    csmArrPoint2D_append(points, -.5 * ax,  .5 * ay);
+
+    shape1 = csmshape2d_new();
+    csmshape2d_append_new_polygon_with_points(shape1, &points);
+
+    solid_to_substract = csmsweep_create_solid_from_shape_debug(
+                    shape1, Xo, Yo, Zo, 1., 0., 0., 0., 1., 0.,
+                    shape1, Xo, Yo, Zo - depth, 1., 0., 0., 0., 1., 0.,
+                    0);
+
+    csmshape2d_free(&shape1);
+
+    solid_aux = *solid_res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, solid_to_substract, solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_to_substract);
+    csmsolid_free(&solid_aux);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_difference9(void)
+{
+    struct csmsolid_t *solid_res;
+    
+    i_set_output_debug_file("test_difference_9");
+
+    {
+        struct csmshape2d_t *shape1;
+        csmArrPoint2D *points;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, -10., -10.);
+        csmArrPoint2D_append(points,  10., -10.);
+        csmArrPoint2D_append(points,  10., 10.);
+        csmArrPoint2D_append(points, -10., 10.);
+        
+        shape1 = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape1, &points);
+        
+        solid_res = csmsweep_create_solid_from_shape_debug(
+                        shape1,
+                        0., 0., 0.3, 1., 0., 0., 0., 1., 0.,
+                        shape1,
+                        0., 0., 0.0, 1., 0., 0., 0., 1., 0.,
+                        0);
+        
+        csmshape2d_free(&shape1);
+    }
+
+     i_substract_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, &solid_res);
+     i_substract_rectangular_solid(1., 0.5, 0.3, -2., -2.5 - 0.25, 0.3, &solid_res);
+     i_substract_rectangular_solid(1., 0.5, 0.3,  2., -2.5 - 0.25, 0.3, &solid_res);
+    
+    csmsolid_free(&solid_res);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_append_loop_to_faceted_brep_face(
                         struct csmfacbrep2solid_face_t *face,
                         csmArrPoint3D **loop_points, CSMBOOL is_outer)
@@ -5378,7 +5449,7 @@ static void i_test_facetedbrep1(struct csmviewer_t *viewer)
     result = csmfacbrep2solid_build(builder, &solid);
     assert(result == CSMFACBREP2SOLID_RESULT_OK);
     
-    csmviewer_set_parameters(viewer, solid, NULL);
+    csmviewer_set_results(viewer, solid, NULL);
     csmviewer_show(viewer);
 
     csmviewer_set_results(viewer, solid, NULL);
@@ -5563,17 +5634,22 @@ void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
     CSMBOOL process_all_test = CSMFALSE;
-    
+
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    i_test_cilindro4(viewer);
-    i_test_mechanichal7();
+    //csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    //i_test_difference9();
+    //return;
+
+    //i_test_cilindro4(viewer);
+    //i_test_mechanichal7();
     //i_test_cilindro7_redux2(viewer);
     //return;
     
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();
+    csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
     
     //csmtest_array_test1();
     //csmtest_array_test2();

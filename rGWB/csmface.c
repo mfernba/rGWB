@@ -35,7 +35,8 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         double x_center, double y_center, double z_center,
                         struct csmbbox_t **bbox,
-                        CSMBOOL setop_is_null_face))
+                        CSMBOOL setop_is_null_face,
+                        CSMBOOL setop_is_new_face))
 {
     struct csmface_t *face;
     
@@ -65,6 +66,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     face->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
  
     face->setop_is_null_face = setop_is_null_face;
+    face->setop_is_new_face = setop_is_new_face;
     
     return face;
 }
@@ -84,6 +86,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     double x_center, y_center, z_center;
     struct csmbbox_t *bbox;
     CSMBOOL setop_is_null_face;
+    CSMBOOL setop_is_new_face;
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
 
@@ -108,6 +111,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     bbox = csmbbox_create_empty_box();
 
     setop_is_null_face = CSMFALSE;
+    setop_is_new_face = CSMTRUE;
     
     return i_crea(
                 id,
@@ -122,7 +126,8 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
                 dropped_coord,
                 x_center, y_center, z_center,
                 &bbox,
-                setop_is_null_face);
+                setop_is_null_face,
+                setop_is_new_face);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -139,12 +144,14 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     struct csmloop_t *flout, *floops;
     struct csmbbox_t *bbox;
     CSMBOOL setop_is_null_face;
+    CSMBOOL setop_is_new_face;
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
     flout = NULL;
     floops = NULL;
     bbox = csmbbox_create_empty_box();
     setop_is_null_face = CSMFALSE;
+    setop_is_new_face = CSMFALSE;
     
     return i_crea(
                 id,
@@ -159,7 +166,8 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                 dropped_coord,
                 x_center, y_center, z_center,
                 &bbox,
-                setop_is_null_face);
+                setop_is_null_face,
+                setop_is_new_face);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1278,6 +1286,7 @@ void csmface_clear_algorithm_mask(struct csmface_t *face)
     assert_no_null(face);
     
     face->setop_is_null_face = CSMFALSE;
+    face->setop_is_new_face = CSMFALSE;
     
     loop_iterator = face->floops;
     
@@ -1302,4 +1311,12 @@ void csmface_mark_setop_null_face(struct csmface_t *face)
 {
     assert_no_null(face);
     face->setop_is_null_face = CSMTRUE;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CSMBOOL csmface_is_setop_new_face(struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->setop_is_new_face;
 }
