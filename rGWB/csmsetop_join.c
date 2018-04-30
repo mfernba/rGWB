@@ -667,11 +667,32 @@ static CSMBOOL i_is_possible_to_loose_ends_after_modifying_topology(
                         struct csmhedge_t *loose_end_b_i, struct csmhedge_t *loose_end_b_j, csmArrayStruct(csmhedge_t) *loose_ends_b)
 {
     enum i_repair_option_t repair_a, repair_b;
+    CSMBOOL try_to_repair;
     
     repair_a = i_repair_option_betweem_hegdes(repair_pass, loose_end_a_i, loose_end_a_j);
     repair_b = i_repair_option_betweem_hegdes(repair_pass, loose_end_b_i, loose_end_b_j);
     
-    if (i_is_possible_to_repair_hedges_connection(repair_a) == CSMTRUE
+    switch (repair_pass)
+    {
+        case i_REPAIR_PASS_ONE:
+        {
+            if (repair_a == i_REPAIR_OPTION_NOT_NEEDED || repair_b == i_REPAIR_OPTION_NOT_NEEDED)
+                try_to_repair = CSMTRUE;
+            else
+                try_to_repair = CSMFALSE;
+            break;
+        }
+            
+        case i_REPAIR_PASS_TWO:
+            
+            try_to_repair = CSMTRUE;
+            break;
+            
+        default_error();
+    }
+    
+    if (try_to_repair == CSMTRUE
+            && i_is_possible_to_repair_hedges_connection(repair_a) == CSMTRUE
             && i_is_possible_to_repair_hedges_connection(repair_b) == CSMTRUE)
     {
         i_repair_hedges_connection_with_repairment_strategy(repair_a, loose_end_a_i, loose_end_a_j, loose_ends_a);
