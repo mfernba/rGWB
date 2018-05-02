@@ -22,32 +22,12 @@
 #include "csmsolid.inl"
 #include "csmsolid_debug.inl"
 #include "csmstring.inl"
-#include "csmvertex.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #else
 #include "cyassert.h"
 #endif
-
-enum i_repair_pass_t
-{
-    i_REPAIR_PASS_ONE,
-    i_REPAIR_PASS_TWO
-};
-
-enum i_repair_option_t
-{
-    i_REPAIR_OPTION_NOT_NEEDED,
-    i_REPAIR_OPTION_UNDEFINED,
-    i_REPAIR_OPTION_END_VERTEX_HE1_OCCUR_IN_FACE_OF_HE2,
-    i_REPAIR_OPTION_START_VERTEX_HE1_OCCUR_IN_FACE_OF_HE2,
-    i_REPAIR_OPTION_MERGE_FACES
-};
-
-#define i_LAST_REPAIR_PASS i_REPAIR_PASS_TWO
-
-static CSMBOOL i_ALLOW_REPAIR_PASS_TWO = CSMFALSE;
 
 // ------------------------------------------------------------------------------------------
 
@@ -273,202 +253,57 @@ static void i_validate_edges_belong_to_solid(struct csmsolid_t *solid, csmArrayS
 
 static void i_replace_loose_end(
                         struct csmhedge_t *he_to_replace, struct csmhedge_t *he_to_replacement,
+                        struct csmhedge_t **he_destination_face, CSMBOOL *he_has_been_replaced, 
                         csmArrayStruct(csmhedge_t) *loose_ends)
 {
     unsigned long idx;
     
     assert(csmhedge_setop_is_loose_end(he_to_replacement) == CSMFALSE);
+    assert_no_null(he_destination_face);
+    assert_no_null(he_has_been_replaced);
     
     if (csmarrayc_contains_element_st(loose_ends, csmhedge_t, he_to_replace, struct csmhedge_t, csmhedge_id_igual, &idx) == CSMTRUE)
     {
         csmhedge_setop_set_loose_end(he_to_replacement, CSMTRUE);
         csmarrayc_set_st(loose_ends, idx, he_to_replacement, csmhedge_t);
     }
-}
 
-// ----------------------------------------------------------------------------------------------------
-
-static CSMBOOL i_does_he1_and_he2_vertex_have_a_common_face(
-                        struct csmhedge_t *he1, struct csmhedge_t *he2,
-                        struct csmface_t **common_face,
-                        struct csmhedge_t **he1_in_common_face, struct csmhedge_t **he2_in_common_face)
-{
-    CSMBOOL exists_common_face;
-    struct csmface_t *common_face_loc;
-    struct csmhedge_t *he1_in_common_face_loc, *he2_in_common_face_loc;
-    struct csmvertex_t *he1_vertex, *he2_vertex;
-    struct csmhedge_t *he1_vertex_hedge, *he1_iterator, *he2_vertex_hedge;
-    unsigned long no_iters;
-
-    assert_no_null(common_face);
-    assert_no_null(he1_in_common_face);
-    assert_no_null(he2_in_common_face);
-    
-    exists_common_face = CSMFALSE;
-    common_face_loc = NULL;
-    he1_in_common_face_loc = NULL;
-    he2_in_common_face_loc = NULL;
-    
-    he1_vertex = csmhedge_vertex(he1);
-    he1_vertex_hedge = csmvertex_hedge(he1_vertex);
-    he1_iterator = he1_vertex_hedge;
-    
-    he2_vertex = csmhedge_vertex(he2);
-    he2_vertex_hedge = csmvertex_hedge(he2_vertex);
-    
-    no_iters = 0;
-    
-    do
+    if (he_to_replace == *he_destination_face)
     {
-        struct csmface_t *he1_iterator_face;
-        struct csmhedge_t *he2_iterator;
-        unsigned long no_iters2;
-        
-        assert(no_iters < 1000);
-        no_iters++;
-        
-        he1_iterator_face = csmopbas_face_from_hedge(he1_iterator);
-        he2_iterator = he2_vertex_hedge;
-        
-        no_iters2 = 0;
-        
-        do
-        {
-            struct csmface_t *he2_iterator_face;
-            
-            assert(no_iters2 < 1000);
-            no_iters2++;
-
-            he2_iterator_face = csmopbas_face_from_hedge(he2_iterator);
-            
-            if (he1_iterator_face == he2_iterator_face)
-            {
-                exists_common_face = CSMTRUE;
-                
-                common_face_loc = he1_iterator_face;
-                he1_in_common_face_loc = he1_iterator;
-                he2_in_common_face_loc = he2_iterator;
-                break;
-            }
-            
-            he2_iterator = csmhedge_next(csmopbas_mate(he2_iterator));
-            
-        } while (he2_iterator != he2_vertex_hedge);
-        
-        if (exists_common_face == CSMFALSE)
-            he1_iterator = csmhedge_next(csmopbas_mate(he1_iterator));
-        else
-            break;
-        
-    } while (he1_iterator != he1_vertex_hedge);
-    
-    *common_face = common_face_loc;
-    *he1_in_common_face = he1_in_common_face_loc;
-    *he2_in_common_face = he2_in_common_face_loc;
-    
-    return exists_common_face;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static enum i_repair_option_t i_repair_option_betweem_hegdes(enum i_repair_pass_t repair_pass, struct csmhedge_t *he1, struct csmhedge_t *he2)
-{
-    if (csmsetopcom_hedges_are_neighbors(he1, he2) == CSMTRUE)
-    {
-        return i_REPAIR_OPTION_NOT_NEEDED;
-    }
-    else if (csmhedge_edge(he1) == csmhedge_edge(he2))
-    {
-        return i_REPAIR_OPTION_UNDEFINED;
-    }
-    else
-    {
-        enum csmedge_lado_hedge_t side_he1, side_he2;
-        
-        side_he1 = csmedge_hedge_side(csmhedge_edge(he1), he1);
-        side_he2 = csmedge_hedge_side(csmhedge_edge(he2), he2);
-        
-        if (side_he1 == side_he2)
-        {
-            return i_REPAIR_OPTION_UNDEFINED;
-        }
-        else
-        {
-            struct csmvertex_t *he1_end_vertex;
-            struct csmface_t *he2_face;
-            
-            he1_end_vertex = csmhedge_vertex(csmopbas_mate(he1));
-            he2_face = csmopbas_face_from_hedge(he2);
-
-            if (csmface_is_vertex_used_by_hedge_on_face(he2_face, he1_end_vertex) == CSMTRUE)
-            {
-                return i_REPAIR_OPTION_END_VERTEX_HE1_OCCUR_IN_FACE_OF_HE2;
-            }
-            else
-            {
-                struct csmvertex_t *he1_start_vertex;
-                
-                he1_start_vertex = csmhedge_vertex(he1);
-
-                if (csmface_is_vertex_used_by_hedge_on_face(he2_face, he1_start_vertex) == CSMTRUE)
-                {
-                    return i_REPAIR_OPTION_START_VERTEX_HE1_OCCUR_IN_FACE_OF_HE2;
-                }
-                else
-                {
-                    switch (repair_pass)
-                    {
-                        case i_REPAIR_PASS_ONE:
-                            
-                            return i_REPAIR_OPTION_UNDEFINED;
-                            
-                        case i_REPAIR_PASS_TWO:
-                        {
-                            struct csmface_t *common_face;
-                            struct csmhedge_t *he1_in_common_face, *he2_in_common_face;
-                            
-                            if (i_does_he1_and_he2_vertex_have_a_common_face(he1, he2, &common_face, &he1_in_common_face, &he2_in_common_face) == CSMTRUE)
-                            {
-                                return i_REPAIR_OPTION_MERGE_FACES;
-                            }
-                            else
-                            {
-                                return i_REPAIR_OPTION_UNDEFINED;
-                            }
-                        }
-                            
-                        default_error();
-
-                    }
-                }
-            }
-        }
+        *he_destination_face = he_to_replacement;
+        *he_has_been_replaced = CSMTRUE;
     }
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 static CSMBOOL i_make_reachable_end_vertex_he1_occur_in_face_of_he2(
-                        struct csmhedge_t *he1, struct csmhedge_t *he2,
+                        struct csmhedge_t *he1, struct csmhedge_t **he2,
+                        CSMBOOL *he2_has_been_replaced,
                         csmArrayStruct(csmhedge_t) *loose_ends)
 {
     struct csmvertex_t *he1_end_vertex;
     struct csmface_t *he2_face;
     
+    assert_no_null(he2);
+    assert_no_null(he2_has_been_replaced);
+
     he1_end_vertex = csmhedge_vertex(csmopbas_mate(he1));
-    he2_face = csmopbas_face_from_hedge(he2);
+    he2_face = csmopbas_face_from_hedge(*he2);
 
     if (csmface_is_vertex_used_by_hedge_on_face(he2_face, he1_end_vertex) == CSMFALSE)
     {
+        *he2_has_been_replaced = CSMFALSE;
         return CSMFALSE;
     }
     else
     {
         unsigned long no_iters;
 
-        csmdebug_print_debug_info("[End vertex he1 in face he2] Moving %lu to face of %lu\n", csmhedge_id(he1), csmhedge_id(he2));
+        csmdebug_print_debug_info("[End vertex he1 in face he2] Moving %lu to face of %lu\n", csmhedge_id(he1), csmhedge_id(*he2));
         
         no_iters = 0;
+        *he2_has_been_replaced = CSMFALSE;
 
         while (csmopbas_face_from_hedge(he1) != he2_face)
         {
@@ -489,48 +324,57 @@ static CSMBOOL i_make_reachable_end_vertex_he1_occur_in_face_of_he2(
             {
                 struct csmhedge_t *he_mate_null_edge_replacement;
                 
-                he_mate_null_edge_replacement = csmhedge_prev(he1);
-                i_replace_loose_end(he1_next_mate, he_mate_null_edge_replacement, loose_ends);
+                he_mate_null_edge_replacement = csmopbas_mate(csmhedge_prev(he1));
+                i_replace_loose_end(he1_next_mate, he_mate_null_edge_replacement, he2, he2_has_been_replaced, loose_ends);
             }
 
             if (csmhedge_setop_is_loose_end(he1_next) == CSMTRUE)
             {
                 struct csmhedge_t *he_mate_null_edge_replacement;
                 
-                he_mate_null_edge_replacement = csmopbas_mate(csmhedge_prev(he1));
-                i_replace_loose_end(he1_next_mate, he_mate_null_edge_replacement, loose_ends);
+                he_mate_null_edge_replacement = csmhedge_prev(he1);
+                i_replace_loose_end(he1_next, he_mate_null_edge_replacement, he2, he2_has_been_replaced, loose_ends);
             }
-            
+
             csmeuler_lkef(&he1_next_mate, &he1_next);
+
+            if (*he2_has_been_replaced == CSMTRUE)
+                break;
         }
 
-        return CSMTRUE;
+        return csmsetopcom_hedges_are_neighbors(he1, *he2);
     }
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 static CSMBOOL i_make_reachable_start_vertex_he1_occur_in_face_of_he2(
-                        struct csmhedge_t *he1, struct csmhedge_t *he2,
+                        struct csmhedge_t *he1, struct csmhedge_t **he2,
+                        CSMBOOL *he2_has_been_replaced,
                         csmArrayStruct(csmhedge_t) *loose_ends)
 {
     struct csmvertex_t *he1_start_vertex;
     struct csmface_t *he2_face;
     
+    assert_no_null(he2);
+    assert_no_null(he2_has_been_replaced);
+
     he1_start_vertex = csmhedge_vertex(he1);
-    he2_face = csmopbas_face_from_hedge(he2);
+    he2_face = csmopbas_face_from_hedge(*he2);
 
     if (csmface_is_vertex_used_by_hedge_on_face(he2_face, he1_start_vertex) == CSMFALSE)
     {
+        *he2_has_been_replaced = CSMFALSE;
         return CSMFALSE;
     }
     else
     {
         unsigned long no_iters;
         
-        csmdebug_print_debug_info("[Start vertex he1 in face he2] Moving %lu to face of %lu\n", csmhedge_id(he1), csmhedge_id(he2));
+        csmdebug_print_debug_info("[Start vertex he1 in face he2] Moving %lu to face of %lu\n", csmhedge_id(he1), csmhedge_id(*he2));
         
         no_iters = 0;
+        *he2_has_been_replaced = CSMFALSE;
         
         while (csmopbas_face_from_hedge(he1) != he2_face)
         {
@@ -551,158 +395,67 @@ static CSMBOOL i_make_reachable_start_vertex_he1_occur_in_face_of_he2(
             {
                 struct csmhedge_t *he_mate_null_edge_replacement;
                 
-                he_mate_null_edge_replacement = csmhedge_next(he1);
-                i_replace_loose_end(he1_prev_mate, he_mate_null_edge_replacement, loose_ends);
+                he_mate_null_edge_replacement = csmopbas_mate(csmhedge_next(he1));
+                i_replace_loose_end(he1_prev_mate, he_mate_null_edge_replacement, he2, he2_has_been_replaced, loose_ends);
             }
 
             if (csmhedge_setop_is_loose_end(he1_prev) == CSMTRUE)
             {
                 struct csmhedge_t *he_mate_null_edge_replacement;
                 
-                he_mate_null_edge_replacement = csmopbas_mate(csmhedge_next(he1));
-                i_replace_loose_end(he1_prev_mate, he_mate_null_edge_replacement, loose_ends);
+                he_mate_null_edge_replacement = csmhedge_next(he1);
+                i_replace_loose_end(he1_prev, he_mate_null_edge_replacement, he2, he2_has_been_replaced, loose_ends);
             }
-            
+
             csmeuler_lkef(&he1_prev_mate, &he1_prev);
+
+            if (*he2_has_been_replaced == CSMTRUE)
+                break;
         }
 
-        assert(csmopbas_face_from_hedge(he1) == he2_face);
-        
-        return CSMTRUE;
+        return csmsetopcom_hedges_are_neighbors(he1, *he2);
     }
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_make_reachable_he1_occur_in_face_of_he2_by_face_lookup(
-                        struct csmhedge_t *he1, struct csmhedge_t *he2,
+static CSMBOOL i_could_make_hedges_reachable(
+                        struct csmhedge_t *he1, struct csmhedge_t **he2,
+                        CSMBOOL *he2_has_been_replaced,
                         csmArrayStruct(csmhedge_t) *loose_ends)
 {
-    CSMBOOL does_have_common_face;
-    struct csmface_t *common_face;
-    struct csmhedge_t *he1_in_common_face, *he2_in_common_face;
-    CSMBOOL make_reachable;
-    
-    does_have_common_face = i_does_he1_and_he2_vertex_have_a_common_face(
-                        he1, he2,
-                        &common_face,
-                        &he1_in_common_face, &he2_in_common_face);
-    assert(does_have_common_face == CSMTRUE);
-    
-    make_reachable = i_make_reachable_start_vertex_he1_occur_in_face_of_he2(he1, he1_in_common_face, loose_ends);
-    assert(make_reachable == CSMTRUE);
-    
-    make_reachable = i_make_reachable_start_vertex_he1_occur_in_face_of_he2(he2, he2_in_common_face, loose_ends);
-    assert(make_reachable == CSMTRUE);
-}
+    assert_no_null(he2);
+    assert_no_null(he2_has_been_replaced);
 
-// ----------------------------------------------------------------------------------------------------
+    *he2_has_been_replaced = CSMFALSE;
 
-static void i_repair_hedges_connection_with_repairment_strategy(
-                        enum i_repair_option_t repairment_strategy,
-                        struct csmhedge_t *he1, struct csmhedge_t *he2,
-                        csmArrayStruct(csmhedge_t) *loose_ends)
-{
-    switch (repairment_strategy)
-    {
-        case i_REPAIR_OPTION_NOT_NEEDED:
-            break;
-            
-        case i_REPAIR_OPTION_UNDEFINED:
-            break;
-            
-        case i_REPAIR_OPTION_END_VERTEX_HE1_OCCUR_IN_FACE_OF_HE2:
-        {
-            CSMBOOL did_repair;
-            
-            did_repair = i_make_reachable_end_vertex_he1_occur_in_face_of_he2(he1, he2, loose_ends);
-            assert(did_repair == CSMTRUE);
-            break;
-        }
-            
-        case i_REPAIR_OPTION_START_VERTEX_HE1_OCCUR_IN_FACE_OF_HE2:
-        {
-            CSMBOOL did_repair;
-            
-            did_repair = i_make_reachable_start_vertex_he1_occur_in_face_of_he2(he1, he2, loose_ends);
-            assert(did_repair == CSMTRUE);
-            break;
-        }
-            
-        case i_REPAIR_OPTION_MERGE_FACES:
-            
-            i_make_reachable_he1_occur_in_face_of_he2_by_face_lookup(he1, he2, loose_ends);
-            break;
-            
-        default_error();
-    }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static CSMBOOL i_is_possible_to_repair_hedges_connection(enum i_repair_option_t repair_option)
-{
-    switch (repair_option)
-    {
-        case i_REPAIR_OPTION_NOT_NEEDED:
-        case i_REPAIR_OPTION_END_VERTEX_HE1_OCCUR_IN_FACE_OF_HE2:
-        case i_REPAIR_OPTION_START_VERTEX_HE1_OCCUR_IN_FACE_OF_HE2:
-        case i_REPAIR_OPTION_MERGE_FACES:
-            
-            return CSMTRUE;
-            
-        case i_REPAIR_OPTION_UNDEFINED:
-            
-            return CSMFALSE;
-            
-        default_error();
-    }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static CSMBOOL i_is_possible_to_loose_ends_after_modifying_topology(
-                        enum i_repair_pass_t repair_pass,
-                        struct csmhedge_t *loose_end_a_i, struct csmhedge_t *loose_end_a_j, csmArrayStruct(csmhedge_t) *loose_ends_a,
-                        struct csmhedge_t *loose_end_b_i, struct csmhedge_t *loose_end_b_j, csmArrayStruct(csmhedge_t) *loose_ends_b)
-{
-    enum i_repair_option_t repair_a, repair_b;
-    CSMBOOL try_to_repair;
-    
-    repair_a = i_repair_option_betweem_hegdes(repair_pass, loose_end_a_i, loose_end_a_j);
-    repair_b = i_repair_option_betweem_hegdes(repair_pass, loose_end_b_i, loose_end_b_j);
-    
-    switch (repair_pass)
-    {
-        case i_REPAIR_PASS_ONE:
-        {
-            if (repair_a == i_REPAIR_OPTION_NOT_NEEDED || repair_b == i_REPAIR_OPTION_NOT_NEEDED)
-                try_to_repair = CSMTRUE;
-            else
-                try_to_repair = CSMFALSE;
-            break;
-        }
-            
-        case i_REPAIR_PASS_TWO:
-            
-            try_to_repair = CSMTRUE;
-            break;
-            
-        default_error();
-    }
-    
-    if (try_to_repair == CSMTRUE
-            && i_is_possible_to_repair_hedges_connection(repair_a) == CSMTRUE
-            && i_is_possible_to_repair_hedges_connection(repair_b) == CSMTRUE)
-    {
-        i_repair_hedges_connection_with_repairment_strategy(repair_a, loose_end_a_i, loose_end_a_j, loose_ends_a);
-        i_repair_hedges_connection_with_repairment_strategy(repair_b, loose_end_b_i, loose_end_b_j, loose_ends_b);
-        
-        return CSMTRUE;
+    if (csmhedge_edge(he1) == csmhedge_edge(*he2))
+    {   
+        return CSMFALSE;
     }
     else
     {
-        return CSMFALSE;
+        enum csmedge_lado_hedge_t side_he1, side_he2;
+        
+        side_he1 = csmedge_hedge_side(csmhedge_edge(he1), he1);
+        side_he2 = csmedge_hedge_side(csmhedge_edge(*he2), *he2);
+        
+        if (side_he1 == side_he2)
+        {
+            return CSMFALSE;
+        }
+        else if (i_make_reachable_end_vertex_he1_occur_in_face_of_he2(he1, he2, he2_has_been_replaced, loose_ends) == CSMTRUE)
+        {
+            return CSMTRUE;
+        }
+        else if (i_make_reachable_start_vertex_he1_occur_in_face_of_he2(he1, he2, he2_has_been_replaced, loose_ends) == CSMTRUE)
+        {
+            return CSMTRUE;
+        }
+        else
+        {
+            return CSMFALSE;
+        }
     }
 }
 
@@ -731,14 +484,12 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
 {
     unsigned long no_iters;
     CSMBOOL there_are_changes;
-    enum i_repair_pass_t repair_pass;
-
+    
     assert_no_null(no_null_edges_deleted_A);
     assert_no_null(no_null_edges_deleted_B);
     
     no_iters = 0;
     there_are_changes = CSMFALSE;
-    repair_pass = i_REPAIR_PASS_ONE;
     
     do
     {
@@ -783,14 +534,44 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
                 if (i != j)
                 {
                     struct csmhedge_t *loose_end_a_j, *loose_end_b_j;
+                    CSMBOOL reachable_a, reachable_b;
+                    CSMBOOL all_hedges_reachable;
+                    CSMBOOL he2_has_been_replaced_A, he2_has_been_replaced_B;
                     
                     loose_end_a_j = csmarrayc_get_st(loose_ends_A, j, csmhedge_t);
                     loose_end_b_j = csmarrayc_get_st(loose_ends_B, j, csmhedge_t);
                     
-                    if (i_is_possible_to_loose_ends_after_modifying_topology(
-                                    repair_pass,
-                                    loose_end_a_i, loose_end_a_j, loose_ends_A,
-                                    loose_end_b_i, loose_end_b_j, loose_ends_B) == CSMTRUE)
+                    reachable_a = csmsetopcom_hedges_are_neighbors(loose_end_a_i, loose_end_a_j);
+                    reachable_b = csmsetopcom_hedges_are_neighbors(loose_end_b_i, loose_end_b_j);
+                    
+                    if (reachable_a == CSMTRUE && reachable_b == CSMTRUE)
+                    {
+                        all_hedges_reachable = CSMTRUE;
+                        he2_has_been_replaced_A = CSMFALSE;
+                        he2_has_been_replaced_B = CSMFALSE;
+                    }
+                    else if (reachable_a == CSMTRUE && reachable_b == CSMFALSE)
+                    {
+                        csmdebug_print_debug_info("Analyzing edges of solid B\n");
+
+                        all_hedges_reachable = i_could_make_hedges_reachable(loose_end_b_i, &loose_end_b_j, &he2_has_been_replaced_B, loose_ends_B);
+                        he2_has_been_replaced_A = CSMFALSE;
+                    }
+                    else if (reachable_a == CSMFALSE && reachable_b == CSMTRUE)
+                    {
+                        csmdebug_print_debug_info("Analyzing edges of solid A\n");
+
+                        all_hedges_reachable = i_could_make_hedges_reachable(loose_end_a_i, &loose_end_a_j, &he2_has_been_replaced_A, loose_ends_A);
+                        he2_has_been_replaced_B = CSMFALSE;
+                    }
+                    else
+                    {
+                        all_hedges_reachable = CSMFALSE;
+                        he2_has_been_replaced_A = CSMFALSE;
+                        he2_has_been_replaced_B = CSMFALSE;
+                    }
+                    
+                    if (all_hedges_reachable == CSMTRUE)
                     {
                         assert(csmsetopcom_hedges_are_neighbors(loose_end_a_i, loose_end_a_j) == CSMTRUE);
                         assert(csmsetopcom_hedges_are_neighbors(loose_end_b_i, loose_end_b_j) == CSMTRUE);
@@ -822,20 +603,19 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
                         there_are_changes = CSMTRUE;
                         break;
                     }
+                    else
+                    {
+                        if (he2_has_been_replaced_A == CSMTRUE || he2_has_been_replaced_B == CSMTRUE)
+                        {
+                            there_are_changes = CSMTRUE;
+                            break;
+                        }
+                    }
                 }
             }
             
             if (there_are_changes == CSMTRUE)
                 break;
-        }
-        
-        if (i_ALLOW_REPAIR_PASS_TWO == CSMTRUE
-                && there_are_changes == CSMFALSE
-                && repair_pass != i_LAST_REPAIR_PASS
-                && (csmarrayc_count_st(loose_ends_A, csmhedge_t) > 0 || csmarrayc_count_st(loose_ends_B, csmhedge_t) > 0))
-        {
-            there_are_changes = CSMTRUE;
-            repair_pass = i_REPAIR_PASS_TWO;
         }
         
     } while (there_are_changes == CSMTRUE);
