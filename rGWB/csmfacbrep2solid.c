@@ -935,7 +935,7 @@ static CSMBOOL i_is_incomplete_edge(const struct i_edge_t *edge, const struct i_
     assert_no_null(edge);
     assert(null_value == NULL);
     
-    return IS_TRUE(edge->he1 == NULL && edge->he2 == NULL);
+    return IS_TRUE(edge->he1 == NULL || edge->he2 == NULL);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -945,7 +945,7 @@ static CSMBOOL i_is_non_manifold_vertex(const struct i_vertex_t *vertex, const s
     assert_no_null(vertex);
     assert(null_value == NULL);
     
-    return IS_TRUE(vertex->no_uses < 3);
+    return IS_TRUE(vertex->no_uses < 2);
 }
 
 // ------------------------------------------------------------------------------------------
