@@ -5353,6 +5353,48 @@ static void i_test_difference9(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_difference10(struct csmviewer_t *viewer)
+{
+    struct csmsolid_t *solid_res;
+    
+    i_set_output_debug_file("test_difference_9");
+
+    {
+        struct csmshape2d_t *shape1;
+        csmArrPoint2D *points;
+        
+        points = csmArrPoint2D_new(0);
+        csmArrPoint2D_append(points, -10., -10.);
+        csmArrPoint2D_append(points,  10., -10.);
+        csmArrPoint2D_append(points,  10., 10.);
+        csmArrPoint2D_append(points, -10., 10.);
+        
+        shape1 = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape1, &points);
+        
+        solid_res = csmsweep_create_solid_from_shape_debug(
+                        shape1,
+                        0., 0., 0.3, 1., 0., 0., 0., 1., 0.,
+                        shape1,
+                        0., 0., 0.0, 1., 0., 0., 0., 1., 0.,
+                        0);
+        
+        csmshape2d_free(&shape1);
+    }
+
+    csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    i_substract_rectangular_solid(1., 0.5, 0.3, -2., -2.5 - 0.25, 0.3, &solid_res);
+    i_substract_rectangular_solid(1., 0.5, 0.3,  2., -2.5 - 0.25, 0.3, &solid_res);
+    i_substract_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, &solid_res);
+    
+    csmviewer_set_results(viewer, solid_res, NULL);
+    csmviewer_show(viewer);
+    
+    csmsolid_free(&solid_res);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_append_loop_to_faceted_brep_face(
                         struct csmfacbrep2solid_face_t *face,
                         csmArrPoint3D **loop_points, CSMBOOL is_outer)
@@ -5644,8 +5686,8 @@ void csmtest_test(void)
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
     process_all_test = CSMTRUE;
-    //csmdebug_configure_for_fast_testing();
-    csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
+    csmdebug_configure_for_fast_testing();
+    //csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
     
     //csmtest_array_test1();
     //csmtest_array_test2();
@@ -5703,6 +5745,7 @@ void csmtest_test(void)
         i_test_difference8();
         i_test_difference8_redux();
         i_test_difference9(viewer);
+        i_test_difference10(viewer);
         
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         {
