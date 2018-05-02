@@ -1239,7 +1239,7 @@ static void i_merge_faces_inside_faces(struct csmsolid_t *solid, const struct cs
             
             csmhashtb_next_pair(outer_face_iterator, NULL, &outer_face, csmface_t);
             
-            if (csmface_is_setop_null_face(outer_face) == CSMTRUE || csmface_is_setop_new_face(outer_face) == CSMTRUE)
+            if (csmface_is_setop_null_face(outer_face) == CSMTRUE || csmface_setop_has_been_modified(outer_face) == CSMTRUE)
             {
                 struct csmhashtb_iterator(csmface_t) *inner_face_iterator;
                 

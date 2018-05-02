@@ -36,7 +36,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         double x_center, double y_center, double z_center,
                         struct csmbbox_t **bbox,
                         CSMBOOL setop_is_null_face,
-                        CSMBOOL setop_is_new_face))
+                        CSMBOOL setop_has_been_modified))
 {
     struct csmface_t *face;
     
@@ -66,7 +66,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
     face->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
  
     face->setop_is_null_face = setop_is_null_face;
-    face->setop_is_new_face = setop_is_new_face;
+    face->setop_has_been_modified = setop_has_been_modified;
     
     return face;
 }
@@ -86,7 +86,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     double x_center, y_center, z_center;
     struct csmbbox_t *bbox;
     CSMBOOL setop_is_null_face;
-    CSMBOOL setop_is_new_face;
+    CSMBOOL setop_has_been_modified;
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
 
@@ -111,7 +111,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     bbox = csmbbox_create_empty_box();
 
     setop_is_null_face = CSMFALSE;
-    setop_is_new_face = CSMTRUE;
+    setop_has_been_modified = CSMTRUE;
     
     return i_crea(
                 id,
@@ -127,7 +127,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
                 x_center, y_center, z_center,
                 &bbox,
                 setop_is_null_face,
-                setop_is_new_face);
+                setop_has_been_modified);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1229,6 +1229,9 @@ void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csm
         csmnode_insert_node2_before_node1(face->floops, loop, csmloop_t);
         face->floops = loop;
     }
+    
+    loop_old_face->setop_has_been_modified = CSMTRUE;
+    face->setop_has_been_modified = CSMTRUE;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1286,7 +1289,7 @@ void csmface_clear_algorithm_mask(struct csmface_t *face)
     assert_no_null(face);
     
     face->setop_is_null_face = CSMFALSE;
-    face->setop_is_new_face = CSMFALSE;
+    face->setop_has_been_modified = CSMFALSE;
     
     loop_iterator = face->floops;
     
@@ -1315,8 +1318,8 @@ void csmface_mark_setop_null_face(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
-CSMBOOL csmface_is_setop_new_face(struct csmface_t *face)
+CSMBOOL csmface_setop_has_been_modified(struct csmface_t *face)
 {
     assert_no_null(face);
-    return face->setop_is_new_face;
+    return face->setop_has_been_modified;
 }
