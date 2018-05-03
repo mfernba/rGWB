@@ -58,7 +58,8 @@ static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CSMBOOL assert
 {
     struct csmhedge_t *hedge;
     
-    csmvertex_debug_print_debug_info(vertex);
+    if (show_info == CSMTRUE)
+        csmvertex_debug_print_debug_info(vertex);
     
     hedge = csmvertex_hedge(vertex);
     
@@ -68,12 +69,7 @@ static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CSMBOOL assert
             csmdebug_print_debug_info("He %6lu", csmnode_id(CSMNODE(hedge)));
         
         if (assert_si_no_es_integro == CSMTRUE)
-        {
-            if (show_info == CSMFALSE)
-                csmdebug_print_debug_info("He %6lu", csmnode_id(CSMNODE(hedge)));
-            
             assert(csmhedge_vertex(hedge) == vertex);
-        }
     }
     else
     {
