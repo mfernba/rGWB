@@ -109,7 +109,7 @@ static void i_print_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, 
         num_iters++;
         
         csmhashtb_next_pair(iterator, NULL, &vertex, csmvertex_t);
-        i_print_debug_info_vertex(vertex, show_info, assert_si_no_es_integro);
+        i_print_debug_info_vertex(vertex, assert_si_no_es_integro, show_info);
         (*num_vertexs)++;
     }
     
