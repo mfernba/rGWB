@@ -83,6 +83,19 @@ struct i_inters_sector_t
 static int g_Draw_inters_sector = 0;
 struct i_inters_sector_t g_inters_sector;
 
+struct i_segment_t
+{
+    double x1, y1, z1;
+    double x2, y2, z2;
+};
+
+#define i_MAX_NO_SEGMENTS 100000
+
+static int g_Draw_segments = 1;
+struct i_segment_t g_segments[i_MAX_NO_SEGMENTS];
+static int g_no_segments = 0;
+
+
 // --------------------------------------------------------------------------------
 
 void csmdebug_set_treat_improper_solid_operations_as_errors(CSMBOOL value)
@@ -577,6 +590,37 @@ CSMBOOL csmdebug_draw_face(unsigned long face_id)
 
 // --------------------------------------------------------------------------------
 
+void csmdebug_set_draw_segments(CSMBOOL draw)
+{
+    g_Draw_segments = draw;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_clear_segments(void)
+{
+    g_no_segments = 0;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmdebug_append_segment(double x1, double y1, double z1, double x2, double y2, double z2)
+{
+    bsassert(g_no_segments < i_MAX_NO_SEGMENTS);
+    
+    g_segments[g_no_segments].x1 = x1;
+    g_segments[g_no_segments].y1 = y1;
+    g_segments[g_no_segments].z1 = z1;
+    
+    g_segments[g_no_segments].x2 = x2;
+    g_segments[g_no_segments].y2 = y2;
+    g_segments[g_no_segments].z2 = z2;
+    
+    g_no_segments++;
+}
+
+// --------------------------------------------------------------------------------
+
 static void i_draw_inters_sector(const struct i_inters_sector_t *sector, struct bsgraphics2_t *graphics)
 {
     struct bsmaterial_t *mat1, *mat2;
@@ -748,6 +792,21 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
                         x4, y4, z4, true, g_A, g_B, g_C);
         
         bsmaterial_destruye(&material);
+    }
+    
+    if (g_Draw_segments == CSMTRUE)
+    {
+        struct bsmaterial_t *debug_point_segment;
+        
+        debug_point_segment = bsmaterial_crea_rgb(1., 0., 0.);
+        bsgraphics2_escr_color(graphics, debug_point_segment);
+        
+        bsgraphics2_escr_grosor_linea(graphics, BSGRAPHICS2_GROSOR_MUY_GRUESO);
+        
+        for (i = 0; i < g_no_segments; i++)
+            bsgraphics2_escr_linea3D(graphics, g_segments[i].x1, g_segments[i].y1, g_segments[i].z1, g_segments[i].x2, g_segments[i].y2, g_segments[i].z2);
+        
+        bsmaterial_destruye(&debug_point_segment);
     }
     
     bsmaterial_destruye(&debug_point_material);

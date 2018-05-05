@@ -96,7 +96,13 @@ void csmdebug_add_face_to_filter(unsigned long face_id);
 CSMBOOL csmdebug_draw_edge(unsigned long edge_id);
 CSMBOOL csmdebug_draw_face(unsigned long face_id);
     
+void csmdebug_set_draw_segments(CSMBOOL draw);
+void csmdebug_clear_segments(void);
+void csmdebug_append_segment(double x1, double y1, double z1, double x2, double y2, double z2);
+
+    
 void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics);
+    
 
 
     

@@ -457,11 +457,18 @@ void csmsetopcom_join_hedges(
     old_face = csmopbas_face_from_hedge(he1);
     he1_solid = csmface_fsolid(old_face);
     
+    if (csmdebug_debug_enabled() == CSMTRUE)
     {
+        double x1, y1, z1, x2, y2, z2;
+        
         csmdebug_print_debug_info(
                         "******\njoin_hedges (%lu [NE: %lu], %lu [NE: %lu]). Solid before operation: \n",
                         csmhedge_id(he1), csmedge_id(csmhedge_edge(he1)),
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)));
+        
+        csmvertex_get_coordenadas(csmhedge_vertex(he1), &x1, &y1, &z1);
+        csmvertex_get_coordenadas(csmhedge_vertex(he2), &x2, &y2, &z2);
+        csmdebug_append_segment(x1, y1, z1, x2, y2, z2);
         
         //csmsolid_debug_print_debug(he1_solid, CSMTRUE);
     }
