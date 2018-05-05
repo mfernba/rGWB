@@ -5357,7 +5357,7 @@ static void i_test_difference10(struct csmviewer_t *viewer)
 {
     struct csmsolid_t *solid_res;
     
-    i_set_output_debug_file("test_difference_9");
+    i_set_output_debug_file("test_difference_10");
 
     {
         struct csmshape2d_t *shape1;
@@ -5383,8 +5383,10 @@ static void i_test_difference10(struct csmviewer_t *viewer)
     }
 
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    csmdebug_set_enabled_by_code(CSMFALSE);
     i_substract_rectangular_solid(1., 0.5, 0.3, -2., -2.5 - 0.25, 0.3, &solid_res);
     i_substract_rectangular_solid(1., 0.5, 0.3,  2., -2.5 - 0.25, 0.3, &solid_res);
+    csmdebug_set_enabled_by_code(CSMTRUE);
     i_substract_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, &solid_res);
     
     csmviewer_set_results(viewer, solid_res, NULL);
@@ -5685,6 +5687,10 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
+    csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    i_test_difference10(viewer);
+    return;
+    
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();
     //csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
@@ -5745,7 +5751,7 @@ void csmtest_test(void)
         i_test_difference8();
         i_test_difference8_redux();
         i_test_difference9(viewer);
-        i_test_difference10(viewer);
+        //i_test_difference10(viewer);
         
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         {
