@@ -463,7 +463,7 @@ void csmsetopcom_join_hedges(
                         csmhedge_id(he1), csmedge_id(csmhedge_edge(he1)),
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)));
         
-        csmsolid_debug_print_debug(he1_solid, CSMTRUE);
+        //csmsolid_debug_print_debug(he1_solid, CSMTRUE);
     }
     
     if (csmhedge_loop(he1) == csmhedge_loop(he2))
@@ -499,7 +499,7 @@ void csmsetopcom_join_hedges(
                         csmface_id(new_face));
                 
                 csmface_debug_print_info_debug(new_face, CSMTRUE, NULL);
-                csmsolid_debug_print_debug(he1_solid, CSMTRUE);
+                //csmsolid_debug_print_debug(he1_solid, CSMTRUE);
             }
         }
         else
@@ -551,7 +551,7 @@ void csmsetopcom_join_hedges(
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)),
                         csmhedge_id(he2), csmhedge_id(he1_next));
             
-            csmsolid_debug_print_debug(he1_solid, CSMTRUE);
+            //csmsolid_debug_print_debug(he1_solid, CSMTRUE);
         }
         
         csmeuler_lmef(he2, he1_next, &second_new_face, NULL, NULL);
@@ -561,7 +561,7 @@ void csmsetopcom_join_hedges(
             csmface_debug_print_info_debug(second_new_face, CSMTRUE, NULL);
 
             csmdebug_print_debug_info("\tFace %lu created\n", csmface_id(second_new_face));
-            csmsolid_debug_print_debug(csmface_fsolid(second_new_face), CSMTRUE);
+            //csmsolid_debug_print_debug(csmface_fsolid(second_new_face), CSMTRUE);
         }
         
         old_face_floops = csmface_floops(old_face);
