@@ -632,7 +632,7 @@ static CSMBOOL i_sectors_overlap(
 }
 
 // ------------------------------------------------------------------------------------------
-/*
+
 static void i_debug_show_inters_sectors(
                         const struct i_neighborhood_t *neighborhood_a, const struct i_neighborhood_t *neighborhood_b,
                         unsigned long intersection_id,
@@ -641,7 +641,7 @@ static void i_debug_show_inters_sectors(
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
 
-    if (csmdebug_debug_enabled() == CSMTRUE && intersection_id == 79)
+    if (csmdebug_debug_enabled() == CSMTRUE && intersection_id == ULONG_MAX)
     {
         double x, y, z;
         
@@ -659,7 +659,7 @@ static void i_debug_show_inters_sectors(
         csmdebug_clear_inters_sector();
     }
 }
-*/
+
 // ------------------------------------------------------------------------------------------
 
 static CSMBOOL i_exists_intersection_between_sectors(
@@ -673,7 +673,7 @@ static CSMBOOL i_exists_intersection_between_sectors(
 
     if (csmface_are_coplanar_faces_at_common_base_vertex(neighborhood_a->face, neighborhood_b->face, tolerances) == CSMTRUE)
     {
-        //i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMFALSE, 0., 0., 0.);
+        i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMFALSE, 0., 0., 0.);
         return i_sectors_overlap(neighborhood_a, neighborhood_b, tolerances);
     }
     else
@@ -688,7 +688,6 @@ static CSMBOOL i_exists_intersection_between_sectors(
                         &Wx_inters, &Wy_inters, &Wz_inters);
         
         csmmath_make_unit_vector3D(&Wx_inters, &Wy_inters, &Wz_inters);
-        //i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
         
         test_parallelism_using_distances = CSMFALSE;
         is_within_a = i_is_intersection_within_sector(neighborhood_a, Wx_inters, Wy_inters, Wz_inters, tolerances, test_parallelism_using_distances);
@@ -696,6 +695,7 @@ static CSMBOOL i_exists_intersection_between_sectors(
         
         if (is_within_a == CSMTRUE && is_within_b == CSMTRUE)
         {
+            i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
             return CSMTRUE;
         }
         else
@@ -705,6 +705,7 @@ static CSMBOOL i_exists_intersection_between_sectors(
             
             if (is_within_a == CSMTRUE && is_within_b == CSMTRUE)
             {
+                i_debug_show_inters_sectors(neighborhood_a, neighborhood_b, intersection_id, CSMTRUE, Wx_inters, Wy_inters, Wz_inters);
                 return CSMTRUE;
             }
             else
@@ -2180,10 +2181,7 @@ static CSMBOOL i_edge_faces_are_convex_between_them(struct csmhedge_t *he, const
         csmmath_cross_product3D(A_he, B1_he, C_he, A_mate_he, B1_mate_he, C_mate_he, &Wx, &Wy, &Wz);
         csmmath_make_unit_vector3D(&Wx, &Wy, &Wz);
         
-        he2 = csmhedge_next(he);
-    
-        if (i_is_null_edge(he2, tolerances) == CSMTRUE)
-            he2 = csmhedge_next(he2);
+        he2 = csmopbas_get_next_no_null_hedge(he, tolerances);
         
         vertex_he = csmhedge_vertex(he);
         vertex_he2 = csmhedge_vertex(he2);
