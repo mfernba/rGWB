@@ -432,6 +432,43 @@ void csmsetopcom_print_debug_info_loose_ends(const csmArrayStruct(csmhedge_t) *l
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsetopcom_print_debug_info_faces_null_edges(const char *solid_reference, const csmArrayStruct(csmedge_t) *null_edges)
+{
+    unsigned long i, no_null_edges;
+    
+    csmdebug_print_debug_info("%s.\n Faces of null edges:\n", solid_reference);
+    
+    no_null_edges = csmarrayc_count_st(null_edges, csmedge_t);
+    
+    for (i = 0; i < no_null_edges; i++)
+    {
+        struct csmedge_t *edge;
+        struct csmhedge_t *he1, *he2;
+        
+        edge = csmarrayc_get_st(null_edges, i, csmedge_t);
+        csmdebug_print_debug_info("Null edge: %lu\n", csmedge_id(edge));
+        
+        he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+        he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+        
+        if (csmopbas_face_from_hedge(he1) == csmopbas_face_from_hedge(he2))
+        {
+            csmdebug_print_debug_info("Loose ends: %lu, %lu\n", csmhedge_id(he1), csmhedge_id(he2));
+            csmface_debug_print_info_debug(csmopbas_face_from_hedge(he1), CSMTRUE, NULL);
+        }
+        else
+        {
+            csmdebug_print_debug_info("Loose end: %lu\n", csmhedge_id(he1));
+            csmface_debug_print_info_debug(csmopbas_face_from_hedge(he1), CSMTRUE, NULL);
+            
+            csmdebug_print_debug_info("Loose end: %lu\n", csmhedge_id(he2));
+            csmface_debug_print_info_debug(csmopbas_face_from_hedge(he2), CSMTRUE, NULL);
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static CSMBOOL i_is_same_edge_by_ptr(const struct csmedge_t *edge1, const struct csmedge_t *edge2)
 {
     if (edge1 == edge2)
@@ -641,7 +678,7 @@ void csmsetopcom_cut_he(
             csmface_debug_print_info_debug(null_face, CSMTRUE, NULL);
             
             csmdebug_print_debug_info("(CUTTING HE)  (%lu, %lu) with LKEMR\n", csmhedge_id(he1_edge), csmhedge_id(he2_edge));
-            csmsolid_debug_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
+            //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
         }
         
         csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL, NULL);
@@ -662,8 +699,9 @@ void csmsetopcom_cut_he(
         csmeuler_lkef(&he1_edge, &he2_edge);
         null_face_created_loc = CSMFALSE;
         
-        if (csmdebug_debug_enabled() == CSMTRUE)
+        /*if (csmdebug_debug_enabled() == CSMTRUE)
             csmsolid_debug_print_debug(solid, CSMTRUE);
+         */
     }
     
     ASSIGN_OPTIONAL_VALUE(null_face_created_opt, null_face_created_loc);

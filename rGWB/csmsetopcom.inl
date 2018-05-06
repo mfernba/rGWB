@@ -28,6 +28,8 @@ CSMBOOL csmsetopcom_is_loose_end(struct csmhedge_t *hedge, csmArrayStruct(csmhed
 
 void csmsetopcom_print_debug_info_loose_ends(const csmArrayStruct(csmhedge_t) *loose_ends);
 
+void csmsetopcom_print_debug_info_faces_null_edges(const char *solid_reference, const csmArrayStruct(csmedge_t) *null_edges);
+
 void csmsetopcom_join_hedges(
                         struct csmhedge_t *he1, struct csmhedge_t *he2,
                         const struct csmtolerance_t *tolerances);
