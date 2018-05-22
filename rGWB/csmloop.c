@@ -20,6 +20,7 @@
 #else
 #include "cyassert.h"
 #include "cypespy.h"
+#include "cypespy.inl"
 #endif
 
 // --------------------------------------------------------------------------------------------------------------
@@ -32,7 +33,7 @@ static void i_csmloop_destruye(struct csmloop_t **loop)
     if ((*loop)->ledge != NULL)
         csmnode_free_node_list(&(*loop)->ledge, csmhedge_t);
     
-    FREE_PP(loop, struct csmloop_t);
+    FREE_PP_NO_CLEAN_MEMORY(loop, struct csmloop_t);
 }
 
 // --------------------------------------------------------------------------------------------------------------
