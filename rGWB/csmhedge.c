@@ -14,6 +14,7 @@
 #else
 #include "cyassert.h"
 #include "cypespy.h"
+#include "cypespy.inl"
 #endif
 
 struct csmhedge_t
@@ -34,7 +35,7 @@ static void i_csmhedge_destruye(struct csmhedge_t **hedge)
     assert_no_null(hedge);
     assert_no_null(*hedge);
     
-    FREE_PP(hedge, struct csmhedge_t);
+    FREE_PP_NO_CLEAN_MEMORY(hedge, struct csmhedge_t);
 }
 
 // --------------------------------------------------------------------------------------------------------------

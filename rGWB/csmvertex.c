@@ -14,6 +14,7 @@
 #else
 #include "cyassert.h"
 #include "cypespy.h"
+#include "cypespy.inl"
 #endif
 
 // ----------------------------------------------------------------------------------------------------
@@ -102,7 +103,7 @@ void csmvertex_destruye(struct csmvertex_t **vertex)
     assert_no_null(vertex);
     assert_no_null(*vertex);
 
-    FREE_PP(vertex, struct csmvertex_t);
+    FREE_PP_NO_CLEAN_MEMORY(vertex, struct csmvertex_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
