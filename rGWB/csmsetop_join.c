@@ -31,6 +31,8 @@
 #include "cyassert.h"
 #endif
 
+static CSMBOOL i_EXHAUSTIVE_DEBUG = CSMFALSE;
+
 // ------------------------------------------------------------------------------------------
 
 static CSMBOOL i_can_join(
@@ -636,92 +638,6 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
         }
     }
 }
-/*
-// ------------------------------------------------------------------------------------------
-
-static CSMBOOL i_can_join2(
-                        struct csmhedge_t *hea, struct csmhedge_t *heb,
-                        csmArrayStruct(csmhedge_t) *loose_ends_A,
-                        csmArrayStruct(csmhedge_t) *loose_ends_B,
-                        struct csmhedge_t **matching_loose_end_hea, struct csmhedge_t **matching_loose_end_heb)
-{
-    CSMBOOL can_join;
-    struct csmhedge_t *matching_loose_end_hea_loc, *matching_loose_end_heb_loc;
-    unsigned long i, num_loose_ends;
-    
-    num_loose_ends = csmarrayc_count_st(loose_ends_A, csmhedge_t);
-    assert(num_loose_ends == csmarrayc_count_st(loose_ends_B, csmhedge_t));
-    assert_no_null(matching_loose_end_hea);
-    assert_no_null(matching_loose_end_heb);
-    
-    can_join = CSMFALSE;
-    matching_loose_end_hea_loc = NULL;
-    matching_loose_end_heb_loc = NULL;
-    
-    for (i = 0; i < num_loose_ends; i++)
-    {
-        struct csmhedge_t *loose_end_a, *loose_end_b;
-        CSMBOOL reachable_a, reachable_b;
-        CSMBOOL match_found;
-        
-        loose_end_a = csmarrayc_get_st(loose_ends_A, i, csmhedge_t);
-        loose_end_b = csmarrayc_get_st(loose_ends_B, i, csmhedge_t);
-        
-        reachable_a = csmsetopcom_hedges_are_neighbors(hea, loose_end_a);
-        reachable_b = csmsetopcom_hedges_are_neighbors(heb, loose_end_b);
-        
-        if (reachable_a == CSMTRUE && reachable_b == CSMTRUE)
-        {
-            match_found = CSMTRUE;
-        }
-        else if (reachable_a == CSMTRUE && reachable_b == CSMFALSE)
-        {
-            CSMBOOL he2_has_been_replaced_B;
-            
-            match_found = i_could_make_hedges_reachable(heb, &loose_end_b, &he2_has_been_replaced_B, loose_ends_B);
-        }
-        else if (reachable_a == CSMFALSE && reachable_b == CSMTRUE)
-        {
-            CSMBOOL he2_has_been_replaced_A;
-            
-            match_found = i_could_make_hedges_reachable(hea, &loose_end_a, &he2_has_been_replaced_A, loose_ends_A);
-        }
-        else
-        {
-            match_found = CSMFALSE;
-        }
-        
-        if (match_found == CSMTRUE)
-        {
-            can_join = CSMTRUE;
-            
-            matching_loose_end_hea_loc = loose_end_a;
-            matching_loose_end_heb_loc = loose_end_b;
-            
-            csmarrayc_delete_element_st(loose_ends_A, i, csmhedge_t, NULL);
-            csmarrayc_delete_element_st(loose_ends_B, i, csmhedge_t, NULL);
-            break;
-        }
-    }
-    
-    if (can_join == CSMFALSE)
-    {
-        matching_loose_end_hea_loc = NULL;
-        matching_loose_end_heb_loc = NULL;
-        
-        csmarrayc_append_element_st(loose_ends_A, hea, csmhedge_t);
-        csmarrayc_append_element_st(loose_ends_B, heb, csmhedge_t);
-        
-        if (csmdebug_debug_enabled() == CSMTRUE)
-            csmdebug_print_debug_info("Pushed loose end pair: (%lu, %lu)\n", csmhedge_id(hea), csmhedge_id(heb));
-    }
-    
-    *matching_loose_end_hea = matching_loose_end_hea_loc;
-    *matching_loose_end_heb = matching_loose_end_heb_loc;
-    
-    return can_join;
-}
-*/
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -866,8 +782,11 @@ void csmsetop_join_null_edges(
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2b), loose_ends_B) == CSMFALSE)
                 i_cut_he_solid_B(h2b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h2b);
 
-            if (csmdebug_debug_enabled() == CSMTRUE || csmdebug_debug_visual_enabled() == CSMTRUE)
-                csmdebug_show_viewer();
+            if (i_EXHAUSTIVE_DEBUG == CSMTRUE)
+            {
+                if (csmdebug_debug_enabled() == CSMTRUE || csmdebug_debug_visual_enabled() == CSMTRUE)
+                    csmdebug_show_viewer();
+            }
             
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
@@ -894,8 +813,11 @@ void csmsetop_join_null_edges(
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1b), loose_ends_B) == CSMFALSE)
                 i_cut_he_solid_B(h1b, set_of_null_edges_B, set_of_null_faces_B_loc, &no_null_edges_deleted_B, &null_face_created_h1b);
          
-            if (csmdebug_debug_enabled() == CSMTRUE || csmdebug_debug_visual_enabled() == CSMTRUE)
-                csmdebug_show_viewer();
+            if (i_EXHAUSTIVE_DEBUG == CSMTRUE)
+            {
+                if (csmdebug_debug_enabled() == CSMTRUE || csmdebug_debug_visual_enabled() == CSMTRUE)
+                    csmdebug_show_viewer();
+            }
             
             assert(no_null_edges_deleted_A == no_null_edges_deleted_B);
         }
