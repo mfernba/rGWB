@@ -14,6 +14,7 @@
 #else
 #include "cyassert.h"
 #include "cypespy.h"
+#include "cypespy.inl"
 #endif
 
 // --------------------------------------------------------------------------------------------------------------
@@ -58,7 +59,7 @@ struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
 
 // --------------------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(struct csmedge_t *, i_duplicate_edge, (unsigned long *id_nuevo_elemento))
+CONSTRUCTOR(static struct csmedge_t *, i_duplicate_edge, (unsigned long *id_nuevo_elemento))
 {
     unsigned long id;
     struct csmhedge_t *he1, *he2;
@@ -104,7 +105,7 @@ void csmedge_destruye(struct csmedge_t **edge)
     assert_no_null(edge);
     assert_no_null(*edge);
 
-    FREE_PP(edge, struct csmedge_t);
+    FREE_PP_NO_CLEAN_MEMORY(edge, struct csmedge_t);
 }
 
 // --------------------------------------------------------------------------------------------------------------
