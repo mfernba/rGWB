@@ -131,6 +131,7 @@ void csmhashtb_nousar_remove_item(struct csmhashtb_t *tabla, unsigned long id)
     assert_no_null(item);
     
     HASH_DEL(tabla->items, item);
+    FREE_PP(&item, struct csmhashtb_item_t);
 }
 
 // ------------------------------------------------------------------------------------------

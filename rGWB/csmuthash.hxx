@@ -29,7 +29,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>   /* exit() */
 #else
 #include "standarc.h"
-#include "cypespy.stc"
+#include "cypespy.h"
+#define uthash_malloc(sz) cypespy_nousar_malloc(sz)
+#define uthash_free(ptr,sz) cypespy_nousar_free(ptr,sz)
 #endif
 
 
