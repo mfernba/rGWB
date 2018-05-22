@@ -5772,8 +5772,8 @@ void csmtest_test(void)
     //i_test_mechanical5();
     //return;
     //i_test_cilindro5_redux(viewer);
-    i_test_difference10(viewer);
-    return;
+    //i_test_difference10(viewer);
+    //return;
     
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();

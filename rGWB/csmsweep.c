@@ -23,6 +23,7 @@
 #include "csmface.inl"
 #include "csmhedge.inl"
 #include "csmopbas.inl"
+#include "csmeuler_mvfb.inl"
 #include "csmeuler_mvfs.inl"
 #include "csmeuler_lmev.inl"
 #include "csmeuler_lmef.inl"
@@ -34,6 +35,7 @@
 #include "csmsolid.inl"
 #include "csmtolerance.inl"
 #include "csmsubdvfaces.inl"
+#include "csmvertex.inl"
 
 
 #ifdef __STANDALONE_DISTRIBUTABLE
@@ -85,40 +87,6 @@ struct csmsweep_path_t
     csmArrayStruct(i_sweep_point_t) *sweep_points;
     CSMBOOL needs_subdivide_faces;
 };
-
-// --------------------------------------------------------------------------------
-
-static void i_check_compatibility_between_shapes(
-                        const struct csmshape2d_t *shape2d_top, const struct csmshape2d_t *shape2d_bot,
-                        unsigned long *idx_outer_loop)
-{
-    unsigned long i, no_of_polygons;
-    
-    no_of_polygons = csmshape2d_polygon_count(shape2d_top);
-    assert(no_of_polygons == csmshape2d_polygon_count(shape2d_bot));
-    assert(no_of_polygons > 0);
-    assert_no_null(idx_outer_loop);
-    
-    *idx_outer_loop = ULONG_MAX;
-    
-    for (i = 0; i < no_of_polygons; i++)
-    {
-        unsigned long no_of_points_in_polygon;
-        CSMBOOL is_hole_loop_top;
-        
-        no_of_points_in_polygon = csmshape2d_point_polygon_count(shape2d_top, i);
-        assert(no_of_points_in_polygon == csmshape2d_point_polygon_count(shape2d_bot, i));
-        
-        is_hole_loop_top = csmshape2d_polygon_is_hole(shape2d_top, i);
-        assert(is_hole_loop_top == csmshape2d_polygon_is_hole(shape2d_bot, i));
-        
-        if (is_hole_loop_top == CSMFALSE)
-        {
-            assert(*idx_outer_loop == ULONG_MAX);
-            *idx_outer_loop = i;
-        }
-    }
-}
 
 // --------------------------------------------------------------------------------
 
@@ -236,6 +204,49 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_face, (
 
 // --------------------------------------------------------------------------------
 
+static void i_append_new_shell_to_solid(
+                        const struct csmshape2d_t *shape2d,
+                        unsigned long idx_outer_loop,
+                        double Xo, double Yo, double Zo,
+                        double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        struct csmsolid_t *solid,
+                        struct csmface_t **bottom_face, struct csmface_t **top_face,
+                        csmArrayStruct(csmhedge_t) **hedges_from_vertexs)
+{
+    struct csmface_t *bottom_face_loc, *top_face_loc;
+    csmArrayStruct(csmhedge_t) *hedges_from_vertexs_loc;
+    double x, y, z;
+    struct csmhedge_t *first_hedge;
+    
+    assert_no_null(bottom_face);
+    assert_no_null(top_face);
+    assert_no_null(hedges_from_vertexs);
+    
+    i_coords_point_in_loop_3D(
+                        shape2d,
+                        idx_outer_loop, 0,
+                        Xo, Yo, Zo,
+						Ux, Uy, Uz, Vx, Vy, Vz,
+                        &x, &y, &z);
+    
+    csmeuler_mvfb(solid, x, y, z, &first_hedge);
+    top_face_loc = csmopbas_face_from_hedge(first_hedge);
+    
+    i_append_loop_from_hedge(
+                        first_hedge,
+                        shape2d, idx_outer_loop,
+                        Xo, Yo, Zo,
+                        Ux, Uy, Uz, Vx, Vy, Vz,
+                        &bottom_face_loc,
+                        &hedges_from_vertexs_loc);
+    
+    *bottom_face = bottom_face_loc;
+    *top_face = top_face_loc;
+    *hedges_from_vertexs = hedges_from_vertexs_loc;
+}
+
+// --------------------------------------------------------------------------------
+
 static void i_create_hedges_from_bottom_to_top_face(
                         const struct csmshape2d_t *shape2d_top,
                         unsigned long idx_outer_loop,
@@ -305,7 +316,7 @@ static void i_create_lateral_faces(csmArrayStruct(csmhedge_t) *hedges_from_verte
 
 // --------------------------------------------------------------------------------
 
-static void i_append_holes_to_solid(
+static void i_append_holes_to_solid_faces(
                         struct csmface_t *top_face, struct csmface_t *bottom_face,
                         unsigned long idx_hole_loop,
                         const struct csmshape2d_t *shape2d_top,
@@ -383,14 +394,160 @@ static void i_append_holes_to_solid(
 
 // --------------------------------------------------------------------------------
 
-static void i_append_holes_to_solid_if_proceed(
-                        struct csmface_t *top_face, struct csmface_t *bottom_face,
+static CSMBOOL i_does_face_contain_polygon(
+                        struct csmface_t *face,
+                        const struct csmshape2d_t *shape2d, unsigned long polygon_idx,
+                        double Xo_shape2d, double Yo_shape2d, double Zo_shape2d,
+                        double Ux_shape2d, double Uy_shape2d, double Uz_shape2d, double Vx_shape2d, double Vy_shape2d, double Vz_shape2d,
+                        const struct csmtolerance_t *tolerances)
+{
+    unsigned long i, no_of_points;
+    
+    no_of_points = csmshape2d_point_polygon_count(shape2d, polygon_idx);
+    assert(no_of_points >= 3);
+
+    for (i = 0; i < no_of_points; i++)
+    {
+        double x, y, z;
+
+        i_coords_point_in_loop_3D(
+                        shape2d,
+                        polygon_idx, i,
+                        Xo_shape2d, Yo_shape2d, Zo_shape2d,
+                        Ux_shape2d, Uy_shape2d, Uz_shape2d, Vx_shape2d, Vy_shape2d, Vz_shape2d,
+                        &x, &y, &z);
+
+        if (csmface_contains_point(
+                        face,
+                        x, y, z,
+                        tolerances,
+                        NULL,
+                        NULL,
+                        NULL, NULL) == CSMFALSE)
+        {
+            return CSMFALSE;
+        }
+    }
+
+    return CSMTRUE;
+}
+
+// --------------------------------------------------------------------------------
+
+static unsigned long i_idx_face_with_polygon(
+                        csmArrayStruct(csmface_t) *faces, 
+                        const struct csmshape2d_t *shape2d, unsigned long polygon_idx,
+                        double Xo_shape2d, double Yo_shape2d, double Zo_shape2d,
+                        double Ux_shape2d, double Uy_shape2d, double Uz_shape2d, double Vx_shape2d, double Vy_shape2d, double Vz_shape2d,
+                        const struct csmtolerance_t *tolerances)
+{
+    unsigned long face_idx;
+    unsigned long i, no_faces;
+
+    no_faces = csmarrayc_count_st(faces, csmface_t);
+    face_idx = ULONG_MAX;
+
+    for (i = 0; i < no_faces; i++)
+    {
+        struct csmface_t *face;
+
+        face = csmarrayc_get_st(faces, i, csmface_t);
+
+        if (i_does_face_contain_polygon(
+                        face, 
+                        shape2d, polygon_idx,
+                        Xo_shape2d, Yo_shape2d, Zo_shape2d,
+                        Ux_shape2d, Uy_shape2d, Uz_shape2d, Vx_shape2d, Vy_shape2d, Vz_shape2d,
+                        tolerances) == CSMTRUE)
+        {
+            assert(face_idx == ULONG_MAX);
+            face_idx = i;
+        }
+    }
+
+    return face_idx;
+}
+
+// --------------------------------------------------------------------------------
+
+static void i_append_holes_in_correspoding_face_of_solid(
+                        csmArrayStruct(csmface_t) *bottom_faces, csmArrayStruct(csmface_t) *top_faces,
+                        unsigned long idx_hole_loop,
                         const struct csmshape2d_t *shape2d_top,
                         double Xo_top, double Yo_top, double Zo_top,
                         double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
                         const struct csmshape2d_t *shape2d_bot,
                         double Xo_bot, double Yo_bot, double Zo_bot,
-                        double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot)
+                        double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot,
+                        const struct csmtolerance_t *tolerances)
+{
+    unsigned long top_face_idx, bottom_face_idx;
+    struct csmface_t *top_face, *bottom_face;
+
+    top_face_idx = i_idx_face_with_polygon(
+                        top_faces, 
+                        shape2d_top, idx_hole_loop,
+                        Xo_top, Yo_top, Zo_top,
+                        Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
+                        tolerances);
+
+    bottom_face_idx = i_idx_face_with_polygon(
+                        bottom_faces, 
+                        shape2d_bot, idx_hole_loop,
+                        Xo_bot, Yo_bot, Zo_bot,
+                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
+                        tolerances);
+
+    assert(top_face_idx == bottom_face_idx);
+
+    top_face = csmarrayc_get_st(top_faces, top_face_idx, csmface_t);
+    bottom_face = csmarrayc_get_st(bottom_faces, bottom_face_idx, csmface_t);
+
+    i_append_holes_to_solid_faces(
+                        top_face, bottom_face,
+                        idx_hole_loop,
+                        shape2d_top,
+                        Xo_top, Yo_top, Zo_top,
+                        Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
+                        shape2d_bot,
+                        Xo_bot, Yo_bot, Zo_bot,
+                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
+}
+
+// --------------------------------------------------------------------------------
+
+static void i_update_face_geometric_data(
+                        csmArrayStruct(csmface_t) *bottom_faces, 
+                        csmArrayStruct(csmface_t) *top_faces)
+{
+    unsigned long i, no_faces;
+
+    no_faces = csmarrayc_count_st(bottom_faces, csmface_t);
+    assert(no_faces == csmarrayc_count_st(top_faces, csmface_t));
+
+    for (i = 0; i < no_faces; i++)
+    {
+        struct csmface_t *bottom_face, *top_face;
+
+        bottom_face = csmarrayc_get_st(bottom_faces, i, csmface_t);
+        csmface_redo_geometric_generated_data(bottom_face);
+
+        top_face = csmarrayc_get_st(top_faces, i, csmface_t);
+        csmface_redo_geometric_generated_data(top_face);
+    }
+}
+
+// --------------------------------------------------------------------------------
+
+static void i_append_holes_to_solid_if_proceed(
+                        csmArrayStruct(csmface_t) *bottom_faces, csmArrayStruct(csmface_t) *top_faces,
+                        const struct csmshape2d_t *shape2d_top,
+                        double Xo_top, double Yo_top, double Zo_top,
+                        double Ux_top, double Uy_top, double Uz_top, double Vx_top, double Vy_top, double Vz_top,
+                        const struct csmshape2d_t *shape2d_bot,
+                        double Xo_bot, double Yo_bot, double Zo_bot,
+                        double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot,
+                        const struct csmtolerance_t *tolerances)
 {
     unsigned long i, no_of_polygons;
     
@@ -398,6 +555,8 @@ static void i_append_holes_to_solid_if_proceed(
     assert(no_of_polygons == csmshape2d_polygon_count(shape2d_bot));
     assert(no_of_polygons > 0);
     
+    i_update_face_geometric_data(bottom_faces, top_faces);
+
     for (i = 0; i < no_of_polygons; i++)
     {
         CSMBOOL is_hole_loop;
@@ -407,15 +566,16 @@ static void i_append_holes_to_solid_if_proceed(
         
         if (is_hole_loop == CSMTRUE)
         {
-            i_append_holes_to_solid(
-                        top_face, bottom_face,
+            i_append_holes_in_correspoding_face_of_solid(
+                        bottom_faces, top_faces,
                         i,
                         shape2d_top,
                         Xo_top, Yo_top, Zo_top,
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         shape2d_bot,
                         Xo_bot, Yo_bot, Zo_bot,
-                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
+                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
+                        tolerances);
         }
     }
 }
@@ -430,40 +590,80 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
                         double Xo_bot, double Yo_bot, double Zo_bot,
                         double Ux_bot, double Uy_bot, double Uz_bot, double Vx_bot, double Vy_bot, double Vz_bot,
                         unsigned long start_id_of_new_element,
-                        struct csmface_t **bottom_face, struct csmface_t **top_face))
+                        csmArrayStruct(csmface_t) **bottom_faces, csmArrayStruct(csmface_t) **top_faces))
 {
     struct csmsolid_t *solid;
-    unsigned long idx_outer_loop;
-    csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face;
+    csmArrayStruct(csmface_t) *bottom_faces_loc, *top_faces_loc;
+    unsigned long i, no_of_polygons;
     
-    i_check_compatibility_between_shapes(shape2d_top, shape2d_bot, &idx_outer_loop);
+    no_of_polygons = csmshape2d_polygon_count(shape2d_top);
+    assert(no_of_polygons == csmshape2d_polygon_count(shape2d_bot));
+    assert(no_of_polygons > 0);
 
-    solid = i_create_solid_from_face(
+    solid = NULL;
+    bottom_faces_loc = csmarrayc_new_st_array(0, csmface_t);
+    top_faces_loc = csmarrayc_new_st_array(0, csmface_t);
+
+    for (i = 0; i < no_of_polygons; i++)
+    {
+        unsigned long no_of_points_in_polygon;
+        CSMBOOL is_hole_loop_top;
+        
+        no_of_points_in_polygon = csmshape2d_point_polygon_count(shape2d_top, i);
+        assert(no_of_points_in_polygon == csmshape2d_point_polygon_count(shape2d_bot, i));
+        
+        is_hole_loop_top = csmshape2d_polygon_is_hole(shape2d_top, i);
+        assert(is_hole_loop_top == csmshape2d_polygon_is_hole(shape2d_bot, i));
+
+        if (is_hole_loop_top == CSMFALSE)
+        {
+            struct csmface_t *bottom_face, *top_face;
+            csmArrayStruct(csmhedge_t) *hedges_from_vertexs_bottom_face;
+
+            if (solid == NULL)
+            {
+                solid = i_create_solid_from_face(
                         shape2d_bot,
                         start_id_of_new_element,
-                        idx_outer_loop,
+                        i,
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
-                        bottom_face, top_face,
+                        &bottom_face, &top_face,
                         &hedges_from_vertexs_bottom_face);
-    
-    //csmsolid_debug_print_debug(solid, CSMTRUE);
+            }
+            else
+            {
+                i_append_new_shell_to_solid(
+                        shape2d_bot,
+                        i,
+                        Xo_bot, Yo_bot, Zo_bot,
+                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
+                        solid,
+                        &bottom_face, &top_face,
+                        &hedges_from_vertexs_bottom_face);
+            }
 
-    i_create_hedges_from_bottom_to_top_face(
+            i_create_hedges_from_bottom_to_top_face(
                         shape2d_top,
-                        idx_outer_loop,
+                        i,
                         Xo_top, Yo_top, Zo_top,
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         hedges_from_vertexs_bottom_face);
 
-    //csmsolid_debug_print_debug(solid, CSMTRUE);
-    
-    i_create_lateral_faces(hedges_from_vertexs_bottom_face);
+            i_create_lateral_faces(hedges_from_vertexs_bottom_face);
 
-    //csmsolid_debug_print_debug(solid, CSMTRUE);
+            csmarrayc_append_element_st(bottom_faces_loc, bottom_face, csmface_t);
+            csmarrayc_append_element_st(top_faces_loc, top_face, csmface_t);
+
+            //csmsolid_debug_print_debug(solid, CSMTRUE);
     
-    csmarrayc_free_st(&hedges_from_vertexs_bottom_face, csmhedge_t, NULL);
-    
+            csmarrayc_free_st(&hedges_from_vertexs_bottom_face, csmhedge_t, NULL);
+        }
+    }
+
+    *bottom_faces = bottom_faces_loc;
+    *top_faces = top_faces_loc;
+
     return solid;
 }
 
@@ -503,9 +703,9 @@ struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
                         unsigned long start_id_of_new_element)
 {
     struct csmsolid_t *solid;
-    struct csmface_t *bottom_face, *top_face;
+    csmArrayStruct(csmface_t) *bottom_faces, *top_faces;
     struct csmtolerance_t *tolerances;
-    
+
     solid = i_create_solid_from_shape_without_holes(
                         shape2d_top,
                         Xo_top, Yo_top, Zo_top,
@@ -514,21 +714,26 @@ struct csmsolid_t *csmsweep_create_solid_from_shape_debug(
                         Xo_bot, Yo_bot, Zo_bot,
                         Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
                         start_id_of_new_element,
-                        &bottom_face, &top_face);
-    
+                        &bottom_faces, &top_faces);
+
+    tolerances = csmtolerance_new();
+
     i_append_holes_to_solid_if_proceed(
-                        top_face, bottom_face,
+                        bottom_faces, top_faces,
                         shape2d_top,
                         Xo_top, Yo_top, Zo_top,
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         shape2d_bot,
                         Xo_bot, Yo_bot, Zo_bot,
-                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot);
+                        Ux_bot, Uy_bot, Uz_bot, Vx_bot, Vy_bot, Vz_bot,
+                        tolerances);
 
-    tolerances = csmtolerance_new();
     csmsimplifysolid_simplify(solid, tolerances);
+
     csmtolerance_free(&tolerances);
-    
+    csmarrayc_free_st(&bottom_faces, csmface_t, NULL);
+    csmarrayc_free_st(&top_faces, csmface_t, NULL);
+
     return solid;
 }
 
@@ -918,13 +1123,38 @@ struct csmsolid_t *csmsweep_create_from_path(const struct csmsweep_path_t *sweep
 
 // --------------------------------------------------------------------------------
 
+static void i_glue_faces(csmArrayStruct(csmface_t) *top_faces_prev, csmArrayStruct(csmface_t) **bottom_faces_i, struct csmtolerance_t *tolerances)
+{
+    unsigned long i, no_faces_to_merge;
+
+    assert_no_null(bottom_faces_i);
+    no_faces_to_merge = csmarrayc_count_st(*bottom_faces_i, csmface_t);
+    assert(no_faces_to_merge == csmarrayc_count_st(top_faces_prev, csmface_t));
+
+    for (i = 0; i < no_faces_to_merge; i++)
+    {
+        struct csmface_t *top_face_solid_prev, *bottom_face_i;
+
+        top_face_solid_prev = csmarrayc_get_st(top_faces_prev, i, csmface_t);
+        bottom_face_i = csmarrayc_get_st(*bottom_faces_i, i, csmface_t);
+
+        csmloopglue_merge_faces(top_face_solid_prev, &bottom_face_i, tolerances);
+    }
+
+
+    csmarrayc_free_st(bottom_faces_i, csmface_t, NULL);
+}
+
+// --------------------------------------------------------------------------------
+
 struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t *sweep_path, unsigned long start_id_of_new_element)
 {
     struct csmsolid_t *solid;
     const struct i_sweep_point_t *initial_point, *end_point;
     struct csmtolerance_t *tolerances;
     unsigned long i, no_points;
-    struct csmface_t *bottom_face_first_solid, *top_face_solid_prev;
+    csmArrayStruct(csmface_t) *bottom_faces_first_solid;
+    csmArrayStruct(csmface_t) *top_faces_prev;
     
     assert_no_null(sweep_path);
     no_points = csmarrayc_count_st(sweep_path->sweep_points, i_sweep_point_t);
@@ -934,14 +1164,14 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
 
     solid = NULL;
     
-    bottom_face_first_solid = NULL;
-    top_face_solid_prev = NULL;
+    bottom_faces_first_solid = NULL;
+    top_faces_prev = NULL;
     
     for (i = 0; i < no_points - 1; i++)
     {
         const struct i_sweep_point_t *point1, *point2;
         struct csmsolid_t *solid_i;
-        struct csmface_t *bottom_face_i, *top_face_i;
+        csmArrayStruct(csmface_t) *bottom_faces_i, *top_faces_i;
         
         point1 = csmarrayc_get_const_st(sweep_path->sweep_points, i, i_sweep_point_t);
         assert_no_null(point1);
@@ -957,29 +1187,31 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
                         point1->Xo, point1->Yo, point1->Zo,
                         point1->Ux, point1->Uy, point1->Uz, point1->Vx, point1->Vy, point1->Vz,
                         start_id_of_new_element,
-                        &bottom_face_i, &top_face_i);
+                        &bottom_faces_i, &top_faces_i);
         
         if (i == 0)
         {
             solid = solid_i;
-            bottom_face_first_solid = bottom_face_i;
+            bottom_faces_first_solid = ASIGNA_PUNTERO_PP_NO_NULL(&bottom_faces_i, csmArrayStruct(csmface_t));
+            top_faces_prev = ASIGNA_PUNTERO_PP_NO_NULL(&top_faces_i, csmArrayStruct(csmface_t));
         }
         else
         {
             csmsolid_merge_solids(solid, solid_i);
-            
-            csmloopglue_merge_faces(top_face_solid_prev, &bottom_face_i, tolerances);
+
+            i_glue_faces(top_faces_prev, &bottom_faces_i, tolerances);
             csmsolid_free(&solid_i);
+
+            csmarrayc_free_st(&top_faces_prev, csmface_t, NULL);
+            top_faces_prev = ASIGNA_PUNTERO_PP_NO_NULL(&top_faces_i, csmArrayStruct(csmface_t));
         }
-        
-        top_face_solid_prev = top_face_i;
     }
     
     initial_point = csmarrayc_get_const_st(sweep_path->sweep_points, 0, i_sweep_point_t);
     end_point = csmarrayc_get_const_st(sweep_path->sweep_points, no_points - 1, i_sweep_point_t);
     
     if (i_points_are_equal(initial_point, end_point, tolerances) == CSMTRUE)
-        csmloopglue_merge_faces(top_face_solid_prev, &bottom_face_first_solid, tolerances);
+        i_glue_faces(top_faces_prev, &bottom_faces_first_solid, tolerances);
     
     if (sweep_path->needs_subdivide_faces == CSMTRUE)
         csmsubdvfaces_subdivide_faces(solid);
@@ -987,6 +1219,10 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
     csmsimplifysolid_simplify(solid, tolerances);
     
     csmtolerance_free(&tolerances);
+    csmarrayc_free_st(&top_faces_prev, csmface_t, NULL);
+
+    if (bottom_faces_first_solid != NULL)
+        csmarrayc_free_st(&bottom_faces_first_solid, csmface_t, NULL);
 
     return solid;
 }
