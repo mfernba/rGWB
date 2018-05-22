@@ -1509,6 +1509,47 @@ static void i_test_cilindro5(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_cilindro5_redux(struct csmviewer_t *viewer)
+{
+    struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    
+    i_set_output_debug_file("test_cilindro5.she");
+
+    cshape2d = csmbasicshape2d_circular_shape(0.25, 4);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
+    shape2d2 = csmbasicshape2d_rectangular_shape(1.5, 0.75);
+    
+    // Adjacent solids to face at 0.5, 0.5, NON equal vertex coordinates...
+    solid1 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 1.25, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0.05, 1., 0., 0., 0., 1., 0., 0);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(
+                        cshape2d, .75,  0.25,   1., -1., 0., 0., 0., 0., 1.,
+                        cshape2d, .75, -2.,     1., -1., 0., 0., 0., 0., 1.,
+                        1000);
+
+    {
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [begin]");
+        assert(csmsetop_union_A_and_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+        csmviewer_set_results(viewer, solid_res, NULL);
+        csmviewer_show(viewer);
+        csmsolid_free(&solid_res);
+        csmdebug_print_debug_info("******* Solid 2 union solid 1 [end]");
+    }
+    
+    csmsolid_debug_print_debug(solid1, CSMTRUE);
+    csmsolid_debug_print_debug(solid2, CSMTRUE);
+    
+    csmshape2d_free(&cshape2d);
+    csmshape2d_free(&shape2d);
+    csmshape2d_free(&shape2d2);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+}
+
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_cilindro6(struct csmviewer_t *viewer)
 {
     struct csmshape2d_t *shape2d, *cshape2d, *shape2d2;
@@ -5282,6 +5323,42 @@ static void i_test_difference8_redux(void)
 static void i_substract_rectangular_solid(
                         double ax, double ay, double depth,
                         double Xo, double Yo, double Zo,
+                        double r, double g, double b,
+                        struct csmsolid_t **solid_res)
+{
+    struct csmshape2d_t *shape1;
+    csmArrPoint2D *points;
+    struct csmsolid_t *solid_aux, *solid_to_substract;
+
+    points = csmArrPoint2D_new(0);
+    csmArrPoint2D_append(points, -.5 * ax, -.5 * ay);
+    csmArrPoint2D_append(points,  .5 * ax, -.5 * ay);
+    csmArrPoint2D_append(points,  .5 * ax,  .5 * ay);
+    csmArrPoint2D_append(points, -.5 * ax,  .5 * ay);
+
+    shape1 = csmshape2d_new();
+    csmshape2d_append_new_polygon_with_points(shape1, &points);
+
+    solid_to_substract = csmsweep_create_solid_from_shape_debug(
+                    shape1, Xo, Yo, Zo, 1., 0., 0., 0., 1., 0.,
+                    shape1, Xo, Yo, Zo - depth, 1., 0., 0., 0., 1., 0.,
+                    0);
+
+    csmshape2d_free(&shape1);
+
+    i_assign_flat_material_to_solid(r, g, b, solid_to_substract);
+    
+    solid_aux = *solid_res;
+    assert(csmsetop_difference_A_minus_B(solid_aux, solid_to_substract, solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_free(&solid_to_substract);
+    csmsolid_free(&solid_aux);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_inters_rectangular_solid(
+                        double ax, double ay, double depth,
+                        double Xo, double Yo, double Zo,
                         struct csmsolid_t **solid_res)
 {
     struct csmshape2d_t *shape1;
@@ -5305,11 +5382,10 @@ static void i_substract_rectangular_solid(
     csmshape2d_free(&shape1);
 
     solid_aux = *solid_res;
-    assert(csmsetop_difference_A_minus_B(solid_aux, solid_to_substract, solid_res) == CSMSETOP_OPRESULT_OK);
+    assert(csmsetop_intersection_A_and_B(solid_aux, solid_to_substract, solid_res) == CSMSETOP_OPRESULT_OK);
     csmsolid_free(&solid_to_substract);
     csmsolid_free(&solid_aux);
 }
-
 // ------------------------------------------------------------------------------------------
 
 static void i_test_difference9(struct csmviewer_t *viewer)
@@ -5341,9 +5417,9 @@ static void i_test_difference9(struct csmviewer_t *viewer)
         csmshape2d_free(&shape1);
     }
 
-    i_substract_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, &solid_res);
-    i_substract_rectangular_solid(1., 0.5, 0.3, -2., -2.5 - 0.25, 0.3, &solid_res);
-    i_substract_rectangular_solid(1., 0.5, 0.3,  2., -2.5 - 0.25, 0.3, &solid_res);
+    i_substract_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, 1., 0., 0., &solid_res);
+    i_substract_rectangular_solid(1., 0.5, 0.3, -2., -2.5 - 0.25, 0.3, 0., 1., 0., &solid_res);
+    i_substract_rectangular_solid(1., 0.5, 0.3,  2., -2.5 - 0.25, 0.3, 1., 1., 0., &solid_res);
     
     csmviewer_set_results(viewer, solid_res, NULL);
     csmviewer_show(viewer);
@@ -5384,10 +5460,12 @@ static void i_test_difference10(struct csmviewer_t *viewer)
 
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
     csmdebug_set_enabled_by_code(CSMFALSE);
-    i_substract_rectangular_solid(1., 0.5, 0.3, -2., -2.5 - 0.25, 0.3, &solid_res);
-    i_substract_rectangular_solid(1., 0.5, 0.3,  2., -2.5 - 0.25, 0.3, &solid_res);
+    i_substract_rectangular_solid(1., 0.5, 0.3, -2., -2.5 - 0.25, 0.3, 1., 0., 0., &solid_res);
+    i_substract_rectangular_solid(1., 0.5, 0.3,  2., -2.5 - 0.25, 0.3, 0., 1., 0., &solid_res);
+    //i_substract_rectangular_solid(1., 0.5, 0.3,  4.25, 0., 0.3, &solid_res);
     csmdebug_set_enabled_by_code(CSMTRUE);
-    i_substract_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, &solid_res);
+    i_substract_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, 1., 1., 0., &solid_res);
+    //i_inters_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, &solid_res);
     
     csmviewer_set_results(viewer, solid_res, NULL);
     csmviewer_show(viewer);
@@ -5688,6 +5766,12 @@ void csmtest_test(void)
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
     csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    //i_test_interseccion_solidos7(viewer);
+
+    csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    //i_test_mechanical5();
+    //return;
+    //i_test_cilindro5_redux(viewer);
     i_test_difference10(viewer);
     return;
     
@@ -5753,6 +5837,7 @@ void csmtest_test(void)
         i_test_difference9(viewer);
         //i_test_difference10(viewer);
         
+        /*
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         {
             i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
@@ -5762,6 +5847,7 @@ void csmtest_test(void)
             i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
         }
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+        */
         
         //i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
         

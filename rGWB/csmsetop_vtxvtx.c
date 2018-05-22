@@ -2201,12 +2201,17 @@ static CSMBOOL i_edge_faces_are_convex_between_them(struct csmhedge_t *he, const
 
 static CSMBOOL i_is_wide_sector(struct csmhedge_t *he, const struct csmtolerance_t *tolerances)
 {
+    struct csmhedge_t *he_prev, *he_next;
     struct csmvertex_t *vertex, *vertex_prv, *vertex_nxt;
     double tolerance_equal_coords;
     
     vertex = csmhedge_vertex(he);
-    vertex_prv = csmhedge_vertex(csmhedge_prev(he));
-    vertex_nxt = csmhedge_vertex(csmhedge_next(he));
+    
+    he_prev = csmopbas_get_prev_no_null_hedge(he, tolerances);
+    vertex_prv = csmhedge_vertex(he_prev);
+    
+    he_next = csmopbas_get_next_no_null_hedge(he, tolerances);
+    vertex_nxt = csmhedge_vertex(he_next);
     
     tolerance_equal_coords = csmtolerance_equal_coords(tolerances);
     

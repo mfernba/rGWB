@@ -421,89 +421,6 @@ static CSMBOOL i_make_reachable_start_vertex_he1_occur_in_face_of_he2(
 
 // ----------------------------------------------------------------------------------------------------
 
-static CSMBOOL i_does_he1_and_he2_vertex_have_a_common_face(
-                        struct csmhedge_t *he1, struct csmhedge_t *he2,
-                        struct csmface_t **common_face,
-                        struct csmhedge_t **he1_in_common_face, struct csmhedge_t **he2_in_common_face)
-{
-    CSMBOOL exists_common_face;
-    struct csmface_t *common_face_loc;
-    struct csmhedge_t *he1_in_common_face_loc, *he2_in_common_face_loc;
-    struct csmvertex_t *he1_vertex, *he2_vertex;
-    struct csmhedge_t *he1_vertex_hedge, *he1_iterator, *he2_vertex_hedge;
-    unsigned long no_iters;
-
-    assert_no_null(common_face);
-    assert_no_null(he1_in_common_face);
-    assert_no_null(he2_in_common_face);
-    
-    exists_common_face = CSMFALSE;
-    common_face_loc = NULL;
-    he1_in_common_face_loc = NULL;
-    he2_in_common_face_loc = NULL;
-    
-    he1_vertex = csmhedge_vertex(he1);
-    he1_vertex_hedge = csmvertex_hedge(he1_vertex);
-    he1_iterator = he1_vertex_hedge;
-    
-    he2_vertex = csmhedge_vertex(he2);
-    he2_vertex_hedge = csmvertex_hedge(he2_vertex);
-    
-    no_iters = 0;
-    
-    do
-    {
-        struct csmface_t *he1_iterator_face;
-        struct csmhedge_t *he2_iterator;
-        unsigned long no_iters2;
-        
-        assert(no_iters < 1000);
-        no_iters++;
-        
-        he1_iterator_face = csmopbas_face_from_hedge(he1_iterator);
-        he2_iterator = he2_vertex_hedge;
-        
-        no_iters2 = 0;
-        
-        do
-        {
-            struct csmface_t *he2_iterator_face;
-            
-            assert(no_iters2 < 1000);
-            no_iters2++;
-
-            he2_iterator_face = csmopbas_face_from_hedge(he2_iterator);
-            
-            if (he1_iterator_face == he2_iterator_face)
-            {
-                exists_common_face = CSMTRUE;
-                
-                common_face_loc = he1_iterator_face;
-                he1_in_common_face_loc = he1_iterator;
-                he2_in_common_face_loc = he2_iterator;
-                break;
-            }
-            
-            he2_iterator = csmhedge_next(csmopbas_mate(he2_iterator));
-            
-        } while (he2_iterator != he2_vertex_hedge);
-        
-        if (exists_common_face == CSMFALSE)
-            he1_iterator = csmhedge_next(csmopbas_mate(he1_iterator));
-        else
-            break;
-        
-    } while (he1_iterator != he1_vertex_hedge);
-    
-    *common_face = common_face_loc;
-    *he1_in_common_face = he1_in_common_face_loc;
-    *he2_in_common_face = he2_in_common_face_loc;
-    
-    return exists_common_face;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 static CSMBOOL i_could_make_hedges_reachable(
                         struct csmhedge_t *he1, struct csmhedge_t **he2,
                         CSMBOOL *he2_has_been_replaced,
@@ -539,20 +456,7 @@ static CSMBOOL i_could_make_hedges_reachable(
         }
         else
         {
-            struct csmface_t *common_face;
-            struct csmhedge_t *he1_in_common_face, *he2_in_common_face;
-            
-            if (i_does_he1_and_he2_vertex_have_a_common_face(
-                        he1, *he2,
-                        &common_face,
-                        &he1_in_common_face, &he2_in_common_face) == CSMTRUE)
-            {
-                return CSMFALSE;
-            }
-            else
-            {
-                return CSMFALSE;
-            }
+            return CSMFALSE;
         }
     }
 }
@@ -699,62 +603,6 @@ static CSMBOOL i_did_delete_orphan_face_with_null_edge(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_delete_faces_to_increase_joinability(
-                        struct csmsolid_t *solid, csmArrayStruct(csmhedge_t) *loose_ends,
-                        CSMBOOL *deleted_faces)
-{
-    CSMBOOL deleted_faces_loc;
-    CSMBOOL there_are_changes;
-    
-    assert_no_null(deleted_faces);
-    
-    deleted_faces_loc = CSMFALSE;
-    
-    do
-    {
-        struct csmhashtb_iterator(csmface_t) *face_iterator;
-    
-        face_iterator = csmsolid_face_iterator(solid);
-        there_are_changes = CSMFALSE;
-    
-        while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
-        {
-            struct csmface_t *face;
-            
-            csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
-            
-            if (csmface_has_holes(face) == CSMFALSE && csmface_is_setop_null_face(face) == CSMFALSE)
-            {
-                if (i_did_delete_joining_face_without_null_edges(face) == CSMTRUE)
-                {
-                    there_are_changes = CSMTRUE;
-                }
-                else if (i_did_delete_orphan_face_with_null_edge(face) == CSMTRUE)
-                {
-                    there_are_changes = CSMTRUE;
-                }
-                else
-                {
-                    there_are_changes = CSMFALSE;
-                }
-            }
-            
-            if (there_are_changes == CSMTRUE)
-            {
-                deleted_faces_loc = CSMTRUE;
-                break;
-            }
-        }
-        
-        csmhashtb_free_iterator(&face_iterator, csmface_t);
-        
-    } while (there_are_changes == CSMTRUE);
-    
-    *deleted_faces = deleted_faces_loc;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 static void i_join_pendant_loose_ends_by_modifying_topology(
                         struct csmsolid_t *solid_A, csmArrayStruct(csmedge_t) *set_of_null_edges_A, csmArrayStruct(csmhedge_t) *loose_ends_A,
                         struct csmsolid_t *solid_B, csmArrayStruct(csmedge_t) *set_of_null_edges_B, csmArrayStruct(csmhedge_t) *loose_ends_B,
@@ -771,16 +619,6 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
     
     no_iters = 0;
     there_are_changes = CSMFALSE;
-    
-    /*
-    if (csmarrayc_count_st(loose_ends_A, csmhedge_t) > 0 || csmarrayc_count_st(loose_ends_B, csmhedge_t) > 0)
-    {
-        CSMBOOL deleted_faces_A, deleted_faces_B;
-        
-        i_delete_faces_to_increase_joinability(solid_A, loose_ends_A, &deleted_faces_A);
-        i_delete_faces_to_increase_joinability(solid_B, loose_ends_B, &deleted_faces_B);
-    }
-    */
     
     do
     {
@@ -909,19 +747,6 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
                 break;
         }
         
-        /*
-        if (there_are_changes == CSMFALSE
-                && (csmarrayc_count_st(loose_ends_A, csmhedge_t) > 0 || csmarrayc_count_st(loose_ends_B, csmhedge_t) > 0))
-        {
-            CSMBOOL deleted_faces_A, deleted_faces_B;
-            
-            i_delete_faces_to_increase_joinability(solid_A, loose_ends_A, &deleted_faces_A);
-            i_delete_faces_to_increase_joinability(solid_B, loose_ends_B, &deleted_faces_B);
-            
-            there_are_changes = IS_TRUE(deleted_faces_A == CSMTRUE || deleted_faces_B == CSMTRUE);
-        }
-        */
-        
     } while (there_are_changes == CSMTRUE);
     
     if (csmdebug_debug_enabled() == CSMTRUE)
@@ -938,6 +763,92 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
         }
     }
 }
+/*
+// ------------------------------------------------------------------------------------------
+
+static CSMBOOL i_can_join2(
+                        struct csmhedge_t *hea, struct csmhedge_t *heb,
+                        csmArrayStruct(csmhedge_t) *loose_ends_A,
+                        csmArrayStruct(csmhedge_t) *loose_ends_B,
+                        struct csmhedge_t **matching_loose_end_hea, struct csmhedge_t **matching_loose_end_heb)
+{
+    CSMBOOL can_join;
+    struct csmhedge_t *matching_loose_end_hea_loc, *matching_loose_end_heb_loc;
+    unsigned long i, num_loose_ends;
+    
+    num_loose_ends = csmarrayc_count_st(loose_ends_A, csmhedge_t);
+    assert(num_loose_ends == csmarrayc_count_st(loose_ends_B, csmhedge_t));
+    assert_no_null(matching_loose_end_hea);
+    assert_no_null(matching_loose_end_heb);
+    
+    can_join = CSMFALSE;
+    matching_loose_end_hea_loc = NULL;
+    matching_loose_end_heb_loc = NULL;
+    
+    for (i = 0; i < num_loose_ends; i++)
+    {
+        struct csmhedge_t *loose_end_a, *loose_end_b;
+        CSMBOOL reachable_a, reachable_b;
+        CSMBOOL match_found;
+        
+        loose_end_a = csmarrayc_get_st(loose_ends_A, i, csmhedge_t);
+        loose_end_b = csmarrayc_get_st(loose_ends_B, i, csmhedge_t);
+        
+        reachable_a = csmsetopcom_hedges_are_neighbors(hea, loose_end_a);
+        reachable_b = csmsetopcom_hedges_are_neighbors(heb, loose_end_b);
+        
+        if (reachable_a == CSMTRUE && reachable_b == CSMTRUE)
+        {
+            match_found = CSMTRUE;
+        }
+        else if (reachable_a == CSMTRUE && reachable_b == CSMFALSE)
+        {
+            CSMBOOL he2_has_been_replaced_B;
+            
+            match_found = i_could_make_hedges_reachable(heb, &loose_end_b, &he2_has_been_replaced_B, loose_ends_B);
+        }
+        else if (reachable_a == CSMFALSE && reachable_b == CSMTRUE)
+        {
+            CSMBOOL he2_has_been_replaced_A;
+            
+            match_found = i_could_make_hedges_reachable(hea, &loose_end_a, &he2_has_been_replaced_A, loose_ends_A);
+        }
+        else
+        {
+            match_found = CSMFALSE;
+        }
+        
+        if (match_found == CSMTRUE)
+        {
+            can_join = CSMTRUE;
+            
+            matching_loose_end_hea_loc = loose_end_a;
+            matching_loose_end_heb_loc = loose_end_b;
+            
+            csmarrayc_delete_element_st(loose_ends_A, i, csmhedge_t, NULL);
+            csmarrayc_delete_element_st(loose_ends_B, i, csmhedge_t, NULL);
+            break;
+        }
+    }
+    
+    if (can_join == CSMFALSE)
+    {
+        matching_loose_end_hea_loc = NULL;
+        matching_loose_end_heb_loc = NULL;
+        
+        csmarrayc_append_element_st(loose_ends_A, hea, csmhedge_t);
+        csmarrayc_append_element_st(loose_ends_B, heb, csmhedge_t);
+        
+        if (csmdebug_debug_enabled() == CSMTRUE)
+            csmdebug_print_debug_info("Pushed loose end pair: (%lu, %lu)\n", csmhedge_id(hea), csmhedge_id(heb));
+    }
+    
+    *matching_loose_end_hea = matching_loose_end_hea_loc;
+    *matching_loose_end_heb = matching_loose_end_heb_loc;
+    
+    return can_join;
+}
+*/
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -1050,6 +961,9 @@ void csmsetop_join_null_edges(
             
             csmsetopcom_print_debug_info_loose_ends(loose_ends_A);
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
+            
+            //csmsetopcom_print_debug_info_faces_null_edges("Solid A", set_of_null_edges_A);
+            //csmsetopcom_print_debug_info_faces_null_edges("Solid B", set_of_null_edges_B);
         }
 
         null_face_created_h1a = CSMFALSE;

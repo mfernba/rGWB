@@ -282,7 +282,7 @@
 		551290C62089054600D0E419 /* csmsimplifysolid.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmsimplifysolid.inl; sourceTree = "<group>"; };
 		5513276F1EC3AF1100F2B04D /* csmvertex.tli */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmvertex.tli; sourceTree = "<group>"; };
 		551327741EC3B06800F2B04D /* csmvertex.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmvertex.hxx; sourceTree = "<group>"; };
-		551327751ECB9A6000F2B04D /* csmsetopcom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetopcom.c; sourceTree = "<group>"; };
+		551327751ECB9A6000F2B04D /* csmsetopcom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmsetopcom.c; sourceTree = "<group>"; };
 		551327761ECB9A6000F2B04D /* csmsetopcom.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsetopcom.inl; sourceTree = "<group>"; };
 		5513277A1ECBA0CC00F2B04D /* csmsetop.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetop.c; sourceTree = "<group>"; };
 		5513277B1ECBA0CC00F2B04D /* csmsetop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = csmsetop.h; sourceTree = "<group>"; };
@@ -330,7 +330,7 @@
 		5536C8661FC1F4B7005CE275 /* WinFrames2.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = WinFrames2.xcodeproj; path = ../WinFrames2/WinFrames2.xcodeproj; sourceTree = "<group>"; };
 		553E63E61FF6990400A15475 /* csmsplit.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmsplit.hxx; sourceTree = "<group>"; };
 		553E63E81FF69E0600A15475 /* csmsetop.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmsetop.hxx; sourceTree = "<group>"; };
-		5559D4E2204F3F310058F6F5 /* csmsetop_join.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmsetop_join.c; sourceTree = "<group>"; };
+		5559D4E2204F3F310058F6F5 /* csmsetop_join.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsetop_join.c; sourceTree = "<group>"; };
 		5559D4E3204F3F310058F6F5 /* csmsetop_join.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmsetop_join.inl; sourceTree = "<group>"; };
 		5570129E1E8328E400DFC490 /* csmsweep.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsweep.c; sourceTree = "<group>"; };
 		5570129F1E8328E400DFC490 /* csmsweep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = csmsweep.h; sourceTree = "<group>"; };
@@ -403,7 +403,7 @@
 		55EA99181ED389C0006C063C /* csmsetop_vtxfacc.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetop_vtxfacc.c; sourceTree = "<group>"; };
 		55EA99191ED389C0006C063C /* csmsetop_vtxfacc.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsetop_vtxfacc.inl; sourceTree = "<group>"; };
 		55EA991C1ED38C22006C063C /* csmsetop.tli */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmsetop.tli; sourceTree = "<group>"; };
-		55EA991D1ED38E66006C063C /* csmsetop_vtxvtx.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetop_vtxvtx.c; sourceTree = "<group>"; };
+		55EA991D1ED38E66006C063C /* csmsetop_vtxvtx.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmsetop_vtxvtx.c; sourceTree = "<group>"; };
 		55EA991E1ED38E66006C063C /* csmsetop_vtxvtx.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsetop_vtxvtx.inl; sourceTree = "<group>"; };
 		55EA99211ED38FCD006C063C /* csmsetop_procedges.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetop_procedges.c; sourceTree = "<group>"; };
 		55EA99221ED38FCD006C063C /* csmsetop_procedges.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsetop_procedges.inl; sourceTree = "<group>"; };

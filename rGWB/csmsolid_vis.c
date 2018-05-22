@@ -298,13 +298,17 @@ static void i_draw_null_edge(struct csmedge_t *edge, struct bsgraphics2_t *graph
                     he1_prev = csmhedge_prev(he1_prev);
                 
                 csmvertex_get_coordenadas(csmhedge_vertex(he1_prev), &x_prev, &y_prev, &z_prev);
-                csmmath_unit_vector_between_two_3D_points(x1, y1, z1, x_prev, y_prev, z_prev, &Ux, &Uy, &Uz);
-                
+
                 length = csmmath_distance_3D(x1, y1, z1, x_prev, y_prev, z_prev);
-                csmmath_move_point(x1, y1, z1, Ux, Uy, Uz, 0.25 * length, &x, &y, &z);
                 
-                bsgraphics2_escr_grosor_linea(graphics, BSGRAPHICS2_GROSOR_TREMENDAMENTE_GRUESO);
-                bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x, y, z);
+                if (length > 0.)
+                {
+                    csmmath_unit_vector_between_two_3D_points(x1, y1, z1, x_prev, y_prev, z_prev, &Ux, &Uy, &Uz);
+                    csmmath_move_point(x1, y1, z1, Ux, Uy, Uz, 0.25 * length, &x, &y, &z);
+                
+                    bsgraphics2_escr_grosor_linea(graphics, BSGRAPHICS2_GROSOR_TREMENDAMENTE_GRUESO);
+                    bsgraphics2_escr_linea3D(graphics, x1, y1, z1, x, y, z);
+                }
             }
         }
     }
