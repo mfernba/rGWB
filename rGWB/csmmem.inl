@@ -27,6 +27,8 @@ void csmmem_dontuse_free(void **data, size_t bytes);
     csmmem_dontuse_free((void **)data, sizeof(data))\
 )
 
+#define FREE_PP_NO_CLEAN_MEMORY FREE_PP
+
 void *csmmem_dontuse_dereference_memory(void **data);
 #define ASIGNA_PUNTERO_PP_NO_NULL(data, type)\
 (\
