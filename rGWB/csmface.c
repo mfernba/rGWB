@@ -21,6 +21,7 @@
 #else
 #include "cyassert.h"
 #include "cypespy.h"
+#include "cypespy.inl"
 #endif
 
 // ------------------------------------------------------------------------------------------
@@ -251,7 +252,7 @@ void csmface_free(struct csmface_t **face)
     
     csmbbox_free(&(*face)->bbox);
     
-    FREE_PP(face, struct csmface_t);
+    FREE_PP_NO_CLEAN_MEMORY(face, struct csmface_t);
 }
 
 // ------------------------------------------------------------------------------------------
