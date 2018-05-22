@@ -8,11 +8,9 @@
 
 #include "csmsimplifysolid.inl"
 
-#include "csmarrayc.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
-#include "csmeuler_lmekr.inl"
 #include "csmeuler_lkef.inl"
 #include "csmeuler_lkemr.inl"
 #include "csmeuler_lkev.inl"
@@ -26,7 +24,6 @@
 #include "csmopbas.inl"
 #include "csmsolid.inl"
 #include "csmsolid_debug.inl"
-#include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
@@ -38,7 +35,7 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_delete_null_area_faces(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances, CSMBOOL *changed)
+static void i_delete_null_area_faces(struct csmsolid_t *solid, CSMBOOL *changed)
 {
     CSMBOOL there_are_changes;
     unsigned long no_iters;
@@ -250,7 +247,7 @@ static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmt
                     if (csmface_is_loop_contained_in_face_outer_loop(face_he1, new_loop, tolerances) == CSMFALSE)
                     {
                         double A_new, B_new, C_new, D_new, xc_new, yc_new, zc_new;
-                        CSMBOOL parallel, same_sense;
+                        CSMBOOL parallel;
 
                         csmloop_face_equation(new_loop, &A_new, &B_new, &C_new, &D_new, &xc_new, &yc_new, &zc_new);
                         
@@ -400,7 +397,7 @@ void csmsimplifysolid_simplify(struct csmsolid_t *solid, const struct csmtoleran
     }
         
     changed = CSMFALSE;
-    i_delete_null_area_faces(solid, tolerances, &changed);
+    i_delete_null_area_faces(solid, &changed);
     i_delete_redundant_faces(solid, tolerances, &changed);
     i_delete_redundant_vertexs(solid, &changed);
 
