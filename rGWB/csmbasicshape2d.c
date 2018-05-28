@@ -86,6 +86,31 @@ struct csmshape2d_t *csmbasicshape2d_circular_shape(double radius, unsigned long
 
 // ------------------------------------------------------------------------------------------
 
+struct csmshape2d_t *csmbasicshape2d_double_circular_shape(
+                        double radius, unsigned long no_points_circle,
+                        double distance_between_centers)
+{
+    struct csmshape2d_t *shape2d;
+    csmArrPoint2D *points;
+
+    assert(radius > 0.);
+    assert(distance_between_centers > 2. * radius);
+
+    shape2d = csmshape2d_new();
+    
+    points = csmArrPoint2D_new(0);
+    csmArrPoint2D_append_circle_points(points, -0.5 * distance_between_centers, 0., radius, no_points_circle, CSMFALSE);
+    csmshape2d_append_new_polygon_with_points(shape2d, &points);
+
+    points = csmArrPoint2D_new(0);
+    csmArrPoint2D_append_circle_points(points, 0.5 * distance_between_centers, 0., radius, no_points_circle, CSMFALSE);
+    csmshape2d_append_new_polygon_with_points(shape2d, &points);
+    
+    return shape2d;
+}
+
+// ------------------------------------------------------------------------------------------
+
 struct csmshape2d_t *csmbasicshape2d_circular_hollow_shape(double outer_radius, double inner_radius, unsigned long no_points_circle)
 {
     struct csmshape2d_t *shape2d;
@@ -140,7 +165,7 @@ struct csmshape2d_t *csmbasicshape2d_C_shape(double dim_x, double dim_y)
     return shape2d;
 }
 
-    // ------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 
 struct csmshape2d_t *csmbasicshape2d_L_shape(double dim_x, double dim_y)
 {

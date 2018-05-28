@@ -18,6 +18,10 @@ DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmbasicshape2d_rectangular_hollow_s
 
 DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmbasicshape2d_circular_shape, (double radius, unsigned long no_points_circle));
 
+DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmbasicshape2d_double_circular_shape, (
+                        double radius, unsigned long no_points_circle,
+                        double distance_between_centers));
+
 DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmbasicshape2d_circular_hollow_shape, (double outer_radius, double inner_radius, unsigned long no_points_circle));
 
 DLL_RGWB CONSTRUCTOR(struct csmshape2d_t *, csmbasicshape2d_C_shape, (double dim_x, double dim_y));

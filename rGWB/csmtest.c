@@ -1000,6 +1000,42 @@ static void i_test_union_solidos6(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_union_solidos7(struct csmviewer_t *viewer)
+{
+    struct csmshape2d_t *shape2d, *circular_shape2d;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    struct csmshape2d_t *shape3d;
+    struct csmsolid_t *solid3, *solid_res2;
+    
+    circular_shape2d = csmbasicshape2d_double_circular_shape(0.3, 16, 0.8);
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
+    
+    solid1 = csmsweep_create_solid_from_shape_debug(circular_shape2d, 0.5, -0.15, 1., 1., 0., 0., 0., 1., 0., circular_shape2d, 0.5, -0.15, 0.5, 1., 0., 0., 0., 1., 0., 0);
+    solid2 = csmsweep_create_solid_from_shape_debug(shape2d, 1., 0., 0.5, 1., 0., 0., 0., 1., 0., shape2d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 1000);
+    
+    assert(csmsetop_union_A_and_B(solid1, solid2, &solid_res) == CSMSETOP_OPRESULT_OK);
+    csmsolid_debug_print_debug(solid_res, CSMTRUE);
+
+    csmviewer_set_results(viewer, solid_res, NULL);
+    csmviewer_show(viewer);
+    
+    shape3d = csmbasicshape2d_rectangular_shape(0.75, 0.75);
+    solid3 = csmsweep_create_solid_from_shape_debug(shape3d, 1., 0., 1, 1., 0., 0., 0., 1., 0., shape3d, 1., 0., 0., 1., 0., 0., 0., 1., 0., 2000);
+    
+    assert(csmsetop_union_A_and_B(solid3, solid_res, &solid_res2) == CSMSETOP_OPRESULT_OK);
+    csmsolid_debug_print_debug(solid_res2, CSMTRUE);
+    
+    csmshape2d_free(&shape2d);
+    csmsolid_free(&solid1);
+    csmsolid_free(&solid2);
+    csmsolid_free(&solid_res);
+    csmsolid_free(&solid3);
+    csmsolid_free(&solid_res2);
+}
+
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_interseccion_solidos3(struct csmviewer_t *viewer)
 {
     struct csmshape2d_t *shape2d, *circular_shape2d;
@@ -5817,6 +5853,7 @@ void csmtest_test(void)
         i_test_union_solidos4(viewer);
         i_test_union_solidos5(viewer);
         i_test_union_solidos6(viewer);
+        i_test_union_solidos7(viewer);
         
         i_test_interseccion_solidos1(viewer);
         i_test_interseccion_solidos2(viewer);
