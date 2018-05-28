@@ -54,6 +54,9 @@
 		5513277C1ECBA0CC00F2B04D /* csmsetop.c in Sources */ = {isa = PBXBuildFile; fileRef = 5513277A1ECBA0CC00F2B04D /* csmsetop.c */; };
 		5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */ = {isa = PBXBuildFile; fileRef = 5513277B1ECBA0CC00F2B04D /* csmsetop.h */; };
 		55161B2B1F82DC3000FF0F24 /* csmarrayc.c in Sources */ = {isa = PBXBuildFile; fileRef = 55161B2A1F82DC3000FF0F24 /* csmarrayc.c */; };
+		5517CD9320BC82FE00DA6690 /* csmArrULong.c in Sources */ = {isa = PBXBuildFile; fileRef = 5517CD9120BC82FE00DA6690 /* csmArrULong.c */; };
+		5517CD9420BC82FE00DA6690 /* csmArrULong.h in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9220BC82FE00DA6690 /* csmArrULong.h */; };
+		5517CD9620BC831100DA6690 /* csmArrULong.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9520BC831100DA6690 /* csmArrULong.hxx */; };
 		551D47591FC1CD50004F3B43 /* csmshape2d.c in Sources */ = {isa = PBXBuildFile; fileRef = 551D47571FC1CD50004F3B43 /* csmshape2d.c */; };
 		551D475A1FC1CD50004F3B43 /* csmshape2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 551D47581FC1CD50004F3B43 /* csmshape2d.h */; };
 		551D475C1FC1CED3004F3B43 /* csmshape2d.inl in Resources */ = {isa = PBXBuildFile; fileRef = 551D475B1FC1CED3004F3B43 /* csmshape2d.inl */; };
@@ -282,16 +285,19 @@
 		550E55AE1F87A9440033864A /* csmarqsort.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmarqsort.inl; sourceTree = "<group>"; };
 		551290C52089054600D0E419 /* csmsimplifysolid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmsimplifysolid.c; sourceTree = "<group>"; };
 		551290C62089054600D0E419 /* csmsimplifysolid.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmsimplifysolid.inl; sourceTree = "<group>"; };
-		5512FD1220B4857D00809018 /* csmeuler_mvfb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmeuler_mvfb.c; sourceTree = "<group>"; };
+		5512FD1220B4857D00809018 /* csmeuler_mvfb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmeuler_mvfb.c; sourceTree = "<group>"; };
 		5512FD1320B4857D00809018 /* csmeuler_mvfb.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmeuler_mvfb.inl; sourceTree = "<group>"; };
 		5513276F1EC3AF1100F2B04D /* csmvertex.tli */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmvertex.tli; sourceTree = "<group>"; };
 		551327741EC3B06800F2B04D /* csmvertex.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmvertex.hxx; sourceTree = "<group>"; };
 		551327751ECB9A6000F2B04D /* csmsetopcom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmsetopcom.c; sourceTree = "<group>"; };
 		551327761ECB9A6000F2B04D /* csmsetopcom.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmsetopcom.inl; sourceTree = "<group>"; };
-		5513277A1ECBA0CC00F2B04D /* csmsetop.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmsetop.c; sourceTree = "<group>"; };
+		5513277A1ECBA0CC00F2B04D /* csmsetop.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmsetop.c; sourceTree = "<group>"; };
 		5513277B1ECBA0CC00F2B04D /* csmsetop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = csmsetop.h; sourceTree = "<group>"; };
 		55161B201F82DC3000FF0F24 /* csmarrayc.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmarrayc.inl; sourceTree = "<group>"; };
 		55161B2A1F82DC3000FF0F24 /* csmarrayc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmarrayc.c; sourceTree = "<group>"; };
+		5517CD9120BC82FE00DA6690 /* csmArrULong.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmArrULong.c; sourceTree = "<group>"; };
+		5517CD9220BC82FE00DA6690 /* csmArrULong.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmArrULong.h; sourceTree = "<group>"; };
+		5517CD9520BC831100DA6690 /* csmArrULong.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmArrULong.hxx; sourceTree = "<group>"; };
 		551D47571FC1CD50004F3B43 /* csmshape2d.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; path = csmshape2d.c; sourceTree = "<group>"; };
 		551D47581FC1CD50004F3B43 /* csmshape2d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmshape2d.h; sourceTree = "<group>"; };
 		551D475B1FC1CED3004F3B43 /* csmshape2d.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmshape2d.inl; sourceTree = "<group>"; };
@@ -365,7 +371,7 @@
 		5579548E1E5E42BB000FC91E /* csmedge.tli */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmedge.tli; sourceTree = "<group>"; };
 		5579548F1E5E446C000FC91E /* csmloop.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmloop.c; sourceTree = "<group>"; };
 		557954901E5E446C000FC91E /* csmloop.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmloop.inl; sourceTree = "<group>"; };
-		557954931E5E4742000FC91E /* csmface.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; path = csmface.c; sourceTree = "<group>"; };
+		557954931E5E4742000FC91E /* csmface.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmface.c; sourceTree = "<group>"; usesTabs = 0; };
 		557954941E5E4742000FC91E /* csmface.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmface.inl; sourceTree = "<group>"; };
 		557954971E5E4811000FC91E /* csmbbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = csmbbox.c; sourceTree = "<group>"; };
 		557954981E5E4811000FC91E /* csmbbox.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = csmbbox.inl; sourceTree = "<group>"; };
@@ -754,6 +760,9 @@
 				55A984381FBE3A6A009F7516 /* csmArrPoint3D.c */,
 				55A984391FBE3A6A009F7516 /* csmArrPoint3D.h */,
 				55A9843E1FBE3A8D009F7516 /* csmArrPoint3D.hxx */,
+				5517CD9120BC82FE00DA6690 /* csmArrULong.c */,
+				5517CD9220BC82FE00DA6690 /* csmArrULong.h */,
+				5517CD9520BC831100DA6690 /* csmArrULong.hxx */,
 				55161B201F82DC3000FF0F24 /* csmarrayc.inl */,
 				550E55AA1F876AB90033864A /* csmarrayc.hxx */,
 				55161B2A1F82DC3000FF0F24 /* csmarrayc.c */,
@@ -871,6 +880,7 @@
 				55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */,
 				5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */,
 				557012C11E832F9600DFC490 /* csmmath.inl in Headers */,
+				5517CD9620BC831100DA6690 /* csmArrULong.hxx in Headers */,
 				551290C82089054600D0E419 /* csmsimplifysolid.inl in Headers */,
 				55308C2B1F92122500353A68 /* csmedge_debug.inl in Headers */,
 				55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */,
@@ -932,6 +942,7 @@
 				557954701E5DB24E000FC91E /* csmvertex.inl in Headers */,
 				5507A6F51E7B451E008B9F73 /* csmhashtb.inl in Headers */,
 				5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */,
+				5517CD9420BC82FE00DA6690 /* csmArrULong.h in Headers */,
 				55308C1B1F9209BC00353A68 /* csmface_vis.inl in Headers */,
 				551D47601FC1E012004F3B43 /* csmbasicshape2d.h in Headers */,
 				559452871F79A0E5002AF198 /* csmquadrics.h in Headers */,
@@ -1143,6 +1154,7 @@
 				5532DDBF1E9001390047B9DF /* csmtolerance.c in Sources */,
 				558DE349208B2ADD00AC42F4 /* csmfacbrep2solid.c in Sources */,
 				55308C261F920D1800353A68 /* csmsolid_vis.c in Sources */,
+				5517CD9320BC82FE00DA6690 /* csmArrULong.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

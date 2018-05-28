@@ -139,7 +139,11 @@ void csmface_revert(struct csmface_t *face);
 
 void csmface_clear_algorithm_mask(struct csmface_t *face);
 
-CSMBOOL csmface_is_setop_null_face(struct csmface_t *face);
+CSMBOOL csmface_is_setop_null_face(const struct csmface_t *face);
 void csmface_mark_setop_null_face(struct csmface_t *face);
 
-CSMBOOL csmface_setop_has_been_modified(struct csmface_t *face);
+CSMBOOL csmface_setop_has_been_modified(const struct csmface_t *face);
+
+CSMBOOL csmface_setop_has_shell_id(const struct csmface_t *face);
+unsigned long csmface_setop_shell_id(const struct csmface_t *face);
+void csmface_set_setop_shell_id(struct csmface_t *face, unsigned long shell_id);

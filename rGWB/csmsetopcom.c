@@ -19,6 +19,7 @@
 #include "csmface_debug.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
+#include "csmid.inl"
 #include "csmloop.inl"
 #include "csmmath.inl"
 #include "csmopbas.inl"
@@ -1603,13 +1604,82 @@ struct csmface_t *csmsetopcom_face_for_hedge_sector(struct csmhedge_t *hedge, st
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_enumerate_shells_from_face(struct csmface_t *face, unsigned long id_new_shell)
+{
+    struct csmloop_t *loop_iterator;
+    
+    assert(csmface_setop_has_shell_id(face) == CSMFALSE);
+    
+    csmface_set_setop_shell_id(face, id_new_shell);
+    
+    loop_iterator = csmface_floops(face);
+
+    while (loop_iterator != NULL)
+    {
+        struct csmhedge_t *loop_ledge, *he_iterator;
+        unsigned long no_iters;
+        
+        loop_ledge = csmloop_ledge(loop_iterator);
+        he_iterator = loop_ledge;
+        no_iters = 0;
+        
+        do
+        {
+            struct csmhedge_t *he_mate_iterator;
+            struct csmface_t *he_mate_iterator_face;
+            
+            assert(no_iters < 10000);
+            no_iters++;
+            
+            he_mate_iterator = csmopbas_mate(he_iterator);
+            he_mate_iterator_face = csmopbas_face_from_hedge(he_mate_iterator);
+            
+            if (csmface_setop_has_shell_id(he_mate_iterator_face) == CSMFALSE)
+                i_enumerate_shells_from_face(he_mate_iterator_face, id_new_shell);
+            
+            he_iterator = csmhedge_next(he_iterator);
+        }
+        while (he_iterator != loop_ledge);
+        
+        loop_iterator = csmloop_next(loop_iterator);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsetopcom_enumerate_shells(struct csmsolid_t *solid, unsigned long *id_new_shell)
+{
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    face_iterator = csmsolid_face_iterator(solid);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        
+        if (csmface_setop_has_shell_id(face) == CSMFALSE)
+        {
+            unsigned long shell_id;
+            
+            shell_id = csmid_new_id(id_new_shell, NULL);
+            i_enumerate_shells_from_face(face, shell_id);
+        }
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_t *destination_solid)
 {
     struct csmhashtb_iterator(csmface_t) *face_iterator;
     
     assert_no_null(destination_solid);
 
-    face_iterator = csmhashtb_create_iterator(destination_solid->sfaces, csmface_t);
+    face_iterator = csmsolid_face_iterator(destination_solid);
     
     while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
     {

@@ -4,6 +4,7 @@
 #include "csmsetop.tli"
 
 #include "csmarrayc.inl"
+#include "csmArrULong.h"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.tli"
@@ -352,10 +353,155 @@ static CSMBOOL i_null_faces_are_correct(csmArrayStruct(csmface_t) *set_of_null_f
 
 // ------------------------------------------------------------------------------------------
 
+CONSTRUCTOR(static csmArrULong *, i_get_faces_shell_ids, (struct csmsolid_t *solid))
+{
+    csmArrULong *faces_shell_ids;
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    face_iterator = csmsolid_face_iterator(solid);
+    faces_shell_ids = csmArrULong_new(0);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        
+        if (csmface_setop_has_shell_id(face) == CSMTRUE)
+        {
+            unsigned long shell_id;
+            
+            shell_id = csmface_setop_shell_id(face);
+            csmArrULong_append(faces_shell_ids, shell_id);
+        }
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+    
+    return faces_shell_ids;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CSMBOOL i_shell_has_been_moved(const csmArrULong *faces_shell_ids, unsigned long shell_id)
+{
+    unsigned long i, no_shells;
+    
+    no_shells = csmArrULong_count(faces_shell_ids);
+    
+    for (i = 0; i < no_shells; i++)
+    {
+        unsigned long face_shell_id;
+        
+        face_shell_id = csmArrULong_get(faces_shell_ids, i);
+        
+        if (face_shell_id == shell_id)
+            return CSMTRUE;
+    }
+    
+    return CSMFALSE;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static csmArrayStruct(csmface_t) *, i_get_faces_not_in_given_shells, (struct csmsolid_t *solid, const csmArrULong *faces_shell_ids))
+{
+    csmArrayStruct(csmface_t) *faces_to_move;
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    face_iterator = csmsolid_face_iterator(solid);
+    faces_to_move = csmarrayc_new_st_array(0, csmface_t);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        
+        if (csmface_setop_has_shell_id(face) == CSMTRUE)
+        {
+            unsigned long shell_id;
+            
+            shell_id = csmface_setop_shell_id(face);
+            
+            if (i_shell_has_been_moved(faces_shell_ids, shell_id) == CSMFALSE)
+                csmarrayc_append_element_st(faces_to_move, face, csmface_t);
+        }
+    }
+    
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+    
+    return faces_to_move;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_move_independent_shells_from_parameter_solid_to_result(
+                        struct csmsolid_t *solid_parameter,
+                        struct csmsolid_t *solid_result,
+                        const csmArrULong *moved_faces_shell_ids)
+{
+    csmArrayStruct(csmface_t) *faces_to_move;
+    unsigned long i, no_faces;
+    
+    faces_to_move = i_get_faces_not_in_given_shells(solid_parameter, moved_faces_shell_ids);
+    
+    no_faces = csmarrayc_count_st(faces_to_move, csmface_t);
+    
+    for (i = 0; i < no_faces; i++)
+    {
+        struct csmface_t *face_from_solid_parameter;
+    
+        face_from_solid_parameter = csmarrayc_get_st(faces_to_move, i, csmface_t);
+        csmsetopcom_move_face_to_solid(0, face_from_solid_parameter, solid_parameter, solid_result);
+    }
+    
+    csmarrayc_free_st(&faces_to_move, csmface_t, NULL);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_move_independent_shells_to_result_solid(
+                        struct csmsolid_t *solid_A, struct csmsolid_t *solid_B,
+                        struct csmsolid_t *solid_result)
+{
+    csmArrULong *moved_faces_shell_ids;
+    
+    moved_faces_shell_ids = i_get_faces_shell_ids(solid_result);
+    i_move_independent_shells_from_parameter_solid_to_result(solid_A, solid_result, moved_faces_shell_ids);
+    i_move_independent_shells_from_parameter_solid_to_result(solid_B, solid_result, moved_faces_shell_ids);
+    
+    csmArrULong_free(&moved_faces_shell_ids);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CSMBOOL i_should_move_independent_shells_to_solid_result(
+                        enum csmsetop_operation_t set_operation,
+                        CSMBOOL setop_operator_union_joins_independent_shells)
+{
+    switch (set_operation)
+    {
+        case CSMSETOP_OPERATION_UNION:
+        
+            return setop_operator_union_joins_independent_shells;
+        
+        case CSMSETOP_OPERATION_DIFFERENCE:
+        case CSMSETOP_OPERATION_INTERSECTION:
+            
+            return CSMFALSE;
+        
+        default_error();
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
                         enum csmsetop_operation_t set_operation,
                         struct csmsolid_t *solid_A, csmArrayStruct(csmface_t) *set_of_null_faces_A,
                         struct csmsolid_t *solid_B, csmArrayStruct(csmface_t) *set_of_null_faces_B,
+                        CSMBOOL setop_operator_union_joins_independent_shells,
                         const struct csmtolerance_t *tolerances))
 {
     struct csmsolid_t *result;
@@ -448,6 +594,9 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
             face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
             csmsetopcom_move_face_to_solid(0, face_from_solid_B, solid_B, result);
         }
+        
+        if (i_should_move_independent_shells_to_solid_result(set_operation, setop_operator_union_joins_independent_shells) == CSMTRUE)
+            i_move_independent_shells_to_result_solid(solid_A, solid_B, result);
     
         csmsetopcom_cleanup_solid_setop(solid_A, solid_B, result);
         csmsolid_finish_cleanup(solid_A);
@@ -595,6 +744,7 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
                         enum csmsetop_operation_t set_operation,
                         const struct csmsolid_t *original_solid_A, struct csmsolid_t *solid_A,
                         const struct csmsolid_t *original_solid_B, struct csmsolid_t *solid_B,
+                        CSMBOOL setop_operator_union_joins_independent_shells,
                         const struct csmtolerance_t *tolerances,
                         struct csmsolid_t **solid_res)
 {
@@ -610,6 +760,15 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
     csmsolid_redo_geometric_face_data(solid_B);
     csmsolid_clear_algorithm_data(solid_B);
 
+    if (i_should_move_independent_shells_to_solid_result(set_operation, setop_operator_union_joins_independent_shells) == CSMTRUE)
+    {
+        unsigned long id_new_shell;
+        
+        id_new_shell = 0;
+        csmsetopcom_enumerate_shells(solid_A, &id_new_shell);
+        csmsetopcom_enumerate_shells(solid_B, &id_new_shell);
+    }
+    
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmsolid_debug_print_debug(solid_A, CSMTRUE);
@@ -684,6 +843,7 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
                                 set_operation,
                                 solid_A, set_of_null_faces_A,
                                 solid_B, set_of_null_faces_B,
+                                setop_operator_union_joins_independent_shells,
                                 tolerances);
 
                     if (solid_res_loc != NULL)
@@ -720,6 +880,7 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
 static enum csmsetop_opresult_t i_set_operation(
                         enum csmsetop_operation_t set_operation,
                         const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B,
+                        CSMBOOL setop_operator_union_joins_independent_shells,
                         struct csmsolid_t **solid_res)
 {
     enum csmsetop_opresult_t result;
@@ -776,6 +937,7 @@ static enum csmsetop_opresult_t i_set_operation(
                         set_operation,
                         solid_A, solid_A_copy,
                         solid_B, solid_B_copy,
+                        setop_operator_union_joins_independent_shells,
                         tolerances,
                         &solid_res_loc);
         }
@@ -850,23 +1012,35 @@ static enum csmsetop_opresult_t i_set_operation(
 enum csmsetop_opresult_t csmsetop_difference_A_minus_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, struct csmsolid_t **solid_res)
 {
     enum csmsetop_operation_t set_operation;
+    CSMBOOL setop_operator_union_joins_independent_shells;
     
     set_operation = CSMSETOP_OPERATION_DIFFERENCE;
-    return i_set_operation(set_operation, solid_A, solid_B, solid_res);
+    setop_operator_union_joins_independent_shells = CSMFALSE;
+    
+    return i_set_operation(
+                        set_operation,
+                        solid_A, solid_B,
+                        setop_operator_union_joins_independent_shells,
+                        solid_res);
 }
 
 // ------------------------------------------------------------------------------------------
 
 static enum csmsetop_opresult_t i_conmutative_set_operation(
                         enum csmsetop_operation_t set_operation,
-                        const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, 
+                        const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B,
+                        CSMBOOL setop_operator_union_joins_independent_shells,
                         struct csmsolid_t **solid_res)
 {
     enum csmsetop_opresult_t res;
     
     assert(set_operation == CSMSETOP_OPERATION_UNION || set_operation == CSMSETOP_OPERATION_INTERSECTION);
     
-    res = i_set_operation(set_operation, solid_A, solid_B, solid_res);
+    res = i_set_operation(
+                        set_operation,
+                        solid_A, solid_B,
+                        setop_operator_union_joins_independent_shells,
+                        solid_res);
 
     switch (res)
     {
@@ -876,7 +1050,11 @@ static enum csmsetop_opresult_t i_conmutative_set_operation(
 
         case CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS:
 
-            res = i_set_operation(set_operation, solid_B, solid_A, solid_res);
+            res = i_set_operation(
+                        set_operation,
+                        solid_B, solid_A,
+                        setop_operator_union_joins_independent_shells,
+                        solid_res);
             break;
 
         default_error();
@@ -890,9 +1068,16 @@ static enum csmsetop_opresult_t i_conmutative_set_operation(
 enum csmsetop_opresult_t csmsetop_union_A_and_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, struct csmsolid_t **solid_res)
 {
     enum csmsetop_operation_t set_operation;
+    CSMBOOL setop_operator_union_joins_independent_shells;
     
     set_operation = CSMSETOP_OPERATION_UNION;
-    return i_conmutative_set_operation(set_operation, solid_A, solid_B, solid_res);
+    setop_operator_union_joins_independent_shells = CSMTRUE;
+    
+    return i_conmutative_set_operation(
+                        set_operation,
+                        solid_A, solid_B,
+                        setop_operator_union_joins_independent_shells,
+                        solid_res);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -900,7 +1085,14 @@ enum csmsetop_opresult_t csmsetop_union_A_and_B(const struct csmsolid_t *solid_A
 enum csmsetop_opresult_t csmsetop_intersection_A_and_B(const struct csmsolid_t *solid_A, const struct csmsolid_t *solid_B, struct csmsolid_t **solid_res)
 {
     enum csmsetop_operation_t set_operation;
+    CSMBOOL setop_operator_union_joins_independent_shells;
     
     set_operation = CSMSETOP_OPERATION_INTERSECTION;
-    return i_conmutative_set_operation(set_operation, solid_A, solid_B, solid_res);
+    setop_operator_union_joins_independent_shells = CSMFALSE;
+    
+    return i_conmutative_set_operation(
+                        set_operation,
+                        solid_A, solid_B,
+                        setop_operator_union_joins_independent_shells,
+                        solid_res);
 }

@@ -24,5 +24,6 @@ struct csmface_t
     
     CSMBOOL setop_is_null_face;
     CSMBOOL setop_has_been_modified;
+    unsigned long setop_shell_id;
 };
 

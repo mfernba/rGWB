@@ -37,7 +37,8 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
                         double x_center, double y_center, double z_center,
                         struct csmbbox_t **bbox,
                         CSMBOOL setop_is_null_face,
-                        CSMBOOL setop_has_been_modified))
+                        CSMBOOL setop_has_been_modified,
+                        unsigned long setop_shell_id))
 {
     struct csmface_t *face;
     
@@ -68,6 +69,7 @@ CONSTRUCTOR(static struct csmface_t *, i_crea, (
  
     face->setop_is_null_face = setop_is_null_face;
     face->setop_has_been_modified = setop_has_been_modified;
+    face->setop_shell_id = setop_shell_id;
     
     return face;
 }
@@ -88,6 +90,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     struct csmbbox_t *bbox;
     CSMBOOL setop_is_null_face;
     CSMBOOL setop_has_been_modified;
+    unsigned long setop_shell_id;
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
 
@@ -113,6 +116,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
 
     setop_is_null_face = CSMFALSE;
     setop_has_been_modified = CSMTRUE;
+    setop_shell_id = ULONG_MAX;
     
     return i_crea(
                 id,
@@ -128,7 +132,8 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
                 x_center, y_center, z_center,
                 &bbox,
                 setop_is_null_face,
-                setop_has_been_modified);
+                setop_has_been_modified,
+                setop_shell_id);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -146,13 +151,17 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     struct csmbbox_t *bbox;
     CSMBOOL setop_is_null_face;
     CSMBOOL setop_is_new_face;
+    unsigned long setop_shell_id;
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
+    
     flout = NULL;
     floops = NULL;
     bbox = csmbbox_create_empty_box();
+    
     setop_is_null_face = CSMFALSE;
     setop_is_new_face = CSMFALSE;
+    setop_shell_id = ULONG_MAX;
     
     return i_crea(
                 id,
@@ -168,7 +177,8 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                 x_center, y_center, z_center,
                 &bbox,
                 setop_is_null_face,
-                setop_is_new_face);
+                setop_is_new_face,
+                setop_shell_id);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1291,6 +1301,7 @@ void csmface_clear_algorithm_mask(struct csmface_t *face)
     
     face->setop_is_null_face = CSMFALSE;
     face->setop_has_been_modified = CSMFALSE;
+    face->setop_shell_id = ULONG_MAX;
     
     loop_iterator = face->floops;
     
@@ -1303,7 +1314,7 @@ void csmface_clear_algorithm_mask(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
-CSMBOOL csmface_is_setop_null_face(struct csmface_t *face)
+CSMBOOL csmface_is_setop_null_face(const struct csmface_t *face)
 {
     assert_no_null(face);
     return face->setop_is_null_face;
@@ -1319,8 +1330,32 @@ void csmface_mark_setop_null_face(struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
-CSMBOOL csmface_setop_has_been_modified(struct csmface_t *face)
+CSMBOOL csmface_setop_has_been_modified(const struct csmface_t *face)
 {
     assert_no_null(face);
     return face->setop_has_been_modified;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CSMBOOL csmface_setop_has_shell_id(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return IS_TRUE(face->setop_shell_id != ULONG_MAX);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+unsigned long csmface_setop_shell_id(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->setop_shell_id;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_set_setop_shell_id(struct csmface_t *face, unsigned long shell_id)
+{
+    assert_no_null(face);
+    face->setop_shell_id = shell_id;
 }
