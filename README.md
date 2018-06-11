@@ -30,3 +30,5 @@ The last resort of the null edge joining algorithm is based on: Bhardwaj, A. & M
 Mäntylä's algorithm need maximal faces, so there is a simplification strategy both in solid generation and after solid operations in order to eliminate unessential elements.
 
 A perturbation strategy is applied if the algorithm doesn't produce an output (it can't join all null edges). This could produce an incorrect output in some cases, but it's a last resort. Also, it reduces the possibility to get a non-manifold solid.
+
+"Boundary representation modeling techniques" from Ian Stroud was also an unvaluable source of information, providing guidance about how to orient the implementation.
