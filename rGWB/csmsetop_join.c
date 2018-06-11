@@ -770,13 +770,13 @@ void csmsetop_join_null_edges(
      
         if (i_can_join(he1_next_edge_A, he2_next_edge_B, loose_ends_A, loose_ends_B, &h1a, &h2b) == CSMTRUE)
         {
-            csmdebug_print_debug_info("Joining h1a, he1_next_edge_A: Iter %lu\n", i);
+            csmdebug_print_debug_info("Joining h1a, he1_next_edge_A: Iter %lu (%lu, %lu)\n", i, csmhedge_id(h1a), csmhedge_id(he1_next_edge_A));
             csmsetopcom_join_hedges(h1a, he1_next_edge_A, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1a), loose_ends_A) == CSMFALSE)
                 i_cut_he_solid_A(h1a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h1a);
             
-            csmdebug_print_debug_info("Joining h2b, he2_next_edge_B: Iter %lu\n", i);
+            csmdebug_print_debug_info("Joining h2b, he2_next_edge_B: Iter %lu (%lu, %lu)\n", i, csmhedge_id(h2b), csmhedge_id(he2_next_edge_B));
             csmsetopcom_join_hedges(h2b, he2_next_edge_B, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2b), loose_ends_B) == CSMFALSE)
@@ -801,13 +801,13 @@ void csmsetop_join_null_edges(
      
         if (i_can_join(he2_next_edge_A, he1_next_edge_B, loose_ends_A, loose_ends_B, &h2a, &h1b) == CSMTRUE)
         {
-            csmdebug_print_debug_info("Joining h2a, he2_next_edge_A: Iter %lu\n", i);
+            csmdebug_print_debug_info("Joining h2a, he2_next_edge_A: Iter %lu (%lu, %lu)\n", i, csmhedge_id(h2a), csmhedge_id(he2_next_edge_A));
             csmsetopcom_join_hedges(h2a, he2_next_edge_A, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h2a), loose_ends_A) == CSMFALSE)
                 i_cut_he_solid_A(h2a, set_of_null_edges_A, set_of_null_faces_A_loc, &no_null_edges_deleted_A, &null_face_created_h2a);
 
-            csmdebug_print_debug_info("Joining h1b, he1_next_edge_B: Iter %lu\n", i);
+            csmdebug_print_debug_info("Joining h1b, he1_next_edge_B: Iter %lu (%lu, %lu)\n", i, csmhedge_id(h1b), csmhedge_id(he1_next_edge_B));
             csmsetopcom_join_hedges(h1b, he1_next_edge_B, tolerances);
             
             if (csmsetopcom_is_loose_end(csmopbas_mate(h1b), loose_ends_B) == CSMFALSE)
