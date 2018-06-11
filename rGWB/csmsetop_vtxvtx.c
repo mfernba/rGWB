@@ -67,6 +67,7 @@ struct i_inters_sectors_t
     enum csmsetop_classify_resp_solid_t s2b;
     
     CSMBOOL intersect;
+    CSMBOOL reclassified_by_adjacency;
 };
 
 /*
@@ -196,7 +197,8 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_inters_sectors, (
                         unsigned long idx_nba, unsigned long idx_nbb,
                         enum csmsetop_classify_resp_solid_t s1a, enum csmsetop_classify_resp_solid_t s2a,
                         enum csmsetop_classify_resp_solid_t s1b, enum csmsetop_classify_resp_solid_t s2b,
-                        CSMBOOL intersect))
+                        CSMBOOL intersect,
+                        CSMBOOL reclassified_by_adjacency))
 {
     struct i_inters_sectors_t *inters;
     
@@ -211,6 +213,7 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_inters_sectors, (
     inters->s2b = s2b;
     
     inters->intersect = intersect;
+    inters->reclassified_by_adjacency = reclassified_by_adjacency;
     
     return inters;
 }
@@ -725,6 +728,7 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
 {
     enum csmsetop_classify_resp_solid_t s1a, s2a, s1b, s2b;
     CSMBOOL intersect;
+    CSMBOOL reclassified_by_adjacency;
     
     assert_no_null(neighborhood_a);
     assert_no_null(neighborhood_b);
@@ -749,13 +753,14 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_intersection_between_se
         intersect = CSMTRUE;
     }
     
-    //assert(intersect == CSMTRUE);
+    reclassified_by_adjacency = CSMFALSE;
     
     return i_create_inters_sectors(
                        idx_nba, idx_nbb,
                        s1a, s2a,
                        s1b, s2b,
-                       intersect);
+                       intersect,
+                       reclassified_by_adjacency);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1231,25 +1236,38 @@ static void i_reclassify_on_sectors(
                 if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                 {
                     if (sector_j->s1a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    {
                         sector_j->s2a = newsa;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
+                    
                 }
                 
                 if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                 {
                     if (sector_j->s2a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    {
                         sector_j->s1a = newsa;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                 }
 
                 if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
                 {
                     if (sector_j->s1b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    {
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                 }
 
                 if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
                 {
                     if (sector_j->s2b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    {
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                 }
                 
                 if (sector_j->s1a == sector_j->s2a
@@ -1330,24 +1348,28 @@ static void i_reclasssify_double_on_edges_s1a_s1b(
                     {
                         sector_j->s1a = newsa;
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
                         sector_j->s2a = newsa;
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
                     {
                         sector_j->s1a = newsa;
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == idx_prev_sector_b)
                     {
                         sector_j->s2a = newsa;
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->s1a == sector_j->s2a
@@ -1423,24 +1445,28 @@ static void i_reclasssify_double_on_edges_s1a_s2b(
                     {
                         sector_j->s1a = newsa;
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
                         sector_j->s2a = newsa;
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
                     {
                         sector_j->s1a = newsa;
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == idx_next_sector_b)
                     {
                         sector_j->s2a = newsa;
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->s1a == sector_j->s2a
@@ -1516,24 +1542,28 @@ static void i_reclasssify_double_on_edges_s2a_s1b(
                     {
                         sector_j->s2a = newsa;
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
                         sector_j->s1a = newsa;
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
                     {
                         sector_j->s2a = newsa;
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == idx_prev_sector_b)
                     {
                         sector_j->s1a = newsa;
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->s1a == sector_j->s2a
@@ -1609,24 +1639,28 @@ static void i_reclasssify_double_on_edges_s2a_s2b(
                     {
                         sector_j->s2a = newsa;
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
                         sector_j->s1a = newsa;
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
                     {
                         sector_j->s2a = newsa;
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == idx_next_sector_b)
                     {
                         sector_j->s1a = newsa;
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->s1a == sector_j->s2a
@@ -1713,10 +1747,16 @@ static void i_reclasssify_single_on_edges(
                 if (sector_j->intersect == CSMTRUE)
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
                         sector_j->s1a = newsa;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                     
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
                         sector_j->s2a = newsa;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                     
                     if (sector_j->s1a == sector_j->s2a
                             && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
@@ -1744,10 +1784,16 @@ static void i_reclasssify_single_on_edges(
                 if (sector_j->intersect == CSMTRUE)
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
                         sector_j->s2a = newsa;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                     
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
                         sector_j->s1a = newsa;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                     
                     if (sector_j->s1a == sector_j->s2a
                             && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
@@ -1776,10 +1822,16 @@ static void i_reclasssify_single_on_edges(
                 if (sector_j->intersect == CSMTRUE)
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                     
                     if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
+                    {
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                     
                     if (sector_j->s1b == sector_j->s2b
                             && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
@@ -1808,10 +1860,16 @@ static void i_reclasssify_single_on_edges(
                 if (sector_j->intersect == CSMTRUE)
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
+                    {
                         sector_j->s2b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                     
                     if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
+                    {
                         sector_j->s1b = newsb;
+                        sector_j->reclassified_by_adjacency = CSMTRUE;
+                    }
                     
                     if (sector_j->s1b == sector_j->s2b
                             && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
@@ -1887,10 +1945,20 @@ static void i_print_neighborhood_intersections(
                         csmhedge_id(nba->he), inters_sectors->idx_nba,
                         csmhedge_id(nbb->he), inters_sectors->idx_nbb);
             
-            csmdebug_print_debug_info(
+            if (inters_sectors->reclassified_by_adjacency == CSMTRUE)
+            {
+                csmdebug_print_debug_info(
+                        "%s %s Intersect: %lu (REC)\n",
+                        text_cla, text_clb,
+                        inters_sectors->intersect);
+            }
+            else
+            {
+                csmdebug_print_debug_info(
                         "%s %s Intersect: %lu\n",
                         text_cla, text_clb,
                         inters_sectors->intersect);
+            }
         
             csmstring_free(&text_cla);
             csmstring_free(&text_clb);
