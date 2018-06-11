@@ -38,7 +38,7 @@ CSMBOOL csmface_contains_vertex(
                         const struct csmface_t *face,
                         const struct csmvertex_t *vertex,
                         const struct csmtolerance_t *tolerances,
-                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        enum csmmath_containment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 
@@ -46,7 +46,7 @@ CSMBOOL csmface_contains_point(
                         const struct csmface_t *face,
                         double x, double y, double z,
                         const struct csmtolerance_t *tolerances,
-                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        enum csmmath_containment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 

@@ -1144,14 +1144,14 @@ CSMBOOL csmsolid_does_solid_contain_point(const struct csmsolid_t *solid, double
                              
                              if (dot > -1.e-3)
                              {
-                                 enum csmmath_contaiment_point_loop_t type_of_containment;
+                                 enum csmmath_containment_point_loop_t type_of_containment;
                                  
                                  if (csmface_contains_point(face, x_inters, y_inters, z_inters, tolerances, &type_of_containment, NULL, NULL, NULL) == CSMTRUE)
                                  {
                                     switch (type_of_containment)
                                     {
-                                        case CSMMATH_CONTAIMENT_POINT_LOOP_ON_VERTEX:
-                                        case CSMMATH_CONTAIMENT_POINT_LOOP_ON_HEDGE:
+                                        case CSMMATH_CONTAINMENT_POINT_LOOP_ON_VERTEX:
+                                        case CSMMATH_CONTAINMENT_POINT_LOOP_ON_HEDGE:
                                         {
                                              if (csmmath_equal_coords(x, y, z, x_inters, y_inters, z_inters, csmtolerance_equal_coords(tolerances)) == CSMTRUE)
                                                  is_point_inside_solid = CSMTRUE;
@@ -1160,7 +1160,7 @@ CSMBOOL csmsolid_does_solid_contain_point(const struct csmsolid_t *solid, double
                                              break;
                                         }
                                             
-                                        case CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR:
+                                        case CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR:
                                         {
                                             if (csmmath_equal_coords(x, y, z, x_inters, y_inters, z_inters, csmtolerance_equal_coords(tolerances)) == CSMTRUE)
                                                 is_point_inside_solid = CSMTRUE;

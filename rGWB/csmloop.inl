@@ -40,7 +40,7 @@ CSMBOOL csmloop_is_point_inside_loop(
                         const struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         const struct csmtolerance_t *tolerances,
-                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        enum csmmath_containment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 

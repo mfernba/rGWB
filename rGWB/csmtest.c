@@ -5805,6 +5805,7 @@ void csmtest_test(void)
     //i_test_interseccion_solidos7(viewer);
 
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    //i_test_difference3();
     //i_test_cilindro5(viewer);
     //i_test_mechanical5();
     //return;

@@ -506,12 +506,12 @@ CSMBOOL csmloop_is_point_inside_loop(
                         const struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         const struct csmtolerance_t *tolerances,
-                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        enum csmmath_containment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
     CSMBOOL is_point_inside_loop;
-    enum csmmath_contaiment_point_loop_t type_of_containment_loc;
+    enum csmmath_containment_point_loop_t type_of_containment_loc;
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
     double t_relative_to_hit_hedge_loc;
@@ -530,12 +530,12 @@ CSMBOOL csmloop_is_point_inside_loop(
         if (hit_vertex_loc != NULL)
         {
             assert(hit_hedge_loc == NULL);
-            type_of_containment_loc = CSMMATH_CONTAIMENT_POINT_LOOP_ON_VERTEX;
+            type_of_containment_loc = CSMMATH_CONTAINMENT_POINT_LOOP_ON_VERTEX;
         }
         else
         {
             assert(hit_hedge_loc != NULL);
-            type_of_containment_loc = CSMMATH_CONTAIMENT_POINT_LOOP_ON_HEDGE;
+            type_of_containment_loc = CSMMATH_CONTAINMENT_POINT_LOOP_ON_HEDGE;
         }
     }
     else
@@ -545,7 +545,7 @@ CSMBOOL csmloop_is_point_inside_loop(
         unsigned long num_iteraciones;
         
         is_point_inside_loop = CSMFALSE;
-        type_of_containment_loc = CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR;
+        type_of_containment_loc = CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR;
         hit_vertex_loc = NULL;
         hit_hedge_loc = NULL;
         t_relative_to_hit_hedge_loc = 0.;

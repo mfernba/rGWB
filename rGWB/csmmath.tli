@@ -9,11 +9,11 @@ enum csmmath_classify_point_t
     CSMMATH_CONTAIMENT_POINT_ABOVE
 };
 
-enum csmmath_contaiment_point_loop_t
+enum csmmath_containment_point_loop_t
 {
-    CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR,
-    CSMMATH_CONTAIMENT_POINT_LOOP_ON_VERTEX,
-    CSMMATH_CONTAIMENT_POINT_LOOP_ON_HEDGE
+    CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR,
+    CSMMATH_CONTAINMENT_POINT_LOOP_ON_VERTEX,
+    CSMMATH_CONTAINMENT_POINT_LOOP_ON_HEDGE
 };
 
 enum csmmath_dropped_coord_t

@@ -322,7 +322,7 @@ static void i_append_new_edge_intersection(
                         double x_edge_interior, double y_edge_interior, double z_edge_interior,
                         double t_absolute_intersection_on_edge,
                         struct csmface_t *face,
-                        enum csmmath_contaiment_point_loop_t type_of_containment_at_face,
+                        enum csmmath_containment_point_loop_t type_of_containment_at_face,
                         struct csmvertex_t *hit_vertex_at_face,
                         struct csmhedge_t *hit_hedge_at_face,
                         double x_edge_interior_hedge_at_face, double y_edge_interior_hedge_at_face, double z_edge_interior_hedge_at_face,
@@ -340,7 +340,7 @@ static void i_append_new_edge_intersection(
     
     switch (type_of_containment_at_face)
     {
-        case CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR:
+        case CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR:
         {
             assert(hit_vertex_at_face == NULL);
             assert(hit_hedge_at_face == NULL);
@@ -349,14 +349,14 @@ static void i_append_new_edge_intersection(
             break;
         }
             
-        case CSMMATH_CONTAIMENT_POINT_LOOP_ON_VERTEX:
+        case CSMMATH_CONTAINMENT_POINT_LOOP_ON_VERTEX:
         {
             assert(hit_vertex_at_face != NULL);
             edge_intersection_at_face = i_TYPE_EDGE_INTERSECTION_VERTEX;
             break;
         }
             
-        case CSMMATH_CONTAIMENT_POINT_LOOP_ON_HEDGE:
+        case CSMMATH_CONTAINMENT_POINT_LOOP_ON_HEDGE:
         {
             assert(hit_hedge_at_face != NULL);
             edge_intersection_at_face = i_TYPE_EDGE_INTERSECTION_INTERIOR_EDGE;
@@ -400,7 +400,7 @@ static void i_append_new_edge_intersection(
 // ------------------------------------------------------------------------------------------
 
 static void i_intersection_coords_at_hedge(
-                        enum csmmath_contaiment_point_loop_t type_of_containment_at_face,
+                        enum csmmath_containment_point_loop_t type_of_containment_at_face,
                         struct csmhedge_t *hedge,
                         double t_relative_to_hit_hedge_at_face,
                         double *x, double *y, double *z)
@@ -411,7 +411,7 @@ static void i_intersection_coords_at_hedge(
     
     switch (type_of_containment_at_face)
     {
-        case CSMMATH_CONTAIMENT_POINT_LOOP_ON_HEDGE:
+        case CSMMATH_CONTAINMENT_POINT_LOOP_ON_HEDGE:
         {
             struct csmhedge_t *hedge_next;
             double x1, y1, z1, x2, y2, z2;
@@ -427,8 +427,8 @@ static void i_intersection_coords_at_hedge(
             break;
         }
             
-        case CSMMATH_CONTAIMENT_POINT_LOOP_ON_VERTEX:
-        case CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR:
+        case CSMMATH_CONTAINMENT_POINT_LOOP_ON_VERTEX:
+        case CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR:
             
             *x = 0.;
             *y = 0.;
@@ -448,7 +448,7 @@ static void i_append_intersection_between_vertex_A_and_face_B(
                         unsigned long *id_new_intersection,
                         csmArrayStruct(i_edge_intersection_t) *edge_intersections)
 {
-    enum csmmath_contaiment_point_loop_t type_of_containment_at_face;
+    enum csmmath_containment_point_loop_t type_of_containment_at_face;
     struct csmvertex_t *hit_vertex_at_face;
     struct csmhedge_t *hit_hedge_at_face;
     double t_relative_to_hit_hedge_at_face;
@@ -547,7 +547,7 @@ static void i_append_intersections_between_A_edge_and_B_face(
                         optimized_edge_data->x2, optimized_edge_data->y2, optimized_edge_data->z2,
                         &x_inters, &y_inters, &z_inters, &t) == CSMTRUE)
             {
-                enum csmmath_contaiment_point_loop_t type_of_containment_at_face;
+                enum csmmath_containment_point_loop_t type_of_containment_at_face;
                 struct csmvertex_t *hit_vertex_at_face;
                 struct csmhedge_t *hit_hedge_at_face;
                 double t_relative_to_hit_hedge_at_face;

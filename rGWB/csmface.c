@@ -511,7 +511,7 @@ CSMBOOL csmface_contains_vertex(
                         const struct csmface_t *face,
                         const struct csmvertex_t *vertex,
                         const struct csmtolerance_t *tolerances,
-                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        enum csmmath_containment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
@@ -536,12 +536,12 @@ CSMBOOL csmface_contains_point(
                         const struct csmface_t *face,
                         double x, double y, double z,
                         const struct csmtolerance_t *tolerances,
-                        enum csmmath_contaiment_point_loop_t *type_of_containment_opc,
+                        enum csmmath_containment_point_loop_t *type_of_containment_opc,
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc)
 {
     CSMBOOL containts_point;
-    enum csmmath_contaiment_point_loop_t type_of_containment_loc;
+    enum csmmath_containment_point_loop_t type_of_containment_loc;
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
     double t_relative_to_hit_hedge_loc;
@@ -556,7 +556,7 @@ CSMBOOL csmface_contains_point(
     {
         containts_point = CSMFALSE;
         
-        type_of_containment_loc = (enum csmmath_contaiment_point_loop_t)USHRT_MAX;
+        type_of_containment_loc = (enum csmmath_containment_point_loop_t)USHRT_MAX;
         hit_vertex_loc = NULL;
         hit_hedge_loc = NULL;
         t_relative_to_hit_hedge_loc = 0.;
@@ -573,7 +573,7 @@ CSMBOOL csmface_contains_point(
         }
         else
         {
-            if (type_of_containment_loc != CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+            if (type_of_containment_loc != CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR)
             {
                 containts_point = CSMTRUE;
             }
@@ -588,7 +588,7 @@ CSMBOOL csmface_contains_point(
                 {
                     if (loop_iterator != face->flout && csmloop_has_only_a_null_edge(loop_iterator) == CSMFALSE)
                     {
-                        enum csmmath_contaiment_point_loop_t type_of_containment_hole;
+                        enum csmmath_containment_point_loop_t type_of_containment_hole;
                         struct csmvertex_t *hit_vertex_hole;
                         struct csmhedge_t *hit_hedge_hole;
                         double t_relative_to_hit_hedge_hole;
@@ -599,7 +599,7 @@ CSMBOOL csmface_contains_point(
                                 tolerances,
                                 &type_of_containment_hole, &hit_vertex_hole, &hit_hedge_hole, &t_relative_to_hit_hedge_hole) == CSMTRUE)
                         {
-                            if (type_of_containment_hole == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+                            if (type_of_containment_hole == CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR)
                             {
                                 containts_point = CSMFALSE;
                             }
@@ -651,7 +651,7 @@ CSMBOOL csmface_is_point_interior_to_face(
     }
     else
     {
-        enum csmmath_contaiment_point_loop_t type_of_containment;
+        enum csmmath_containment_point_loop_t type_of_containment;
     
         if (csmloop_is_point_inside_loop(
                         face->flout,
@@ -661,7 +661,7 @@ CSMBOOL csmface_is_point_interior_to_face(
         {
             is_interior_to_face = CSMFALSE;
         }
-        else if (type_of_containment != CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+        else if (type_of_containment != CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR)
         {
             is_interior_to_face = CSMTRUE;
         }
@@ -682,7 +682,7 @@ CSMBOOL csmface_is_point_interior_to_face(
                             tolerances,
                             &type_of_containment, NULL, NULL, NULL) == CSMTRUE)
                     {
-                        if (type_of_containment == CSMMATH_CONTAIMENT_POINT_LOOP_INTERIOR)
+                        if (type_of_containment == CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR)
                             is_interior_to_face = CSMFALSE;
                         else
                             is_interior_to_face = CSMTRUE;
@@ -862,7 +862,7 @@ CSMBOOL csmface_is_point_interior_to_face_outer_loop(
     }
     else
     {
-        enum csmmath_contaiment_point_loop_t type_of_containment;
+        enum csmmath_containment_point_loop_t type_of_containment;
     
         if (csmloop_is_point_inside_loop(
                         face->flout,
