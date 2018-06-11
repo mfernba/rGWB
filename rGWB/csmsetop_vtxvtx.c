@@ -2342,6 +2342,8 @@ static CSMBOOL i_get_orient(
     
     if (i_is_wide_sector(mhe1, tolerances) == CSMTRUE && i_is_wide_sector(ref, tolerances) == CSMTRUE)
         orient = INVERT_BOOLEAN(orient);
+    else if (i_is_wide_sector(mhe2, tolerances) == CSMTRUE && i_is_wide_sector(ref, tolerances) == CSMTRUE)
+        orient = INVERT_BOOLEAN(orient);
     
     return INVERT_BOOLEAN(orient);
 }

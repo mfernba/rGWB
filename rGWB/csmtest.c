@@ -5498,7 +5498,7 @@ static void i_test_difference10(struct csmviewer_t *viewer)
     csmdebug_set_enabled_by_code(CSMFALSE);
     i_substract_rectangular_solid(1., 0.5, 0.3, -2., -2.5 - 0.25, 0.3, 1., 0., 0., &solid_res);
     i_substract_rectangular_solid(1., 0.5, 0.3,  2., -2.5 - 0.25, 0.3, 0., 1., 0., &solid_res);
-    //i_substract_rectangular_solid(1., 0.5, 0.3,  4.25, 0., 0.3, &solid_res);
+    //i_substract_rectangular_solid(1., 0.5, 0.3,  4.25, 0., 0.3, 0., 1., 1., &solid_res);
     csmdebug_set_enabled_by_code(CSMTRUE);
     i_substract_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, 1., 1., 0., &solid_res);
     //i_inters_rectangular_solid(8., 5., 0.3, 0., 0., 0.3, &solid_res);
@@ -5805,9 +5805,10 @@ void csmtest_test(void)
     //i_test_interseccion_solidos7(viewer);
 
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    //i_test_cilindro5(viewer);
     //i_test_mechanical5();
     //return;
-    //i_test_cilindro5_redux(viewer);
+    //i_test_facetedbrep2(viewer, CSMFALSE);
     //i_test_difference10(viewer);
     //return;
     
@@ -5869,12 +5870,13 @@ void csmtest_test(void)
         i_test_cilindro1(viewer);
         i_test_cilindro2(viewer);
         i_test_cilindro3(viewer);
+        
+        i_test_cilindro5_redux(viewer);
         i_test_difference8();
         i_test_difference8_redux();
         i_test_difference9(viewer);
-        //i_test_difference10(viewer);
+        i_test_difference10(viewer);
         
-        /*
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
         {
             i_test_cilindro4(viewer); // --> Revisar la orientación de las caras del hueco, falla split a 0,75. Assert de puntos repetidos al realizar la diferencia, arista nula no borrada?
@@ -5884,7 +5886,6 @@ void csmtest_test(void)
             i_test_cilindro8(viewer); // --> Intersecciones non-manifold.
         }
         csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
-        */
         
         //i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
         
