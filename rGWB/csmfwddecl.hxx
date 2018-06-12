@@ -58,12 +58,14 @@ enum csmsetop_operation_t: int;
 enum csmsetop_classify_resp_solid_t: int;
 enum csmsetop_a_vs_b_t: int;
 enum csmoptree_result_t: int;
+enum csmnode_object_t: int;
 #else
 enum csmedge_lado_hedge_t;
 enum csmsetop_operation_t;
 enum csmsetop_classify_resp_solid_t;
 enum csmsetop_a_vs_b_t;
 enum csmoptree_result_t;
+enum csmnode_object_t;
 #endif
 
 struct csmbbox_t;

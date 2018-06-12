@@ -20,39 +20,28 @@
 
 // ------------------------------------------------------------------------------------------
 
-struct csmnode_t csmnode_nousar_crea_node(
+void csmnode_dontuse_init(
+                        struct csmnode_t *node,
                         unsigned long id,
-                        struct csmnode_derivada_t *clase_derivada,
-                        const char *tipo_clase_derivada,
-                        csmnode_FPtr_destruye func_destruye_clase_derivada)
+                        enum csmnode_object_t real_type,
+                        csmnode_FPtr_free func_free)
 {
-    struct csmnode_t node;
+    assert_no_null(node);
     
-    node.id = id;
+    node->id = id;
     
-    node.clase_derivada = clase_derivada;
-    node.tipo_clase_derivada = csmstring_duplicate(tipo_clase_derivada);
-    node.func_destruye_clase_derivada = func_destruye_clase_derivada;
+    node->real_type = real_type;
+    node->func_free = func_free;
     
-    node.prev = NULL;
-    node.next = NULL;
-    
-    return node;
+    node->prev = NULL;
+    node->next = NULL;
 }
+
 // ------------------------------------------------------------------------------------------
 
-void csmnode_destruye(struct csmnode_t **node)
+void csmnode_dealloc(struct csmnode_t *node)
 {
-    struct csmnode_t *node_loc;
-
     assert_no_null(node);
-    assert_no_null(*node);
-    assert_no_null((*node)->func_destruye_clase_derivada);
-    
-    node_loc = ASIGNA_PUNTERO_PP_NO_NULL(node, struct csmnode_t);
-    
-    csmstring_free(&node_loc->tipo_clase_derivada);
-    node_loc->func_destruye_clase_derivada(&node_loc->clase_derivada);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -65,7 +54,7 @@ unsigned long csmnode_id(const struct csmnode_t *node)
 
 // ------------------------------------------------------------------------------------------
 
-struct csmnode_derivada_t *csmnode_nousar_downcast(struct csmnode_t *node, const char *tipo_clase_derivada)
+struct csmnode_t *csmnode_dontuse_downcast(struct csmnode_t *node, enum csmnode_object_t real_type)
 {
     if (node == NULL)
     {
@@ -73,8 +62,8 @@ struct csmnode_derivada_t *csmnode_nousar_downcast(struct csmnode_t *node, const
     }
     else
     {
-        assert(csmstring_equal_strings(node->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
-        return node->clase_derivada;
+        assert(node->real_type == real_type);
+        return node;
     }
 }
 
@@ -120,10 +109,10 @@ void csmnode_set_ptr_prev(struct csmnode_t *node, struct csmnode_t *prev_node)
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_nousar_remove_from_own_list(struct csmnode_t *node2, const char *tipo_clase_derivada)
+void csmnode_dontuse_remove_from_own_list(struct csmnode_t *node2, enum csmnode_object_t real_type)
 {
     assert_no_null(node2);
-    assert(csmstring_equal_strings(node2->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
+    assert(node2->real_type == real_type);
     
     if (node2->prev != NULL)
     {
@@ -143,14 +132,14 @@ void csmnode_nousar_remove_from_own_list(struct csmnode_t *node2, const char *ti
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct csmnode_t *node2, const char *tipo_clase_derivada)
+void csmnode_dontuse_insert_node2_before_node1(struct csmnode_t *node1, struct csmnode_t *node2, enum csmnode_object_t real_type)
 {
     assert_no_null(node1);
     assert_no_null(node2);
-    assert(csmstring_equal_strings(node1->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
-    assert(csmstring_equal_strings(node2->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
+    assert(node1->real_type == real_type);
+    assert(node2->real_type == real_type);
 
-    csmnode_nousar_remove_from_own_list(node2, tipo_clase_derivada);
+    csmnode_dontuse_remove_from_own_list(node2, real_type);
     
     if (node1->prev != NULL)
     {
@@ -166,14 +155,14 @@ void csmnode_nousar_insert_node2_before_node1(struct csmnode_t *node1, struct cs
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_nousar_insert_node2_after_node1(struct csmnode_t *node1, struct csmnode_t *node2, const char *tipo_clase_derivada)
+void csmnode_dontuse_insert_node2_after_node1(struct csmnode_t *node1, struct csmnode_t *node2, enum csmnode_object_t real_type)
 {
     assert_no_null(node1);
     assert_no_null(node2);
-    assert(csmstring_equal_strings(node1->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
-    assert(csmstring_equal_strings(node2->tipo_clase_derivada, tipo_clase_derivada) == CSMTRUE);
+    assert(node1->real_type == real_type);
+    assert(node2->real_type == real_type);
 
-    csmnode_nousar_remove_from_own_list(node2, tipo_clase_derivada);
+    csmnode_dontuse_remove_from_own_list(node2, real_type);
     
     if (node1->next != NULL)
     {
@@ -189,13 +178,13 @@ void csmnode_nousar_insert_node2_after_node1(struct csmnode_t *node1, struct csm
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived, const char *tipo_clase_derivada)
+void csmnode_dontuse_free_node_list(struct csmnode_t **head_node_derived, enum csmnode_object_t real_type)
 {
-    struct csmnode_derivada_t *head_node_derived_loc;
+    struct csmnode_t *head_node_derived_loc;
     struct csmnode_t *first_node, *head_node;
     //unsigned long no_of_deleted_nodes;
     
-    head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_derivada_t);
+    head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_t);
     head_node = (struct csmnode_t *)head_node_derived_loc;
     first_node = head_node;
     //no_of_deleted_nodes = 0;
@@ -212,7 +201,8 @@ void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived
         else
             next_node = NULL;
         
-        csmnode_destruye(&head_node);
+        assert_no_null(head_node->func_free);
+        head_node->func_free(&head_node);
         //no_of_deleted_nodes++;
         
         head_node = next_node;
@@ -222,16 +212,18 @@ void csmnode_nousar_free_node_list(struct csmnode_derivada_t **head_node_derived
 
 // ------------------------------------------------------------------------------------------
 
-void csmnode_nousar_free_node_in_list(struct csmnode_derivada_t **head_node_derived, const char *tipo_clase_derivada)
+void csmnode_dontuse_free_node_in_list(struct csmnode_t **head_node_derived, enum csmnode_object_t real_type)
 {
-    struct csmnode_derivada_t *head_node_derived_loc;
+    struct csmnode_t *head_node_derived_loc;
     struct csmnode_t *head_node;
     
-    head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_derivada_t);
+    head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_t);
     head_node = (struct csmnode_t *)head_node_derived_loc;
     
-    csmnode_nousar_remove_from_own_list(head_node, tipo_clase_derivada);
-    csmnode_destruye(&head_node);
+    csmnode_dontuse_remove_from_own_list(head_node, real_type);
+    
+    assert_no_null(head_node->func_free);
+    head_node->func_free(&head_node);
 }
 
 

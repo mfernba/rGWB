@@ -29,6 +29,8 @@ static void i_csmloop_destruye(struct csmloop_t **loop)
 {
     assert_no_null(loop);
     assert_no_null(*loop);
+    
+    csmnode_dealloc(&(*loop)->super);
 
     if ((*loop)->ledge != NULL)
         csmnode_free_node_list(&(*loop)->ledge, csmhedge_t);
@@ -49,7 +51,7 @@ CONSTRUCTOR(static struct csmloop_t *, i_crea, (
     
     loop = MALLOC(struct csmloop_t);
     
-    loop->clase_base = csmnode_crea_node(id, loop, i_csmloop_destruye, csmloop_t);
+    csmnode_init(&loop->super, id, i_csmloop_destruye, csmloop_t);
     
     loop->ledge = ledge;
     loop->lface = lface;
@@ -161,7 +163,7 @@ unsigned long csmloop_id(const struct csmloop_t *loop)
 void csmloop_reassign_id(struct csmloop_t *loop, unsigned long *id_new_element, unsigned long *new_id_opt)
 {
     assert_no_null(loop);
-    loop->clase_base.id = csmid_new_id(id_new_element, new_id_opt);
+    loop->super.id = csmid_new_id(id_new_element, new_id_opt);
 }
 
 // --------------------------------------------------------------------------------------------------------------

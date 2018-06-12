@@ -7,7 +7,7 @@
 
 struct csmloop_t
 {
-    struct csmnode_t clase_base;
+    struct csmnode_t super;
     
     struct csmhedge_t *ledge;
     struct csmface_t *lface;

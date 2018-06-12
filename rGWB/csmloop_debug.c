@@ -102,7 +102,7 @@ void csmloop_debug_print_info_debug(
                     csmnode_id(CSMNODE(iterator)),
                     csmnode_id(CSMNODE(edge)),
                     csmnode_id(CSMNODE(he_mate)),
-                    he_mate_loop->clase_base.id,
+                    he_mate_loop->super.id,
                     csmnode_id(CSMNODE(vertex)),
                     x, y, z,
                     IS_TRUE(csmhedge_loop(iterator) == loop),

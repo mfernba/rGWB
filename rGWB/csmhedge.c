@@ -19,7 +19,7 @@
 
 struct csmhedge_t
 {
-    struct csmnode_t clase_base;
+    struct csmnode_t super;
     
     struct csmedge_t *edge;
     struct csmvertex_t *vertex;
@@ -35,7 +35,9 @@ static void i_csmhedge_destruye(struct csmhedge_t **hedge)
     assert_no_null(hedge);
     assert_no_null(*hedge);
     
-    FREE_PP_NO_CLEAN_MEMORY(hedge, struct csmhedge_t);
+    csmnode_dealloc(&(*hedge)->super);
+    
+    FREE_PP(hedge, struct csmhedge_t);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -51,7 +53,7 @@ CONSTRUCTOR(static struct csmhedge_t *, i_crea, (
     
     hedge = MALLOC(struct csmhedge_t);
     
-    hedge->clase_base = csmnode_crea_node(id, hedge, i_csmhedge_destruye, csmhedge_t);
+    csmnode_init(&hedge->super, id, i_csmhedge_destruye, csmhedge_t);
     
     hedge->edge = edge;
     hedge->vertex = vertex;
@@ -127,7 +129,7 @@ struct csmhedge_t *csmhedge_duplicate(
     if (csmvertex_hedge(hedge->vertex) == hedge)
         csmvertex_set_hedge(new_hedge->vertex, new_hedge);
     
-    csmhashtb_add_item(relation_shedges_old_to_new, hedge->clase_base.id, new_hedge, csmhedge_t);
+    csmhashtb_add_item(relation_shedges_old_to_new, hedge->super.id, new_hedge, csmhedge_t);
     
     return new_hedge;
 }
@@ -137,7 +139,7 @@ struct csmhedge_t *csmhedge_duplicate(
 unsigned long csmhedge_id(const struct csmhedge_t *hedge)
 {
     assert_no_null(hedge);
-    return hedge->clase_base.id;
+    return hedge->super.id;
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -145,7 +147,7 @@ unsigned long csmhedge_id(const struct csmhedge_t *hedge)
 void csmhedge_reassign_id(struct csmhedge_t *hedge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
 {
     assert_no_null(hedge);
-    hedge->clase_base.id = csmid_new_id(id_nuevo_elemento, new_id_opc);
+    hedge->super.id = csmid_new_id(id_nuevo_elemento, new_id_opc);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -155,7 +157,7 @@ CSMBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge
     assert_no_null(hedge1);
     assert_no_null(hedge2);
     
-    return IS_TRUE(hedge1->clase_base.id == hedge2->clase_base.id);
+    return IS_TRUE(hedge1->super.id == hedge2->super.id);
 }
 
 // --------------------------------------------------------------------------------------------------------------
