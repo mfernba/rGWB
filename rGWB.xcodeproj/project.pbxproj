@@ -98,7 +98,6 @@
 		5536C8741FC1F4DB005CE275 /* WinFrames3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5536C8631FC1F4AD005CE275 /* WinFrames3.framework */; };
 		553E63E71FF6990400A15475 /* csmsplit.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 553E63E61FF6990400A15475 /* csmsplit.hxx */; };
 		553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 553E63E81FF69E0600A15475 /* csmsetop.hxx */; };
-		554E4F7C1FC1EFDE00D8E7D4 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5579545C1E5DB074000FC91E /* Info.plist */; };
 		5559D4E4204F3F310058F6F5 /* csmsetop_join.c in Sources */ = {isa = PBXBuildFile; fileRef = 5559D4E2204F3F310058F6F5 /* csmsetop_join.c */; };
 		5559D4E5204F3F310058F6F5 /* csmsetop_join.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5559D4E3204F3F310058F6F5 /* csmsetop_join.inl */; };
 		557012A01E8328E400DFC490 /* csmsweep.c in Sources */ = {isa = PBXBuildFile; fileRef = 5570129E1E8328E400DFC490 /* csmsweep.c */; };
@@ -979,7 +978,7 @@
 		5579544F1E5DB074000FC91E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0920;
 				ORGANIZATIONNAME = "Manuel Fernández";
 				TargetAttributes = {
 					557954571E5DB074000FC91E = {
@@ -1069,7 +1068,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				554E4F7C1FC1EFDE00D8E7D4 /* Info.plist in Resources */,
 				5507A6741E706175008B9F73 /* csmtest.h in Resources */,
 				55308C3E1F9222B500353A68 /* csmmaterial.inl in Resources */,
 				551D475C1FC1CED3004F3B43 /* csmshape2d.inl in Resources */,
