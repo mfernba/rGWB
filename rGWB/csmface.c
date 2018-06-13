@@ -547,6 +547,7 @@ CSMBOOL csmface_contains_point(
     double t_relative_to_hit_hedge_loc;
     
     assert_no_null(face);
+    assert_no_null(face->flout);
     
     if (i_is_point_on_face_plane(
                         x, y, z,
@@ -640,6 +641,7 @@ CSMBOOL csmface_is_point_interior_to_face(
     CSMBOOL is_interior_to_face;
     
     assert_no_null(face);
+    assert_no_null(face->flout);
     
     if (i_is_point_on_face_plane(
                         x, y, z,
@@ -815,6 +817,7 @@ CSMBOOL csmface_is_loop_contained_in_face(
     unsigned long num_iteraciones;
     
     assert_no_null(face);
+    assert_no_null(face->flout);
     assert(face->flout != loop);
     
     iterator = csmloop_ledge(loop);
@@ -851,6 +854,7 @@ CSMBOOL csmface_is_point_interior_to_face_outer_loop(
                         const struct csmtolerance_t *tolerances)
 {
     assert_no_null(face);
+    assert_no_null(face->flout);
     
     if (i_is_point_on_face_plane(
                         x, y, z,
@@ -890,6 +894,7 @@ CSMBOOL csmface_is_loop_contained_in_face_outer_loop(
     unsigned long num_iteraciones;
     
     assert_no_null(face);
+    assert_no_null(face->flout);
     assert(face->flout != loop);
     
     iterator = csmloop_ledge(loop);
