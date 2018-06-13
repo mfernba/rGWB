@@ -28,14 +28,14 @@ void csmmem_dontuse_free(void **data, size_t bytes);
 )
 
 void *csmmem_dontuse_dereference_memory(void **data);
-#define ASIGNA_PUNTERO_PP_NO_NULL(data, type)\
+#define ASSIGN_POINTER_PP_NOT_NULL(data, type)\
 (\
     ((type **)data == data),\
     (type *)csmmem_dontuse_dereference_memory((void **)data)\
 )
 
 void *csmmem_dontuse_dereference_optional_memory(void **data);
-#define ASIGNA_PUNTERO_PP(data, type)\
+#define ASSIGN_POINTER_PP(data, type)\
 (\
     ((type **)data == data),\
     (type *)csmmem_dontuse_dereference_optional_memory((void **)data)\

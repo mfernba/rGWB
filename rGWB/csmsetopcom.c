@@ -1094,8 +1094,8 @@ static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmfa
     //csmdebug_set_debug_screen(CSMTRUE);
     //csmface_debug_print_info_debug(*face, CSMTRUE, NULL);
     
-    loop1_loc = ASIGNA_PUNTERO_PP_NO_NULL(loop1, struct csmloop_t);
-    loop2_loc = ASIGNA_PUNTERO_PP_NO_NULL(loop2, struct csmloop_t);
+    loop1_loc = ASSIGN_POINTER_PP_NOT_NULL(loop1, struct csmloop_t);
+    loop2_loc = ASSIGN_POINTER_PP_NOT_NULL(loop2, struct csmloop_t);
     equal_loops = IS_TRUE(loop1_loc == loop2_loc);
     
     he = csmloop_ledge(loop1_loc);

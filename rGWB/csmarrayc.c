@@ -76,7 +76,7 @@ static struct csmarrayc_t *i_new(
     
     array->no_elems = no_elems;
     array->capacity = capacity;
-    array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(ptr_data, char);
+    array->ptr_data = ASSIGN_POINTER_PP_NOT_NULL(ptr_data, char);
     array->element_data_size = element_data_size;
     array->debug_mask = i_DEBUG_MASK;
     
@@ -199,7 +199,7 @@ void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long p
         
         FREE_PP(&array->ptr_data, char);
         
-        array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_data_extended, char);
+        array->ptr_data = ASSIGN_POINTER_PP_NOT_NULL(&ptr_data_extended, char);
         array->capacity = new_capacity;
     }
     
@@ -233,7 +233,7 @@ void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato)
         
         FREE_PP(&array->ptr_data, char);
         
-        array->ptr_data = ASIGNA_PUNTERO_PP_NO_NULL(&ptr_data_extended, char);
+        array->ptr_data = ASSIGN_POINTER_PP_NOT_NULL(&ptr_data_extended, char);
         array->capacity = new_capacity;;
     }
     

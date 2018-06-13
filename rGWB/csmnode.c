@@ -184,7 +184,7 @@ void csmnode_dontuse_free_node_list(struct csmnode_t **head_node_derived, enum c
     struct csmnode_t *first_node, *head_node;
     //unsigned long no_of_deleted_nodes;
     
-    head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_t);
+    head_node_derived_loc = ASSIGN_POINTER_PP_NOT_NULL(head_node_derived, struct csmnode_t);
     head_node = (struct csmnode_t *)head_node_derived_loc;
     first_node = head_node;
     //no_of_deleted_nodes = 0;
@@ -217,7 +217,7 @@ void csmnode_dontuse_free_node_in_list(struct csmnode_t **head_node_derived, enu
     struct csmnode_t *head_node_derived_loc;
     struct csmnode_t *head_node;
     
-    head_node_derived_loc = ASIGNA_PUNTERO_PP_NO_NULL(head_node_derived, struct csmnode_t);
+    head_node_derived_loc = ASSIGN_POINTER_PP_NOT_NULL(head_node_derived, struct csmnode_t);
     head_node = (struct csmnode_t *)head_node_derived_loc;
     
     csmnode_dontuse_remove_from_own_list(head_node, real_type);

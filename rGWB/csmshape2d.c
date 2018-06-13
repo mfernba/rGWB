@@ -53,8 +53,8 @@ CONSTRUCTOR(static struct i_polygon_t *, i_new_polygon, (csmArrPoint2D **points,
 	
 	polygon = MALLOC(struct i_polygon_t);
     
-	polygon->points = ASIGNA_PUNTERO_PP_NO_NULL(points, csmArrPoint2D);
-    polygon->normals = ASIGNA_PUNTERO_PP_NO_NULL(normals, csmArrPoint3D);
+	polygon->points = ASSIGN_POINTER_PP_NOT_NULL(points, csmArrPoint2D);
+    polygon->normals = ASSIGN_POINTER_PP_NOT_NULL(normals, csmArrPoint3D);
 	
 	return polygon;
 }
@@ -107,7 +107,7 @@ CONSTRUCTOR(static struct csmshape2d_t *, i_new, (csmArrayStruct(i_polygon_t) **
 	struct csmshape2d_t *shape2d;
 	
 	shape2d = MALLOC(struct csmshape2d_t);
-	shape2d->polygons = ASIGNA_PUNTERO_PP_NO_NULL(polygons, csmArrayStruct(i_polygon_t));
+	shape2d->polygons = ASSIGN_POINTER_PP_NOT_NULL(polygons, csmArrayStruct(i_polygon_t));
 	
 	return shape2d;
 }
@@ -333,7 +333,7 @@ CONSTRUCTOR(static struct i_tesselator_data_t *, i_new_tesselator_data, (
     tesselator_data = MALLOC(struct i_tesselator_data_t);
     
     tesselator_data->current_vertex_on_edge = current_vertex_on_edge;
-    tesselator_data->vertexs = ASIGNA_PUNTERO_PP_NO_NULL(vertexs, csmArrayStruct(i_tesselator_vertex_t));
+    tesselator_data->vertexs = ASSIGN_POINTER_PP_NOT_NULL(vertexs, csmArrayStruct(i_tesselator_vertex_t));
     
     return tesselator_data;
 }

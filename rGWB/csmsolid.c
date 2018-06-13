@@ -55,18 +55,18 @@ CONSTRUCTOR(static struct csmsolid_t *, i_new, (
     
     solid = MALLOC(struct csmsolid_t);
     
-    solid->name = ASIGNA_PUNTERO_PP(name, char);
+    solid->name = ASSIGN_POINTER_PP(name, char);
     
     solid->id_nuevo_elemento = id_nuevo_elemento;
     
-    solid->sfaces = ASIGNA_PUNTERO_PP_NO_NULL(sfaces, struct csmhashtb(csmface_t));
-    solid->sedges = ASIGNA_PUNTERO_PP_NO_NULL(sedges, struct csmhashtb(csmedge_t));
-    solid->svertexs = ASIGNA_PUNTERO_PP_NO_NULL(svertexs, struct csmhashtb(csmvertex_t));
+    solid->sfaces = ASSIGN_POINTER_PP_NOT_NULL(sfaces, struct csmhashtb(csmface_t));
+    solid->sedges = ASSIGN_POINTER_PP_NOT_NULL(sedges, struct csmhashtb(csmedge_t));
+    solid->svertexs = ASSIGN_POINTER_PP_NOT_NULL(svertexs, struct csmhashtb(csmvertex_t));
     
-    solid->visz_material_opt = ASIGNA_PUNTERO_PP(visz_material_opt, struct csmmaterial_t);
+    solid->visz_material_opt = ASSIGN_POINTER_PP(visz_material_opt, struct csmmaterial_t);
     solid->draw_only_border_edges = draw_only_border_edges;
     
-    solid->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
+    solid->bbox = ASSIGN_POINTER_PP_NOT_NULL(bbox, struct csmbbox_t);
     
     return solid;
 }
@@ -1203,7 +1203,7 @@ void csmsolid_set_visualization_material(struct csmsolid_t *solid, struct csmmat
     if (solid->visz_material_opt != NULL)
         csmmaterial_free(&solid->visz_material_opt);
     
-    solid->visz_material_opt = ASIGNA_PUNTERO_PP_NO_NULL(visz_material, struct csmmaterial_t);
+    solid->visz_material_opt = ASSIGN_POINTER_PP_NOT_NULL(visz_material, struct csmmaterial_t);
     
     face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
     

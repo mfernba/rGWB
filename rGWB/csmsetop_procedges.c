@@ -154,7 +154,7 @@ CONSTRUCTOR(static struct i_inters_vertex_t *, i_new_inters_vertex, (struct csmv
     inters_vertex = MALLOC(struct i_inters_vertex_t);
     
     inters_vertex->vertex = vertex;
-    inters_vertex->overlapped_vertexs = ASIGNA_PUNTERO_PP_NO_NULL(overlapped_vertexs, struct csmhashtb(csmvertex_t));
+    inters_vertex->overlapped_vertexs = ASSIGN_POINTER_PP_NOT_NULL(overlapped_vertexs, struct csmhashtb(csmvertex_t));
     
     return inters_vertex;
 }

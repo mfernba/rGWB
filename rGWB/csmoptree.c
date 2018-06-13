@@ -94,7 +94,7 @@ CONSTRUCTOR(static struct csmoptree_t *, i_new, (unsigned long node_id, enum i_t
     optree->type = type;
     
     optree->evaluation_result = evaluation_result;
-    optree->solid_result = ASIGNA_PUNTERO_PP(solid_result, struct csmsolid_t);
+    optree->solid_result = ASSIGN_POINTER_PP(solid_result, struct csmsolid_t);
     
     return optree;
 }
@@ -165,7 +165,7 @@ struct csmoptree_t *csmoptree_new_node_solid(struct csmsolid_t **solid)
     optree = i_new_unevaluated_optree(i_TYPE_SOLID);
     assert_no_null(optree);
     
-    optree->operands.solid = ASIGNA_PUNTERO_PP_NO_NULL(solid, struct csmsolid_t);
+    optree->operands.solid = ASSIGN_POINTER_PP_NOT_NULL(solid, struct csmsolid_t);
     
     return optree;
 }
@@ -179,8 +179,8 @@ struct csmoptree_t *csmoptree_new_node_boolean_union(struct csmoptree_t **node1,
     optree = i_new_unevaluated_optree(i_TYPE_OPERATION_SETOP_UNION);
     assert_no_null(optree);
     
-    optree->operands.setop_operation.node1 = ASIGNA_PUNTERO_PP_NO_NULL(node1, struct csmoptree_t);
-    optree->operands.setop_operation.node2 = ASIGNA_PUNTERO_PP_NO_NULL(node2, struct csmoptree_t);
+    optree->operands.setop_operation.node1 = ASSIGN_POINTER_PP_NOT_NULL(node1, struct csmoptree_t);
+    optree->operands.setop_operation.node2 = ASSIGN_POINTER_PP_NOT_NULL(node2, struct csmoptree_t);
     
     return optree;
 }
@@ -194,8 +194,8 @@ struct csmoptree_t *csmoptree_new_node_boolean_intersection(struct csmoptree_t *
     optree = i_new_unevaluated_optree(i_TYPE_OPERATION_SETOP_INTERSECTION);
     assert_no_null(optree);
     
-    optree->operands.setop_operation.node1 = ASIGNA_PUNTERO_PP_NO_NULL(node1, struct csmoptree_t);
-    optree->operands.setop_operation.node2 = ASIGNA_PUNTERO_PP_NO_NULL(node2, struct csmoptree_t);
+    optree->operands.setop_operation.node1 = ASSIGN_POINTER_PP_NOT_NULL(node1, struct csmoptree_t);
+    optree->operands.setop_operation.node2 = ASSIGN_POINTER_PP_NOT_NULL(node2, struct csmoptree_t);
     
     return optree;
 }
@@ -209,8 +209,8 @@ struct csmoptree_t *csmoptree_new_node_boolean_difference_1_minus_2(struct csmop
     optree = i_new_unevaluated_optree(i_TYPE_OPERATION_SETOP_DIFFERENCE);
     assert_no_null(optree);
     
-    optree->operands.setop_operation.node1 = ASIGNA_PUNTERO_PP_NO_NULL(node1, struct csmoptree_t);
-    optree->operands.setop_operation.node2 = ASIGNA_PUNTERO_PP_NO_NULL(node2, struct csmoptree_t);
+    optree->operands.setop_operation.node1 = ASSIGN_POINTER_PP_NOT_NULL(node1, struct csmoptree_t);
+    optree->operands.setop_operation.node2 = ASSIGN_POINTER_PP_NOT_NULL(node2, struct csmoptree_t);
     
     return optree;
 }
@@ -229,7 +229,7 @@ struct csmoptree_t *csmoptree_new_node_split_and_get_above(double A, double B, d
     optree->operands.split_plane.C = C;
     optree->operands.split_plane.D = D;
     
-    optree->operands.split_plane.node = ASIGNA_PUNTERO_PP_NO_NULL(node, struct csmoptree_t);
+    optree->operands.split_plane.node = ASSIGN_POINTER_PP_NOT_NULL(node, struct csmoptree_t);
 
     return optree;
 }
@@ -248,7 +248,7 @@ struct csmoptree_t *csmoptree_new_node_split_and_get_below(double A, double B, d
     optree->operands.split_plane.C = C;
     optree->operands.split_plane.D = D;
     
-    optree->operands.split_plane.node = ASIGNA_PUNTERO_PP_NO_NULL(node, struct csmoptree_t);
+    optree->operands.split_plane.node = ASSIGN_POINTER_PP_NOT_NULL(node, struct csmoptree_t);
     
     return optree;
 }
@@ -281,7 +281,7 @@ struct csmoptree_t *csmoptree_new_node_transform(
     optree->operands.transform.Wz = Wz;
     optree->operands.transform.Dz = Dz;
     
-    optree->operands.transform.node = ASIGNA_PUNTERO_PP_NO_NULL(node, struct csmoptree_t);
+    optree->operands.transform.node = ASSIGN_POINTER_PP_NOT_NULL(node, struct csmoptree_t);
     
     return optree;
 }
@@ -400,7 +400,7 @@ static void i_evaluate_node(struct csmoptree_t *node)
                             else
                             {
                                 node->evaluation_result = CSMOPTREE_RESULT_OK;
-                                node->solid_result = ASIGNA_PUNTERO_PP_NO_NULL(&solid_above, struct csmsolid_t);
+                                node->solid_result = ASSIGN_POINTER_PP_NOT_NULL(&solid_above, struct csmsolid_t);
                             }
                             
                             csmsolid_free(&solid_below);
@@ -417,7 +417,7 @@ static void i_evaluate_node(struct csmoptree_t *node)
                             else
                             {
                                 node->evaluation_result = CSMOPTREE_RESULT_OK;
-                                node->solid_result = ASIGNA_PUNTERO_PP_NO_NULL(&solid_below, struct csmsolid_t);
+                                node->solid_result = ASSIGN_POINTER_PP_NOT_NULL(&solid_below, struct csmsolid_t);
                             }
                             
                             csmsolid_free(&solid_above);

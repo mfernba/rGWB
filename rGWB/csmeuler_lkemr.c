@@ -43,8 +43,8 @@ void csmeuler_lkemr(
     struct csmvertex_t *vertex1, *vertex2;
     struct csmsolid_t *he1_and_he2_solid;
     
-    he1_loc = ASIGNA_PUNTERO_PP_NO_NULL(he_to_ring, struct csmhedge_t);
-    he2_loc = ASIGNA_PUNTERO_PP_NO_NULL(he_from_ring, struct csmhedge_t);
+    he1_loc = ASSIGN_POINTER_PP_NOT_NULL(he_to_ring, struct csmhedge_t);
+    he2_loc = ASSIGN_POINTER_PP_NOT_NULL(he_from_ring, struct csmhedge_t);
     assert(he1_loc != he2_loc);
     
     edge_to_remove = csmhedge_edge(he1_loc);

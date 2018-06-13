@@ -27,7 +27,7 @@ void csmeuler_lkfmrh(struct csmface_t *face_to_add_loop, struct csmface_t **face
     struct csmloop_t *loop_iterator;
     unsigned long num_iteraciones;
     
-    face_to_remove_loc = ASIGNA_PUNTERO_PP_NO_NULL(face_to_remove, struct csmface_t);
+    face_to_remove_loc = ASSIGN_POINTER_PP_NOT_NULL(face_to_remove, struct csmface_t);
     face_to_remove_solid = csmface_fsolid(face_to_remove_loc);
     
     loop_iterator = csmface_floops(face_to_remove_loc);

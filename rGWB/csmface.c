@@ -52,8 +52,8 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
     face->flout = flout;
     face->floops = floops;
     
-    face->surface_eq = ASIGNA_PUNTERO_PP_NO_NULL(surface_eq, struct csmsurface_t);
-    face->visz_material_opt = ASIGNA_PUNTERO_PP(visz_material_opt, struct csmmaterial_t);
+    face->surface_eq = ASSIGN_POINTER_PP_NOT_NULL(surface_eq, struct csmsurface_t);
+    face->visz_material_opt = ASSIGN_POINTER_PP(visz_material_opt, struct csmmaterial_t);
     
     face->A = A;
     face->B = B;
@@ -65,7 +65,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
     face->y_center = y_center;
     face->z_center = z_center;
     
-    face->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
+    face->bbox = ASSIGN_POINTER_PP_NOT_NULL(bbox, struct csmbbox_t);
  
     face->setop_is_null_face = setop_is_null_face;
     face->setop_has_been_modified = setop_has_been_modified;

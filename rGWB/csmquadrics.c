@@ -41,7 +41,7 @@ static void i_assign_face_eq_to_solid_faces(struct csmsolid_t *solid, struct csm
     struct csmsurface_t *surface_loc;
     struct csmhashtb_iterator(csmface_t) *face_iterator;
     
-    surface_loc = ASIGNA_PUNTERO_PP_NO_NULL(surface, struct csmsurface_t);
+    surface_loc = ASSIGN_POINTER_PP_NOT_NULL(surface, struct csmsurface_t);
     face_iterator = csmsolid_face_iterator(solid);
     
     while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)

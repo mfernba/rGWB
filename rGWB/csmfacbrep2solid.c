@@ -139,7 +139,7 @@ CONSTRUCTOR(static struct csmfacbrep2solid_loop_t *, i_new_loop, (csmArrayStruct
     
     loop = MALLOC(struct csmfacbrep2solid_loop_t);
     
-    loop->points = ASIGNA_PUNTERO_PP(points, csmArrayStruct(i_loop_point_t));
+    loop->points = ASSIGN_POINTER_PP(points, csmArrayStruct(i_loop_point_t));
     loop->sloop = sloop;
     
     return loop;
@@ -168,8 +168,8 @@ CONSTRUCTOR(static struct csmfacbrep2solid_face_t *, i_new_face, (
     
     face = MALLOC(struct csmfacbrep2solid_face_t);
     
-    face->outer_loop = ASIGNA_PUNTERO_PP(outer_loop, struct csmfacbrep2solid_loop_t);
-    face->inner_loops = ASIGNA_PUNTERO_PP(inner_loops, csmArrayStruct(csmfacbrep2solid_loop_t));
+    face->outer_loop = ASSIGN_POINTER_PP(outer_loop, struct csmfacbrep2solid_loop_t);
+    face->inner_loops = ASSIGN_POINTER_PP(inner_loops, csmArrayStruct(csmfacbrep2solid_loop_t));
     
     face->sface = sface;
     
@@ -240,8 +240,8 @@ CONSTRUCTOR(static struct csmfacbrep2solid_t *, i_new_facbrep2solid, (
 
     builder->id_new_element = id_new_element;
     
-    builder->faces = ASIGNA_PUNTERO_PP(faces, csmArrayStruct(csmfacbrep2solid_face_t));
-    builder->vertexs = ASIGNA_PUNTERO_PP(vertexs, csmArrayStruct(i_vertex_t));
+    builder->faces = ASSIGN_POINTER_PP(faces, csmArrayStruct(csmfacbrep2solid_face_t));
+    builder->vertexs = ASSIGN_POINTER_PP(vertexs, csmArrayStruct(i_vertex_t));
     
     return builder;
 }
@@ -299,7 +299,7 @@ void csmfacbrep2solid_append_outer_loop_to_face(struct csmfacbrep2solid_face_t *
     assert_no_null(face);
     assert(face->outer_loop == NULL);
     
-    face->outer_loop = ASIGNA_PUNTERO_PP_NO_NULL(outer_loop, struct csmfacbrep2solid_loop_t);
+    face->outer_loop = ASSIGN_POINTER_PP_NOT_NULL(outer_loop, struct csmfacbrep2solid_loop_t);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -310,7 +310,7 @@ void csmfacbrep2solid_append_inner_loop_to_face(struct csmfacbrep2solid_face_t *
     
     assert_no_null(face);
     
-    inner_loop_loc = ASIGNA_PUNTERO_PP_NO_NULL(inner_loop, struct csmfacbrep2solid_loop_t);
+    inner_loop_loc = ASSIGN_POINTER_PP_NOT_NULL(inner_loop, struct csmfacbrep2solid_loop_t);
     csmarrayc_append_element_st(face->inner_loops, inner_loop_loc, csmfacbrep2solid_loop_t);
 }
 
@@ -451,7 +451,7 @@ void csmfacbrep2solid_append_face(struct csmfacbrep2solid_t *builder, struct csm
     
     assert_no_null(builder);
     
-    face_loc = ASIGNA_PUNTERO_PP_NO_NULL(face, struct csmfacbrep2solid_face_t);
+    face_loc = ASSIGN_POINTER_PP_NOT_NULL(face, struct csmfacbrep2solid_face_t);
     assert_no_null(face_loc);
     
     i_register_loop_vertexs(face_loc->outer_loop, builder->equal_points_tolerance, builder->vertexs);
@@ -498,8 +498,8 @@ CONSTRUCTOR(static struct i_edge_t *, i_new_edge, (
     edge->idx_vertex1 = idx_vertex1;
     edge->idx_vertex2 = idx_vertex2;
     
-    edge->he1 = ASIGNA_PUNTERO_PP(he1, struct i_hedge_id_t);
-    edge->he2 = ASIGNA_PUNTERO_PP(he2, struct i_hedge_id_t);
+    edge->he1 = ASSIGN_POINTER_PP(he1, struct i_hedge_id_t);
+    edge->he2 = ASSIGN_POINTER_PP(he2, struct i_hedge_id_t);
     
     return edge;
 }

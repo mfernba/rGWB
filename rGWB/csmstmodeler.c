@@ -45,7 +45,7 @@ CONSTRUCTOR(static struct i_operand_t *, i_new_operand, (unsigned long solid_id,
     operand = MALLOC(struct i_operand_t);
     
     operand->solid_id = solid_id;
-    operand->solid = ASIGNA_PUNTERO_PP_NO_NULL(solid, struct csmsolid_t);
+    operand->solid = ASSIGN_POINTER_PP_NOT_NULL(solid, struct csmsolid_t);
     
     return operand;
 }
@@ -83,7 +83,7 @@ CONSTRUCTOR(static struct csmstmodeler_t *, i_new, (
     modeler = MALLOC(struct csmstmodeler_t);
     
     modeler->id_new_element = id_new_element;
-    modeler->operands = ASIGNA_PUNTERO_PP_NO_NULL(operands, csmArrayStruct(i_operand_t));
+    modeler->operands = ASSIGN_POINTER_PP_NOT_NULL(operands, csmArrayStruct(i_operand_t));
     
     return modeler;
 }

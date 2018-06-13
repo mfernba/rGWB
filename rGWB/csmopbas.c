@@ -124,7 +124,7 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
     assert_no_null(hedge);
     assert_no_null(*hedge);
     
-    hedge_loc = ASIGNA_PUNTERO_PP_NO_NULL(hedge, struct csmhedge_t);
+    hedge_loc = ASSIGN_POINTER_PP_NOT_NULL(hedge, struct csmhedge_t);
     edge = csmhedge_edge(hedge_loc);
     loop = csmhedge_loop(hedge_loc);
     vertex = csmhedge_vertex(hedge_loc);

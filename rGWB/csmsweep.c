@@ -760,7 +760,7 @@ CONSTRUCTOR(static struct i_sweep_point_t *, i_new_sweep_point, (
     sweep_point->Vy = Vy;
     sweep_point->Vz = Vz;
     
-    sweep_point->shape = ASIGNA_PUNTERO_PP_NO_NULL(shape, struct csmshape2d_t);
+    sweep_point->shape = ASSIGN_POINTER_PP_NOT_NULL(shape, struct csmshape2d_t);
     
     return sweep_point;
 }
@@ -801,7 +801,7 @@ CONSTRUCTOR(static struct csmsweep_path_t *, i_new_sweeppath, (csmArrayStruct(i_
     
     sweep_path = MALLOC(struct csmsweep_path_t);
     
-    sweep_path->sweep_points = ASIGNA_PUNTERO_PP_NO_NULL(sweep_points, csmArrayStruct(i_sweep_point_t));
+    sweep_path->sweep_points = ASSIGN_POINTER_PP_NOT_NULL(sweep_points, csmArrayStruct(i_sweep_point_t));
     sweep_path->needs_subdivide_faces = needs_subdivide_faces;
     
     return sweep_path;
@@ -1192,8 +1192,8 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
         if (i == 0)
         {
             solid = solid_i;
-            bottom_faces_first_solid = ASIGNA_PUNTERO_PP_NO_NULL(&bottom_faces_i, csmArrayStruct(csmface_t));
-            top_faces_prev = ASIGNA_PUNTERO_PP_NO_NULL(&top_faces_i, csmArrayStruct(csmface_t));
+            bottom_faces_first_solid = ASSIGN_POINTER_PP_NOT_NULL(&bottom_faces_i, csmArrayStruct(csmface_t));
+            top_faces_prev = ASSIGN_POINTER_PP_NOT_NULL(&top_faces_i, csmArrayStruct(csmface_t));
         }
         else
         {
@@ -1203,7 +1203,7 @@ struct csmsolid_t *csmsweep_create_from_path_debug(const struct csmsweep_path_t 
             csmsolid_free(&solid_i);
 
             csmarrayc_free_st(&top_faces_prev, csmface_t, NULL);
-            top_faces_prev = ASIGNA_PUNTERO_PP_NO_NULL(&top_faces_i, csmArrayStruct(csmface_t));
+            top_faces_prev = ASSIGN_POINTER_PP_NOT_NULL(&top_faces_i, csmArrayStruct(csmface_t));
         }
     }
     

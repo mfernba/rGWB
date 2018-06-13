@@ -113,6 +113,8 @@ csmArrPoint3D;
 #define csmArrPoint2D_get arr_GetPunto2D
 #define csmArrPoint2D_free arr_DestruyePunto2D
     
+#define ASSIGN_POINTER_PP_NOT_NULL ASIGNA_PUNTERO_PP_NO_NULL
+#define ASSIGN_POINTER_PP ASIGNA_PUNTERO_PP
 #define ASSIGN_OPTIONAL_VALUE ASIGNA_OPC
     
 #endif
