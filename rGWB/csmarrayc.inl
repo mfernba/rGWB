@@ -11,11 +11,11 @@ void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_stru
 
 unsigned long csmarrayc_dontuse_count(const struct csmarrayc_t *array);
 
-void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *dato);
+void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *element);
 
-void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato);
+void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *element);
 
-void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *dato);
+void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *element);
 
 CSMBOOL csmarrayc_dontuse_contains_element(
                         const struct csmarrayc_t *array,
@@ -67,25 +67,25 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
     csmarrayc_dontuse_count((const struct csmarrayc_t *)array)\
 )
 
-#define csmarrayc_insert_element_st(array, pos, dato, type)\
+#define csmarrayc_insert_element_st(array, pos, element, type)\
 (/*lint -save -e505*/\
     (void)((csmArrayStruct(type) *)array == array),\
-    (void)((struct type *)dato == dato),\
-    csmarrayc_dontuse_insert_element((struct csmarrayc_t *)array, pos, (void *)(&(dato)))\
+    (void)((struct type *)element == element),\
+    csmarrayc_dontuse_insert_element((struct csmarrayc_t *)array, pos, (void *)(&(element)))\
 )/*lint -restore*/
 
-#define csmarrayc_append_element_st(array, dato, type)\
+#define csmarrayc_append_element_st(array, element, type)\
 (/*lint -save -e505*/\
     (void)((csmArrayStruct(type) *)array == array),\
-    (void)((struct type *)dato == dato),\
-    csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (void *)(&(dato)))\
+    (void)((struct type *)element == element),\
+    csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (void *)(&(element)))\
 )/*lint -restore*/
 
-#define csmarrayc_append_element_const_st(array, dato, type)\
+#define csmarrayc_append_element_const_st(array, element, type)\
 (/*lint -save -e505*/\
     (void)((const csmArrayStruct(type) *)array == array),\
-    (void)((const struct type *)dato == dato),\
-    csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (void *)(&(dato)))\
+    (void)((const struct type *)element == element),\
+    csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (void *)(&(element)))\
 )/*lint -restore*/
 
 #define csmarrayc_contains_element_st(array, array_type, search_data, search_data_type, func_match_condition, idx_opt)\

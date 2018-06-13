@@ -179,7 +179,7 @@ unsigned long csmarrayc_dontuse_count(const struct csmarrayc_t *array)
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *dato)
+void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *element)
 {
     size_t offset_pos, offset_pos_next, bytes_elems_to_move;
     
@@ -209,13 +209,13 @@ void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long p
     
     memmove(array->ptr_data + offset_pos_next, array->ptr_data + offset_pos, bytes_elems_to_move);
     
-    memcpy(array->ptr_data + offset_pos, dato, array->element_data_size);
+    memcpy(array->ptr_data + offset_pos, element, array->element_data_size);
     array->no_elems++;
 }
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato)
+void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *element)
 {
     i_integrity(array);
     
@@ -237,18 +237,18 @@ void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *dato)
         array->capacity = new_capacity;;
     }
     
-    memcpy(array->ptr_data + array->no_elems * array->element_data_size, dato, array->element_data_size);
+    memcpy(array->ptr_data + array->no_elems * array->element_data_size, element, array->element_data_size);
     array->no_elems++;
 }
 
 // ---------------------------------------------------------------------------------
 
-void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *dato)
+void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *element)
 {
     i_integrity(array);
     assert(idx < array->no_elems);
     
-    memcpy(array->ptr_data + idx * array->element_data_size, &dato, array->element_data_size);
+    memcpy(array->ptr_data + idx * array->element_data_size, &element, array->element_data_size);
 }
 
 // ---------------------------------------------------------------------------------
