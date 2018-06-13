@@ -57,46 +57,46 @@ static void i_assign_flat_material_to_solid(float r, float g, float b, struct cs
 
 static void i_test_crea_destruye_solido_vacio(void)
 {
-    struct csmsolid_t *solido;
+    struct csmsolid_t *solid;
     
-    solido = csmeuler_mvfs(0., 0., 0., 0, NULL);
+    solid = csmeuler_mvfs(0., 0., 0., 0, NULL);
     
-    csmeuler_kvfs(solido);
+    csmeuler_kvfs(solid);
     
-    csmsolid_free(&solido);
+    csmsolid_free(&solid);
 }
 
 // ------------------------------------------------------------------------------------------
 
 static void i_test_basico_solido_una_arista(void)
 {
-    struct csmsolid_t *solido;
+    struct csmsolid_t *solid;
     struct csmhedge_t *hedge;
     struct csmhedge_t *he1, *he2;
     
-    solido = csmeuler_mvfs(0., 0., 0., 0, &hedge);
+    solid = csmeuler_mvfs(0., 0., 0., 0, &hedge);
     
     csmeuler_lmev(hedge, hedge, 1., 0., 0., NULL, NULL, &he1, &he2);
     
     csmeuler_lkev(&he1, &he2, &he1, NULL, &he2, NULL);
     assert(he1 == he2);
 
-    csmeuler_kvfs(solido);
+    csmeuler_kvfs(solid);
     
-    csmsolid_free(&solido);
+    csmsolid_free(&solid);
 }
 
 // ------------------------------------------------------------------------------------------
 
 static void i_test_crea_lamina(void)
 {
-    struct csmsolid_t *solido;
+    struct csmsolid_t *solid;
     struct csmhedge_t *initial_hedge, *hedge_from_vertex1, *hedge_from_vertex2, *hedge_from_vertex3;
     struct csmface_t *initial_face, *new_face;
     struct csmhedge_t *he_pos, *he_neg;
     struct csmhedge_t *he1, *he2;
     
-    solido = csmeuler_mvfs(0., 0., 0., 0, &initial_hedge);
+    solid = csmeuler_mvfs(0., 0., 0., 0, &initial_hedge);
     initial_face = csmopbas_face_from_hedge(initial_hedge);
     
     csmeuler_lmev_strut_edge(initial_hedge, 1., 0., 1., &hedge_from_vertex1);
@@ -109,7 +109,7 @@ static void i_test_crea_lamina(void)
         
         tolerance = csmtolerance_new();
         
-        csmsolid_redo_geometric_generated_data(solido);
+        csmsolid_redo_geometric_generated_data(solid);
         
         assert(initial_face != new_face);
 
@@ -143,21 +143,21 @@ static void i_test_crea_lamina(void)
     assert(he1 == he2);
     assert(he1 == initial_hedge);
     
-    csmeuler_kvfs(solido);
+    csmeuler_kvfs(solid);
     
-    csmsolid_free(&solido);
+    csmsolid_free(&solid);
 }
 
 // ------------------------------------------------------------------------------------------
 
 static void i_test_crea_lamina_con_hueco(void)
 {
-    struct csmsolid_t *solido;
+    struct csmsolid_t *solid;
     struct csmhedge_t *initial_hedge, *hedge_from_vertex1, *hedge_from_vertex2, *hedge_from_vertex3;
     struct csmhedge_t *he_pos, *he_neg;
     struct csmhedge_t *he1, *he2;
     
-    solido = csmeuler_mvfs(0., 0., 0., 0, &initial_hedge);
+    solid = csmeuler_mvfs(0., 0., 0., 0, &initial_hedge);
     
     csmeuler_lmev_strut_edge(initial_hedge, 10., 0., 0., &hedge_from_vertex1);
     csmeuler_lmev_strut_edge(hedge_from_vertex1, 10., 1.0, 0., &hedge_from_vertex2);
@@ -200,16 +200,16 @@ static void i_test_crea_lamina_con_hueco(void)
     assert(he1 == he2);
     assert(he1 == initial_hedge);
     
-    csmeuler_kvfs(solido);
+    csmeuler_kvfs(solid);
     
-    csmsolid_free(&solido);
+    csmsolid_free(&solid);
 }
 
 // ------------------------------------------------------------------------------------------
 
 static void i_test_crea_hexaedro(void)
 {
-    struct csmsolid_t *solido;
+    struct csmsolid_t *solid;
     unsigned long id_nuevo_elemento;
     struct csmhedge_t *hei, *he1, *he2, *he3, *he4;
     struct csmhedge_t *he1_top, *he2_top, *he3_top, *he4_top;
@@ -217,8 +217,8 @@ static void i_test_crea_hexaedro(void)
     
     id_nuevo_elemento = 0;
     
-    solido = csmeuler_mvfs(0., 0., 0., 0, &hei);
-    csmsolid_debug_print_debug(solido, CSMTRUE);
+    solid = csmeuler_mvfs(0., 0., 0., 0, &hei);
+    csmsolid_debug_print_debug(solid, CSMTRUE);
     
     // Cara inferior...
     {
@@ -229,7 +229,7 @@ static void i_test_crea_hexaedro(void)
         assert(csmopbas_mate(he1) == hei);
     }
 
-    csmsolid_debug_print_debug(solido, CSMTRUE);
+    csmsolid_debug_print_debug(solid, CSMTRUE);
     
     // Aristas verticales...
     {
@@ -243,7 +243,7 @@ static void i_test_crea_hexaedro(void)
         assert(csmhedge_loop(he1_top) == csmhedge_loop(he4_top));
     }
 
-    csmsolid_debug_print_debug(solido, CSMTRUE);
+    csmsolid_debug_print_debug(solid, CSMTRUE);
     
     csmeuler_lmef(he4_top, he3_top, NULL, NULL, NULL);
     csmeuler_lmef(he3_top, he2_top, NULL, NULL, NULL);
@@ -258,20 +258,20 @@ static void i_test_crea_hexaedro(void)
     he1_top_next_next_next = csmhedge_next(he1_top_next_next);
     assert(csmhedge_vertex(he1_top_next_next_next) == csmhedge_vertex(he4_top));
 
-    csmsolid_debug_print_debug(solido, CSMTRUE);
+    csmsolid_debug_print_debug(solid, CSMTRUE);
     
     csmeuler_lmef(he1_top, he1_top_next_next_next, NULL, NULL, NULL);
     
-    csmsolid_debug_print_debug(solido, CSMTRUE);
+    csmsolid_debug_print_debug(solid, CSMTRUE);
     
-    csmsolid_free(&solido);
+    csmsolid_free(&solid);
 }
 
 // ------------------------------------------------------------------------------------------
 
 static void i_test_crea_hexaedro_y_copia(void)
 {
-    struct csmsolid_t *solido;
+    struct csmsolid_t *solid;
     unsigned long id_nuevo_elemento;
     struct csmhedge_t *hei, *he1, *he2, *he3, *he4;
     struct csmhedge_t *he1_top, *he2_top, *he3_top, *he4_top;
@@ -280,7 +280,7 @@ static void i_test_crea_hexaedro_y_copia(void)
     
     id_nuevo_elemento = 0;
     
-    solido = csmeuler_mvfs(0., 0., 0., 0, &hei);
+    solid = csmeuler_mvfs(0., 0., 0., 0, &hei);
     
     // Cara inferior...
     {
@@ -318,12 +318,12 @@ static void i_test_crea_hexaedro_y_copia(void)
 
     csmeuler_lmef(he1_top, he1_top_next_next_next, NULL, NULL, NULL);
     
-    csmsolid_debug_print_debug(solido, CSMTRUE);
+    csmsolid_debug_print_debug(solid, CSMTRUE);
     
-    copia_solido = csmsolid_duplicate(solido);
+    copia_solido = csmsolid_duplicate(solid);
     csmsolid_debug_print_debug(copia_solido, CSMTRUE);
     
-    csmsolid_free(&solido);
+    csmsolid_free(&solid);
     csmsolid_free(&copia_solido);
 }
 

@@ -76,7 +76,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
 
 // ------------------------------------------------------------------------------------------
 
-struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo_elemento)
+struct csmface_t *csmface_new(struct csmsolid_t *solid, unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
     struct csmsolid_t *fsolid, *fsolid_aux;
@@ -94,7 +94,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     
     id = csmid_new_id(id_nuevo_elemento, NULL);
 
-    fsolid = solido;
+    fsolid = solid;
     fsolid_aux = NULL;
     flout = NULL;
     floops = NULL;

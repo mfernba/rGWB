@@ -14,10 +14,10 @@ extern "C" {
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 
-DLL_RGWB void csmsolid_vis_draw_debug_info(struct csmsolid_t *solido, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics);
+DLL_RGWB void csmsolid_vis_draw_debug_info(struct csmsolid_t *solid, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics);
 
 DLL_RGWB void csmsolid_vis_draw(
-                            struct csmsolid_t *solido,
+                            struct csmsolid_t *solid,
                             CSMBOOL draw_solid_face,
                             CSMBOOL draw_face_normal,
                             const struct bsmaterial_t *face_material,

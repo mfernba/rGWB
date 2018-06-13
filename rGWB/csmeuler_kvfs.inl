@@ -8,4 +8,4 @@
 
 #include "csmfwddecl.hxx"
 
-void csmeuler_kvfs(struct csmsolid_t *solido);
+void csmeuler_kvfs(struct csmsolid_t *solid);

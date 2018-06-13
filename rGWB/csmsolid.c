@@ -51,24 +51,24 @@ CONSTRUCTOR(static struct csmsolid_t *, i_new, (
                         CSMBOOL draw_only_border_edges,
                         struct csmbbox_t **bbox))
 {
-    struct csmsolid_t *solido;
+    struct csmsolid_t *solid;
     
-    solido = MALLOC(struct csmsolid_t);
+    solid = MALLOC(struct csmsolid_t);
     
-    solido->name = ASIGNA_PUNTERO_PP(name, char);
+    solid->name = ASIGNA_PUNTERO_PP(name, char);
     
-    solido->id_nuevo_elemento = id_nuevo_elemento;
+    solid->id_nuevo_elemento = id_nuevo_elemento;
     
-    solido->sfaces = ASIGNA_PUNTERO_PP_NO_NULL(sfaces, struct csmhashtb(csmface_t));
-    solido->sedges = ASIGNA_PUNTERO_PP_NO_NULL(sedges, struct csmhashtb(csmedge_t));
-    solido->svertexs = ASIGNA_PUNTERO_PP_NO_NULL(svertexs, struct csmhashtb(csmvertex_t));
+    solid->sfaces = ASIGNA_PUNTERO_PP_NO_NULL(sfaces, struct csmhashtb(csmface_t));
+    solid->sedges = ASIGNA_PUNTERO_PP_NO_NULL(sedges, struct csmhashtb(csmedge_t));
+    solid->svertexs = ASIGNA_PUNTERO_PP_NO_NULL(svertexs, struct csmhashtb(csmvertex_t));
     
-    solido->visz_material_opt = ASIGNA_PUNTERO_PP(visz_material_opt, struct csmmaterial_t);
-    solido->draw_only_border_edges = draw_only_border_edges;
+    solid->visz_material_opt = ASIGNA_PUNTERO_PP(visz_material_opt, struct csmmaterial_t);
+    solid->draw_only_border_edges = draw_only_border_edges;
     
-    solido->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
+    solid->bbox = ASIGNA_PUNTERO_PP_NO_NULL(bbox, struct csmbbox_t);
     
-    return solido;
+    return solid;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -122,18 +122,18 @@ const char *csmsolid_get_name(const struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-const struct csmmaterial_t *csmsolid_get_material(const struct csmsolid_t *solido)
+const struct csmmaterial_t *csmsolid_get_material(const struct csmsolid_t *solid)
 {
-    assert_no_null(solido);
-    return solido->visz_material_opt;
+    assert_no_null(solid);
+    return solid->visz_material_opt;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-const struct csmbbox_t *csmsolid_get_bbox(const struct csmsolid_t *solido)
+const struct csmbbox_t *csmsolid_get_bbox(const struct csmsolid_t *solid)
 {
-    assert_no_null(solido);
-    return solido->bbox;
+    assert_no_null(solid);
+    return solid->bbox;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -295,47 +295,47 @@ struct csmsolid_t *csmsolid_duplicate(const struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_free(struct csmsolid_t **solido)
+void csmsolid_free(struct csmsolid_t **solid)
 {
-    assert_no_null(solido);
-    assert_no_null(*solido);
+    assert_no_null(solid);
+    assert_no_null(*solid);
     
-    if ((*solido)->name != NULL)
-        csmstring_free(&(*solido)->name);
+    if ((*solid)->name != NULL)
+        csmstring_free(&(*solid)->name);
     
-    csmhashtb_free(&(*solido)->sfaces, csmface_t, csmface_free);
-    csmhashtb_free(&(*solido)->sedges, csmedge_t, csmedge_destruye);
-    csmhashtb_free(&(*solido)->svertexs, csmvertex_t, csmvertex_free);
+    csmhashtb_free(&(*solid)->sfaces, csmface_t, csmface_free);
+    csmhashtb_free(&(*solid)->sedges, csmedge_t, csmedge_destruye);
+    csmhashtb_free(&(*solid)->svertexs, csmvertex_t, csmvertex_free);
 
-    if ((*solido)->visz_material_opt != NULL)
-        csmmaterial_free(&(*solido)->visz_material_opt);
+    if ((*solid)->visz_material_opt != NULL)
+        csmmaterial_free(&(*solid)->visz_material_opt);
 
-    csmbbox_free(&(*solido)->bbox);
+    csmbbox_free(&(*solid)->bbox);
     
-    FREE_PP(solido, struct csmsolid_t);
+    FREE_PP(solid, struct csmsolid_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-unsigned long *csmsolid_id_new_element(struct csmsolid_t *solido)
+unsigned long *csmsolid_id_new_element(struct csmsolid_t *solid)
 {
-    assert_no_null(solido);
-    return &solido->id_nuevo_elemento;
+    assert_no_null(solid);
+    return &solid->id_nuevo_elemento;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-CSMBOOL csmsolid_is_empty(const struct csmsolid_t *solido)
+CSMBOOL csmsolid_is_empty(const struct csmsolid_t *solid)
 {
-    assert_no_null(solido);
+    assert_no_null(solid);
     
-    if (csmhashtb_count(solido->sedges, csmedge_t) > 0)
+    if (csmhashtb_count(solid->sedges, csmedge_t) > 0)
         return CSMFALSE;
     
-    if (csmhashtb_count(solido->sfaces, csmface_t) > 0)
+    if (csmhashtb_count(solid->sfaces, csmface_t) > 0)
         return CSMFALSE;
     
-    if (csmhashtb_count(solido->svertexs, csmvertex_t) > 0)
+    if (csmhashtb_count(solid->svertexs, csmvertex_t) > 0)
         return CSMFALSE;
     
     return CSMTRUE;
@@ -612,30 +612,30 @@ void csmsolid_finish_cleanup(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_append_new_face(struct csmsolid_t *solido, struct csmface_t **face)
+void csmsolid_append_new_face(struct csmsolid_t *solid, struct csmface_t **face)
 {
     struct csmface_t *face_loc;
     
-    assert_no_null(solido);
+    assert_no_null(solid);
     assert_no_null(face);
     
-    face_loc = csmface_new(solido, &solido->id_nuevo_elemento);
-    csmhashtb_add_item(solido->sfaces, csmface_id(face_loc), face_loc, csmface_t);
+    face_loc = csmface_new(solid, &solid->id_nuevo_elemento);
+    csmhashtb_add_item(solid->sfaces, csmface_id(face_loc), face_loc, csmface_t);
     
-    if (solido->visz_material_opt != NULL)
-        csmface_set_visualization_material(face_loc, solido->visz_material_opt);
+    if (solid->visz_material_opt != NULL)
+        csmface_set_visualization_material(face_loc, solid->visz_material_opt);
     
     *face = face_loc;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_remove_face(struct csmsolid_t *solido, struct csmface_t **face)
+void csmsolid_remove_face(struct csmsolid_t *solid, struct csmface_t **face)
 {
-    assert_no_null(solido);
+    assert_no_null(solid);
     assert_no_null(face);
     
-    csmhashtb_remove_item(solido->sfaces, csmface_id(*face), csmface_t);
+    csmhashtb_remove_item(solid->sfaces, csmface_id(*face), csmface_t);
     csmface_free(face);
 }
 
@@ -674,27 +674,27 @@ struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_f
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_append_new_edge(struct csmsolid_t *solido, struct csmedge_t **edge)
+void csmsolid_append_new_edge(struct csmsolid_t *solid, struct csmedge_t **edge)
 {
     struct csmedge_t *edge_loc;
     
-    assert_no_null(solido);
+    assert_no_null(solid);
     assert_no_null(edge);
     
-    edge_loc = csmedge_crea(&solido->id_nuevo_elemento);
-    csmhashtb_add_item(solido->sedges, csmedge_id(edge_loc), edge_loc, csmedge_t);
+    edge_loc = csmedge_crea(&solid->id_nuevo_elemento);
+    csmhashtb_add_item(solid->sedges, csmedge_id(edge_loc), edge_loc, csmedge_t);
     
     *edge = edge_loc;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_remove_edge(struct csmsolid_t *solido, struct csmedge_t **edge)
+void csmsolid_remove_edge(struct csmsolid_t *solid, struct csmedge_t **edge)
 {
-    assert_no_null(solido);
+    assert_no_null(solid);
     assert_no_null(edge);
 
-    csmhashtb_remove_item(solido->sedges, csmedge_id(*edge), csmedge_t);
+    csmhashtb_remove_item(solid->sedges, csmedge_id(*edge), csmedge_t);
     csmedge_destruye(edge);
 }
 
@@ -730,27 +730,27 @@ struct csmhashtb_iterator(csmedge_t) *csmsolid_edge_iterator(struct csmsolid_t *
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, double z, struct csmvertex_t **vertex)
+void csmsolid_append_new_vertex(struct csmsolid_t *solid, double x, double y, double z, struct csmvertex_t **vertex)
 {
     struct csmvertex_t *vertex_loc;
     
-    assert_no_null(solido);
+    assert_no_null(solid);
     assert_no_null(vertex);
     
-    vertex_loc = csmvertex_new(x, y, z, &solido->id_nuevo_elemento);
-    csmhashtb_add_item(solido->svertexs, csmvertex_id(vertex_loc), vertex_loc, csmvertex_t);
+    vertex_loc = csmvertex_new(x, y, z, &solid->id_nuevo_elemento);
+    csmhashtb_add_item(solid->svertexs, csmvertex_id(vertex_loc), vertex_loc, csmvertex_t);
     
     *vertex = vertex_loc;
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vertex)
+void csmsolid_remove_vertex(struct csmsolid_t *solid, struct csmvertex_t **vertex)
 {
-    assert_no_null(solido);
+    assert_no_null(solid);
     assert_no_null(vertex);
 
-    csmhashtb_remove_item(solido->svertexs, csmvertex_id(*vertex), csmvertex_t);
+    csmhashtb_remove_item(solid->svertexs, csmvertex_id(*vertex), csmvertex_t);
     csmvertex_free(vertex);
 }
 
@@ -794,10 +794,10 @@ struct csmhashtb_iterator(csmvertex_t) *csmsolid_vertex_iterator_const(const str
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_set_draw_only_border_edges(struct csmsolid_t *solido, CSMBOOL draw_only_border_edges)
+void csmsolid_set_draw_only_border_edges(struct csmsolid_t *solid, CSMBOOL draw_only_border_edges)
 {
-    assert_no_null(solido);
-    solido->draw_only_border_edges = draw_only_border_edges;
+    assert_no_null(solid);
+    solid->draw_only_border_edges = draw_only_border_edges;
 }
 
 // ----------------------------------------------------------------------------------------------------

@@ -8,7 +8,7 @@ extern "C" {
 
 DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmsolid_duplicate, (const struct csmsolid_t *solid));
 
-DLL_RGWB void csmsolid_free(struct csmsolid_t **solido);
+DLL_RGWB void csmsolid_free(struct csmsolid_t **solid);
 
 
 // Transformations...

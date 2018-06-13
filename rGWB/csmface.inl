@@ -2,7 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-CONSTRUCTOR(struct csmface_t *, csmface_new, (struct csmsolid_t *solido, unsigned long *id_nuevo_elemento));
+CONSTRUCTOR(struct csmface_t *, csmface_new, (struct csmsolid_t *solid, unsigned long *id_nuevo_elemento));
 
 CONSTRUCTOR(struct csmface_t *, csmface_duplicate, (
                         struct csmface_t *face,

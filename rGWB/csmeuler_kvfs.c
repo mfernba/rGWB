@@ -22,18 +22,18 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmeuler_kvfs(struct csmsolid_t *solido)
+void csmeuler_kvfs(struct csmsolid_t *solid)
 {
     struct csmhashtb_iterator(csmface_t) *face_iterator;
     struct csmface_t *face;
     struct csmloop_t *floops;
 
-    assert_no_null(solido);
-    assert(csmhashtb_count(solido->sfaces, csmface_t) == 1);
-    assert(csmhashtb_count(solido->sedges, csmedge_t) == 0);
-    assert(csmhashtb_count(solido->svertexs, csmvertex_t) == 1);
+    assert_no_null(solid);
+    assert(csmhashtb_count(solid->sfaces, csmface_t) == 1);
+    assert(csmhashtb_count(solid->sedges, csmedge_t) == 0);
+    assert(csmhashtb_count(solid->svertexs, csmvertex_t) == 1);
     
-    face_iterator = csmhashtb_create_iterator(solido->sfaces, csmface_t);
+    face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
     assert(csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE);
     
     csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
@@ -44,6 +44,6 @@ void csmeuler_kvfs(struct csmsolid_t *solido)
     
     csmhashtb_free_iterator(&face_iterator, csmface_t);
     
-    csmhashtb_clear(solido->sfaces, csmface_t, csmface_free);
-    csmhashtb_clear(solido->svertexs, csmvertex_t, csmvertex_free);
+    csmhashtb_clear(solid->sfaces, csmface_t, csmface_free);
+    csmhashtb_clear(solid->svertexs, csmvertex_t, csmvertex_free);
 }

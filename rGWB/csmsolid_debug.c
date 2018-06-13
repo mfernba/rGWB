@@ -156,38 +156,38 @@ static void i_print_info_debug_faces(
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_debug_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_es_integro)
+void csmsolid_debug_print_debug(struct csmsolid_t *solid, CSMBOOL assert_si_no_es_integro)
 {
     if (csmdebug_debug_enabled() == CSMTRUE && csmdebug_is_print_solid_unblocked() == CSMTRUE)
     {
         unsigned long num_faces, num_holes, num_vertexs;
         
-        assert_no_null(solido);
+        assert_no_null(solid);
         
         csmdebug_begin_context("SOLID DESCRIPTION");
         
-        if (solido->name != NULL)
-            csmdebug_print_debug_info("Solid Address: %s (%p)\n", solido->name, solido);
+        if (solid->name != NULL)
+            csmdebug_print_debug_info("Solid Address: %s (%p)\n", solid->name, solid);
         else
-            csmdebug_print_debug_info("Solid Address: %p\n", solido);
+            csmdebug_print_debug_info("Solid Address: %p\n", solid);
         
         csmdebug_print_debug_info("Face table\n");
-        i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
+        i_print_info_debug_faces(solid->sfaces, solid, assert_si_no_es_integro, &num_faces, &num_holes);
         csmdebug_print_debug_info("\n");
 
         csmdebug_print_debug_info("Vertex table\n");
-        i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, CSMFALSE, &num_vertexs);
+        i_print_debug_info_vertexs(solid->svertexs, assert_si_no_es_integro, CSMFALSE, &num_vertexs);
         csmdebug_print_debug_info("\n");
         
         csmdebug_end_context();
         
         /*
         csmdebug_print_debug_info("Edge table\n");
-        i_print_debug_info_edges(solido->sedges, assert_si_no_es_integro, &num_edges);
+        i_print_debug_info_edges(solid->sedges, assert_si_no_es_integro, &num_edges);
         csmdebug_print_debug_info("\n");
         
         csmdebug_print_debug_info("Vertex table\n");
-        i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, &num_vertexs);
+        i_print_debug_info_vertexs(solid->svertexs, assert_si_no_es_integro, &num_vertexs);
         csmdebug_print_debug_info("\n");
         csmdebug_end_context();
         */
@@ -196,32 +196,32 @@ void csmsolid_debug_print_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_debug_print_debug_forced(struct csmsolid_t *solido)
+void csmsolid_debug_print_debug_forced(struct csmsolid_t *solid)
 {
     CSMBOOL assert_si_no_es_integro;
     unsigned long num_faces, num_holes, num_vertexs, num_edges;
 
-    assert_no_null(solido);
+    assert_no_null(solid);
 
     assert_si_no_es_integro = CSMTRUE;
 
     csmdebug_begin_context("SOLID DESCRIPTION");
 
-    if (solido->name != NULL)
-        csmdebug_print_debug_info("Solid Address: %s (%p)\n", solido->name, solido);
+    if (solid->name != NULL)
+        csmdebug_print_debug_info("Solid Address: %s (%p)\n", solid->name, solid);
     else
-        csmdebug_print_debug_info("Solid Address: %p\n", solido);
+        csmdebug_print_debug_info("Solid Address: %p\n", solid);
 
     csmdebug_print_debug_info("Face table\n");
-    i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
+    i_print_info_debug_faces(solid->sfaces, solid, assert_si_no_es_integro, &num_faces, &num_holes);
     csmdebug_print_debug_info("\n");
 
     csmdebug_print_debug_info("Edge table\n");
-    i_print_debug_info_edges(solido->sedges, assert_si_no_es_integro, &num_edges);
+    i_print_debug_info_edges(solid->sedges, assert_si_no_es_integro, &num_edges);
     csmdebug_print_debug_info("\n");
     
     csmdebug_print_debug_info("Vertex table\n");
-    i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, CSMFALSE, &num_vertexs);
+    i_print_debug_info_vertexs(solid->svertexs, assert_si_no_es_integro, CSMFALSE, &num_vertexs);
     csmdebug_print_debug_info("\n");
 
     csmdebug_end_context();
@@ -229,31 +229,31 @@ void csmsolid_debug_print_debug_forced(struct csmsolid_t *solido)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_debug_print_complete_debug(struct csmsolid_t *solido, CSMBOOL assert_si_no_es_integro)
+void csmsolid_debug_print_complete_debug(struct csmsolid_t *solid, CSMBOOL assert_si_no_es_integro)
 {
     if (csmdebug_debug_enabled() == CSMTRUE && csmdebug_is_print_solid_unblocked() == CSMTRUE)
     {
         unsigned long num_faces, num_edges, num_holes;
         
-        assert_no_null(solido);
+        assert_no_null(solid);
         
         csmdebug_begin_context("SOLID DESCRIPTION");
         
-        if (solido->name != NULL)
-            csmdebug_print_debug_info("Solid Address: %s (%p)\n", solido->name, solido);
+        if (solid->name != NULL)
+            csmdebug_print_debug_info("Solid Address: %s (%p)\n", solid->name, solid);
         else
-            csmdebug_print_debug_info("Solid Address: %p\n", solido);
+            csmdebug_print_debug_info("Solid Address: %p\n", solid);
         
         csmdebug_print_debug_info("Face table\n");
-        i_print_info_debug_faces(solido->sfaces, solido, assert_si_no_es_integro, &num_faces, &num_holes);
+        i_print_info_debug_faces(solid->sfaces, solid, assert_si_no_es_integro, &num_faces, &num_holes);
         csmdebug_print_debug_info("\n");
         
         csmdebug_print_debug_info("Edge table\n");
-        i_print_debug_info_edges(solido->sedges, assert_si_no_es_integro, &num_edges);
+        i_print_debug_info_edges(solid->sedges, assert_si_no_es_integro, &num_edges);
         csmdebug_print_debug_info("\n");
         
         csmdebug_print_debug_info("Vertex table\n");
-        //i_print_debug_info_vertexs(solido->svertexs, assert_si_no_es_integro, CSMTRUE, &num_vertexs);
+        //i_print_debug_info_vertexs(solid->svertexs, assert_si_no_es_integro, CSMTRUE, &num_vertexs);
         csmdebug_print_debug_info("\n");
         
         csmdebug_end_context();

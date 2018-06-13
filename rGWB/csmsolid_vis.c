@@ -338,13 +338,13 @@ static void i_draw_null_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgrap
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_vis_draw_debug_info(struct csmsolid_t *solido, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics)
+void csmsolid_vis_draw_debug_info(struct csmsolid_t *solid, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics)
 {
-    assert_no_null(solido);
+    assert_no_null(solid);
     
-    i_draw_debug_info_vertexs(solido->svertexs, graphics);
-    i_draw_debug_info_faces(solido->sfaces, draw_edge_info, graphics);
-    i_draw_null_edges(solido->sedges, graphics);
+    i_draw_debug_info_vertexs(solid->svertexs, graphics);
+    i_draw_debug_info_faces(solid->sfaces, draw_edge_info, graphics);
+    i_draw_null_edges(solid->sedges, graphics);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -422,7 +422,7 @@ static void i_draw_border_edges(struct csmhashtb(csmedge_t) *sedges, CSMBOOL dra
 // ----------------------------------------------------------------------------------------------------
 
 void csmsolid_vis_draw(
-                struct csmsolid_t *solido,
+                struct csmsolid_t *solid,
                 CSMBOOL draw_solid_face,
                 CSMBOOL draw_face_normal,
                 const struct bsmaterial_t *face_material,
@@ -430,12 +430,12 @@ void csmsolid_vis_draw(
                 const struct bsmaterial_t *border_edges_material,
                 struct bsgraphics2_t *graphics)
 {
-    assert_no_null(solido);
+    assert_no_null(solid);
     
-    i_draw_solid_faces(solido->sfaces, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
+    i_draw_solid_faces(solid->sfaces, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
     
     bsgraphics2_escr_color(graphics, border_edges_material);
-    i_draw_border_edges(solido->sedges, solido->draw_only_border_edges, graphics);
+    i_draw_border_edges(solid->sedges, solid->draw_only_border_edges, graphics);
 }
 
 #else
