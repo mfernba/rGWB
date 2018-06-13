@@ -40,7 +40,7 @@ static void i_csmloop_destruye(struct csmloop_t **loop)
 
 // --------------------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmloop_t *, i_crea, (
+CONSTRUCTOR(static struct csmloop_t *, i_new, (
                         unsigned long id,
                         struct csmhedge_t *ledge,
                         struct csmface_t *lface,
@@ -80,7 +80,7 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
     setop_convert_loop_in_face = CSMFALSE;
     setop_loop_was_a_hole = CSMFALSE;
     
-    return i_crea(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
+    return i_new(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lfac
     setop_convert_loop_in_face = CSMFALSE;
     setop_loop_was_a_hole = CSMFALSE;
     
-    return i_crea(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
+    return i_new(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -214,10 +214,10 @@ void csmloop_face_equation(
         next_hedge = csmhedge_next(iterator);
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x1, &y1, &z1);
+        csmvertex_get_coords(vertex, &x1, &y1, &z1);
         
         next_vertex = csmhedge_vertex(next_hedge);
-        csmvertex_get_coordenadas(next_vertex, &x2, &y2, &z2);
+        csmvertex_get_coords(next_vertex, &x2, &y2, &z2);
         
         A_loc += (y1 - y2) * (z1 + z2);
         B_loc += (z1 - z2) * (x1 + x2);
@@ -279,7 +279,7 @@ void csmloop_update_bounding_box(const struct csmloop_t *loop, struct csmbbox_t 
         num_iteraciones++;
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        csmvertex_get_coords(vertex, &x, &y, &z);
         
         csmbbox_maximize_coord(bbox, x, y, z);
         
@@ -316,7 +316,7 @@ double csmloop_max_distance_to_plane(
         num_iteraciones++;
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        csmvertex_get_coords(vertex, &x, &y, &z);
         
         distance = csmmath_fabs(csmmath_signed_distance_point_to_plane(x, y, z, A, B, C, D));
         max_distance_to_plane = CSMMATH_MAX(max_distance_to_plane, distance);
@@ -358,12 +358,12 @@ double csmloop_compute_area(
         num_iteraciones++;
         
         vertex_i = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex_i, &x_3d, &y_3d, &z_3d);
+        csmvertex_get_coords(vertex_i, &x_3d, &y_3d, &z_3d);
         csmgeom_project_coords_3d_to_2d(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, x_3d, y_3d, z_3d, &x_i, &y_i);
         
         iterator = csmhedge_next(iterator);
         vertex_i_1 = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex_i_1, &x_3d, &y_3d, &z_3d);
+        csmvertex_get_coords(vertex_i_1, &x_3d, &y_3d, &z_3d);
         csmgeom_project_coords_3d_to_2d(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, x_3d, y_3d, z_3d, &x_i_1, &y_i_1);
         
         area_i = x_i * y_i_1 - y_i * x_i_1;
@@ -412,10 +412,10 @@ static CSMBOOL i_is_point_on_loop_boundary(
         next_hedge = csmhedge_next(iterator);
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x_vertex, &y_vertex, &z_vertex);
+        csmvertex_get_coords(vertex, &x_vertex, &y_vertex, &z_vertex);
 
         next_vertex = csmhedge_vertex(next_hedge);
-        csmvertex_get_coordenadas(next_vertex, &x_next_vertex, &y_next_vertex, &z_next_vertex);
+        csmvertex_get_coords(next_vertex, &x_next_vertex, &y_next_vertex, &z_next_vertex);
         
         if (csmmath_is_point_in_segment3D(
                         x, y, z,
@@ -764,7 +764,7 @@ void csmloop_geometric_center_3d(struct csmloop_t *loop, double *x, double *y, d
         no_iters++;
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
+        csmvertex_get_coords(vertex, &x_3d, &y_3d, &z_3d);
         
         *x += x_3d;
         *y += y_3d;

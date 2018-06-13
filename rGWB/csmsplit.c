@@ -125,7 +125,7 @@ static void i_classify_hedge_respect_to_plane(
     tolerance = csmtolerance_point_on_plane(tolerances);
 
     vertex_loc = csmhedge_vertex(hedge);
-    csmvertex_get_coordenadas(vertex_loc, &x_loc, &y_loc, &z_loc);
+    csmvertex_get_coords(vertex_loc, &x_loc, &y_loc, &z_loc);
     
     i_classify_point_respect_to_plane(
                         x_loc, y_loc, z_loc,
@@ -179,8 +179,8 @@ CONSTRUCTOR(static csmArrayStruct(csmvertex_t) *, i_split_edges_by_plane, (
         {
             double x_pos, y_pos, z_pos, x_neg, y_neg, z_neg;
 
-            csmvertex_get_coordenadas(vertex_pos, &x_pos, &y_pos, &z_pos);
-            csmvertex_get_coordenadas(vertex_neg, &x_neg, &y_neg, &z_neg);
+            csmvertex_get_coords(vertex_pos, &x_pos, &y_pos, &z_pos);
+            csmvertex_get_coords(vertex_neg, &x_neg, &y_neg, &z_neg);
             
             csmdebug_print_debug_info(
                     "Analizing edge %lu (%g, %g, %g) -> (%g, %g, %g)\n",
@@ -200,8 +200,8 @@ CONSTRUCTOR(static csmArrayStruct(csmvertex_t) *, i_split_edges_by_plane, (
             
             t = dist_to_plane_pos / (dist_to_plane_pos - dist_to_plane_neg);
             
-            csmvertex_get_coordenadas(vertex_pos, &x_pos, &y_pos, &z_pos);
-            csmvertex_get_coordenadas(vertex_neg, &x_neg, &y_neg, &z_neg);
+            csmvertex_get_coords(vertex_pos, &x_pos, &y_pos, &z_pos);
+            csmvertex_get_coords(vertex_neg, &x_neg, &y_neg, &z_neg);
             
             x_inters = x_pos + t * (x_neg - x_pos);
             y_inters = y_pos + t * (y_neg - y_pos);
@@ -261,7 +261,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
     
     vertex_neighborhood = csmarrayc_new_st_array(0, i_neighborhood_t);
     
-    csmvertex_get_coordenadas(vertex, &x_vertex, &y_vertex, &z_vertex);
+    csmvertex_get_coords(vertex, &x_vertex, &y_vertex, &z_vertex);
     vertex_hedge = csmvertex_hedge(vertex);
     hedge_iterator = vertex_hedge;
     
@@ -543,7 +543,7 @@ static void i_print_debug_info_vertex_neighborhood(
         double x, y, z;
         unsigned long i, num_sectors;
         
-        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        csmvertex_get_coords(vertex, &x, &y, &z);
         csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g):\n", description, csmvertex_id(vertex), x, y, z);
         
         num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
@@ -631,7 +631,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
             tail_neighborhood = csmarrayc_get_st(vertex_neighborhood, (idx + 1) % num_sectors, i_neighborhood_t);
             assert_no_null(tail_neighborhood);
             
-            csmvertex_get_coordenadas(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
+            csmvertex_get_coords(csmhedge_vertex(head_neighborhood->hedge), &x_split, &y_split, &z_split);
 
             csmdebug_print_debug_info(
                         "Inserting null edge at (%g, %g, %g) from hedge %lu to hedge %lu.\n",

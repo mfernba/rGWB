@@ -268,7 +268,7 @@ static void i_append_common_vertices_solid_A_on_solid_B(
                     char *description;
                     double x, y, z;
                     
-                    csmvertex_get_coordenadas(vertex_A, &x, &y, &z);
+                    csmvertex_get_coords(vertex_A, &x, &y, &z);
                     description = copiafor_codigo5("EQ VV (%g, %g, %g) %lu %lu", x, y, z, csmvertex_id(vertex_A), csmvertex_id(vertex_B));
                     csmdebug_append_debug_point(x, y, z, &description);
                 
@@ -416,10 +416,10 @@ static void i_intersection_coords_at_hedge(
             struct csmhedge_t *hedge_next;
             double x1, y1, z1, x2, y2, z2;
             
-            csmvertex_get_coordenadas(csmhedge_vertex(hedge), &x1, &y1, &z1);
+            csmvertex_get_coords(csmhedge_vertex(hedge), &x1, &y1, &z1);
             
             hedge_next = csmhedge_next(hedge);
-            csmvertex_get_coordenadas(csmhedge_vertex(hedge_next), &x2, &y2, &z2);
+            csmvertex_get_coords(csmhedge_vertex(hedge_next), &x2, &y2, &z2);
             
             *x = x1 + (x2 - x1) * t_relative_to_hit_hedge_at_face;
             *y = y1 + (y2 - y1) * t_relative_to_hit_hedge_at_face;
@@ -469,7 +469,7 @@ static void i_append_intersection_between_vertex_A_and_face_B(
         double x_edge_interior_hedge_at_face, y_edge_interior_hedge_at_face, z_edge_interior_hedge_at_face;
         
         intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_VERTEX;
-        csmvertex_get_coordenadas(vertex, &x_edge_interior, &y_edge_interior,  &z_edge_interior);
+        csmvertex_get_coords(vertex, &x_edge_interior, &y_edge_interior,  &z_edge_interior);
         
         i_intersection_coords_at_hedge(
                         type_of_containment_at_face,
@@ -578,7 +578,7 @@ static void i_append_intersections_between_A_edge_and_B_face(
                         intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_VERTEX;
                         
                         edge_vertex = optimized_edge_data->vertex_pos;
-                        csmvertex_get_coordenadas(optimized_edge_data->vertex_pos, &x_inters, &y_inters, &z_inters);
+                        csmvertex_get_coords(optimized_edge_data->vertex_pos, &x_inters, &y_inters, &z_inters);
                         t = 0.;
                     }
                     else if (csmmath_equal_coords(
@@ -589,7 +589,7 @@ static void i_append_intersections_between_A_edge_and_B_face(
                         intersection_position_at_edge = i_INTERSECTION_POSITION_AT_EDGE_VERTEX;
                         
                         edge_vertex = optimized_edge_data->vertex_neg;
-                        csmvertex_get_coordenadas(optimized_edge_data->vertex_neg, &x_inters, &y_inters, &z_inters);
+                        csmvertex_get_coords(optimized_edge_data->vertex_neg, &x_inters, &y_inters, &z_inters);
                         t = 1.;
                     }
                     else
@@ -864,7 +864,7 @@ static void i_process_edge_intersections(
                     {
                         double x, y, z;
                     
-                        csmvertex_get_coordenadas(edge_intersection->edge_vertex, &x, &y, &z);
+                        csmvertex_get_coords(edge_intersection->edge_vertex, &x, &y, &z);
                         csmdebug_print_debug_info("Intersection at vertex: %lu (%lf, %lf, %lf)\n", csmvertex_id(edge_intersection->edge_vertex), x, y, z);
                         csmdebug_print_debug_info("-->NOTHING DONE\n");
                     }
@@ -1030,7 +1030,7 @@ static void i_process_edge_intersections(
                         char *description;
                         double x_edge_intersection, y_edge_intersection, z_edge_intersection;
 
-                        csmvertex_get_coordenadas(edge_vertex_intersection, &x_edge_intersection, &y_edge_intersection, &z_edge_intersection);
+                        csmvertex_get_coords(edge_vertex_intersection, &x_edge_intersection, &y_edge_intersection, &z_edge_intersection);
                         
                         csmdebug_print_debug_info(" Intersection at interior of face\n");
                         
@@ -1075,11 +1075,11 @@ static void i_generate_intersections_edge_with_solid_faces(
     
     hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_POS);
     optimized_edge_data.vertex_pos = csmhedge_vertex(hedge_pos);
-    csmvertex_get_coordenadas(optimized_edge_data.vertex_pos, &optimized_edge_data.x1, &optimized_edge_data.y1, &optimized_edge_data.z1);
+    csmvertex_get_coords(optimized_edge_data.vertex_pos, &optimized_edge_data.x1, &optimized_edge_data.y1, &optimized_edge_data.z1);
     
     hedge_neg = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_NEG);
     optimized_edge_data.vertex_neg = csmhedge_vertex(hedge_neg);
-    csmvertex_get_coordenadas(optimized_edge_data.vertex_neg, &optimized_edge_data.x2, &optimized_edge_data.y2, &optimized_edge_data.z2);
+    csmvertex_get_coords(optimized_edge_data.vertex_neg, &optimized_edge_data.x2, &optimized_edge_data.y2, &optimized_edge_data.z2);
     
     solid_b_bbox = csmsolid_get_bbox(solid_B);
     

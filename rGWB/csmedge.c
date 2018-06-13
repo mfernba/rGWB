@@ -19,7 +19,7 @@
 
 // --------------------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmedge_t *, i_crea, (
+CONSTRUCTOR(static struct csmedge_t *, i_new, (
                         unsigned long id,
                         struct csmhedge_t *he1,
                         struct csmhedge_t *he2,
@@ -54,7 +54,7 @@ struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
     
     setop_is_null_edge = CSMFALSE;
     
-    return i_crea(id, he1, he2, setop_is_null_edge);
+    return i_new(id, he1, he2, setop_is_null_edge);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ CONSTRUCTOR(static struct csmedge_t *, i_duplicate_edge, (unsigned long *id_nuev
     
     setop_is_null_edge = CSMFALSE;
     
-    return i_crea(id, he1, he2, setop_is_null_edge);
+    return i_new(id, he1, he2, setop_is_null_edge);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -288,10 +288,10 @@ void csmedge_vertex_coordinates(
     assert_no_null(edge);
     
     v1 = csmhedge_vertex_const(edge->he1);
-    csmvertex_get_coordenadas(v1, x1, y1, z1);
+    csmvertex_get_coords(v1, x1, y1, z1);
     ASSIGN_OPTIONAL_VALUE(id_vertex1_opt, csmvertex_id(v1));
     
     v2 = csmhedge_vertex_const(edge->he2);
-    csmvertex_get_coordenadas(v2, x2, y2, z2);
+    csmvertex_get_coords(v2, x2, y2, z2);
     ASSIGN_OPTIONAL_VALUE(id_vertex2_opt, csmvertex_id(v2));
 }

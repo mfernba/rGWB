@@ -225,11 +225,11 @@ static enum csmcompare_t i_compare_edges_by_coord(
     
     he1_edge1 = csmedge_hedge_lado_const(edge1, CSMEDGE_LADO_HEDGE_POS);
     vertex1 = csmhedge_vertex_const(he1_edge1);
-    csmvertex_get_coordenadas(vertex1, &x1, &y1, &z1);
+    csmvertex_get_coords(vertex1, &x1, &y1, &z1);
     
     he1_edge2 = csmedge_hedge_lado_const(edge2, CSMEDGE_LADO_HEDGE_POS);
     vertex2 = csmhedge_vertex_const(he1_edge2);
-    csmvertex_get_coordenadas(vertex2, &x2, &y2, &z2);
+    csmvertex_get_coords(vertex2, &x2, &y2, &z2);
     
     return csmmath_compare_coords_xyz(x1, y1, z1, x2, y2, z2, *tolerance);
 }
@@ -285,7 +285,7 @@ CONSTRUCTOR(static csmArrayStruct(i_pair_null_edges_t) *, i_pair_null_edges, (
         vertex_b = i_edge_reference_for_ordering(null_edge_b);
         
         assert(csmvertex_equal_coords(vertex_a, vertex_b, tolerance_equal_coords) == CSMTRUE);
-        csmvertex_get_coordenadas(vertex_a, &x, &y, &z);
+        csmvertex_get_coords(vertex_a, &x, &y, &z);
         
         pair_null_edges = i_new_pair_null_edges(x, y, z, null_edge_a, null_edge_b);
         csmarrayc_set_st(array_pair_null_edges, i, pair_null_edges, i_pair_null_edges_t);
@@ -355,7 +355,7 @@ void csmsetopcom_print_set_of_null_edges(const csmArrayStruct(csmedge_t) *set_of
         is_loose_he2 = csmsetopcom_is_loose_end(he2, loose_ends);
         
         vertex1 = csmhedge_vertex_const(he1);
-        csmvertex_get_coordenadas(vertex1, &x, &y, &z);
+        csmvertex_get_coords(vertex1, &x, &y, &z);
 
         csmdebug_print_debug_info("\t[");
         
@@ -504,8 +504,8 @@ void csmsetopcom_join_hedges(
                         csmhedge_id(he1), csmedge_id(csmhedge_edge(he1)),
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)));
         
-        csmvertex_get_coordenadas(csmhedge_vertex(he1), &x1, &y1, &z1);
-        csmvertex_get_coordenadas(csmhedge_vertex(he2), &x2, &y2, &z2);
+        csmvertex_get_coords(csmhedge_vertex(he1), &x1, &y1, &z1);
+        csmvertex_get_coords(csmhedge_vertex(he2), &x2, &y2, &z2);
         csmdebug_append_segment(x1, y1, z1, x2, y2, z2);
         
         csmsolid_debug_print_debug(he1_solid, CSMTRUE);

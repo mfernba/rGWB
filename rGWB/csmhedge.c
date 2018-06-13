@@ -42,7 +42,7 @@ static void i_csmhedge_destruye(struct csmhedge_t **hedge)
 
 // --------------------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmhedge_t *, i_crea, (
+CONSTRUCTOR(static struct csmhedge_t *, i_new, (
                         unsigned long id,
                         struct csmedge_t *edge,
                         struct csmvertex_t *vertex,
@@ -82,7 +82,7 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
     
     setop_is_loose_end = CSMFALSE;
     
-    return i_crea(id, edge, vertex, loop, setop_is_loose_end);
+    return i_new(id, edge, vertex, loop, setop_is_loose_end);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ CONSTRUCTOR(static struct csmhedge_t *, i_duplicate_hedge, (struct csmloop_t *lo
     vertex = NULL;
     setop_is_loose_end = CSMFALSE;
     
-    return i_crea(id, edge, vertex, loop, setop_is_loose_end);
+    return i_new(id, edge, vertex, loop, setop_is_loose_end);
 }
 
 // --------------------------------------------------------------------------------------------------------------

@@ -648,7 +648,7 @@ static void i_debug_show_inters_sectors(
     {
         double x, y, z;
         
-        csmvertex_get_coordenadas(csmhedge_vertex(neighborhood_a->he), &x, &y, &z);
+        csmvertex_get_coords(csmhedge_vertex(neighborhood_a->he), &x, &y, &z);
         
         csmdebug_set_inters_sector(
                     x, y, z,
@@ -772,7 +772,7 @@ static void i_print_debug_info_vertex_neighborhood(const char *description, cons
         double x, y, z;
         unsigned long i, num_sectors;
         
-        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        csmvertex_get_coords(vertex, &x, &y, &z);
         csmdebug_print_debug_info("Vertex neighborhood [%s]: %lu (%g, %g, %g): \n", description, csmvertex_id(vertex), x, y, z);
         
         num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
@@ -2411,7 +2411,7 @@ static void i_separateEdgeSequence(
     }
     
     split_vertex = csmhedge_vertex(from);
-    csmvertex_get_coordenadas(split_vertex, &x, &y, &z);
+    csmvertex_get_coords(split_vertex, &x, &y, &z);
 
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
@@ -2464,7 +2464,7 @@ static void i_separateInteriorHedge(
     }
     
     split_vertex = csmhedge_vertex(he);
-    csmvertex_get_coordenadas(split_vertex, &x, &y, &z);
+    csmvertex_get_coords(split_vertex, &x, &y, &z);
     
     csmeuler_lmev(he, he, x, y, z, NULL, &null_edge1, NULL, NULL);
 
@@ -2665,7 +2665,7 @@ static void i_vtxvtx_append_null_edges(
         char *description;
         double x, y, z;
         
-        csmvertex_get_coordenadas(vv_intersection->vertex_a, &x, &y, &z);
+        csmvertex_get_coords(vv_intersection->vertex_a, &x, &y, &z);
         
         description = copiafor_codigo6("[%lu] VV Intersection (%lf, %lf, %lf). Va %lu - Vb %lu", vv_intersection->intersection_id, x, y, z, csmvertex_id(vv_intersection->vertex_a), csmvertex_id(vv_intersection->vertex_b));
         csmdebug_begin_context(description);
@@ -2726,7 +2726,7 @@ static void i_print_vv_intersections(const csmArrayStruct(csmsetop_vtxvtx_inters
         vv_intersection = csmarrayc_get_const_st(vv_intersections, i, csmsetop_vtxvtx_inters_t);
         assert_no_null(vv_intersection);
         
-        csmvertex_get_coordenadas(vv_intersection->vertex_a, &x, &y, &z);
+        csmvertex_get_coords(vv_intersection->vertex_a, &x, &y, &z);
         
         description = copiafor_codigo6("[%lu] VV Intersection (%lf, %lf, %lf). Va %lu - Vb %lu", vv_intersection->intersection_id, x, y, z, csmvertex_id(vv_intersection->vertex_a), csmvertex_id(vv_intersection->vertex_b));
         csmdebug_print_debug_info("%s\n", description);

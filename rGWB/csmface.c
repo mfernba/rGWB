@@ -26,7 +26,7 @@
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmface_t *, i_crea, (
+CONSTRUCTOR(static struct csmface_t *, i_new, (
                         unsigned long id,
                         struct csmsolid_t *fsolid, struct csmsolid_t *fsolid_aux,
                         struct csmloop_t *flout,
@@ -118,7 +118,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solido, unsigned long *id_nuevo
     setop_has_been_modified = CSMTRUE;
     setop_shell_id = ULONG_MAX;
     
-    return i_crea(
+    return i_new(
                 id,
                 fsolid,
                 fsolid_aux,
@@ -163,7 +163,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     setop_is_new_face = CSMFALSE;
     setop_shell_id = ULONG_MAX;
     
-    return i_crea(
+    return i_new(
                 id,
                 fsolid,
                 NULL,
@@ -519,7 +519,7 @@ CSMBOOL csmface_contains_vertex(
     
     assert_no_null(face);
     
-    csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    csmvertex_get_coords(vertex, &x, &y, &z);
     
     return csmface_contains_point(
                         face,
@@ -731,7 +731,7 @@ enum csmcompare_t csmface_classify_vertex_relative_to_face(const struct csmface_
     
     assert_no_null(face);
     
-    csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    csmvertex_get_coords(vertex, &x, &y, &z);
     dist = csmmath_signed_distance_point_to_plane(x, y, z, face->A, face->B, face->C, face->D);
     
     return csmmath_compare_doubles(dist, 0., face->fuzzy_epsilon);
@@ -832,7 +832,7 @@ CSMBOOL csmface_is_loop_contained_in_face(
         num_iteraciones++;
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        csmvertex_get_coords(vertex, &x, &y, &z);
 
         if (csmface_is_point_interior_to_face(face, x, y, z, tolerances) == CSMFALSE)
         {
@@ -909,7 +909,7 @@ CSMBOOL csmface_is_loop_contained_in_face_outer_loop(
         num_iteraciones++;
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        csmvertex_get_coords(vertex, &x, &y, &z);
 
         if (csmface_is_point_interior_to_face_outer_loop(face, x, y, z, tolerances) == CSMFALSE)
         {

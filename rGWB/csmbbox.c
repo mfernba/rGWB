@@ -31,7 +31,7 @@ struct csmbbox_t
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmbbox_t *, i_crea, (
+CONSTRUCTOR(static struct csmbbox_t *, i_new, (
                         CSMBOOL initialized,
                         double x_min, double y_min, double z_min,
                         double x_max, double y_max, double z_max,
@@ -66,7 +66,7 @@ struct csmbbox_t *csmbbox_create_empty_box(void)
     CSMBOOL initialized;
     
     initialized = CSMFALSE;
-    return i_crea(initialized, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
+    return i_new(initialized, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ struct csmbbox_t *csmbbox_copy(const struct csmbbox_t *bbox)
 {
     assert_no_null(bbox);
     
-    return i_crea(
+    return i_new(
                 bbox->initialized,
                 bbox->x_min, bbox->y_min, bbox->z_min, bbox->x_max, bbox->y_max, bbox->z_max,
                 bbox->x_center, bbox->y_center, bbox->z_center, bbox->radius_sq);

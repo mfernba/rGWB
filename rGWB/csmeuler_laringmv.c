@@ -51,7 +51,7 @@ void csmeuler_laringmv(
             
             ledge = csmloop_ledge(iterator_face1);
             vtx = csmhedge_vertex(ledge);
-            csmvertex_get_coordenadas(vtx, &x, &y, &z);
+            csmvertex_get_coords(vtx, &x, &y, &z);
             
             if (csmface_is_point_interior_to_face(face1, x, y, z, tolerances) == CSMFALSE)
             {
@@ -100,7 +100,7 @@ void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(
             
             ledge = csmloop_ledge(iterator_face1);
             vtx = csmhedge_vertex(ledge);
-            csmvertex_get_coordenadas(vtx, &x, &y, &z);
+            csmvertex_get_coords(vtx, &x, &y, &z);
             
             if (csmface_is_point_interior_to_face(face2, x, y, z, tolerances) == CSMTRUE)
             {

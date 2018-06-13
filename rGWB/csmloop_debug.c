@@ -59,7 +59,7 @@ void csmloop_debug_print_info_debug(
         num_iters++;
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x, &y, &z);
+        csmvertex_get_coords(vertex, &x, &y, &z);
         
         edge = csmhedge_edge(iterator);
         

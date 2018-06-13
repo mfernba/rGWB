@@ -102,7 +102,7 @@ static void i_free_polygon(struct i_polygon_t **polygon)
 
 // --------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmshape2d_t *, i_crea, (csmArrayStruct(i_polygon_t) **polygons))
+CONSTRUCTOR(static struct csmshape2d_t *, i_new, (csmArrayStruct(i_polygon_t) **polygons))
 {
 	struct csmshape2d_t *shape2d;
 	
@@ -119,7 +119,7 @@ struct csmshape2d_t *csmshape2d_new(void)
 	csmArrayStruct(i_polygon_t) *polygons;
 	
 	polygons = csmarrayc_new_st_array(0, i_polygon_t);
-	return i_crea(&polygons);
+	return i_new(&polygons);
 }
 
 // --------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ struct csmshape2d_t *csmshape2d_copy(const struct csmshape2d_t *shape2d)
     
     polygons = csmarrayc_copy_st_array(shape2d->polygons, i_polygon_t, i_copy_polygon);
     
-	return i_crea(&polygons);
+	return i_new(&polygons);
 }
 
 // --------------------------------------------------------------------------------

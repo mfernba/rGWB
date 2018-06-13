@@ -48,7 +48,7 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
     
     assert_no_null(vertex);
     
-    csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    csmvertex_get_coords(vertex, &x, &y, &z);
     bsgraphics2_escr_punto3D(graphics, x, y, z);
     
     if (csmvertex_id(vertex) == 1881 || csmvertex_id(vertex) == 1711 || csmvertex_id(vertex) == 1833 || csmvertex_id(vertex) == 867)
@@ -92,8 +92,8 @@ static void i_draw_debug_info_hedge(
     double x1, y1, z1, x2, y2, z2;
     CSMBOOL is_he_pos;
     
-    csmvertex_get_coordenadas(csmhedge_vertex(he), &x1, &y1, &z1);
-    csmvertex_get_coordenadas(csmhedge_vertex(he_next), &x2, &y2, &z2);
+    csmvertex_get_coords(csmhedge_vertex(he), &x1, &y1, &z1);
+    csmvertex_get_coords(csmhedge_vertex(he_next), &x2, &y2, &z2);
     
     edge = csmhedge_edge(he);
     
@@ -297,7 +297,7 @@ static void i_draw_null_edge(struct csmedge_t *edge, struct bsgraphics2_t *graph
                 if (csmedge_setop_is_null_edge(csmhedge_edge(he1_prev)) == CSMTRUE)
                     he1_prev = csmhedge_prev(he1_prev);
                 
-                csmvertex_get_coordenadas(csmhedge_vertex(he1_prev), &x_prev, &y_prev, &z_prev);
+                csmvertex_get_coords(csmhedge_vertex(he1_prev), &x_prev, &y_prev, &z_prev);
 
                 length = csmmath_distance_3D(x1, y1, z1, x_prev, y_prev, z_prev);
                 

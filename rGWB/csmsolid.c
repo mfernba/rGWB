@@ -41,7 +41,7 @@ typedef void (*i_FPtr_reassign_id)(struct i_item_t *item, unsigned long *id_nuev
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsolid_t *, i_crea, (
+CONSTRUCTOR(static struct csmsolid_t *, i_new, (
                         char **name,
                         unsigned long id_nuevo_elemento,
                         struct csmhashtb(csmface_t) **sfaces,
@@ -97,7 +97,7 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
     
     bbox = csmbbox_create_empty_box();
     
-    return i_crea(&name, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox);
+    return i_new(&name, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -168,7 +168,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (
     
     bbox_copy = csmbbox_copy(bbox);
     
-    return i_crea(&name_copy, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox_copy);
+    return i_new(&name_copy, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox_copy);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -305,7 +305,7 @@ void csmsolid_free(struct csmsolid_t **solido)
     
     csmhashtb_free(&(*solido)->sfaces, csmface_t, csmface_free);
     csmhashtb_free(&(*solido)->sedges, csmedge_t, csmedge_destruye);
-    csmhashtb_free(&(*solido)->svertexs, csmvertex_t, csmvertex_destruye);
+    csmhashtb_free(&(*solido)->svertexs, csmvertex_t, csmvertex_free);
 
     if ((*solido)->visz_material_opt != NULL)
         csmmaterial_free(&(*solido)->visz_material_opt);
@@ -737,7 +737,7 @@ void csmsolid_append_new_vertex(struct csmsolid_t *solido, double x, double y, d
     assert_no_null(solido);
     assert_no_null(vertex);
     
-    vertex_loc = csmvertex_crea(x, y, z, &solido->id_nuevo_elemento);
+    vertex_loc = csmvertex_new(x, y, z, &solido->id_nuevo_elemento);
     csmhashtb_add_item(solido->svertexs, csmvertex_id(vertex_loc), vertex_loc, csmvertex_t);
     
     *vertex = vertex_loc;
@@ -751,7 +751,7 @@ void csmsolid_remove_vertex(struct csmsolid_t *solido, struct csmvertex_t **vert
     assert_no_null(vertex);
 
     csmhashtb_remove_item(solido->svertexs, csmvertex_id(*vertex), csmvertex_t);
-    csmvertex_destruye(vertex);
+    csmvertex_free(vertex);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -818,7 +818,7 @@ CSMBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
     contains_vertex = CSMFALSE;
     coincident_vertex_loc = NULL;
     
-    csmvertex_get_coordenadas(vertex, &x, &y, &z);
+    csmvertex_get_coords(vertex, &x, &y, &z);
     
     if (csmbbox_contains_point(solid->bbox, x, y, z) == CSMTRUE)
     {
@@ -979,7 +979,7 @@ double csmsolid_volume(const struct csmsolid_t *solid)
             num_loop_iterations++;
             
             he1 = csmloop_ledge(loop_iterator);
-            csmvertex_get_coordenadas(csmhedge_vertex(he1), &x1, &y1, &z1);
+            csmvertex_get_coords(csmhedge_vertex(he1), &x1, &y1, &z1);
             
             he2 = csmhedge_next(he1);
             num_he_iterations = 0;
@@ -994,11 +994,11 @@ double csmsolid_volume(const struct csmsolid_t *solid)
                 assert(num_he_iterations < 100000);
                 num_he_iterations++;
 
-                csmvertex_get_coordenadas(csmhedge_vertex(he2), &x2, &y2, &z2);
+                csmvertex_get_coords(csmhedge_vertex(he2), &x2, &y2, &z2);
                 csmmath_cross_product3D(x2, y2, z2, x1, y1, z1, &Ux_cross, &Uy_cross, &Uz_cross);
 
                 he2_next = csmhedge_next(he2);
-                csmvertex_get_coordenadas(csmhedge_vertex(he2_next), &x_next, &y_next, &z_next);
+                csmvertex_get_coords(csmhedge_vertex(he2_next), &x_next, &y_next, &z_next);
                 
                 volume += csmmath_dot_product3D(x_next, y_next, z_next, Ux_cross, Uy_cross, Uz_cross);
                 

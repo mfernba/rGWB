@@ -160,7 +160,7 @@ static void i_vis_append_loop_to_shape(
         num_iteraciones++;
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
+        csmvertex_get_coords(vertex, &x_3d, &y_3d, &z_3d);
         
         i_compute_vertex_normal_for_hedge(
                         iterator, Wx, Wy, Wz,
@@ -381,7 +381,7 @@ static void i_vis_append_loop_to_shape(
         num_iteraciones++;
         
         vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coordenadas(vertex, &x_3d, &y_3d, &z_3d);
+        csmvertex_get_coords(vertex, &x_3d, &y_3d, &z_3d);
 
         arr_AppendPunto3D(points, x_3d, y_3d, z_3d);
         

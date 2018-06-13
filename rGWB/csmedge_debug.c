@@ -43,7 +43,7 @@ void csmedge_debug_print_debug_info(struct csmedge_t *edge, CSMBOOL assert_si_no
             assert(csmhedge_edge(he1) == edge);
         
         vertex = csmhedge_vertex_const(he1);
-        csmvertex_get_coordenadas(vertex, &x1, &y1, &z1);
+        csmvertex_get_coords(vertex, &x1, &y1, &z1);
     }
     else
     {
@@ -61,7 +61,7 @@ void csmedge_debug_print_debug_info(struct csmedge_t *edge, CSMBOOL assert_si_no
             assert(csmhedge_edge(he2) == edge);
         
         vertex = csmhedge_vertex_const(he2);
-        csmvertex_get_coordenadas(vertex, &x2, &y2, &z2);
+        csmvertex_get_coords(vertex, &x2, &y2, &z2);
     }
     else
     {

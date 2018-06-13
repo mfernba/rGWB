@@ -666,7 +666,7 @@ static CSMBOOL i_is_solid_A_contained_in_solid_B(
             double x, y, z;
             
             csmhashtb_next_pair(vertex_iterator_A, NULL, &vertex_A, csmvertex_t);
-            csmvertex_get_coordenadas(vertex_A, &x, &y, &z);
+            csmvertex_get_coords(vertex_A, &x, &y, &z);
             
             if (csmsolid_does_solid_contain_point(solid_B, x, y, z, tolerances) == CSMFALSE)
             {

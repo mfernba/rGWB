@@ -45,5 +45,5 @@ void csmeuler_kvfs(struct csmsolid_t *solido)
     csmhashtb_free_iterator(&face_iterator, csmface_t);
     
     csmhashtb_clear(solido->sfaces, csmface_t, csmface_free);
-    csmhashtb_clear(solido->svertexs, csmvertex_t, csmvertex_destruye);
+    csmhashtb_clear(solido->svertexs, csmvertex_t, csmvertex_free);
 }

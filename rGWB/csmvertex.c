@@ -19,7 +19,7 @@
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
+CONSTRUCTOR(static struct csmvertex_t *, i_new, (
 						unsigned long id,
                         double x, double y, double z,
                         struct csmhedge_t *hedge,
@@ -44,7 +44,7 @@ CONSTRUCTOR(static struct csmvertex_t *, i_crea, (
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *id_nuevo_elemento)
+struct csmvertex_t *csmvertex_new(double x, double y, double z, unsigned long *id_nuevo_elemento)
 {
     unsigned long id;
     struct csmhedge_t *hedge;
@@ -56,7 +56,7 @@ struct csmvertex_t *csmvertex_crea(double x, double y, double z, unsigned long *
     
     algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
     
-    return i_crea(id, x, y, z, hedge, algorithm_attrib_mask);
+    return i_new(id, x, y, z, hedge, algorithm_attrib_mask);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y
     
     algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
     
-    return i_crea(id, x, y, z, hedge, algorithm_attrib_mask);
+    return i_new(id, x, y, z, hedge, algorithm_attrib_mask);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ struct csmvertex_t *csmvertex_duplicate(
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmvertex_destruye(struct csmvertex_t **vertex)
+void csmvertex_free(struct csmvertex_t **vertex)
 {
     assert_no_null(vertex);
     assert_no_null(*vertex);
@@ -180,7 +180,7 @@ void csmvertex_clear_mask(struct csmvertex_t *vertex)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmvertex_get_coordenadas(const struct csmvertex_t *vertex, double *x, double *y, double *z)
+void csmvertex_get_coords(const struct csmvertex_t *vertex, double *x, double *y, double *z)
 {
     assert_no_null(vertex);
     assert_no_null(x);
@@ -244,17 +244,6 @@ void csmvertex_get_coords_not_dropped(
 {
     assert_no_null(vertex);
     csmmath_select_not_dropped_coords(vertex->x, vertex->y, vertex->z, dropped_coord, x, y);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-void csmvertex_set_coordenadas(struct csmvertex_t *vertex, double x, double y, double z)
-{
-    assert_no_null(vertex);
-    
-    vertex->x = x;
-    vertex->y = y;
-    vertex->z = z;
 }
 
 // ----------------------------------------------------------------------------------------------------

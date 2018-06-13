@@ -39,7 +39,7 @@ static void i_init_matrix(double diagona_value, double data[4][4])
 
 // -------------------------------------------------
 
-CONSTRUCTOR(static struct csmtransform_t *, i_crea, (void))
+CONSTRUCTOR(static struct csmtransform_t *, i_new, (void))
 {
     struct csmtransform_t *transformacion;
     
@@ -54,7 +54,7 @@ struct csmtransform_t *csmtransform_make_identity(void)
 {
     struct csmtransform_t *transform;
     
-    transform = i_crea();
+    transform = i_new();
     assert_no_null(transform);
     
     i_init_matrix(1., transform->data);
@@ -68,7 +68,7 @@ struct csmtransform_t *csmtransform_make_displacement(double dx, double dy, doub
 {
     struct csmtransform_t *transform;
     
-    transform = i_crea();
+    transform = i_new();
     assert_no_null(transform);
     
     i_init_matrix(1., transform->data);
@@ -93,7 +93,7 @@ struct csmtransform_t *csmtransform_make_arbitrary_axis_rotation(
     double u2, v2, w2;
     double seno, coseno, uno_menos_coseno;
     
-    transform = i_crea();
+    transform = i_new();
     assert_no_null(transform);
     
     a = Xo;
@@ -144,7 +144,7 @@ struct csmtransform_t *csmtransform_make_general(
 {
     struct csmtransform_t *transform;
     
-    transform = i_crea();
+    transform = i_new();
     assert_no_null(transform);
     
     transform->data[0][0] = Ux;
