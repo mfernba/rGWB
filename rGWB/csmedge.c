@@ -105,7 +105,7 @@ void csmedge_destruye(struct csmedge_t **edge)
     assert_no_null(edge);
     assert_no_null(*edge);
 
-    FREE_PP_NO_CLEAN_MEMORY(edge, struct csmedge_t);
+    FREE_PP(edge, struct csmedge_t);
 }
 
 // --------------------------------------------------------------------------------------------------------------
