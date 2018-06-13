@@ -58,8 +58,6 @@ void csmsetopcom_introduce_holes_in_in_component_null_faces_if_proceed(
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(csmface_t) *set_of_null_faces);
 
-void csmsetopcom_correct_non_manifold_edges_null_faces(csmArrayStruct(csmface_t) *set_of_null_faces);
-
 void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid, const struct csmtolerance_t *tolerances);
 
 void csmsetopcom_move_face_to_solid(

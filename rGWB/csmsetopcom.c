@@ -1243,8 +1243,7 @@ static void i_delete_holes_filled_by_faces(struct csmsolid_t *solid, const struc
                                 else
                                 {
                                     csmface_add_loop_while_removing_from_old(opposed_face, loop_iterator);
-                                    i_remove_hole_filled_by_face(solid, opposed_face);
-                                    
+                                    i_remove_hole_filled_by_face(solid, opposed_face);                                    
                                 }
                             }
                         }
@@ -1413,6 +1412,9 @@ static void i_extract_inner_positive_area_loops_from_faces(struct csmsolid_t *so
 
                             csmeuler_laringmv_from_face1_to_2_if_fits_in_face(face, new_face, tolerances, NULL);
                             csmface_redo_geometric_generated_data(new_face);
+                            
+                            if (csmface_has_loops(face) == CSMFALSE)
+                                csmsolid_remove_face(solid, &face);
                             
                             there_are_changes = CSMTRUE;
                             break;

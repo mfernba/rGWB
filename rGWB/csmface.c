@@ -1264,6 +1264,14 @@ void csmface_remove_loop(struct csmface_t *face, struct csmloop_t **loop)
 
 // ----------------------------------------------------------------------------------------------------
 
+CSMBOOL csmface_has_loops(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return IS_TRUE(face->floops != NULL);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 CSMBOOL csmface_has_holes(const struct csmface_t *face)
 {
     assert_no_null(face);
