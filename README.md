@@ -25,7 +25,7 @@ IMPORTANT: The project has been developed using xcode and some parts of the syst
 
 I have reimplemented the core of the modeler by using code exposed on the the book and taking (and extending) some parts from original Mäntylä source code (part of the euler operators to match the expected algorithm behaviour and the vertex neighborhood classification strategy -which I needed to complete-). 
 
-The last resort of the null edge joining algorithm is based on: Bhardwaj, A. & Malik, I. (1997). Java Applet for Constructive Solid Geometry. Technical report, Computer Science Department, Cornell University. I was pointed to this source by the paper: "REFLECTIONS ON THE IMPLEMENTATION OF BOOLEAN OPERATIONS WITH POLYHEDRAL SOLIDS" by Herbert J. Koelman from SARC BV.
+The last resort of the null edge joining algorithm is based on: Bhardwaj, A. & Malik, I. (1997). Java Applet for Constructive Solid Geometry. Technical report, Computer Science Department, Cornell University. I was pointed to this source by the paper: "Reflections on the implementation of boolean operations with polyhedral solids" by Herbert J. Koelman from SARC BV.
 
 Mäntylä's algorithm need maximal faces, so there is a simplification strategy both in solid generation and after solid operations in order to eliminate unessential elements.
 
