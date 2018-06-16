@@ -1469,10 +1469,15 @@ static void i_reclasssify_double_on_edges(
                         csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
 {
     i_reclasssify_double_on_edges_s1a_s1b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
-    i_reclasssify_double_on_edges_s1a_s2b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
-    i_reclasssify_double_on_edges_s2a_s1b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
-    i_reclasssify_double_on_edges_s2a_s2b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
+    i_update_inters_sectors_prev_position_after_reclassification(neighborhood_intersections);
     
+    i_reclasssify_double_on_edges_s1a_s2b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
+    i_update_inters_sectors_prev_position_after_reclassification(neighborhood_intersections);
+    
+    i_reclasssify_double_on_edges_s2a_s1b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
+    i_update_inters_sectors_prev_position_after_reclassification(neighborhood_intersections);
+    
+    i_reclasssify_double_on_edges_s2a_s2b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
     i_update_inters_sectors_prev_position_after_reclassification(neighborhood_intersections);
 }
 
