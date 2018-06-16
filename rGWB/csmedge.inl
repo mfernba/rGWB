@@ -2,7 +2,7 @@
 
 #include "csmfwddecl.hxx"
 
-CONSTRUCTOR(struct csmedge_t *, csmedge_crea, (unsigned long *id_new_element));
+CONSTRUCTOR(struct csmedge_t *, csmedge_new, (unsigned long *id_new_element));
 
 CONSTRUCTOR(struct csmedge_t *, csmedge_duplicate, (
                         const struct csmedge_t *edge,

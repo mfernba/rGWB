@@ -51,7 +51,7 @@ CONSTRUCTOR(static struct csmedge_t *, i_new, (
 
 // --------------------------------------------------------------------------------------------------------------
 
-struct csmedge_t *csmedge_crea(unsigned long *id_new_element)
+struct csmedge_t *csmedge_new(unsigned long *id_new_element)
 {
     unsigned long id;
     struct csmhedge_t *he1, *he2;

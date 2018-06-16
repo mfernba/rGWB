@@ -77,7 +77,7 @@ CONSTRUCTOR(static struct csmloop_t *, i_new, (
 
 // --------------------------------------------------------------------------------------------------------------
 
-struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_new_element)
+struct csmloop_t *csmloop_new(struct csmface_t *face, unsigned long *id_new_element)
 {
     unsigned long id;
     struct csmhedge_t *ledge;

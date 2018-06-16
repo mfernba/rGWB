@@ -67,7 +67,7 @@ void csmeuler_lkemr(
 
     he1_and_he2_face = csmloop_lface(loop_to_divide);
     id_new_element = csmsolid_id_new_element(csmface_fsolid(he1_and_he2_face));
-    new_loop = csmloop_crea(he1_and_he2_face, id_new_element);
+    new_loop = csmloop_new(he1_and_he2_face, id_new_element);
     csmface_add_loop_while_removing_from_old(he1_and_he2_face, new_loop);
  
     he_iterator = he2_loc;

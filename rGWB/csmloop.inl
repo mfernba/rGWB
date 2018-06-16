@@ -3,7 +3,7 @@
 #include "csmfwddecl.hxx"
 #include "csmvertex.hxx"
 
-CONSTRUCTOR(struct csmloop_t *, csmloop_crea, (struct csmface_t *face, unsigned long *id_new_element));
+CONSTRUCTOR(struct csmloop_t *, csmloop_new, (struct csmface_t *face, unsigned long *id_new_element));
 
 CONSTRUCTOR(struct csmloop_t *, csmloop_duplicate, (
                         const struct csmloop_t *loop,

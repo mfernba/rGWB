@@ -21,8 +21,8 @@ void csmeuler_mvfb(struct csmsolid_t *solid, double x, double y, double z, struc
     csmsolid_append_new_face(solid, &face);
     
     id_new_element = csmsolid_id_new_element(solid);
-    loop = csmloop_crea(face, id_new_element);
-    hedge = csmhedge_crea(id_new_element);
+    loop = csmloop_new(face, id_new_element);
+    hedge = csmhedge_new(id_new_element);
     csmsolid_append_new_vertex(solid, x, y, z, &vertex);
     
     csmface_set_flout(face, loop);

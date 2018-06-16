@@ -56,7 +56,7 @@ void csmeuler_lmef(
     csmface_copy_attributtes_from_face1(csmopbas_face_from_hedge(he1), new_face);
 
     id_new_element = csmsolid_id_new_element(he1_solid);
-    new_loop = csmloop_crea(new_face, id_new_element);
+    new_loop = csmloop_new(new_face, id_new_element);
     csmface_set_flout(new_face, new_loop);
     
     he_iterator = he1;

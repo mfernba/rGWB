@@ -679,7 +679,7 @@ void csmsolid_append_new_edge(struct csmsolid_t *solid, struct csmedge_t **edge)
     assert_no_null(solid);
     assert_no_null(edge);
     
-    edge_loc = csmedge_crea(&solid->id_new_element);
+    edge_loc = csmedge_new(&solid->id_new_element);
     csmhashtb_add_item(solid->sedges, csmedge_id(edge_loc), edge_loc, csmedge_t);
     
     *edge = edge_loc;

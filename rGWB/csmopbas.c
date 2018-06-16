@@ -95,7 +95,7 @@ void csmopbas_addhe(
     }
     else
     {
-        new_hedge_loc = csmhedge_crea(id_new_element);
+        new_hedge_loc = csmhedge_new(id_new_element);
         csmnode_insert_node2_before_node1(hedge, new_hedge_loc, csmhedge_t);
     }
     

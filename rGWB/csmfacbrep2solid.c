@@ -760,7 +760,7 @@ static void i_generate_loop_point_solid_hedge(
     vertex = csmarrayc_get_st(vertexs, loop_point->vertex_idx, i_vertex_t);
     assert_no_null(vertex);
     
-    loop_point->shedge = csmhedge_crea(id_new_element);
+    loop_point->shedge = csmhedge_new(id_new_element);
     csmhedge_set_vertex(loop_point->shedge, vertex->svertex);
     csmhedge_set_loop(loop_point->shedge, sloop);
     
@@ -786,7 +786,7 @@ static void i_generate_loop_solid_loop(
     no_points = csmarrayc_count_st(loop->points, i_loop_point_t);
     assert(no_points >= 3);
 
-    loop->sloop = csmloop_crea(sface, id_new_element);
+    loop->sloop = csmloop_new(sface, id_new_element);
     
     if (is_outer_loop == CSMTRUE)
     {
