@@ -7,7 +7,6 @@
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
-#include "csmedge_debug.inl"
 #include "csmeuler_lmev.inl"
 #include "csmface.inl"
 #include "csmhashtb.inl"
@@ -685,7 +684,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
             csmedge_setop_set_is_null_edge(null_edge, CSMTRUE);
             
             if (csmdebug_debug_enabled() == CSMTRUE)
-                csmedge_debug_print_debug_info(null_edge, CSMTRUE);
+                csmedge_print_debug_info(null_edge, CSMTRUE);
             
             csmvertex_set_mask_attrib(split_vertex, vertex_algorithm_mask);
             

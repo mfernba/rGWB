@@ -4,8 +4,9 @@
 #include "csmface.tli"
 
 #include "csmbbox.inl"
-#include "csmloop.inl"
+#include "csmdebug.inl"
 #include "csmhedge.inl"
+#include "csmloop.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmmaterial.inl"

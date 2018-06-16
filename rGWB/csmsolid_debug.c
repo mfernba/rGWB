@@ -11,7 +11,7 @@
 
 #include "csmdebug.inl"
 #include "csmhashtb.inl"
-#include "csmedge_debug.inl"
+#include "csmedge.inl"
 #include "csmface.inl"
 #include "csmhedge.inl"
 #include "csmnode.inl"
@@ -40,7 +40,7 @@ static void i_print_debug_info_edges(struct csmhashtb(csmedge_t) *sedges, CSMBOO
         
         csmhashtb_next_pair(iterator, NULL, &edge, csmedge_t);
         
-        csmedge_debug_print_debug_info(edge, assert_si_no_es_integro);
+        csmedge_print_debug_info(edge, assert_si_no_es_integro);
         (*num_edges)++;
     }
     

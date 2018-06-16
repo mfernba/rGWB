@@ -13,7 +13,6 @@
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"
-#include "csmedge_debug.inl"
 #include "csmeuler_lmev.inl"
 #include "csmface.inl"
 #include "csmhashtb.inl"
@@ -999,7 +998,7 @@ static void i_process_edge_intersections(
                         char *description;
                         
                         csmdebug_print_debug_info("-->Splitted hedge, new vertex: %lu\n", csmvertex_id(new_vertex_on_hit_hedge));
-                        csmedge_debug_print_debug_info(new_edge_other_solid, CSMTRUE);
+                        csmedge_print_debug_info(new_edge_other_solid, CSMTRUE);
                         csmdebug_print_debug_info("Added VV intersection (%lu, %lu)\n", csmvertex_id(edge_vertex_intersection), csmvertex_id(new_vertex_on_hit_hedge));
                         
                         description = copiafor_codigo4(
