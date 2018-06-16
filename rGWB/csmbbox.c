@@ -310,32 +310,39 @@ static CSMBOOL i_exists_intersection_between_bbboxes(
 
 CSMBOOL csmbbox_intersects_with_other_bbox(const struct csmbbox_t *bbox1, const struct csmbbox_t *bbox2)
 {
-    double sq_distance;
-    
     assert_no_null(bbox1);
     assert_no_null(bbox2);
     
-    sq_distance = csmmath_squared_distance_3D(
-                        bbox1->x_center, bbox1->y_center, bbox1->z_center,
-                        bbox2->x_center, bbox2->y_center, bbox2->z_center);
-    
-    if (sq_distance - 1.e-6 > (bbox1->radius_sq + bbox2->radius_sq))
+    if (bbox1->initialized == CSMFALSE || bbox2->initialized == CSMFALSE)
     {
         return CSMFALSE;
     }
     else
     {
-        if (i_exists_intersection_between_bbboxes(
-                        bbox1->x_min, bbox1->y_min, bbox1->z_min, bbox1->x_max, bbox1->y_max, bbox1->z_max,
-                        bbox2->x_min, bbox2->y_min, bbox2->z_min, bbox2->x_max, bbox2->y_max, bbox2->z_max) == CSMTRUE)
+        double sq_distance;
+        
+        sq_distance = csmmath_squared_distance_3D(
+                        bbox1->x_center, bbox1->y_center, bbox1->z_center,
+                        bbox2->x_center, bbox2->y_center, bbox2->z_center);
+    
+        if (sq_distance - 1.e-6 > (bbox1->radius_sq + bbox2->radius_sq))
         {
-            return CSMTRUE;
+            return CSMFALSE;
         }
         else
         {
-            return i_exists_intersection_between_bbboxes(
+            if (i_exists_intersection_between_bbboxes(
+                        bbox1->x_min, bbox1->y_min, bbox1->z_min, bbox1->x_max, bbox1->y_max, bbox1->z_max,
+                        bbox2->x_min, bbox2->y_min, bbox2->z_min, bbox2->x_max, bbox2->y_max, bbox2->z_max) == CSMTRUE)
+            {
+                return CSMTRUE;
+            }
+            else
+            {
+                return i_exists_intersection_between_bbboxes(
                         bbox2->x_min, bbox2->y_min, bbox2->z_min, bbox2->x_max, bbox2->y_max, bbox2->z_max,
                         bbox1->x_min, bbox1->y_min, bbox1->z_min, bbox1->x_max, bbox1->y_max, bbox1->z_max);
+            }
         }
     }
 }

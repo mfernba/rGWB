@@ -5806,7 +5806,9 @@ void csmtest_test(void)
 
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
     csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
-    i_test_mechanical_part1();
+    //i_test_cilindro7_redux(viewer);
+    //i_test_cilindro9(viewer);
+    //i_test_mechanical_part1();
     //i_test_difference3();
     //i_test_cilindro5(viewer);
     //i_test_mechanical5();
@@ -5892,12 +5894,12 @@ void csmtest_test(void)
         
         //i_test_cilindro7_redux(viewer); // --> Intersecciones non-manifold.
         
-        //i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
+        i_test_cilindro9(viewer); // --> Intersecciones non-manifold.
                                   // --> Detectar situación de error y gestionarla correctamente, la unión no tiene sentido porque no se puede realizar a través de una cara
                                   // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
         i_test_mechanical_part1_redux();
-        //-->i_test_mechanical_part1();
+        i_test_mechanical_part1();
         
         i_test_mechanical_part2();
         
