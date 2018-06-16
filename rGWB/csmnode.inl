@@ -17,13 +17,8 @@ void csmnode_dontuse_init(
 #define csmnode_init(node, id, func_free, derived_class_type)\
 (/*lint -save -e505*/\
     CSMNODE_CHECK_FUNC_FREE(func_free, derived_class_type),\
-    csmnode_dontuse_init(\
-                node,\
-                id,\
-                CSMNODE_OBJECT_##derived_class_type,\
-                (csmnode_FPtr_free)func_free)\
+    csmnode_dontuse_init(node, id, CSMNODE_OBJECT_##derived_class_type, (csmnode_FPtr_free)func_free)\
 )/*lint -restore*/
-
 
 void csmnode_dealloc(struct csmnode_t *node);
 
