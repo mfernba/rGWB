@@ -16,7 +16,6 @@
 #include "csmeuler_lmfkrh.inl"
 #include "csmeuler_lringmv.inl"
 #include "csmface.inl"
-#include "csmface_debug.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmid.inl"
@@ -454,15 +453,15 @@ void csmsetopcom_print_debug_info_faces_null_edges(const char *solid_reference, 
         if (csmopbas_face_from_hedge(he1) == csmopbas_face_from_hedge(he2))
         {
             csmdebug_print_debug_info("Loose ends: %lu, %lu\n", csmhedge_id(he1), csmhedge_id(he2));
-            csmface_debug_print_info_debug(csmopbas_face_from_hedge(he1), CSMTRUE, NULL);
+            csmface_print_info_debug(csmopbas_face_from_hedge(he1), CSMTRUE, NULL);
         }
         else
         {
             csmdebug_print_debug_info("Loose end: %lu\n", csmhedge_id(he1));
-            csmface_debug_print_info_debug(csmopbas_face_from_hedge(he1), CSMTRUE, NULL);
+            csmface_print_info_debug(csmopbas_face_from_hedge(he1), CSMTRUE, NULL);
             
             csmdebug_print_debug_info("Loose end: %lu\n", csmhedge_id(he2));
-            csmface_debug_print_info_debug(csmopbas_face_from_hedge(he2), CSMTRUE, NULL);
+            csmface_print_info_debug(csmopbas_face_from_hedge(he2), CSMTRUE, NULL);
         }
     }
 }
@@ -542,8 +541,8 @@ void csmsetopcom_join_hedges(
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)),
                         csmface_id(new_face));
 
-                csmface_debug_print_info_debug(csmopbas_face_from_hedge(he2_next), CSMTRUE, NULL);
-                csmface_debug_print_info_debug(new_face, CSMTRUE, NULL);
+                csmface_print_info_debug(csmopbas_face_from_hedge(he2_next), CSMTRUE, NULL);
+                csmface_print_info_debug(new_face, CSMTRUE, NULL);
             }
         }
         else
@@ -576,7 +575,7 @@ void csmsetopcom_join_hedges(
                         csmhedge_id(he2), csmedge_id(csmhedge_edge(he2)),
                         csmhedge_id(he2_next));
             
-            csmface_debug_print_info_debug(csmopbas_face_from_hedge(he2), CSMTRUE, NULL);
+            csmface_print_info_debug(csmopbas_face_from_hedge(he2), CSMTRUE, NULL);
         }
         
         original_loop_is_a_hole = CSMFALSE;
@@ -603,10 +602,10 @@ void csmsetopcom_join_hedges(
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmdebug_print_debug_info("\tFace %lu created\n", csmface_id(second_new_face));
-            csmface_debug_print_info_debug(second_new_face, CSMTRUE, NULL);
+            csmface_print_info_debug(second_new_face, CSMTRUE, NULL);
 
             csmdebug_print_debug_info("\tOld face\n");
-            csmface_debug_print_info_debug(csmopbas_face_from_hedge(he1_next), CSMTRUE, NULL);
+            csmface_print_info_debug(csmopbas_face_from_hedge(he1_next), CSMTRUE, NULL);
         }
         
         old_face_floops = csmface_floops(old_face);
@@ -632,7 +631,7 @@ void csmsetopcom_join_hedges(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("\tInitial old face\n");
-        csmface_debug_print_info_debug(old_face, CSMTRUE, NULL);
+        csmface_print_info_debug(old_face, CSMTRUE, NULL);
     }
 }
 
@@ -682,7 +681,7 @@ void csmsetopcom_cut_he(
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmdebug_print_debug_info("***NULL FACE***\n");
-            csmface_debug_print_info_debug(null_face, CSMTRUE, NULL);
+            csmface_print_info_debug(null_face, CSMTRUE, NULL);
             
             csmdebug_print_debug_info("(CUTTING HE)  (%lu, %lu) with LKEMR\n", csmhedge_id(he1_edge), csmhedge_id(he2_edge));
             //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
@@ -1091,7 +1090,7 @@ static void i_remove_loops_erasing_hedges(struct csmsolid_t *solid, struct csmfa
     assert_no_null(face);
     
     //csmdebug_set_debug_screen(CSMTRUE);
-    //csmface_debug_print_info_debug(*face, CSMTRUE, NULL);
+    //csmface_print_info_debug(*face, CSMTRUE, NULL);
     
     loop1_loc = ASSIGN_POINTER_PP_NOT_NULL(loop1, struct csmloop_t);
     loop2_loc = ASSIGN_POINTER_PP_NOT_NULL(loop2, struct csmloop_t);
@@ -1142,7 +1141,7 @@ static void i_remove_hole_filled_by_face(struct csmsolid_t *solid, struct csmfac
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("i_remove_hole_filled_by_face(): Before deleting hedges\n");
-        csmface_debug_print_info_debug(face, CSMTRUE, NULL);
+        csmface_print_info_debug(face, CSMTRUE, NULL);
     }
     
     loop1 = csmface_floops(face);
@@ -1199,16 +1198,16 @@ static void i_delete_holes_filled_by_faces(struct csmsolid_t *solid, const struc
                         struct csmloop_t *opposed_loop_fill;
 
                         //csmdebug_set_debug_screen(CSMTRUE);
-                        //csmface_debug_print_info_debug(face, CSMTRUE, NULL);
-                        //csmface_debug_print_info_debug(csmloop_lface(opposed_loop), CSMTRUE, NULL);
+                        //csmface_print_info_debug(face, CSMTRUE, NULL);
+                        //csmface_print_info_debug(csmloop_lface(opposed_loop), CSMTRUE, NULL);
                         
                         is_other_loop_filled_by_face = i_is_loop_filled_by_face(opposed_loop, &opposed_loop_fill);
                         assert(is_other_loop_filled_by_face == CSMTRUE);
                         assert(loop_iterator == opposed_loop_fill);
                         
                         //csmdebug_set_debug_screen(CSMTRUE);
-                        //csmface_debug_print_info_debug(face, CSMTRUE, NULL);
-                        //csmface_debug_print_info_debug(csmloop_lface(opposed_loop), CSMTRUE, NULL);
+                        //csmface_print_info_debug(face, CSMTRUE, NULL);
+                        //csmface_print_info_debug(csmloop_lface(opposed_loop), CSMTRUE, NULL);
                         
                         //csmdebug_show_face(face, NULL);
                         //csmdebug_show_face(csmloop_lface(opposed_loop), NULL);

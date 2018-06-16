@@ -149,3 +149,8 @@ CSMBOOL csmface_setop_has_been_modified(const struct csmface_t *face);
 CSMBOOL csmface_setop_has_shell_id(const struct csmface_t *face);
 unsigned long csmface_setop_shell_id(const struct csmface_t *face);
 void csmface_set_setop_shell_id(struct csmface_t *face, unsigned long shell_id);
+
+
+// Debug...
+
+void csmface_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no_es_integro, unsigned long *num_holes_opc);

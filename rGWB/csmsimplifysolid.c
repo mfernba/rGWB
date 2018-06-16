@@ -16,7 +16,6 @@
 #include "csmeuler_lkev.inl"
 #include "csmeuler_lringmv.inl"
 #include "csmface.inl"
-#include "csmface_debug.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
@@ -131,7 +130,7 @@ static void i_delete_overlaped_hedges_in_same_loop(struct csmloop_t *loop, CSMBO
                 if (csmdebug_debug_enabled() == CSMTRUE)
                 {
                     csmdebug_show_face(csmloop_lface(loop), NULL);
-                    csmface_debug_print_info_debug(csmloop_lface(loop), CSMTRUE, NULL);
+                    csmface_print_info_debug(csmloop_lface(loop), CSMTRUE, NULL);
                 }
                 
                 csmeuler_lkev(&he_iterator_mate, &he_iterator, NULL, NULL, NULL, NULL);
@@ -141,7 +140,7 @@ static void i_delete_overlaped_hedges_in_same_loop(struct csmloop_t *loop, CSMBO
                 if (csmdebug_debug_enabled() == CSMTRUE)
                 {
                     csmdebug_show_face(csmloop_lface(loop), NULL);
-                    csmface_debug_print_info_debug(csmloop_lface(loop), CSMTRUE, NULL);
+                    csmface_print_info_debug(csmloop_lface(loop), CSMTRUE, NULL);
                 }
             }
             else

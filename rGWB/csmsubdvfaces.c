@@ -5,7 +5,6 @@
 #include "csmdebug.inl"
 #include "csmeuler_lmef.inl"
 #include "csmface.inl"
-#include "csmface_debug.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
@@ -131,8 +130,8 @@ static CSMBOOL i_did_subdivide_face(struct csmface_t *face)
                 
                 if (csmdebug_debug_enabled() == CSMTRUE)
                 {
-                    csmface_debug_print_info_debug(face, CSMTRUE, NULL);
-                    csmface_debug_print_info_debug(new_face, CSMTRUE, NULL);
+                    csmface_print_info_debug(face, CSMTRUE, NULL);
+                    csmface_print_info_debug(new_face, CSMTRUE, NULL);
                 }
             }
             

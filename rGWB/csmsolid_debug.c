@@ -13,7 +13,6 @@
 #include "csmhashtb.inl"
 #include "csmedge_debug.inl"
 #include "csmface.inl"
-#include "csmface_debug.inl"
 #include "csmhedge.inl"
 #include "csmnode.inl"
 #include "csmvertex.inl"
@@ -141,7 +140,7 @@ static void i_print_info_debug_faces(
         
         csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
         
-        csmface_debug_print_info_debug(face, assert_si_no_es_integro, &num_holes_loc);
+        csmface_print_info_debug(face, assert_si_no_es_integro, &num_holes_loc);
         (*num_faces)++;
         *num_holes += num_holes_loc;
         
