@@ -11,8 +11,7 @@
 #include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmloop.inl"
-#include "csmsolid.tli"
-#include "csmvertex.inl"
+#include "csmsolid.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -28,13 +27,11 @@ void csmeuler_kvfs(struct csmsolid_t *solid)
     struct csmface_t *face;
     struct csmloop_t *floops;
 
-    assert_no_null(solid);
-    assert(csmhashtb_count(solid->sfaces, csmface_t) == 1);
-    assert(csmhashtb_count(solid->sedges, csmedge_t) == 0);
-    assert(csmhashtb_count(solid->svertexs, csmvertex_t) == 1);
+    assert(csmsolid_num_faces(solid) == 1);
+    assert(csmsolid_num_edges(solid) == 0);
+    assert(csmsolid_num_vertexs(solid) == 1);
     
-    face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
-    assert(csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE);
+    face_iterator = csmsolid_face_iterator(solid);
     
     csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
     assert(csmhashtb_has_next(face_iterator, csmface_t) == CSMFALSE);
@@ -43,7 +40,7 @@ void csmeuler_kvfs(struct csmsolid_t *solid)
     assert(csmloop_next(floops) == NULL);
     
     csmhashtb_free_iterator(&face_iterator, csmface_t);
-    
-    csmhashtb_clear(solid->sfaces, csmface_t, csmface_free);
-    csmhashtb_clear(solid->svertexs, csmvertex_t, csmvertex_free);
+ 
+    csmsolid_clear_face_table(solid);
+    csmsolid_clear_vertex_table(solid);
 }

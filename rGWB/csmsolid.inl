@@ -37,6 +37,8 @@ const struct csmbbox_t *csmsolid_get_bbox(const struct csmsolid_t *solid);
 
 // Faces...
 
+void csmsolid_clear_face_table(struct csmsolid_t *solid);
+
 void csmsolid_append_new_face(struct csmsolid_t *solid, struct csmface_t **face);
 
 void csmsolid_remove_face(struct csmsolid_t *solid, struct csmface_t **face);
@@ -46,6 +48,8 @@ void csmsolid_move_face_to_solid(struct csmsolid_t *face_solid, struct csmface_t
 struct csmface_t *csmsolid_get_face(struct csmsolid_t *solid, unsigned long id_face);
 
 CONSTRUCTOR(struct csmhashtb_iterator(csmface_t) *, csmsolid_face_iterator, (struct csmsolid_t *solid));
+
+unsigned long csmsolid_num_faces(const struct csmsolid_t *solid);
 
 
 // Edges...
@@ -60,8 +64,12 @@ CSMBOOL csmsolid_contains_edge(const struct csmsolid_t *solid, const struct csme
 
 CONSTRUCTOR(struct csmhashtb_iterator(csmedge_t) *, csmsolid_edge_iterator, (struct csmsolid_t *solid));
 
+unsigned long csmsolid_num_edges(const struct csmsolid_t *solid);
+
 
 // Vertexs...
+
+void csmsolid_clear_vertex_table(struct csmsolid_t *solid);
 
 void csmsolid_append_new_vertex(struct csmsolid_t *solid, double x, double y, double z, struct csmvertex_t **vertex);
 
@@ -73,6 +81,8 @@ CSMBOOL csmsolid_contains_vertex(const struct csmsolid_t *solid, const struct cs
 
 CONSTRUCTOR(struct csmhashtb_iterator(csmvertex_t) *, csmsolid_vertex_iterator, (struct csmsolid_t *solid));
 CONSTRUCTOR(struct csmhashtb_iterator(csmvertex_t) *, csmsolid_vertex_iterator_const, (const struct csmsolid_t *solid));
+
+unsigned long csmsolid_num_vertexs(const struct csmsolid_t *solid);
 
 CSMBOOL csmsolid_contains_vertex_in_same_coordinates_as_given(
                         struct csmsolid_t *solid,

@@ -610,6 +610,14 @@ void csmsolid_finish_cleanup(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_clear_face_table(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    csmhashtb_clear(solid->sfaces, csmface_t, csmface_free);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_append_new_face(struct csmsolid_t *solid, struct csmface_t **face)
 {
     struct csmface_t *face_loc;
@@ -660,6 +668,14 @@ struct csmhashtb_iterator(csmface_t) *csmsolid_face_iterator(struct csmsolid_t *
 {
     assert_no_null(solid);
     return csmhashtb_create_iterator(solid->sfaces, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+unsigned long csmsolid_num_faces(const struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    return csmhashtb_count(solid->sfaces, csmface_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -728,6 +744,22 @@ struct csmhashtb_iterator(csmedge_t) *csmsolid_edge_iterator(struct csmsolid_t *
 
 // ----------------------------------------------------------------------------------------------------
 
+unsigned long csmsolid_num_edges(const struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    return csmhashtb_count(solid->sedges, csmedge_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsolid_clear_vertex_table(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    csmhashtb_clear(solid->svertexs, csmvertex_t, csmvertex_free);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_append_new_vertex(struct csmsolid_t *solid, double x, double y, double z, struct csmvertex_t **vertex)
 {
     struct csmvertex_t *vertex_loc;
@@ -788,6 +820,14 @@ struct csmhashtb_iterator(csmvertex_t) *csmsolid_vertex_iterator_const(const str
 {
     assert_no_null(solid);
     return csmhashtb_create_iterator(solid->svertexs, csmvertex_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+unsigned long csmsolid_num_vertexs(const struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    return csmhashtb_count(solid->svertexs, csmvertex_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
