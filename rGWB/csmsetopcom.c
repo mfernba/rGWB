@@ -25,7 +25,6 @@
 #include "csmopbas.inl"
 #include "csmsetop.tli"
 #include "csmsolid.inl"
-#include "csmsolid.tli"
 #include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
@@ -1746,7 +1745,7 @@ void csmsetopcom_cleanup_solid_setop(
     
     assert_no_null(destination_solid);
     
-    face_iterator = csmhashtb_create_iterator(destination_solid->sfaces, csmface_t);
+    face_iterator = csmsolid_face_iterator(destination_solid);
     
     while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
     {

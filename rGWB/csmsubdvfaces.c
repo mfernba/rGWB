@@ -11,7 +11,6 @@
 #include "csmloop.inl"
 #include "csmmath.inl"
 #include "csmsolid.inl"
-#include "csmsolid.tli"
 #include "csmvertex.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
@@ -166,7 +165,7 @@ void csmsubdvfaces_subdivide_faces(struct csmsolid_t *solid)
         //if (csmdebug_debug_enabled() == CSMTRUE)
             //csmsolid_debug_print_debug(solid, CSMTRUE);
 
-        face_iterator = csmhashtb_create_iterator(solid->sfaces, csmface_t);
+        face_iterator = csmsolid_face_iterator(solid);
         faces_subdivided = CSMFALSE;
     
         while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)

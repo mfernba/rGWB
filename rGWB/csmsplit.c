@@ -20,7 +20,6 @@
 #include "csmsimplifysolid.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
-#include "csmsolid.tli"
 #include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
@@ -156,7 +155,7 @@ CONSTRUCTOR(static csmArrayStruct(csmvertex_t) *, i_split_edges_by_plane, (
 
     csmdebug_begin_context("Split edges by plane");
 
-    edge_iterator = csmhashtb_create_iterator(work_solid->sedges, csmedge_t);
+    edge_iterator = csmsolid_edge_iterator(work_solid);
     set_of_on_vertices = csmarrayc_new_st_array(0, csmvertex_t);
     
     while (csmhashtb_has_next(edge_iterator, csmedge_t) == CSMTRUE)
