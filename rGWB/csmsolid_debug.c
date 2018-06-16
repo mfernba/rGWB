@@ -16,7 +16,6 @@
 #include "csmhedge.inl"
 #include "csmnode.inl"
 #include "csmvertex.inl"
-#include "csmvertex_debug.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -58,7 +57,7 @@ static void i_print_debug_info_vertex(struct csmvertex_t *vertex, CSMBOOL assert
     struct csmhedge_t *hedge;
     
     if (show_info == CSMTRUE)
-        csmvertex_debug_print_debug_info(vertex);
+        csmvertex_print_debug_info(vertex);
     
     hedge = csmvertex_hedge(vertex);
     

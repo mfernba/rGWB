@@ -3,6 +3,7 @@
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
+#include "csmdebug.inl"
 #include "csmhashtb.inl"
 #include "csmid.inl"
 #include "csmmath.inl"
@@ -263,3 +264,22 @@ void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtrans
     assert_no_null(vertex);
     csmtransform_transform_point(transform, vertex->x, vertex->y, vertex->z, &vertex->x, &vertex->y, &vertex->z);
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmvertex_print_debug_info(struct csmvertex_t *vertex)
+{
+    assert_no_null(vertex);
+    
+    csmdebug_print_debug_info("\tVertex %6lu\t%6.6lf\t%6.6lf\t%6.6lf [%lu]", vertex->id, vertex->x, vertex->y, vertex->z, vertex->algorithm_attrib_mask);
+    
+    if (vertex->algorithm_attrib_mask & CSMVERTEX_MASK_VERTEX_ON_HOLE_LOOP)
+        csmdebug_print_debug_info(" [H] ");
+    
+    if (vertex->algorithm_attrib_mask & CSMVERTEX_MASK_SETOP_COMMON_VERTEX)
+        csmdebug_print_debug_info(" [CV] ");
+    
+    if (vertex->algorithm_attrib_mask &     CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS)
+        csmdebug_print_debug_info(" [VTXFACC] ");
+}
+

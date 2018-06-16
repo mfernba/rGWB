@@ -77,8 +77,6 @@
 		55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */ = {isa = PBXBuildFile; fileRef = 55308C251F920D1800353A68 /* csmsolid_vis.h */; };
 		55308C2A1F92122500353A68 /* csmedge_debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C281F92122500353A68 /* csmedge_debug.c */; };
 		55308C2B1F92122500353A68 /* csmedge_debug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C291F92122500353A68 /* csmedge_debug.inl */; };
-		55308C331F92161F00353A68 /* csmvertex_debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C311F92161F00353A68 /* csmvertex_debug.c */; };
-		55308C341F92161F00353A68 /* csmvertex_debug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C321F92161F00353A68 /* csmvertex_debug.inl */; };
 		55308C371F921A5600353A68 /* csmtest_array.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C351F921A5600353A68 /* csmtest_array.c */; };
 		55308C381F921A5600353A68 /* csmtest_array.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C361F921A5600353A68 /* csmtest_array.inl */; };
 		55308C3B1F92219600353A68 /* csmmaterial.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C391F92219600353A68 /* csmmaterial.c */; };
@@ -313,8 +311,6 @@
 		55308C251F920D1800353A68 /* csmsolid_vis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmsolid_vis.h; sourceTree = "<group>"; };
 		55308C281F92122500353A68 /* csmedge_debug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmedge_debug.c; sourceTree = "<group>"; };
 		55308C291F92122500353A68 /* csmedge_debug.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmedge_debug.inl; sourceTree = "<group>"; };
-		55308C311F92161F00353A68 /* csmvertex_debug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmvertex_debug.c; sourceTree = "<group>"; };
-		55308C321F92161F00353A68 /* csmvertex_debug.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmvertex_debug.inl; sourceTree = "<group>"; };
 		55308C351F921A5600353A68 /* csmtest_array.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmtest_array.c; sourceTree = "<group>"; };
 		55308C361F921A5600353A68 /* csmtest_array.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmtest_array.inl; sourceTree = "<group>"; };
 		55308C391F92219600353A68 /* csmmaterial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmmaterial.c; sourceTree = "<group>"; };
@@ -578,8 +574,6 @@
 				55308C201F920BCD00353A68 /* csmsolid_debug.c */,
 				55308C291F92122500353A68 /* csmedge_debug.inl */,
 				55308C281F92122500353A68 /* csmedge_debug.c */,
-				55308C321F92161F00353A68 /* csmvertex_debug.inl */,
-				55308C311F92161F00353A68 /* csmvertex_debug.c */,
 			);
 			name = "Half-Edge Data Structure Debug";
 			sourceTree = "<group>";
@@ -877,7 +871,6 @@
 				551327701EC3AF1100F2B04D /* csmvertex.tli in Headers */,
 				5589F1EF2083EFE400526923 /* csmoptree.hxx in Headers */,
 				5507A62E1E701441008B9F73 /* csmeuler_lkef.inl in Headers */,
-				55308C341F92161F00353A68 /* csmvertex_debug.inl in Headers */,
 				553E63E71FF6990400A15475 /* csmsplit.hxx in Headers */,
 				5507A5CB1E662758008B9F73 /* csmeuler_lmev.inl in Headers */,
 				5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */,
@@ -1076,7 +1069,6 @@
 				557954951E5E4742000FC91E /* csmface.c in Sources */,
 				5507A6291E700F7C008B9F73 /* csmeuler_lmef.c in Sources */,
 				55244B2A1EAA57C4006F546E /* csmsplit.c in Sources */,
-				55308C331F92161F00353A68 /* csmvertex_debug.c in Sources */,
 				5507A62D1E701441008B9F73 /* csmeuler_lkef.c in Sources */,
 				5507A5CA1E662758008B9F73 /* csmeuler_lmev.c in Sources */,
 				55EA991F1ED38E66006C063C /* csmsetop_vtxvtx.c in Sources */,

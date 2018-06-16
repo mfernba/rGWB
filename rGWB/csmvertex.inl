@@ -67,3 +67,5 @@ void csmvertex_apply_transform(struct csmvertex_t *vertex, const struct csmtrans
 // Debug...
 
 void csmvertex_print_debug_info(struct csmvertex_t *vertex);
+
+
