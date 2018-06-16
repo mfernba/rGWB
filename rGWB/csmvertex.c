@@ -15,7 +15,6 @@
 #else
 #include "cyassert.h"
 #include "cypespy.h"
-#include "cypespy.inl"
 #endif
 
 struct csmvertex_t

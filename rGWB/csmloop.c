@@ -23,7 +23,6 @@
 #include "cyassert.h"
 #include "copiafor.h"
 #include "cypespy.h"
-#include "cypespy.inl"
 #endif
 
 struct csmloop_t
