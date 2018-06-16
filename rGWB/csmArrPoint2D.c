@@ -2,7 +2,7 @@
 
 #include "csmArrPoint2D.h"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmassert.inl"
 #include "csmmem.inl"
 #include "csmmath.inl"

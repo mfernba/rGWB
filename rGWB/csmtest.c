@@ -3,7 +3,7 @@
 #include "csmtest.h"
 
 #include "csmArrPoint2D.h"
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmassert.inl"
 #include "csmbasicshape2d.h"
 #include "csmdebug.inl"

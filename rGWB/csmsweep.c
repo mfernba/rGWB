@@ -15,7 +15,7 @@
 
 #include "csmsweep.h"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmmath.inl"
 #include "csmgeom.inl"
 #include "csmloop.inl"

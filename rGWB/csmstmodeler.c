@@ -8,7 +8,7 @@
 
 #include "csmstmodeler.h"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmid.inl"
 #include "csmsetop.h"
 #include "csmsetop.hxx"

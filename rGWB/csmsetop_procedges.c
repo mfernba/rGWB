@@ -8,7 +8,7 @@
 
 #include "csmsetop_procedges.inl"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"

@@ -13,7 +13,7 @@
 #include "csmmem.inl"
 #include "csmmath.inl"
 #include "csmgeom.inl"
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmArrPoint2D.h"
 #include "csmArrPoint3D.h"
 

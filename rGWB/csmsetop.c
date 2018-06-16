@@ -3,7 +3,7 @@
 #include "csmsetop.h"
 #include "csmsetop.tli"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmArrULong.h"
 #include "csmbbox.inl"
 #include "csmdebug.inl"

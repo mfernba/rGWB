@@ -2,7 +2,7 @@
 
 #include "csmsetopcom.inl"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmdebug.inl"
 #include "csmedge.inl"
 #include "csmedge.tli"

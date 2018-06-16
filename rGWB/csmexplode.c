@@ -2,7 +2,7 @@
 
 #include "csmexplode.h"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmdebug.inl"
 #include "csmhashtb.inl"
 #include "csmsetopcom.inl"

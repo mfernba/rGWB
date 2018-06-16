@@ -3,38 +3,42 @@
 #include "csmarrayc.hxx"
 #include "csmfwddecl.hxx"
 
-struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(unsigned long capacidad_inicial, size_t tamanyo_type_dato);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *array, csmarrayc_FPtr_copy_struct func_copy_element);
+DLL_RGWB struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(unsigned long capacidad_inicial, size_t tamanyo_type_dato);
 
-void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_struct func_free_struct);
+DLL_RGWB struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *array, csmarrayc_FPtr_copy_struct func_copy_element);
 
-unsigned long csmarrayc_dontuse_count(const struct csmarrayc_t *array);
+DLL_RGWB void csmarrayc_dontuse_free(struct csmarrayc_t **array, csmarrayc_FPtr_free_struct func_free_struct);
 
-void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *element);
+DLL_RGWB unsigned long csmarrayc_dontuse_count(const struct csmarrayc_t *array);
 
-void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *element);
+DLL_RGWB void csmarrayc_dontuse_insert_element(struct csmarrayc_t *array, unsigned long pos, void *element);
 
-void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *element);
+DLL_RGWB void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *element);
 
-CSMBOOL csmarrayc_dontuse_contains_element(
+DLL_RGWB void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *element);
+
+DLL_RGWB CSMBOOL csmarrayc_dontuse_contains_element(
                         const struct csmarrayc_t *array,
                         const csmarrayc_byte *search_data,
                         csmarrayc_FPtr_match_condition func_match_condition,
                         unsigned long *idx_opt);
 
-void *csmarrayc_dontuse_get(struct csmarrayc_t *array, unsigned long idx);
+DLL_RGWB void *csmarrayc_dontuse_get(struct csmarrayc_t *array, unsigned long idx);
 
-void csmarrayc_dontuse_delete_element(struct csmarrayc_t *array, unsigned long idx, csmarrayc_FPtr_free_struct func_free);
+DLL_RGWB void csmarrayc_dontuse_delete_element(struct csmarrayc_t *array, unsigned long idx, csmarrayc_FPtr_free_struct func_free);
 
-void csmarrayc_dontuse_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare func_compare);
+DLL_RGWB void csmarrayc_dontuse_qsort(struct csmarrayc_t *array, csmarrayc_FPtr_compare func_compare);
 
-void csmarrayc_dontuse_qsort_1_extra(
+DLL_RGWB void csmarrayc_dontuse_qsort_1_extra(
                         struct csmarrayc_t *array,
                         struct csmarrayc_extra_item_t *extra_item,
                         csmarrayc_FPtr_compare_1_extra func_compare_1_extra);
 
-void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
+DLL_RGWB void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
 
 // Array of pointers to structs...
 
@@ -149,3 +153,8 @@ void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
     (void)((csmArrayStruct(type) *)array == array),\
     csmarrayc_dontuse_invert((struct csmarrayc_t *)array)\
 )/*lint -restore*/
+
+
+#ifdef __cplusplus
+}
+#endif

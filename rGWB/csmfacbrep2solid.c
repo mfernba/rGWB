@@ -8,7 +8,7 @@
 
 #include "csmfacbrep2solid.h"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmface.inl"

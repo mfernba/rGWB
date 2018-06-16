@@ -8,7 +8,7 @@
 
 #include "csmtest_array.inl"
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 #include "csmassert.inl"
 #include "csmmem.inl"
 #include "csmmath.inl"

@@ -1,6 +1,6 @@
 // Generic container...
 
-#include "csmarrayc.inl"
+#include "csmarrayc.h"
 
 #include "csmarqsort.inl"
 
