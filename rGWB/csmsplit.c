@@ -44,19 +44,25 @@ enum i_position_t
 struct i_neighborhood_t
 {
     struct csmhedge_t *hedge;
-    enum i_position_t position;
+    
+    enum i_position_t prev_position;
+    enum i_position_t recl_position;
 };
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct i_neighborhood_t *, i_create_neighborhod, (struct csmhedge_t *hedge, enum i_position_t position))
+CONSTRUCTOR(static struct i_neighborhood_t *, i_create_neighborhod, (
+                        struct csmhedge_t *hedge,
+                        enum i_position_t prev_position, enum i_position_t recl_position))
 {
     struct i_neighborhood_t *neighborhood;
     
     neighborhood = MALLOC(struct i_neighborhood_t);
     
     neighborhood->hedge = hedge;
-    neighborhood->position = position;
+    
+    neighborhood->prev_position = prev_position;
+    neighborhood->recl_position = recl_position;
     
     return neighborhood;
 }
@@ -280,7 +286,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
         hedge_next = csmhedge_next(hedge_iterator);
         i_classify_hedge_respect_to_plane(hedge_next, A, B, C, D, tolerances, NULL, NULL, &cl_resp_plane);
         
-        hedge_neighborhood = i_create_neighborhod(hedge_iterator, cl_resp_plane);
+        hedge_neighborhood = i_create_neighborhod(hedge_iterator, cl_resp_plane, cl_resp_plane);
         csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood, i_neighborhood_t);
         
         if (csmopbas_is_wide_hedge(hedge_iterator, tolerances, &Ux_bisec, &Uy_bisec, &Uz_bisec) == CSMTRUE)
@@ -288,12 +294,13 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
             struct i_neighborhood_t *hedge_neighborhood_wide;
             double tolerance;
             
-            hedge_neighborhood_wide = i_create_neighborhod(hedge_iterator, hedge_neighborhood->position);
+            hedge_neighborhood_wide = i_create_neighborhod(hedge_iterator, hedge_neighborhood->prev_position, hedge_neighborhood->recl_position);
             csmarrayc_append_element_st(vertex_neighborhood, hedge_neighborhood_wide, i_neighborhood_t);
             
             tolerance = csmtolerance_point_on_plane(tolerances);
             i_classify_point_respect_to_plane(x_vertex + Ux_bisec, y_vertex + Uy_bisec, z_vertex + Uz_bisec, A, B, C, D, tolerance, NULL, &cl_resp_plane);
-            hedge_neighborhood->position = cl_resp_plane;
+            hedge_neighborhood->prev_position = cl_resp_plane;
+            hedge_neighborhood->recl_position = cl_resp_plane;
         }
         
         hedge_iterator = csmhedge_next(csmopbas_mate(hedge_iterator));
@@ -308,36 +315,54 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
 static void i_reclassify_on_sector_vertex_neighborhood(
                         struct i_neighborhood_t *hedge_neighborhood,
                         struct i_neighborhood_t *next_hedge_neighborhood,
-                        double A, double B, double C, double D,
+                        double A, double B, double C,
                         const struct csmtolerance_t *tolerances)
 {
-    struct csmface_t *common_face;
-    CSMBOOL same_orientation;
-    
     assert_no_null(hedge_neighborhood);
     assert_no_null(next_hedge_neighborhood);
-    
-    common_face = csmsetopcom_face_for_hedge_sector(hedge_neighborhood->hedge, next_hedge_neighborhood->hedge);
-    
-    if (csmface_is_coplanar_to_plane(common_face, A, B, C, D, tolerances, &same_orientation) == CSMTRUE)
+
+    if (hedge_neighborhood->prev_position == i_POSITION_ON && next_hedge_neighborhood->prev_position == i_POSITION_ON)
     {
-        if (same_orientation == CSMTRUE)
+        struct csmface_t *common_face;
+        
+        common_face = csmsetopcom_face_for_hedge_sector(hedge_neighborhood->hedge, next_hedge_neighborhood->hedge);
+    
+        if (csmface_is_oriented_in_direction(common_face, A, B, C) == CSMTRUE)
         {
-            hedge_neighborhood->position = i_POSITION_BELOW;
-            next_hedge_neighborhood->position = i_POSITION_BELOW;
+            hedge_neighborhood->recl_position = i_POSITION_BELOW;
+            next_hedge_neighborhood->recl_position = i_POSITION_BELOW;
         }
         else
         {
-            hedge_neighborhood->position = i_POSITION_ABOVE;
-            next_hedge_neighborhood->position = i_POSITION_ABOVE;
+            hedge_neighborhood->recl_position = i_POSITION_ABOVE;
+            next_hedge_neighborhood->recl_position = i_POSITION_ABOVE;
         }
     }
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_update_vertex_neighborhood_prev_position_after_reclassification(csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
+{
+    unsigned long i, num_sectors;
     
+    num_sectors = csmarrayc_count_st(vertex_neighborhood, i_neighborhood_t);
+    
+    for (i = 0; i < num_sectors; i++)
+    {
+        struct i_neighborhood_t *hedge_neighborhood;
+        
+        hedge_neighborhood = csmarrayc_get_st(vertex_neighborhood, i, i_neighborhood_t);
+        assert_no_null(hedge_neighborhood);
+        
+        hedge_neighborhood->prev_position = hedge_neighborhood->recl_position;
+    }
+}
+
 // ----------------------------------------------------------------------------------------------------
 
 static void i_reclassify_on_sectors_vertex_neighborhood(
-                        double A, double B, double C, double D,
+                        double A, double B, double C,
                         const struct csmtolerance_t *tolerances,
                         csmArrayStruct(i_neighborhood_t) *vertex_neighborhood)
 {
@@ -359,9 +384,11 @@ static void i_reclassify_on_sectors_vertex_neighborhood(
         i_reclassify_on_sector_vertex_neighborhood(
                         hedge_neighborhood,
                         next_hedge_neighborhood,
-                        A, B, C, D,
+                        A, B, C,
                         tolerances);
     }
+    
+    i_update_vertex_neighborhood_prev_position_after_reclassification(vertex_neighborhood);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -375,29 +402,29 @@ static void i_reclassify_on_edge_vertex_neighborhood(
     assert_no_null(prev_hedge_neighborhood);
     assert_no_null(next_hedge_neighborhood);
     
-    if (hedge_neighborhood->position == i_POSITION_ON)
+    if (hedge_neighborhood->prev_position == i_POSITION_ON)
     {
         enum i_position_t new_position;
 
-        if (prev_hedge_neighborhood->position == i_POSITION_ABOVE && next_hedge_neighborhood->position == i_POSITION_ABOVE)
+        if (prev_hedge_neighborhood->prev_position == i_POSITION_ABOVE && next_hedge_neighborhood->prev_position == i_POSITION_ABOVE)
         {
             new_position = i_POSITION_BELOW;
         }
-        else if (prev_hedge_neighborhood->position == i_POSITION_ABOVE && next_hedge_neighborhood->position == i_POSITION_BELOW)
+        else if (prev_hedge_neighborhood->prev_position == i_POSITION_ABOVE && next_hedge_neighborhood->prev_position == i_POSITION_BELOW)
         {
             new_position = i_POSITION_BELOW;
         }
-        else if (prev_hedge_neighborhood->position == i_POSITION_BELOW && next_hedge_neighborhood->position == i_POSITION_BELOW)
+        else if (prev_hedge_neighborhood->prev_position == i_POSITION_BELOW && next_hedge_neighborhood->prev_position == i_POSITION_BELOW)
         {
             new_position = i_POSITION_ABOVE;
         }
         else
         {
-            assert(prev_hedge_neighborhood->position == i_POSITION_BELOW && next_hedge_neighborhood->position == i_POSITION_ABOVE);
+            assert(prev_hedge_neighborhood->prev_position == i_POSITION_BELOW && next_hedge_neighborhood->prev_position == i_POSITION_ABOVE);
             new_position = i_POSITION_BELOW;
         }
         
-        hedge_neighborhood->position = new_position;
+        hedge_neighborhood->recl_position = new_position;
     }
 }
 
@@ -430,6 +457,8 @@ static void i_reclassify_on_edges_vertex_neighborhood(csmArrayStruct(i_neighborh
                         prev_hedge_neighborhood,
                         next_hedge_neighborhood);
     }
+    
+    i_update_vertex_neighborhood_prev_position_after_reclassification(vertex_neighborhood);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -441,7 +470,7 @@ static enum i_position_t i_sector_position(const csmArrayStruct(i_neighborhood_t
     hedge_neighborhood = csmarrayc_get_st(vertex_neighborhood, idx, i_neighborhood_t);
     assert_no_null(hedge_neighborhood);
     
-    return hedge_neighborhood->position;    
+    return hedge_neighborhood->recl_position;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -556,9 +585,9 @@ static void i_print_debug_info_vertex_neighborhood(
             assert_no_null(hedge_neighborhood);
             
             csmdebug_print_debug_info(
-                        "\t(hedge = %5lu\tclassification: %5s)\n ",
+                        "\t(hedge = %5lu\trecl_cl: %5s)\n ",
                         csmhedge_id(hedge_neighborhood->hedge),
-                        i_cl_plane_to_string(hedge_neighborhood->position));
+                        i_cl_plane_to_string(hedge_neighborhood->recl_position));
         }
         
         csmdebug_print_debug_info("\n");
@@ -584,7 +613,7 @@ static void i_insert_nulledges_to_split_solid_at_on_vertex_neihborhood(
     vertex_neighborhood = i_initial_vertex_neighborhood(vertex, A, B, C, D, tolerances);
     i_print_debug_info_vertex_neighborhood("Initial", vertex, vertex_neighborhood);
     
-    i_reclassify_on_sectors_vertex_neighborhood(A, B, C, D, tolerances, vertex_neighborhood);
+    i_reclassify_on_sectors_vertex_neighborhood(A, B, C, tolerances, vertex_neighborhood);
     i_print_debug_info_vertex_neighborhood("After Reclassify On Sectors", vertex, vertex_neighborhood);
     
     i_reclassify_on_edges_vertex_neighborhood(vertex_neighborhood);
