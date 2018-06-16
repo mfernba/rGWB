@@ -29,7 +29,7 @@ static void i_move_all_loops_from_he2_face1_to_he1_face(struct csmhedge_t *he1, 
 {
     struct csmface_t *face_he1, *face_he2;
     register struct csmloop_t *loop_iterator_face2;
-    register unsigned long num_iteraciones;
+    register unsigned long no_iterations;
 
     assert(he1 != he2);
     assert(csmhedge_edge(he1) == csmhedge_edge(he2));
@@ -39,14 +39,14 @@ static void i_move_all_loops_from_he2_face1_to_he1_face(struct csmhedge_t *he1, 
     assert(face_he1 != face_he2);
     
     loop_iterator_face2 = csmface_floops(face_he2);
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     do
     {
         struct csmloop_t *loop_to_move;
         
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
+        assert(no_iterations < 10000);
+        no_iterations++;
         
         loop_to_move = loop_iterator_face2;
         loop_iterator_face2 = csmloop_next(loop_iterator_face2);
@@ -66,7 +66,7 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     struct csmhedge_t *prev_he1, *next_he1;
     struct csmhedge_t *prev_he2, *next_he2;
     register struct csmhedge_t *he_iterator;
-    register unsigned long num_iteraciones;
+    register unsigned long no_iterations;
     struct csmface_t *he2_loop_face;
     
     assert_no_null(he1);
@@ -81,12 +81,12 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     he1_loop = csmhedge_loop(*he1);
     he2_loop = csmhedge_loop(*he2);
     he_iterator = csmloop_ledge(he2_loop);
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     do
     {
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
+        assert(no_iterations < 10000);
+        no_iterations++;
         
         csmhedge_set_loop(he_iterator, he1_loop);
         he_iterator = csmhedge_next(he_iterator);

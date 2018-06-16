@@ -814,22 +814,22 @@ CSMBOOL csmface_is_loop_contained_in_face(
                         const struct csmtolerance_t *tolerances)
 {
     register struct csmhedge_t *iterator;
-    unsigned long num_iteraciones;
+    unsigned long no_iterations;
     
     assert_no_null(face);
     assert_no_null(face->flout);
     assert(face->flout != loop);
     
     iterator = csmloop_ledge(loop);
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     do
     {
         struct csmvertex_t *vertex;
         double x, y, z;
         
-        assert(num_iteraciones < 100000);
-        num_iteraciones++;
+        assert(no_iterations < 100000);
+        no_iterations++;
         
         vertex = csmhedge_vertex(iterator);
         csmvertex_get_coords(vertex, &x, &y, &z);
@@ -891,22 +891,22 @@ CSMBOOL csmface_is_loop_contained_in_face_outer_loop(
                         const struct csmtolerance_t *tolerances)
 {
     register struct csmhedge_t *iterator;
-    unsigned long num_iteraciones;
+    unsigned long no_iterations;
     
     assert_no_null(face);
     assert_no_null(face->flout);
     assert(face->flout != loop);
     
     iterator = csmloop_ledge(loop);
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     do
     {
         struct csmvertex_t *vertex;
         double x, y, z;
         
-        assert(num_iteraciones < 100000);
-        num_iteraciones++;
+        assert(no_iterations < 100000);
+        no_iterations++;
         
         vertex = csmhedge_vertex(iterator);
         csmvertex_get_coords(vertex, &x, &y, &z);

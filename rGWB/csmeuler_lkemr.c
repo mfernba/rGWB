@@ -38,7 +38,7 @@ void csmeuler_lkemr(
     unsigned long *id_nuevo_elemento;
     struct csmloop_t *new_loop;
     struct csmhedge_t *he_iterator;
-    unsigned long num_iteraciones;
+    unsigned long no_iterations;
     struct csmhedge_t *he1_prev, *he2_prev;
     struct csmvertex_t *vertex1, *vertex2;
     struct csmsolid_t *he1_and_he2_solid;
@@ -71,12 +71,12 @@ void csmeuler_lkemr(
     csmface_add_loop_while_removing_from_old(he1_and_he2_face, new_loop);
  
     he_iterator = he2_loc;
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     do
     {
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
+        assert(no_iterations < 10000);
+        no_iterations++;
         
         csmhedge_set_loop(he_iterator, new_loop);
         he_iterator = csmhedge_next(he_iterator);

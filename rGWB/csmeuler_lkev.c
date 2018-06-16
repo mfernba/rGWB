@@ -34,7 +34,7 @@ void csmeuler_lkev(
     struct csmsolid_t *hes_solid;
     struct csmvertex_t *vertex_to_retain, *vertex_to_delete;
     register struct csmhedge_t *he_iterator;
-    register unsigned long num_iteraciones;
+    register unsigned long no_iterations;
     struct csmedge_t *edge;    
     CSMBOOL delete_vertex;
     
@@ -66,13 +66,13 @@ void csmeuler_lkev(
     }
     
     he_iterator = csmhedge_next(he2_loc);
-    num_iteraciones = 0;
+    no_iterations = 0;
     he_vertex_to_retain = NULL;
     
     while (he_iterator != he1_loc)
     {
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
+        assert(no_iterations < 10000);
+        no_iterations++;
         
         assert(csmhedge_vertex(he_iterator) == vertex_to_delete);
         csmhedge_set_vertex(he_iterator, vertex_to_retain);

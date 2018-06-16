@@ -133,7 +133,7 @@ static void i_vis_append_loop_to_shape(
                         struct csmshape2d_t *shape)
 {
     struct csmhedge_t *ledge, *iterator;
-    unsigned long num_iteraciones;
+    unsigned long no_iterations;
     double Wx, Wy, Wz;
     csmArrPoint2D *points;
     csmArrPoint3D *points_normals;
@@ -142,7 +142,7 @@ static void i_vis_append_loop_to_shape(
     
     ledge = csmloop_ledge(loop);
     iterator = ledge;
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx, &Wy, &Wz);
     
@@ -156,8 +156,8 @@ static void i_vis_append_loop_to_shape(
         double Nx, Ny, Nz;
         double x_2d, y_2d;
         
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
+        assert(no_iterations < 10000);
+        no_iterations++;
         
         vertex = csmhedge_vertex(iterator);
         csmvertex_get_coords(vertex, &x_3d, &y_3d, &z_3d);
@@ -358,7 +358,7 @@ static void i_vis_append_loop_to_shape(
                         ArrPuntero(ArrPunto3D) *poligonos_3d_cara)
 {
     struct csmhedge_t *ledge, *iterator;
-    unsigned long num_iteraciones;
+    unsigned long no_iterations;
     ArrPunto3D *points;
     ArrPunto2D *points_2d;
     
@@ -366,7 +366,7 @@ static void i_vis_append_loop_to_shape(
     
     ledge = csmloop_ledge(loop);
     iterator = ledge;
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     points = arr_CreaPunto3D(0);
     points_2d = arr_CreaPunto2D(0);
@@ -377,8 +377,8 @@ static void i_vis_append_loop_to_shape(
         double x_3d, y_3d, z_3d;
         double x_2d, y_2d;
         
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
+        assert(no_iterations < 10000);
+        no_iterations++;
         
         vertex = csmhedge_vertex(iterator);
         csmvertex_get_coords(vertex, &x_3d, &y_3d, &z_3d);

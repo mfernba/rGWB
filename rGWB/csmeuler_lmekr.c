@@ -31,7 +31,7 @@ void csmeuler_lmekr(
     struct csmsolid_t *he1_and_he2_solid;
     unsigned long *id_nuevo_elemento;
     register struct csmhedge_t *he_iterator;
-    register unsigned long num_iteraciones;
+    register unsigned long no_iterations;
     struct csmedge_t *new_edge;
     struct csmhedge_t *nhe1, *nhe2;
     
@@ -44,12 +44,12 @@ void csmeuler_lmekr(
     assert(csmhedge_edge(he1) != csmhedge_edge(he2));
     
     he_iterator = he2;
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     do
     {
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
+        assert(no_iterations < 10000);
+        no_iterations++;
         
         csmhedge_set_loop(he_iterator, he1_loop);
         he_iterator = csmhedge_next(he_iterator);

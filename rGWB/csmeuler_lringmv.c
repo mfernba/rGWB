@@ -31,19 +31,19 @@ void csmeuler_lringmv(struct csmloop_t *loop, struct csmface_t *face, CSMBOOL as
 void csmeuler_lringmv_move_all_loops_from_face1_to_face2(struct csmface_t *face1, struct csmface_t *face2)
 {
     register struct csmloop_t *iterator_face1;
-    unsigned long num_iteraciones;
+    unsigned long no_iterations;
     
     csmface_redo_geometric_generated_data(face1);
     
     iterator_face1 = csmface_floops(face1);
-    num_iteraciones = 0;
+    no_iterations = 0;
     
     do
     {
         struct csmloop_t *next_loop;
         
-        assert(num_iteraciones < 10000);
-        num_iteraciones++;
+        assert(no_iterations < 10000);
+        no_iterations++;
         
         next_loop = csmloop_next(iterator_face1);
         csmface_add_loop_while_removing_from_old(face2, iterator_face1);
