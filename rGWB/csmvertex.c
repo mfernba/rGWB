@@ -18,6 +18,16 @@
 #include "cypespy.inl"
 #endif
 
+struct csmvertex_t
+{
+    unsigned long id;
+
+    double x, y, z;
+    struct csmhedge_t *hedge;
+
+    csmvertex_mask_t algorithm_attrib_mask;
+};
+
 // ----------------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmvertex_t *, i_new, (

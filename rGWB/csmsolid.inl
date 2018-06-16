@@ -92,3 +92,9 @@ CSMBOOL csmsolid_does_solid_contain_point(
 
 void csmsolid_set_draw_only_border_edges(struct csmsolid_t *solid, CSMBOOL draw_only_border_edges);
 
+void csmsolid_print_debug(struct csmsolid_t *solid, CSMBOOL assert_si_no_es_integro);
+
+void csmsolid_print_debug_forced(struct csmsolid_t *solid);
+
+void csmsolid_print_complete_debug(struct csmsolid_t *solid, CSMBOOL assert_si_no_es_integro);
+

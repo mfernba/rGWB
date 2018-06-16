@@ -3,7 +3,6 @@
 #include "csmfwddecl.hxx"
 #include "csmvertex.hxx"
 
-
 CONSTRUCTOR(struct csmvertex_t *, csmvertex_new, (double x, double y, double z, unsigned long *id_nuevo_elemento));
 
 CONSTRUCTOR(struct csmvertex_t *, csmvertex_duplicate, (

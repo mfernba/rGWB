@@ -25,7 +25,6 @@
 #include "csmsetop_vtxfacc.inl"
 #include "csmsetop_vtxvtx.inl"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
@@ -1204,8 +1203,8 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
                         vv_intersections_loc, vf_intersections_A_loc,
                         &did_find_non_manifold_operand_solid_A);
             
-            csmsolid_debug_print_debug(solid_A, CSMTRUE);
-            csmsolid_debug_print_debug(solid_B, CSMTRUE);
+            csmsolid_print_debug(solid_A, CSMTRUE);
+            csmsolid_print_debug(solid_B, CSMTRUE);
         }
         csmdebug_end_context();
     
@@ -1229,8 +1228,8 @@ void csmsetop_procedges_generate_intersections_on_both_solids(
                         vv_intersections_loc, vf_intersections_B_loc,
                         &did_find_non_manifold_operand_solid_B);
             
-                csmsolid_debug_print_debug(solid_A, CSMTRUE);
-                csmsolid_debug_print_debug(solid_B, CSMTRUE);
+                csmsolid_print_debug(solid_A, CSMTRUE);
+                csmsolid_print_debug(solid_B, CSMTRUE);
             }
             csmdebug_end_context();
         }

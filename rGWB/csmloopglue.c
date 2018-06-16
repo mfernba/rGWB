@@ -18,7 +18,7 @@
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmopbas.inl"
-#include "csmsolid_debug.inl"
+#include "csmsolid.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 
@@ -219,10 +219,10 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
     solid = csmface_fsolid(csmopbas_face_from_hedge(common_hedge_face1));
     
     if (csmdebug_debug_enabled() == CSMTRUE)
-        csmsolid_debug_print_complete_debug(solid, CSMTRUE);
+        csmsolid_print_complete_debug(solid, CSMTRUE);
 
     csmeuler_lmekr(common_hedge_face1, common_hedge_face2, &he_prev_common_edge_face1, &he_prev_common_edge_face2);
-    csmsolid_debug_print_complete_debug(solid, CSMTRUE);
+    csmsolid_print_complete_debug(solid, CSMTRUE);
     csmeuler_lkev(&he_prev_common_edge_face1, &he_prev_common_edge_face2, NULL, &he1_next, NULL, &he2_next);
     assert(he1_next == common_hedge_face1);
     assert(he2_next == common_hedge_face2);
@@ -231,7 +231,7 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
     num_iters = 0;
     
     if (csmdebug_debug_enabled() == CSMTRUE)
-        csmsolid_debug_print_complete_debug(solid, CSMTRUE);
+        csmsolid_print_complete_debug(solid, CSMTRUE);
 
     while (csmhedge_next(he_iterator) != common_hedge_face2)
     {
@@ -247,7 +247,7 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
         csmeuler_lmef(he_next, he_prev, NULL, NULL, NULL);
         
         if (csmdebug_debug_enabled() == CSMTRUE)
-           csmsolid_debug_print_complete_debug(solid, CSMTRUE);
+           csmsolid_print_complete_debug(solid, CSMTRUE);
         
         he_iterator_next = csmhedge_next(he_iterator);
         he_iterator_next_mate = csmopbas_mate(he_iterator_next);
@@ -261,20 +261,20 @@ static void i_glue_loops_given_hedges(struct csmhedge_t *common_hedge_face1, str
         
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
-            csmsolid_debug_print_complete_debug(solid, CSMTRUE);
+            csmsolid_print_complete_debug(solid, CSMTRUE);
             csmdebug_print_debug_info("loopglue lkef: (%lu, %lu)\n", csmhedge_id(he_iterator_mate), csmhedge_id(he_iterator));
         }
         
         csmeuler_lkef(&he_iterator_mate, &he_iterator);
 
         if (csmdebug_debug_enabled() == CSMTRUE)
-            csmsolid_debug_print_debug(solid, CSMTRUE);
+            csmsolid_print_debug(solid, CSMTRUE);
         
         he_iterator = he_next;
     }
 
     if (csmdebug_debug_enabled() == CSMTRUE)
-        csmsolid_debug_print_debug(solid, CSMTRUE);
+        csmsolid_print_debug(solid, CSMTRUE);
     
     he_iterator_mate = csmopbas_mate(he_iterator);
     csmeuler_lkef(&he_iterator_mate, &he_iterator);

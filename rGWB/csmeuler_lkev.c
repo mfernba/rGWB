@@ -11,7 +11,6 @@
 #include "csmhedge.inl"
 #include "csmopbas.inl"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 #include "csmvertex.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE

@@ -24,7 +24,6 @@
 #include "csmopbas.inl"
 #include "csmsetop.tli"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
@@ -506,7 +505,7 @@ void csmsetopcom_join_hedges(
         csmvertex_get_coords(csmhedge_vertex(he2), &x2, &y2, &z2);
         csmdebug_append_segment(x1, y1, z1, x2, y2, z2);
         
-        csmsolid_debug_print_debug(he1_solid, CSMTRUE);
+        csmsolid_print_debug(he1_solid, CSMTRUE);
     }
 
     if (csmhedge_loop(he1) == csmhedge_loop(he2))
@@ -684,13 +683,13 @@ void csmsetopcom_cut_he(
             csmface_print_info_debug(null_face, CSMTRUE, NULL);
             
             csmdebug_print_debug_info("(CUTTING HE)  (%lu, %lu) with LKEMR\n", csmhedge_id(he1_edge), csmhedge_id(he2_edge));
-            //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
+            //csmsolid_print_debug(csmopbas_solid_from_hedge(hedge), CSMTRUE);
         }
         
         csmeuler_lkemr(&he1_edge, &he2_edge, NULL, NULL, NULL);
         
         if (csmdebug_debug_enabled() == CSMTRUE)
-            csmsolid_debug_print_debug(solid, CSMTRUE);
+            csmsolid_print_debug(solid, CSMTRUE);
         
         null_face_created_loc = CSMTRUE;
     }
@@ -706,7 +705,7 @@ void csmsetopcom_cut_he(
         null_face_created_loc = CSMFALSE;
         
         /*if (csmdebug_debug_enabled() == CSMTRUE)
-            csmsolid_debug_print_debug(solid, CSMTRUE);
+            csmsolid_print_debug(solid, CSMTRUE);
          */
     }
     
@@ -1459,15 +1458,15 @@ void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid
     
         csmdebug_print_debug_info("Extract positive inner area loops from faces...\n");
         i_extract_inner_positive_area_loops_from_faces(solid, tolerances, &there_are_changes);
-        csmsolid_debug_print_debug(solid, CSMFALSE);
+        csmsolid_print_debug(solid, CSMFALSE);
             
         csmdebug_print_debug_info("Merging faces...\n");
         i_merge_faces_inside_faces(solid, tolerances, &there_are_changes);
-        csmsolid_debug_print_debug(solid, CSMFALSE);
+        csmsolid_print_debug(solid, CSMFALSE);
 
         csmdebug_print_debug_info("Deleting holes filled by faces...\n");
         i_delete_holes_filled_by_faces(solid, tolerances, &there_are_changes);
-        csmsolid_debug_print_debug(solid, CSMFALSE);
+        csmsolid_print_debug(solid, CSMFALSE);
     }
     while (there_are_changes == CSMTRUE);
 }

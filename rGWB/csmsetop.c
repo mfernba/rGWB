@@ -25,7 +25,6 @@
 #include "csmsimplifysolid.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 #include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
@@ -574,8 +573,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
             default_error();
         }
     
-        csmsolid_debug_print_debug(solid_A, CSMFALSE);
-        csmsolid_debug_print_debug(solid_B, CSMFALSE);
+        csmsolid_print_debug(solid_A, CSMFALSE);
+        csmsolid_print_debug(solid_B, CSMFALSE);
 
         csmsolid_prepare_for_cleanup(solid_A);
         csmsolid_prepare_for_cleanup(solid_B);
@@ -603,11 +602,11 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         csmsolid_finish_cleanup(solid_B);
         csmsolid_finish_cleanup(result);
     
-        csmsolid_debug_print_debug(result, CSMTRUE);
-        //csmsolid_debug_print_debug(solid_A, CSMFALSE);
-        //csmsolid_debug_print_debug(solid_B, CSMFALSE);
+        csmsolid_print_debug(result, CSMTRUE);
+        //csmsolid_print_debug(solid_A, CSMFALSE);
+        //csmsolid_print_debug(solid_B, CSMFALSE);
 
-        csmsolid_debug_print_debug(result, CSMTRUE);
+        csmsolid_print_debug(result, CSMTRUE);
     
         for (i = 0; i < half_no_null_faces; i++)
         {
@@ -624,7 +623,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         //csmdebug_show_viewer();
 
         csmdebug_print_debug_info("After merging face loops...\n");
-        csmsolid_debug_print_debug(result, CSMTRUE);
+        csmsolid_print_debug(result, CSMTRUE);
 
         csmsetopcom_correct_faces_after_joining_null_edges(result, tolerances);
     
@@ -771,8 +770,8 @@ static enum csmsetop_opresult_t i_set_operation_modifying_solids_internal(
     
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
-        csmsolid_debug_print_debug(solid_A, CSMTRUE);
-        csmsolid_debug_print_debug(solid_B, CSMTRUE);
+        csmsolid_print_debug(solid_A, CSMTRUE);
+        csmsolid_print_debug(solid_B, CSMTRUE);
     }
     
     csmsetop_procedges_generate_intersections_on_both_solids(
@@ -994,7 +993,7 @@ static enum csmsetop_opresult_t i_set_operation(
     if (result == CSMSETOP_OPRESULT_OK && csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_clear_debug_points();
-        csmsolid_debug_print_debug(solid_res_loc, CSMTRUE);
+        csmsolid_print_debug(solid_res_loc, CSMTRUE);
         
         csmdebug_set_viewer_results(solid_res_loc, NULL);
         csmdebug_show_viewer();

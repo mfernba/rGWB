@@ -22,7 +22,6 @@
 #include "csmmath.inl"
 #include "csmopbas.inl"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
@@ -237,7 +236,7 @@ static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmt
                     if (csmdebug_debug_enabled() == CSMTRUE)
                     {
                         //csmdebug_set_debug_screen(CSMTRUE);
-                        csmsolid_debug_print_debug_forced(solid);
+                        csmsolid_print_debug_forced(solid);
                         csmdebug_show_face(face_he1, NULL);
                     }
                     
@@ -269,7 +268,7 @@ static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmt
                     
                     if (csmdebug_debug_enabled() == CSMTRUE)
                     {
-                        csmsolid_debug_print_debug_forced(solid);
+                        csmsolid_print_debug_forced(solid);
                         csmdebug_show_face(face_he1, face_he2);
                     }
                 
@@ -367,7 +366,7 @@ static void i_delete_redundant_vertexs(struct csmsolid_t *solid, CSMBOOL *change
                     csmeuler_lkev(&he1, &he1_mate, NULL, NULL, NULL, NULL);
                     there_are_changes = CSMTRUE;
                     
-                    csmsolid_debug_print_debug(solid, CSMTRUE);
+                    csmsolid_print_debug(solid, CSMTRUE);
                     break;
                 }
             }
@@ -392,7 +391,7 @@ void csmsimplifysolid_simplify(struct csmsolid_t *solid, const struct csmtoleran
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("Before simplification...\n");
-        csmsolid_debug_print_debug_forced(solid);
+        csmsolid_print_debug_forced(solid);
     }
         
     changed = CSMFALSE;
@@ -403,7 +402,7 @@ void csmsimplifysolid_simplify(struct csmsolid_t *solid, const struct csmtoleran
     if (changed == CSMTRUE && csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("After simplification...\n");
-        csmsolid_debug_print_debug_forced(solid);
+        csmsolid_print_debug_forced(solid);
         
         csmdebug_show_viewer();
     }

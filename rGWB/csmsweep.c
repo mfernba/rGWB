@@ -303,7 +303,7 @@ static void i_create_lateral_faces(csmArrayStruct(csmhedge_t) *hedges_from_verte
         hedge_next_next = csmhedge_next(csmhedge_next(scan));
         
         csmeuler_lmef(hedge_prev, hedge_next_next, NULL, NULL, NULL);
-        //csmsolid_debug_print_debug(solid, CSMTRUE);
+        //csmsolid_print_debug(solid, CSMTRUE);
         
         scan = csmhedge_next(hedge_next_next);
     }
@@ -353,7 +353,7 @@ static void i_append_holes_to_solid_faces(
     
     original_ring_loop = csmhedge_loop(he_from_ring);
     
-    //csmsolid_debug_print_debug(solid, CSMTRUE);
+    //csmsolid_print_debug(solid, CSMTRUE);
     
     i_append_loop_from_hedge(
                         he_from_ring,
@@ -370,7 +370,7 @@ static void i_append_holes_to_solid_faces(
     csmeuler_lkfmrh(bottom_face, &top_hole_face_loc);
     csmeuler_lmfkrh(original_ring_loop, &top_hole_face_loc);
     
-    //csmsolid_debug_print_debug(solid, CSMTRUE);
+    //csmsolid_print_debug(solid, CSMTRUE);
 
     i_create_hedges_from_bottom_to_top_face(
                         shape2d_top,
@@ -379,15 +379,15 @@ static void i_append_holes_to_solid_faces(
                         Ux_top, Uy_top, Uz_top, Vx_top, Vy_top, Vz_top,
                         hedges_from_vertexs_bottom_face);
 
-    //csmsolid_debug_print_debug(solid, CSMTRUE);
+    //csmsolid_print_debug(solid, CSMTRUE);
     
     i_create_lateral_faces(hedges_from_vertexs_bottom_face);
  
-    //csmsolid_debug_print_debug(solid, CSMTRUE);
+    //csmsolid_print_debug(solid, CSMTRUE);
     
     csmeuler_lkfmrh(top_face, &top_hole_face_loc);
     
-    //csmsolid_debug_print_debug(solid, CSMTRUE);
+    //csmsolid_print_debug(solid, CSMTRUE);
 
     csmarrayc_free_st(&hedges_from_vertexs_bottom_face, csmhedge_t, NULL);
 }
@@ -655,7 +655,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_create_solid_from_shape_without_holes,
             csmarrayc_append_element_st(bottom_faces_loc, bottom_face, csmface_t);
             csmarrayc_append_element_st(top_faces_loc, top_face, csmface_t);
 
-            //csmsolid_debug_print_debug(solid, CSMTRUE);
+            //csmsolid_print_debug(solid, CSMTRUE);
     
             csmarrayc_free_st(&hedges_from_vertexs_bottom_face, csmhedge_t, NULL);
         }

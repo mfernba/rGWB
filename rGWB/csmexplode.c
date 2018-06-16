@@ -8,7 +8,6 @@
 #include "csmsetopcom.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -30,7 +29,7 @@ csmArrayStruct(csmsolid_t) *csmexplode_explode_shells(const struct csmsolid_t *s
     did_move_faces = CSMFALSE;
     
     if (csmdebug_debug_enabled() == CSMTRUE)
-        csmsolid_debug_print_debug(work_solid, CSMTRUE);
+        csmsolid_print_debug(work_solid, CSMTRUE);
     
     do
     {
@@ -53,8 +52,8 @@ csmArrayStruct(csmsolid_t) *csmexplode_explode_shells(const struct csmsolid_t *s
             
             if (csmdebug_debug_enabled() == CSMTRUE)
             {
-                csmsolid_debug_print_debug(work_solid, CSMTRUE);
-                csmsolid_debug_print_debug(independent_shell, CSMTRUE);
+                csmsolid_print_debug(work_solid, CSMTRUE);
+                csmsolid_print_debug(independent_shell, CSMTRUE);
             }
             
             csmarrayc_append_element_st(solids, independent_shell, csmsolid_t);

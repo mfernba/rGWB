@@ -21,7 +21,6 @@
 #include "csmopbas.inl"
 #include "csmsetopcom.inl"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 #include "csmstring.inl"
 #include "csmvertex.inl"
 
@@ -517,8 +516,8 @@ static void i_join_pendant_loose_ends_by_modifying_topology(
             csmsetopcom_print_debug_info_loose_ends(loose_ends_B);
             
             csmdebug_print_debug_info("*** joining loose ends by modifying topology\n");
-            csmsolid_debug_print_debug(solid_A, CSMTRUE);
-            csmsolid_debug_print_debug(solid_B, CSMTRUE);
+            csmsolid_print_debug(solid_A, CSMTRUE);
+            csmsolid_print_debug(solid_B, CSMTRUE);
             
             //csmdebug_show_viewer();
         }
@@ -719,10 +718,10 @@ void csmsetop_join_null_edges(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmsolid_redo_geometric_face_data(solid_A);
-        csmsolid_debug_print_debug(solid_A, CSMTRUE);
+        csmsolid_print_debug(solid_A, CSMTRUE);
         
         csmsolid_redo_geometric_face_data(solid_B);
-        csmsolid_debug_print_debug(solid_B, CSMTRUE);
+        csmsolid_print_debug(solid_B, CSMTRUE);
         
         i_append_null_edges_to_debug_view(set_of_null_edges_A);
         csmdebug_show_viewer();
@@ -844,8 +843,8 @@ void csmsetop_join_null_edges(
             {
                 csmdebug_unblock_print_solid();
                     csmdebug_print_debug_info("*** AFTER NULL FACES\n");
-                    csmsolid_debug_print_debug(solid_A, CSMTRUE);
-                    csmsolid_debug_print_debug(solid_B, CSMTRUE);
+                    csmsolid_print_debug(solid_A, CSMTRUE);
+                    csmsolid_print_debug(solid_B, CSMTRUE);
                 csmdebug_block_print_solid();
                 
                 csmsetopcom_print_set_of_null_edges(set_of_null_edges_A, loose_ends_A);
@@ -882,8 +881,8 @@ void csmsetop_join_null_edges(
     csmsetopcom_postprocess_join_edges(solid_B);
     
     csmdebug_print_debug_info("*** AFTER JOINING NULL EDGES\n");
-    csmsolid_debug_print_debug(solid_A, CSMTRUE);
-    csmsolid_debug_print_debug(solid_B, CSMTRUE);
+    csmsolid_print_debug(solid_A, CSMTRUE);
+    csmsolid_print_debug(solid_B, CSMTRUE);
     //csmdebug_show_viewer();
     
     no_null_edges_pendant = csmarrayc_count_st(set_of_null_edges_A, csmedge_t);

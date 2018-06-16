@@ -19,7 +19,6 @@
 #include "csmsimplifysolid.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
-#include "csmsolid_debug.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
@@ -878,7 +877,7 @@ static void i_join_null_edges(
         if (csmdebug_debug_enabled() == CSMTRUE)
         {
             csmsetopcom_print_debug_info_loose_ends(loose_ends);
-            //csmsolid_debug_print_debug(csmopbas_solid_from_hedge(he1_next_edge), CSMTRUE);
+            //csmsolid_print_debug(csmopbas_solid_from_hedge(he1_next_edge), CSMTRUE);
         }
     }
     
@@ -930,7 +929,7 @@ static void i_finish_split(
     csmdebug_begin_context("********FINISH SPLIT");
 
     if (csmdebug_debug_enabled() == CSMTRUE)
-        csmsolid_debug_print_debug(work_solid, CSMTRUE);
+        csmsolid_print_debug(work_solid, CSMTRUE);
 
     set_of_null_faces_above = csmsetopcom_convert_inner_loops_of_null_faces_to_faces(set_of_null_faces);
     set_of_null_faces_below = set_of_null_faces;
@@ -944,7 +943,7 @@ static void i_finish_split(
     assert(no_null_faces > 0);
     
     if (csmdebug_debug_enabled() == CSMTRUE)
-        csmsolid_debug_print_debug(work_solid, CSMTRUE);
+        csmsolid_print_debug(work_solid, CSMTRUE);
     
     solid_above_loc = csmsolid_crea_vacio(0);
     i_assign_result_material(work_solid, solid_above_loc);
@@ -975,9 +974,9 @@ static void i_finish_split(
 
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
-        csmsolid_debug_print_debug(work_solid, CSMTRUE);
-        csmsolid_debug_print_debug(solid_above_loc, CSMTRUE);
-        csmsolid_debug_print_debug(solid_below_loc, CSMTRUE);
+        csmsolid_print_debug(work_solid, CSMTRUE);
+        csmsolid_print_debug(solid_above_loc, CSMTRUE);
+        csmsolid_print_debug(solid_below_loc, CSMTRUE);
     }
  
     csmdebug_end_context();
@@ -1020,7 +1019,7 @@ enum csmsplit_opresult_t csmsplit_split_solid(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("---->WORK SOLID BEFORE INSERTING NULL EDGES\n");
-        csmsolid_debug_print_debug(work_solid, CSMTRUE);
+        csmsolid_print_debug(work_solid, CSMTRUE);
         csmdebug_print_debug_info("<----WORK SOLID BEFORE INSERTING NULL EDGES\n");
     }
 
@@ -1029,7 +1028,7 @@ enum csmsplit_opresult_t csmsplit_split_solid(
     if (csmdebug_debug_enabled() == CSMTRUE)
     {
         csmdebug_print_debug_info("---->WORK SOLID AFTER INSERTING NULL EDGES\n");
-        csmsolid_debug_print_debug(work_solid, CSMTRUE);
+        csmsolid_print_debug(work_solid, CSMTRUE);
         csmdebug_print_debug_info("<----WORK SOLID AFTER INSERTING NULL EDGES\n");
     }
 

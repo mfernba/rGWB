@@ -71,8 +71,6 @@
 		55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */ = {isa = PBXBuildFile; fileRef = 55244B291EAA57C4006F546E /* csmsplit.h */; };
 		55308C1A1F9209BC00353A68 /* csmface_vis.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C181F9209BC00353A68 /* csmface_vis.c */; };
 		55308C1B1F9209BC00353A68 /* csmface_vis.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C191F9209BC00353A68 /* csmface_vis.inl */; };
-		55308C221F920BCD00353A68 /* csmsolid_debug.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C201F920BCD00353A68 /* csmsolid_debug.c */; };
-		55308C231F920BCD00353A68 /* csmsolid_debug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C211F920BCD00353A68 /* csmsolid_debug.inl */; };
 		55308C261F920D1800353A68 /* csmsolid_vis.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C241F920D1800353A68 /* csmsolid_vis.c */; };
 		55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */ = {isa = PBXBuildFile; fileRef = 55308C251F920D1800353A68 /* csmsolid_vis.h */; };
 		55308C371F921A5600353A68 /* csmtest_array.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C351F921A5600353A68 /* csmtest_array.c */; };
@@ -303,8 +301,6 @@
 		55308C171F92096A00353A68 /* csmface.tli */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; lineEnding = 2; path = csmface.tli; sourceTree = "<group>"; };
 		55308C181F9209BC00353A68 /* csmface_vis.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; lineEnding = 2; path = csmface_vis.c; sourceTree = "<group>"; };
 		55308C191F9209BC00353A68 /* csmface_vis.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmface_vis.inl; sourceTree = "<group>"; };
-		55308C201F920BCD00353A68 /* csmsolid_debug.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsolid_debug.c; sourceTree = "<group>"; };
-		55308C211F920BCD00353A68 /* csmsolid_debug.inl */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; lineEnding = 2; path = csmsolid_debug.inl; sourceTree = "<group>"; };
 		55308C241F920D1800353A68 /* csmsolid_vis.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; lineEnding = 2; path = csmsolid_vis.c; sourceTree = "<group>"; };
 		55308C251F920D1800353A68 /* csmsolid_vis.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmsolid_vis.h; sourceTree = "<group>"; };
 		55308C351F921A5600353A68 /* csmtest_array.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmtest_array.c; sourceTree = "<group>"; };
@@ -563,15 +559,6 @@
 			name = "2D Tools";
 			sourceTree = "<group>";
 		};
-		55308C091F92071500353A68 /* Half-Edge Data Structure Debug */ = {
-			isa = PBXGroup;
-			children = (
-				55308C211F920BCD00353A68 /* csmsolid_debug.inl */,
-				55308C201F920BCD00353A68 /* csmsolid_debug.c */,
-			);
-			name = "Half-Edge Data Structure Debug";
-			sourceTree = "<group>";
-		};
 		5536C85E1FC1F4AD005CE275 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -636,7 +623,6 @@
 				5570129B1E83286400DFC490 /* Algorithms */,
 				557954A71E60D0F7000FC91E /* Low Level Euler Operators */,
 				557954891E5E41A0000FC91E /* Half-Edge Data Structure */,
-				55308C091F92071500353A68 /* Half-Edge Data Structure Debug */,
 				550765CA1F92051400E6BD2E /* Half-Edge Data Structure Visualization */,
 				5507A6261E6B8721008B9F73 /* Test */,
 			);
@@ -840,7 +826,6 @@
 				55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */,
 				55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */,
 				5579545D1E5DB074000FC91E /* rGWB.h in Headers */,
-				55308C231F920BCD00353A68 /* csmsolid_debug.inl in Headers */,
 				5507A6811E7362EF008B9F73 /* csmeuler_lkfmrh.inl in Headers */,
 				55C6F71F1F82E7CF005EA51D /* csmassert.inl in Headers */,
 				55354A441E9AE595007B0692 /* csmmath.tli in Headers */,
@@ -1102,7 +1087,6 @@
 				557954811E5E1AA9000FC91E /* csmnode.c in Sources */,
 				5507A6F21E7B450C008B9F73 /* csmhashtb.c in Sources */,
 				55FA851720853B7200FB00EE /* csmstmodeler.c in Sources */,
-				55308C221F920BCD00353A68 /* csmsolid_debug.c in Sources */,
 				5598D6131F24E7F600EA1876 /* csmviewer.mm in Sources */,
 				5507A67C1E73484D008B9F73 /* csmeuler_lmekr.c in Sources */,
 				55A9843C1FBE3A6A009F7516 /* csmArrPoint3D.c in Sources */,
