@@ -12,7 +12,7 @@
 extern "C" {
 #endif
     
-#include "csmface_vis.inl"
+#include "csmface.inl"
 #include "csmsolid.h"
 #include "csmsolid_vis.h"
 #include "csmsolid.inl"
@@ -154,7 +154,7 @@ static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graph
             material2 = bsmaterial_crea_rgba(1., 0., 0., 1.);
             material3 = bsmaterial_crea_rgba(0., 0., 1., 1.);
             
-            csmface_vis_draw_edges(viewer->face1, material1, material2, material3, graphics);
+            csmface_draw_edges(viewer->face1, material1, material2, material3, graphics);
             
             bsmaterial_destruye(&material1);
             bsmaterial_destruye(&material2);
@@ -167,7 +167,7 @@ static void i_draw_scene(struct csmviewer_t *viewer, struct bsgraphics2_t *graph
             material2 = bsmaterial_crea_rgba(1., 0.5, 0., 1.);
             material3 = bsmaterial_crea_rgba(0.5, 0.5, 1., 1.);
             
-            csmface_vis_draw_edges(viewer->face2, material1, material2, material3, graphics);
+            csmface_draw_edges(viewer->face2, material1, material2, material3, graphics);
             
             bsmaterial_destruye(&material1);
             bsmaterial_destruye(&material2);

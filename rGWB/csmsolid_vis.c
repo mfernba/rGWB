@@ -13,7 +13,6 @@
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmface.inl"
-#include "csmface_vis.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
@@ -232,7 +231,7 @@ static void i_draw_debug_info_faces(
         }
         
         if (draw_face == CSMTRUE)
-            csmface_vis_draw_normal(face, graphics);
+            csmface_draw_normal(face, graphics);
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
@@ -369,7 +368,7 @@ static void i_draw_solid_faces(
         csmhashtb_next_pair(iterator, &face_id, &face, csmface_t);
         
         if (csmdebug_draw_face(face_id) == CSMTRUE)
-            csmface_vis_draw_solid(face, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
+            csmface_draw_solid(face, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
@@ -470,7 +469,7 @@ static void i_genera_mesh_solido(
         
         csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
 
-        csmface_vis_append_datos_mesh(
+        csmface_append_datos_mesh(
                     face,
                     *puntos, *normales, *es_borde,
                     *tipo_primitivas, *inds_caras);
