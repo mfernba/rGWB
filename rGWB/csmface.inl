@@ -105,7 +105,7 @@ void csmface_face_equation_info(
                         const struct csmface_t *face,
                         double *A, double *B, double *C, double *D);
 
-const struct csmbbox_t *csmface_bbox(const struct csmface_t *face);
+void csmface_maximize_bbox(const struct csmface_t *face, struct csmbbox_t *bbox);
 
 double csmface_loop_area_in_face(const struct csmface_t *face, const struct csmloop_t *loop);
 

@@ -1087,10 +1087,10 @@ void csmface_face_equation_info(
 
 // ------------------------------------------------------------------------------------------
 
-const struct csmbbox_t *csmface_bbox(const struct csmface_t *face)
+void csmface_maximize_bbox(const struct csmface_t *face, struct csmbbox_t *bbox)
 {
     assert_no_null(face);
-    return face->bbox;
+    csmbbox_maximize_bbox(bbox, face->bbox);
 }
 
 // ------------------------------------------------------------------------------------------

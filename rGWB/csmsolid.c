@@ -411,25 +411,22 @@ void csmsolid_clear_algorithm_data(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *bbox)
+static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *solid_bbox)
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
     
-    csmbbox_reset(bbox);
+    csmbbox_reset(solid_bbox);
     
     iterator = csmhashtb_create_iterator(sfaces, csmface_t);
     
     while (csmhashtb_has_next(iterator, csmface_t) == CSMTRUE)
     {
         struct csmface_t *face;
-        const struct csmbbox_t *face_bbox;
         
         csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
         
         csmface_redo_geometric_generated_data(face);
-        
-        face_bbox = csmface_bbox(face);
-        csmbbox_maximize_bbox(bbox, face_bbox);
+        csmface_maximize_bbox(face, solid_bbox);
     }
     
     csmhashtb_free_iterator(&iterator, csmface_t);
