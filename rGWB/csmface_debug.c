@@ -11,7 +11,6 @@
 
 #include "csmdebug.inl"
 #include "csmloop.inl"
-#include "csmloop_debug.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
 
@@ -87,7 +86,7 @@ void csmface_debug_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no
             loop_area = 0.;
         }
         
-        csmloop_debug_print_info_debug(
+        csmloop_print_info_debug(
 	                    loop_iterator,
                         is_outer_loop,
                         compute_loop_area, loop_area,

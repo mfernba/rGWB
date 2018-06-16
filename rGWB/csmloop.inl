@@ -75,4 +75,12 @@ void csmloop_set_setop_loop_was_a_hole(struct csmloop_t *loop, CSMBOOL setop_loo
 void csmloop_clear_algorithm_mask(struct csmloop_t *loop);
 
 
+// Debug...
+
+void csmloop_print_info_debug(
+                        struct csmloop_t *loop,
+                        CSMBOOL is_outer_loop,
+                        CSMBOOL with_loop_area, double loop_area,
+                        CSMBOOL assert_si_no_es_integro);
+
 
