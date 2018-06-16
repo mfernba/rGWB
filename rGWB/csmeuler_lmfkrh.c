@@ -29,7 +29,7 @@ void csmeuler_lmfkrh(struct csmloop_t *loop, struct csmface_t **new_face_opc)
     solid = csmface_fsolid(old_face);
     
     csmsolid_append_new_face(solid, &new_face_loc);
-    csmface_copy_attributtes_from_face1(old_face, new_face_loc);
+    csmface_copy_attributes_from_face1(old_face, new_face_loc);
     
     csmface_add_loop_while_removing_from_old(new_face_loc, loop);
     

@@ -21,7 +21,7 @@ void csmface_set_visualization_material(struct csmface_t *face, const struct csm
 
 void csmface_set_surface_eq(struct csmface_t *face, const struct csmsurface_t *surface_eq);
 
-void csmface_copy_attributtes_from_face1(const struct csmface_t *face1, struct csmface_t *face2);
+void csmface_copy_attributes_from_face1(const struct csmface_t *face1, struct csmface_t *face2);
 
 
 // Geometry...

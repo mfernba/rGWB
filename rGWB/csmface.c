@@ -387,7 +387,7 @@ void csmface_set_surface_eq(struct csmface_t *face, const struct csmsurface_t *s
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmface_copy_attributtes_from_face1(const struct csmface_t *face1, struct csmface_t *face2)
+void csmface_copy_attributes_from_face1(const struct csmface_t *face1, struct csmface_t *face2)
 {
     assert_no_null(face1);
     assert_no_null(face2);
