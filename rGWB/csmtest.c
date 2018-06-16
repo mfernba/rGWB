@@ -5805,6 +5805,8 @@ void csmtest_test(void)
     //i_test_interseccion_solidos7(viewer);
 
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
+    i_test_mechanical_part1();
     //i_test_difference3();
     //i_test_cilindro5(viewer);
     //i_test_mechanical5();
@@ -5814,8 +5816,8 @@ void csmtest_test(void)
     //return;
     
     process_all_test = CSMTRUE;
-    //csmdebug_configure_for_fast_testing();
-    csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
+    csmdebug_configure_for_fast_testing();
+    //csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
     
     //csmtest_array_test1();
     //csmtest_array_test2();
@@ -5895,7 +5897,7 @@ void csmtest_test(void)
                                   // --> No manipular las intersecciones non-manifold, parece que el caso out-on-out se gestiona correctamente.
 
         i_test_mechanical_part1_redux();
-        i_test_mechanical_part1();
+        //-->i_test_mechanical_part1();
         
         i_test_mechanical_part2();
         

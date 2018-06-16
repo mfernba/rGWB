@@ -57,14 +57,20 @@ struct i_neighborhood_t
     CSMBOOL U2_is_real_hedge;
 };
 
-struct i_inters_sectors_t
+struct i_inters_sectors_cl_t
 {
-    unsigned long idx_nba, idx_nbb;
-    
     enum csmsetop_classify_resp_solid_t s1a;
     enum csmsetop_classify_resp_solid_t s2a;
     enum csmsetop_classify_resp_solid_t s1b;
     enum csmsetop_classify_resp_solid_t s2b;
+};
+
+struct i_inters_sectors_t
+{
+    unsigned long idx_nba, idx_nbb;
+
+    struct i_inters_sectors_cl_t prev_position;
+    struct i_inters_sectors_cl_t recl_position;
     
     CSMBOOL intersect;
     CSMBOOL reclassified_by_adjacency;
@@ -207,11 +213,16 @@ CONSTRUCTOR(static struct i_inters_sectors_t *, i_create_inters_sectors, (
     inters->idx_nba = idx_nba;
     inters->idx_nbb = idx_nbb;
     
-    inters->s1a = s1a;
-    inters->s2a = s2a;
-    inters->s1b = s1b;
-    inters->s2b = s2b;
-    
+    inters->prev_position.s1a = s1a;
+    inters->prev_position.s2a = s2a;
+    inters->prev_position.s1b = s1b;
+    inters->prev_position.s2b = s2b;
+
+    inters->recl_position.s1a = s1a;
+    inters->recl_position.s2a = s2a;
+    inters->recl_position.s1b = s1b;
+    inters->recl_position.s2b = s2b;
+
     inters->intersect = intersect;
     inters->reclassified_by_adjacency = reclassified_by_adjacency;
     
@@ -866,147 +877,9 @@ static void i_generate_neighboorhoods(
     *neighborhood_intersections = neighborhood_intersections_loc;
 }
 
-/*
-// ------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------
 
-static CSMBOOL i_must_look_for_non_manifold_intersection(
-                        enum csmsetop_classify_resp_solid_t s1, enum csmsetop_classify_resp_solid_t s2,
-                        enum i_nonmanifold_intersect_sequence_t *nonmanifold_intersection_sequence)
-{
-    CSMBOOL must_look_for;
-    enum i_nonmanifold_intersect_sequence_t nonmanifold_intersection_sequence_loc;
-    
-    assert_no_null(nonmanifold_intersection_sequence);
-    
-    if (s1 == CSMSETOP_CLASSIFY_RESP_SOLID_ON && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
-    {
-        must_look_for = CSMTRUE;
-        nonmanifold_intersection_sequence_loc = i_NONMANIFOLD_INTERSECT_SEQUENCE_IN_ON;
-    }
-    else if (s1 == CSMSETOP_CLASSIFY_RESP_SOLID_IN && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-    {
-        must_look_for = CSMTRUE;
-        nonmanifold_intersection_sequence_loc = i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_IN;
-    }
-    else if (s1 == CSMSETOP_CLASSIFY_RESP_SOLID_ON && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
-    {
-        must_look_for = CSMFALSE;
-        nonmanifold_intersection_sequence_loc = i_NONMANIFOLD_INTERSECT_SEQUENCE_OUT_ON;
-    }
-    else if (s1 == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-    {
-        must_look_for = CSMFALSE;
-        nonmanifold_intersection_sequence_loc = i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_OUT;
-    }
-    else
-    {
-        must_look_for = CSMFALSE;
-        nonmanifold_intersection_sequence_loc = (enum i_nonmanifold_intersect_sequence_t)USHRT_MAX;
-    }
-    
-    *nonmanifold_intersection_sequence = nonmanifold_intersection_sequence_loc;
-    
-    return must_look_for;
-}
-
-// ------------------------------------------------------------------------------------------
-
-static CSMBOOL i_match_non_manifold_intersection(
-                        enum i_nonmanifold_intersect_sequence_t nonmanifold_intersection_sequence,
-                        enum csmsetop_classify_resp_solid_t s1, enum csmsetop_classify_resp_solid_t s2)
-{
-    switch (nonmanifold_intersection_sequence)
-    {
-        case i_NONMANIFOLD_INTERSECT_SEQUENCE_IN_ON:
-            
-            return IS_TRUE(s1 == CSMSETOP_CLASSIFY_RESP_SOLID_IN && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
-            
-        case i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_IN:
-            
-            return IS_TRUE(s1 == CSMSETOP_CLASSIFY_RESP_SOLID_ON && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_IN);
-            
-        case i_NONMANIFOLD_INTERSECT_SEQUENCE_OUT_ON:
-            
-            return IS_TRUE(s1 == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
-            
-        case i_NONMANIFOLD_INTERSECT_SEQUENCE_ON_OUT:
-            
-            return IS_TRUE(s1 == CSMSETOP_CLASSIFY_RESP_SOLID_ON && s2 == CSMSETOP_CLASSIFY_RESP_SOLID_OUT);
-            
-        default_error();
-    }
-}
-
-// ------------------------------------------------------------------------------------------
-
-static CSMBOOL i_on_sides_of_sectors_are_overlapped_on_edge(
-                        const struct i_neighborhood_t *nba,
-                        enum csmsetop_classify_resp_solid_t s1a, enum csmsetop_classify_resp_solid_t s2a,
-                        const struct i_neighborhood_t *nbb,
-                        enum csmsetop_classify_resp_solid_t s1b, enum csmsetop_classify_resp_solid_t s2b,
-                        const struct csmtolerance_t *tolerances)
-{
-    CSMBOOL on_sides_of_sectors_are_overlapped_on_edge;
-    double Ux_b, Uy_b, Uz_b;
-    CSMBOOL Ub_is_real_edge;
-    
-    assert_no_null(nba);
-    assert_no_null(nbb);
-    
-    if (s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-    {
-        assert(s2b == CSMSETOP_CLASSIFY_RESP_SOLID_IN);
-        
-        Ux_b = nbb->Ux1_u;
-        Uy_b = nbb->Uy1_u;
-        Uz_b = nbb->Uz1_u;
-        Ub_is_real_edge = nbb->U1_is_real_hedge;
-    }
-    else
-    {
-        assert(s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN);
-        assert(s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
-        
-        Ux_b = nbb->Ux2_u;
-        Uy_b = nbb->Uy2_u;
-        Uz_b = nbb->Uz2_u;
-        Ub_is_real_edge = nbb->U2_is_real_hedge;
-    }
-    
-    if (Ub_is_real_edge == CSMFALSE)
-    {
-        on_sides_of_sectors_are_overlapped_on_edge = CSMFALSE;
-    }
-    else
-    {
-        if (s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON && nba->U1_is_real_hedge == CSMTRUE)
-        {
-            on_sides_of_sectors_are_overlapped_on_edge = csmmath_vectors_are_parallel(nba->Ux1_u, nba->Uy1_u, nba->Uz1_u, Ux_b, Uy_b, Uz_b, tolerances);
-        }
-        else
-        {
-            assert(s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
-            on_sides_of_sectors_are_overlapped_on_edge = CSMFALSE;
-        }
-        
-        if (on_sides_of_sectors_are_overlapped_on_edge == CSMFALSE)
-        {
-            if (s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-                on_sides_of_sectors_are_overlapped_on_edge = csmmath_vectors_are_parallel(nba->Ux2_u, nba->Uy2_u, nba->Uz2_u, Ux_b, Uy_b, Uz_b, tolerances);
-            else
-                assert(s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON);
-        }
-    }
-    
-    return on_sides_of_sectors_are_overlapped_on_edge;
-}
-
-// ------------------------------------------------------------------------------------------
-
-static void i_discard_non_manifold_intersections(
-                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
-                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections,
-                        const struct csmtolerance_t *tolerances)
+static void i_update_inters_sectors_prev_position_after_reclassification(csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
 {
     unsigned long i, num_sectors;
     
@@ -1015,110 +888,14 @@ static void i_discard_non_manifold_intersections(
     for (i = 0; i < num_sectors; i++)
     {
         struct i_inters_sectors_t *sector_i;
-        struct i_neighborhood_t *nba_i, *nbb_i;
-        enum i_nonmanifold_intersect_sequence_t nonmanifold_intersection_sequence;
 
         sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
         assert_no_null(sector_i);
         
-        nba_i = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
-        assert_no_null(nba_i);
-        
-        nbb_i = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
-        assert_no_null(nbb_i);
-            
-        if (sector_i->intersect == CSMTRUE
-                && csmopbas_is_wide_hedge(nba_i->he, tolerances, NULL, NULL, NULL) == CSMTRUE
-                && (sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON || sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-                && i_must_look_for_non_manifold_intersection(sector_i->s1b, sector_i->s2b, &nonmanifold_intersection_sequence) == CSMTRUE)
-        {
-            struct csmhedge_t *mate_he_nbb_i;
-            unsigned long j;
-            CSMBOOL modified_mate_neighborhood;
-            
-            mate_he_nbb_i = csmhedge_next(csmopbas_mate(nbb_i->he));
-            
-            modified_mate_neighborhood = CSMFALSE;
-            
-            for (j = 0; j < num_sectors; j++)
-            {
-                struct i_inters_sectors_t *sector_j;
-                struct i_neighborhood_t *nbb_j;
-                
-                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
-                assert_no_null(sector_j);
-                
-                nbb_j = csmarrayc_get_st(neighborhood_B, sector_j->idx_nbb, i_neighborhood_t);
-                assert_no_null(nbb_j);
-                
-                if (sector_j->idx_nba == sector_i->idx_nba
-                        && nbb_j->he == mate_he_nbb_i
-                        && i_match_non_manifold_intersection(nonmanifold_intersection_sequence, sector_j->s1b, sector_j->s2b) == CSMTRUE)
-                {
-                    if (i_on_sides_of_sectors_are_overlapped_on_edge(
-                            nba_i,
-                            sector_i->s1a, sector_i->s2a,
-                            nbb_j,
-                            sector_j->s1b, sector_j->s2b,
-                            tolerances) == CSMFALSE)
-                    {
-                        assert(modified_mate_neighborhood == CSMFALSE);
-                        modified_mate_neighborhood = CSMTRUE;
-                    
-                        sector_i->intersect = CSMFALSE;
-                        sector_j->intersect = CSMFALSE;
-                    }
-                }
-            }
-        }
-        
-        if (sector_i->intersect == CSMTRUE
-                && csmopbas_is_wide_hedge(nbb_i->he, tolerances, NULL, NULL, NULL) == CSMTRUE
-                && (sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON || sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-                && i_must_look_for_non_manifold_intersection(sector_i->s1a, sector_i->s2a, &nonmanifold_intersection_sequence) == CSMTRUE)
-        {
-            struct csmhedge_t *mate_he_nba_i;
-            unsigned long j;
-            CSMBOOL modified_mate_neighborhood;
-            
-            mate_he_nba_i = csmhedge_next(csmopbas_mate(nba_i->he));
-            
-            modified_mate_neighborhood = CSMFALSE;
-            
-            for (j = 0; j < num_sectors; j++)
-            {
-                struct i_inters_sectors_t *sector_j;
-                struct i_neighborhood_t *nba_j;
-                
-                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
-                assert_no_null(sector_j);
-                
-                nba_j = csmarrayc_get_st(neighborhood_A, sector_j->idx_nba, i_neighborhood_t);
-                assert_no_null(nba_j);
-                
-                if (sector_j->idx_nbb == sector_i->idx_nbb
-                        && nba_j->he == mate_he_nba_i
-                        && i_match_non_manifold_intersection(nonmanifold_intersection_sequence, sector_j->s1a, sector_j->s2a) == CSMTRUE)
-                {
-                    if (i_on_sides_of_sectors_are_overlapped_on_edge(
-                            nbb_i,
-                            sector_i->s1b, sector_i->s2b,
-                            nba_j,
-                            sector_j->s1a, sector_j->s2a,
-                            tolerances) == CSMFALSE)
-                    {
-                        assert(modified_mate_neighborhood == CSMFALSE);
-                        modified_mate_neighborhood = CSMTRUE;
-                    
-                        sector_i->intersect = CSMFALSE;
-                        sector_j->intersect = CSMFALSE;
-                    }
-                }
-            }
-        }
+        sector_i->prev_position = sector_i->recl_position;
     }
 }
-*/
+
 // ------------------------------------------------------------------------------------------
 
 static void i_correct_impossible_classifications_due_to_precision_errors(
@@ -1145,24 +922,26 @@ static void i_correct_impossible_classifications_due_to_precision_errors(
         
         if (sector_i->intersect == CSMTRUE)
         {
-            if (sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+            if (sector_i->prev_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON && sector_i->prev_position.s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
             {
-                if (sector_i->s1b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-                    sector_i->s1b = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
+                if (sector_i->prev_position.s1b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    sector_i->recl_position.s1b = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
                 
-                if (sector_i->s2b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-                    sector_i->s2b = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
+                if (sector_i->prev_position.s2b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    sector_i->recl_position.s2b = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
             }
-            else if (sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+            else if (sector_i->prev_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON && sector_i->prev_position.s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
             {
-                if (sector_i->s1a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-                    sector_i->s1a = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
+                if (sector_i->prev_position.s1a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    sector_i->recl_position.s1a = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
                 
-                if (sector_i->s2a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-                    sector_i->s2a = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
+                if (sector_i->prev_position.s2a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    sector_i->recl_position.s2a = CSMSETOP_CLASSIFY_RESP_SOLID_ON;
             }
         }
     }
+    
+    i_update_inters_sectors_prev_position_after_reclassification(neighborhood_intersections);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1187,10 +966,10 @@ static void i_reclassify_on_sectors(
         sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
         assert_no_null(sector_i);
         
-        if (sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
-                && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
-                && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON
-                && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        if (sector_i->prev_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->prev_position.s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->prev_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->prev_position.s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             struct i_neighborhood_t *nba, *nbb;
             unsigned long idx_prev_sector_a, idx_next_sector_a;
@@ -1235,9 +1014,9 @@ static void i_reclassify_on_sectors(
                 
                 if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                 {
-                    if (sector_j->s1a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    if (sector_j->prev_position.s1a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
                     {
-                        sector_j->s2a = newsa;
+                        sector_j->recl_position.s2a = newsa;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
@@ -1245,51 +1024,53 @@ static void i_reclassify_on_sectors(
                 
                 if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                 {
-                    if (sector_j->s2a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    if (sector_j->prev_position.s2a != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
                     {
-                        sector_j->s1a = newsa;
+                        sector_j->recl_position.s1a = newsa;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                 }
 
                 if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
                 {
-                    if (sector_j->s1b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    if (sector_j->prev_position.s1b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
                     {
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                 }
 
                 if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
                 {
-                    if (sector_j->s2b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                    if (sector_j->prev_position.s2b != CSMSETOP_CLASSIFY_RESP_SOLID_ON)
                     {
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                 }
                 
-                if (sector_j->s1a == sector_j->s2a
-                        && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                if (sector_j->recl_position.s1a == sector_j->recl_position.s2a
+                        && (sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                 {
                     sector_j->intersect = CSMFALSE;
                 }
                 
-                if (sector_j->s1b == sector_j->s2b
-                        && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                if (sector_j->recl_position.s1b == sector_j->recl_position.s2b
+                        && (sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                 {
                     sector_j->intersect = CSMFALSE;
                 }
                 
-                sector_i->s1a = newsa;
-                sector_i->s2a = newsa;
-                sector_i->s1b = newsb;
-                sector_i->s2b = newsb;
+                sector_i->recl_position.s1a = newsa;
+                sector_i->recl_position.s2a = newsa;
+                sector_i->recl_position.s1b = newsb;
+                sector_i->recl_position.s2b = newsb;
                 sector_i->intersect = CSMFALSE;
             }
         }
     }
+    
+    i_update_inters_sectors_prev_position_after_reclassification(neighborhood_intersections);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1315,8 +1096,8 @@ static void i_reclasssify_double_on_edges_s1a_s1b(
         assert_no_null(sector_i);
         
         if(sector_i->intersect == CSMTRUE
-                && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
-                && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                && sector_i->prev_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->prev_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             struct i_neighborhood_t *nba, *nbb;
             unsigned long idx_prev_sector_a, idx_prev_sector_b;
@@ -1346,40 +1127,40 @@ static void i_reclasssify_double_on_edges_s1a_s1b(
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s1a = newsa;
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s1a = newsa;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s2a = newsa;
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s2a = newsa;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
                     {
-                        sector_j->s1a = newsa;
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s1a = newsa;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == idx_prev_sector_b)
                     {
-                        sector_j->s2a = newsa;
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s2a = newsa;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
-                    if (sector_j->s1a == sector_j->s2a
-                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1a == sector_j->recl_position.s2a
+                            && (sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
 
-                    if (sector_j->s1b == sector_j->s2b
-                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1b == sector_j->recl_position.s2b
+                            && (sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
@@ -1412,8 +1193,8 @@ static void i_reclasssify_double_on_edges_s1a_s2b(
         assert_no_null(sector_i);
         
         if(sector_i->intersect == CSMTRUE
-                && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
-                && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                && sector_i->prev_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->prev_position.s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             struct i_neighborhood_t *nba, *nbb;
             unsigned long idx_prev_sector_a, idx_next_sector_b;
@@ -1443,40 +1224,40 @@ static void i_reclasssify_double_on_edges_s1a_s2b(
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s1a = newsa;
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s1a = newsa;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s2a = newsa;
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s2a = newsa;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
                     {
-                        sector_j->s1a = newsa;
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s1a = newsa;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == idx_next_sector_b)
                     {
-                        sector_j->s2a = newsa;
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s2a = newsa;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
-                    if (sector_j->s1a == sector_j->s2a
-                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1a == sector_j->recl_position.s2a
+                            && (sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
 
-                    if (sector_j->s1b == sector_j->s2b
-                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1b == sector_j->recl_position.s2b
+                            && (sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
@@ -1509,8 +1290,8 @@ static void i_reclasssify_double_on_edges_s2a_s1b(
         assert_no_null(sector_i);
         
         if(sector_i->intersect == CSMTRUE
-                && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
-                && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                && sector_i->prev_position.s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->prev_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             struct i_neighborhood_t *nba, *nbb;
             unsigned long idx_next_sector_a, idx_prev_sector_b;
@@ -1540,40 +1321,40 @@ static void i_reclasssify_double_on_edges_s2a_s1b(
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s2a = newsa;
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s2a = newsa;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s1a = newsa;
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s1a = newsa;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
                     {
-                        sector_j->s2a = newsa;
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s2a = newsa;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == idx_prev_sector_b)
                     {
-                        sector_j->s1a = newsa;
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s1a = newsa;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
-                    if (sector_j->s1a == sector_j->s2a
-                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1a == sector_j->recl_position.s2a
+                            && (sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
 
-                    if (sector_j->s1b == sector_j->s2b
-                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1b == sector_j->recl_position.s2b
+                            && (sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
@@ -1606,8 +1387,8 @@ static void i_reclasssify_double_on_edges_s2a_s2b(
         assert_no_null(sector_i);
         
         if(sector_i->intersect == CSMTRUE
-                && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
-                && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+                && sector_i->prev_position.s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON
+                && sector_i->prev_position.s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             struct i_neighborhood_t *nba, *nbb;
             unsigned long idx_next_sector_a, idx_next_sector_b;
@@ -1637,40 +1418,40 @@ static void i_reclasssify_double_on_edges_s2a_s2b(
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s2a = newsa;
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s2a = newsa;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s1a = newsa;
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s1a = newsa;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
 
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
                     {
-                        sector_j->s2a = newsa;
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s2a = newsa;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == idx_next_sector_b)
                     {
-                        sector_j->s1a = newsa;
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s1a = newsa;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
-                    if (sector_j->s1a == sector_j->s2a
-                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1a == sector_j->recl_position.s2a
+                            && (sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
 
-                    if (sector_j->s1b == sector_j->s2b
-                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1b == sector_j->recl_position.s2b
+                            && (sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
@@ -1691,6 +1472,8 @@ static void i_reclasssify_double_on_edges(
     i_reclasssify_double_on_edges_s1a_s2b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
     i_reclasssify_double_on_edges_s2a_s1b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
     i_reclasssify_double_on_edges_s2a_s2b(set_operation, neighborhood_A, neighborhood_B, neighborhood_intersections);
+    
+    i_update_inters_sectors_prev_position_after_reclassification(neighborhood_intersections);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1730,7 +1513,7 @@ static void i_reclasssify_single_on_edges(
         idx_prev_sector_b = csmmath_prev_idx(sector_i->idx_nbb, num_sectors_b);
         idx_next_sector_b = csmmath_next_idx(sector_i->idx_nbb, num_sectors_b);
         
-        if (sector_i->intersect == CSMTRUE && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        if (sector_i->intersect == CSMTRUE && sector_i->prev_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             enum csmsetop_classify_resp_solid_t newsa;
             unsigned long j;
@@ -1748,18 +1531,18 @@ static void i_reclasssify_single_on_edges(
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s1a = newsa;
+                        sector_j->recl_position.s1a = newsa;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s2a = newsa;
+                        sector_j->recl_position.s2a = newsa;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
-                    if (sector_j->s1a == sector_j->s2a
-                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1a == sector_j->recl_position.s2a
+                            && (sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
@@ -1767,7 +1550,7 @@ static void i_reclasssify_single_on_edges(
             }
         }
 
-        if (sector_i->intersect == CSMTRUE && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        if (sector_i->intersect == CSMTRUE && sector_i->prev_position.s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             enum csmsetop_classify_resp_solid_t newsa;
             unsigned long j;
@@ -1785,18 +1568,18 @@ static void i_reclasssify_single_on_edges(
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s2a = newsa;
+                        sector_j->recl_position.s2a = newsa;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s1a = newsa;
+                        sector_j->recl_position.s1a = newsa;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
-                    if (sector_j->s1a == sector_j->s2a
-                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1a == sector_j->recl_position.s2a
+                            && (sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
@@ -1804,7 +1587,7 @@ static void i_reclasssify_single_on_edges(
             }
         }
         
-        if(sector_i->intersect == CSMTRUE && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        if(sector_i->intersect == CSMTRUE && sector_i->prev_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             enum csmsetop_classify_resp_solid_t newsb;
             unsigned long j;
@@ -1823,18 +1606,18 @@ static void i_reclasssify_single_on_edges(
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
                     {
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
-                    if (sector_j->s1b == sector_j->s2b
-                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1b == sector_j->recl_position.s2b
+                            && (sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
@@ -1842,7 +1625,7 @@ static void i_reclasssify_single_on_edges(
             }
         }
         
-        if(sector_i->intersect == CSMTRUE && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
+        if(sector_i->intersect == CSMTRUE && sector_i->prev_position.s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
         {
             enum csmsetop_classify_resp_solid_t newsb;
             unsigned long j;
@@ -1861,18 +1644,18 @@ static void i_reclasssify_single_on_edges(
                 {
                     if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
                     {
-                        sector_j->s2b = newsb;
+                        sector_j->recl_position.s2b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
                     if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
                     {
-                        sector_j->s1b = newsb;
+                        sector_j->recl_position.s1b = newsb;
                         sector_j->reclassified_by_adjacency = CSMTRUE;
                     }
                     
-                    if (sector_j->s1b == sector_j->s2b
-                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
+                    if (sector_j->recl_position.s1b == sector_j->recl_position.s2b
+                            && (sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
                     {
                         sector_j->intersect = CSMFALSE;
                     }
@@ -1880,6 +1663,8 @@ static void i_reclasssify_single_on_edges(
             }
         }
     }
+    
+    i_update_inters_sectors_prev_position_after_reclassification(neighborhood_intersections);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1937,8 +1722,8 @@ static void i_print_neighborhood_intersections(
             nbb = csmarrayc_get_st(neighborhood_B, inters_sectors->idx_nbb, i_neighborhood_t);
             assert_no_null(nbb);
             
-            text_cla = i_debug_text_for_sector_classification(inters_sectors->s1a, inters_sectors->s2a);
-            text_clb = i_debug_text_for_sector_classification(inters_sectors->s1b, inters_sectors->s2b);
+            text_cla = i_debug_text_for_sector_classification(inters_sectors->recl_position.s1a, inters_sectors->recl_position.s2a);
+            text_clb = i_debug_text_for_sector_classification(inters_sectors->recl_position.s1b, inters_sectors->recl_position.s2b);
 
             csmdebug_print_debug_info(
                         "(hea %lu [%lu]) (heb %lu [%lu])",
@@ -1988,171 +1773,6 @@ static void i_reclasssify_on_edges(
                         neighborhood_intersections);
 }
 
-// ------------------------------------------------------------------------------------------
-/*
-static void i_reclasssify_incorrect_in_out_edges(
-                        csmArrayStruct(i_neighborhood_t) *neighborhood_A, csmArrayStruct(i_neighborhood_t) *neighborhood_B,
-                        csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections)
-{
-    unsigned long num_sectors_a, num_sectors_b;
-    unsigned long i, num_sectors;
-    
-    num_sectors_a = csmarrayc_count_st(neighborhood_A, i_neighborhood_t);
-    num_sectors_b = csmarrayc_count_st(neighborhood_B, i_neighborhood_t);
-    
-    num_sectors = csmarrayc_count_st(neighborhood_intersections, i_inters_sectors_t);
-
-    for (i = 0; i < num_sectors; i++)
-    {
-        struct i_inters_sectors_t *sector_i;
-        struct i_neighborhood_t *nba, *nbb;
-        unsigned long idx_prev_sector_a, idx_prev_sector_b;
-        unsigned long idx_next_sector_a, idx_next_sector_b;
-        
-        sector_i = csmarrayc_get_st(neighborhood_intersections, i, i_inters_sectors_t);
-        assert_no_null(sector_i);
-
-        nba = csmarrayc_get_st(neighborhood_A, sector_i->idx_nba, i_neighborhood_t);
-        assert_no_null(nba);
-
-        nbb = csmarrayc_get_st(neighborhood_B, sector_i->idx_nbb, i_neighborhood_t);
-        assert_no_null(nbb);
-        
-        idx_prev_sector_a = csmmath_prev_idx(sector_i->idx_nba, num_sectors_a);
-        idx_next_sector_a = csmmath_next_idx(sector_i->idx_nba, num_sectors_a);
-        
-        idx_prev_sector_b = csmmath_prev_idx(sector_i->idx_nbb, num_sectors_b);
-        idx_next_sector_b = csmmath_next_idx(sector_i->idx_nbb, num_sectors_b);
-        
-        if (sector_i->intersect == CSMTRUE
-                && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT && sector_i->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
-        {
-            enum csmsetop_classify_resp_solid_t newsa;
-            unsigned long j;
-            
-            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-    
-            for(j = 0; j < num_sectors; j++)
-            {
-                struct i_inters_sectors_t *sector_j;
-                
-                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
-                assert_no_null(sector_j);
-                
-                if (sector_j->intersect == CSMTRUE)
-                {
-                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
-                        sector_j->s1a = newsa;
-                    
-                    if (sector_j->idx_nba == idx_prev_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
-                        sector_j->s2a = newsa;
-                    
-                    if (sector_j->s1a == sector_j->s2a
-                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
-                    {
-                        sector_j->intersect = CSMFALSE;
-                    }
-                }
-            }
-        }
-
-        if (sector_i->intersect == CSMTRUE && sector_i->s2a == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-        {
-            enum csmsetop_classify_resp_solid_t newsa;
-            unsigned long j;
-            
-            newsa = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-    
-            for(j = 0; j < num_sectors; j++)
-            {
-                struct i_inters_sectors_t *sector_j;
-                
-                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
-                assert_no_null(sector_j);
-                
-                if (sector_j->intersect == CSMTRUE)
-                {
-                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
-                        sector_j->s2a = newsa;
-                    
-                    if (sector_j->idx_nba == idx_next_sector_a && sector_j->idx_nbb == sector_i->idx_nbb)
-                        sector_j->s1a = newsa;
-                    
-                    if (sector_j->s1a == sector_j->s2a
-                            && (sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
-                    {
-                        sector_j->intersect = CSMFALSE;
-                    }
-                }
-            }
-        }
-        
-        if(sector_i->intersect == CSMTRUE && sector_i->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-        {
-            enum csmsetop_classify_resp_solid_t newsb;
-            unsigned long j;
-            
-            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-            //newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-    
-            for(j = 0; j < num_sectors; j++)
-            {
-                struct i_inters_sectors_t *sector_j;
-                
-                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
-                assert_no_null(sector_j);
-                
-                if (sector_j->intersect == CSMTRUE)
-                {
-                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
-                        sector_j->s1b = newsb;
-                    
-                    if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_prev_sector_b)
-                        sector_j->s2b = newsb;
-                    
-                    if (sector_j->s1b == sector_j->s2b
-                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
-                    {
-                        sector_j->intersect = CSMFALSE;
-                    }
-                }
-            }
-        }
-        
-        if(sector_i->intersect == CSMTRUE && sector_i->s2b == CSMSETOP_CLASSIFY_RESP_SOLID_ON)
-        {
-            enum csmsetop_classify_resp_solid_t newsb;
-            unsigned long j;
-            
-            newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_OUT: CSMSETOP_CLASSIFY_RESP_SOLID_IN;
-            //newsb = (set_operation == CSMSETOP_OPERATION_UNION) ? CSMSETOP_CLASSIFY_RESP_SOLID_IN: CSMSETOP_CLASSIFY_RESP_SOLID_OUT;
-    
-            for(j = 0; j < num_sectors; j++)
-            {
-                struct i_inters_sectors_t *sector_j;
-                
-                sector_j = csmarrayc_get_st(neighborhood_intersections, j, i_inters_sectors_t);
-                assert_no_null(sector_j);
-                
-                if (sector_j->intersect == CSMTRUE)
-                {
-                    if (sector_j->idx_nba == sector_i->idx_nba && sector_j->idx_nbb == sector_i->idx_nbb)
-                        sector_j->s2b = newsb;
-                    
-                    if (sector_j->idx_nba == sector_j->idx_nba && sector_j->idx_nbb == idx_next_sector_b)
-                        sector_j->s1b = newsb;
-                    
-                    if (sector_j->s1b == sector_j->s2b
-                            && (sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN || sector_j->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_OUT))
-                    {
-                        sector_j->intersect = CSMFALSE;
-                    }
-                }
-            }
-        }
-    }
-}
-*/
 // ------------------------------------------------------------------------------------------
 
 static struct i_inters_sectors_t *i_get_next_sector(csmArrayStruct(i_inters_sectors_t) *neighborhood_intersections, unsigned long *last_idx)
@@ -2547,12 +2167,12 @@ static void i_insert_null_edges(
             nbb = csmarrayc_get_st(neighborhood_B, sector->idx_nbb, i_neighborhood_t);
             assert_no_null(nbb);
             
-            if (sector->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+            if (sector->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
                 ha1 = nba->he;
             else
                 ha2 = nba->he;
             
-            if (sector->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
+            if (sector->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
                 hb1 = nbb->he;
             else
                 hb2 = nbb->he;
@@ -2572,7 +2192,7 @@ static void i_insert_null_edges(
                 nbb = csmarrayc_get_st(neighborhood_B, sector->idx_nbb, i_neighborhood_t);
                 assert_no_null(nbb);
                 
-                if (sector->s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
+                if (sector->recl_position.s1a == CSMSETOP_CLASSIFY_RESP_SOLID_OUT)
                 {
                     if (ha1 == NULL && ha2 != NULL)
                         ha1 = nba->he;
@@ -2587,7 +2207,7 @@ static void i_insert_null_edges(
                         *improper_intersection_detected = CSMTRUE;
                 }
                 
-                if (sector->s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
+                if (sector->recl_position.s1b == CSMSETOP_CLASSIFY_RESP_SOLID_IN)
                 {
                     if (hb1 == NULL && hb2 != NULL)
                         hb1 = nbb->he;
