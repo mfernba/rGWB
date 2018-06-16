@@ -8,7 +8,6 @@
 
 #include "csmsolid_vis.h"
 #include "csmsolid.inl"
-#include "csmsolid.tli"
 
 #include "csmedge.inl"
 #include "csmedge.tli"
@@ -163,14 +162,11 @@ static void i_draw_debug_info_hedge(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_debug_info_faces(
-                        struct csmhashtb(csmface_t) *sfaces,
-                        CSMBOOL draw_edge_info,
-                        struct bsgraphics2_t *graphics)
+static void i_draw_debug_info_faces(struct csmsolid_t *solid, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics)
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
     
-    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    iterator = csmsolid_face_iterator(solid);
     
     while (csmhashtb_has_next(iterator, csmface_t) == CSMTRUE)
     {
@@ -240,12 +236,12 @@ static void i_draw_debug_info_faces(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_debug_info_vertexs(struct csmhashtb(csmvertex_t) *svertexs, struct bsgraphics2_t *graphics)
+static void i_draw_debug_info_vertexs(struct csmsolid_t *solid, struct bsgraphics2_t *graphics)
 {
     struct csmhashtb_iterator(csmvertex_t) *iterator;
     unsigned long num_iters;
     
-    iterator = csmhashtb_create_iterator(svertexs, csmvertex_t);
+    iterator = csmsolid_vertex_iterator(solid);
     num_iters = 0;
     
     while (csmhashtb_has_next(iterator, csmvertex_t) == CSMTRUE)
@@ -315,11 +311,11 @@ static void i_draw_null_edge(struct csmedge_t *edge, struct bsgraphics2_t *graph
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_null_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgraphics2_t *graphics)
+static void i_draw_null_edges(struct csmsolid_t *solid, struct bsgraphics2_t *graphics)
 {
     struct csmhashtb_iterator(csmedge_t) *iterator;
     
-    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    iterator = csmsolid_edge_iterator(solid);
     
     while (csmhashtb_has_next(iterator, csmedge_t) == CSMTRUE)
     {
@@ -339,17 +335,15 @@ static void i_draw_null_edges(struct csmhashtb(csmedge_t) *sedges, struct bsgrap
 
 void csmsolid_vis_draw_debug_info(struct csmsolid_t *solid, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics)
 {
-    assert_no_null(solid);
-    
-    i_draw_debug_info_vertexs(solid->svertexs, graphics);
-    i_draw_debug_info_faces(solid->sfaces, draw_edge_info, graphics);
-    i_draw_null_edges(solid->sedges, graphics);
+    i_draw_debug_info_vertexs(solid, graphics);
+    i_draw_debug_info_faces(solid, draw_edge_info, graphics);
+    i_draw_null_edges(solid, graphics);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 static void i_draw_solid_faces(
-                        struct csmhashtb(csmface_t) *sfaces,
+                        struct csmsolid_t *solid,
                         CSMBOOL draw_solid_face,
                         CSMBOOL draw_face_normal,
                         const struct bsmaterial_t *face_material,
@@ -358,7 +352,7 @@ static void i_draw_solid_faces(
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
     
-    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    iterator = csmsolid_face_iterator(solid);
     
     while (csmhashtb_has_next(iterator, csmface_t) == CSMTRUE)
     {
@@ -398,11 +392,13 @@ static void i_draw_border_edge(struct csmedge_t *edge, CSMBOOL draw_only_border_
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_draw_border_edges(struct csmhashtb(csmedge_t) *sedges, CSMBOOL draw_only_border_edges, struct bsgraphics2_t *graphics)
+static void i_draw_border_edges(struct csmsolid_t *solid, struct bsgraphics2_t *graphics)
 {
+    CSMBOOL draw_only_border_edges;
     struct csmhashtb_iterator(csmedge_t) *iterator;
     
-    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    draw_only_border_edges = csmsolid_draw_only_border_edges(solid);
+    iterator = csmsolid_edge_iterator(solid);
     
     while (csmhashtb_has_next(iterator, csmedge_t) == CSMTRUE)
     {
@@ -429,12 +425,11 @@ void csmsolid_vis_draw(
                 const struct bsmaterial_t *border_edges_material,
                 struct bsgraphics2_t *graphics)
 {
-    assert_no_null(solid);
     
-    i_draw_solid_faces(solid->sfaces, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
+    i_draw_solid_faces(solid, draw_solid_face, draw_face_normal, face_material, normal_material, graphics);
     
     bsgraphics2_escr_color(graphics, border_edges_material);
-    i_draw_border_edges(solid->sedges, solid->draw_only_border_edges, graphics);
+    i_draw_border_edges(solid, graphics);
 }
 
 #else
@@ -442,7 +437,7 @@ void csmsolid_vis_draw(
 // ----------------------------------------------------------------------------------------------------
 
 static void i_genera_mesh_solido(
-                        struct csmhashtb(csmface_t) *sfaces,
+                        struct csmsolid_t *solid,
                         ArrPunto3D **puntos, ArrPunto3D **normales, ArrBool **es_borde,
                         ArrEnum(cplan_tipo_primitiva_t) **tipo_primitivas, ArrPuntero(ArrULong) **inds_caras)
 {
@@ -461,18 +456,14 @@ static void i_genera_mesh_solido(
     *tipo_primitivas = arr_CreaEnum(0, cplan_tipo_primitiva_t);
     *inds_caras = arr_CreaPunteroTD(0, ArrULong);
 
-    face_iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    face_iterator = csmsolid_face_iterator(solid);
     
     while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
     {
         struct csmface_t *face;
         
         csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
-
-        csmface_append_datos_mesh(
-                    face,
-                    *puntos, *normales, *es_borde,
-                    *tipo_primitivas, *inds_caras);
+        csmface_append_datos_mesh(face, *puntos, *normales, *es_borde, *tipo_primitivas, *inds_caras);
     }
 
     csmhashtb_free_iterator(&face_iterator, csmface_t);
@@ -518,13 +509,13 @@ static void i_append_lineas_contorno(struct csmedge_t *edge, ArrPuntero(ArrPunto
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static ArrPuntero(ArrPunto3D) *, i_lineas_contorno, (struct csmhashtb(csmedge_t) *sedges))
+CONSTRUCTOR(static ArrPuntero(ArrPunto3D) *, i_lineas_contorno, (struct csmsolid_t *solid))
 {
     ArrPuntero(ArrPunto3D) *lineas_contorno;
     struct csmhashtb_iterator(csmedge_t) *iterator;
     
     lineas_contorno = arr_CreaPunteroTD(0, ArrPunto3D);
-    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    iterator = csmsolid_edge_iterator(solid);
     
     while (csmhashtb_has_next(iterator, csmedge_t) == CSMTRUE)
     {
@@ -548,17 +539,11 @@ void csmsolid_vis_datos_mesh(
                         ArrEnum(cplan_tipo_primitiva_t) **tipo_primitivas, ArrPuntero(ArrULong) **inds_caras,
                         ArrPuntero(ArrPunto3D) **lineas_contorno_opc)
 {
-    assert_no_null(solid);
-
     csmsolid_redo_geometric_generated_data(solid);
-
-    i_genera_mesh_solido(
-                        solid->sfaces,
-                        puntos, normales, es_borde,
-                        tipo_primitivas, inds_caras);
+    i_genera_mesh_solido(solid, puntos, normales, es_borde, tipo_primitivas, inds_caras);
 
     if (lineas_contorno_opc != NULL)
-        *lineas_contorno_opc = i_lineas_contorno(solid->sedges);
+        *lineas_contorno_opc = i_lineas_contorno(solid);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -583,13 +568,13 @@ static void i_append_linea_arista(struct csmedge_t *edge, ArrPuntero(ArrPunto3D)
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static ArrPuntero(ArrPunto3D) *, i_lineas_aristas, (struct csmhashtb(csmedge_t) *sedges))
+CONSTRUCTOR(static ArrPuntero(ArrPunto3D) *, i_lineas_aristas, (struct csmsolid_t *solid))
 {
     ArrPuntero(ArrPunto3D) *lineas_contorno;
     struct csmhashtb_iterator(csmedge_t) *iterator;
     
     lineas_contorno = arr_CreaPunteroTD(0, ArrPunto3D);
-    iterator = csmhashtb_create_iterator(sedges, csmedge_t);
+    iterator = csmsolid_edge_iterator(solid);
     
     while (csmhashtb_has_next(iterator, csmedge_t) == CSMTRUE)
     {
@@ -609,9 +594,7 @@ CONSTRUCTOR(static ArrPuntero(ArrPunto3D) *, i_lineas_aristas, (struct csmhashtb
 
 ArrPuntero(ArrPunto3D) *csmsolid_vis_datos_lineas(struct csmsolid_t *solid)
 {
-    assert_no_null(solid);
-
     csmsolid_redo_geometric_generated_data(solid);
-    return i_lineas_aristas(solid->sedges);
+    return i_lineas_aristas(solid);
 }
 #endif

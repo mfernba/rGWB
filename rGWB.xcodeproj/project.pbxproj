@@ -120,7 +120,6 @@
 		5579549A1E5E4811000FC91E /* csmbbox.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954981E5E4811000FC91E /* csmbbox.inl */; };
 		5579549F1E5F942E000FC91E /* csmsolid.c in Sources */ = {isa = PBXBuildFile; fileRef = 5579549D1E5F942E000FC91E /* csmsolid.c */; };
 		557954A01E5F942E000FC91E /* csmsolid.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5579549E1E5F942E000FC91E /* csmsolid.inl */; };
-		557954A21E60D064000FC91E /* csmsolid.tli in Headers */ = {isa = PBXBuildFile; fileRef = 557954A11E60D064000FC91E /* csmsolid.tli */; };
 		557954A51E60D0EF000FC91E /* csmeuler_mvfs.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954A31E60D0EF000FC91E /* csmeuler_mvfs.c */; };
 		557954A61E60D0EF000FC91E /* csmeuler_mvfs.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954A41E60D0EF000FC91E /* csmeuler_mvfs.inl */; };
 		5585C6B71FCB3DFA0045898B /* csmsubdvfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 5585C6B51FCB3DFA0045898B /* csmsubdvfaces.c */; };
@@ -350,7 +349,6 @@
 		557954981E5E4811000FC91E /* csmbbox.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmbbox.inl; sourceTree = "<group>"; };
 		5579549D1E5F942E000FC91E /* csmsolid.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmsolid.c; sourceTree = "<group>"; };
 		5579549E1E5F942E000FC91E /* csmsolid.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmsolid.inl; sourceTree = "<group>"; };
-		557954A11E60D064000FC91E /* csmsolid.tli */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; lineEnding = 2; path = csmsolid.tli; sourceTree = "<group>"; };
 		557954A31E60D0EF000FC91E /* csmeuler_mvfs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmeuler_mvfs.c; sourceTree = "<group>"; };
 		557954A41E60D0EF000FC91E /* csmeuler_mvfs.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmeuler_mvfs.inl; sourceTree = "<group>"; };
 		5585C6B51FCB3DFA0045898B /* csmsubdvfaces.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsubdvfaces.c; sourceTree = "<group>"; };
@@ -644,7 +642,6 @@
 				5579549E1E5F942E000FC91E /* csmsolid.inl */,
 				55244B261EA02A68006F546E /* csmsolid.h */,
 				5579549D1E5F942E000FC91E /* csmsolid.c */,
-				557954A11E60D064000FC91E /* csmsolid.tli */,
 			);
 			name = "Half-Edge Data Structure";
 			sourceTree = "<group>";
@@ -861,7 +858,6 @@
 				557954A01E5F942E000FC91E /* csmsolid.inl in Headers */,
 				557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */,
 				558DE34F208B379700AC42F4 /* csmfacbrep2solid.hxx in Headers */,
-				557954A21E60D064000FC91E /* csmsolid.tli in Headers */,
 				557954781E5E0694000FC91E /* csmid.inl in Headers */,
 				55A984411FBE434A009F7516 /* csmArrPoint2D.hxx in Headers */,
 				553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */,

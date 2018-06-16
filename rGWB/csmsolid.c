@@ -8,7 +8,6 @@
 
 #include "csmsolid.h"
 #include "csmsolid.inl"
-#include "csmsolid.tli"
 
 #include "csmbbox.inl"
 #include "csmdebug.inl"
@@ -33,6 +32,22 @@
 #include "cyassert.h"
 #include "cypespy.h"
 #endif
+
+struct csmsolid_t
+{
+    char *name;
+
+    unsigned long id_new_element;
+
+    struct csmhashtb(csmface_t) *sfaces;
+    struct csmhashtb(csmedge_t) *sedges;
+    struct csmhashtb(csmvertex_t) *svertexs;
+
+    struct csmmaterial_t *visz_material_opt;
+    CSMBOOL draw_only_border_edges;
+    
+    struct csmbbox_t *bbox;
+};
 
 struct i_item_t;
 struct csmhashtb(i_item_t);
@@ -340,6 +355,14 @@ CSMBOOL csmsolid_is_empty(const struct csmsolid_t *solid)
         return CSMFALSE;
     
     return CSMTRUE;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CSMBOOL csmsolid_draw_only_border_edges(const struct csmsolid_t *solid)
+{
+    assert(solid);
+    return solid->draw_only_border_edges;
 }
 
 // ----------------------------------------------------------------------------------------------------
