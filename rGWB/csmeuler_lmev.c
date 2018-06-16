@@ -35,7 +35,7 @@ void csmeuler_lmev(
     register struct csmhedge_t *he_iterator;
     register unsigned long no_iterations;
     struct csmvertex_t *old_vertex;
-    unsigned long *id_nuevo_elemento;
+    unsigned long *id_new_element;
     
     solido_he1 = csmopbas_solid_from_hedge(he1);
     csmsolid_append_new_edge(solido_he1, &new_edge);
@@ -55,9 +55,9 @@ void csmeuler_lmev(
 
     old_vertex = csmhedge_vertex(he2);
     
-    id_nuevo_elemento = csmsolid_id_new_element(solido_he1);
-    csmopbas_addhe(new_edge, old_vertex, he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &hedge_to_new_vertex_loc);
-    csmopbas_addhe(new_edge, new_vertex, he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, &hedge_from_new_vertex_loc);
+    id_new_element = csmsolid_id_new_element(solido_he1);
+    csmopbas_addhe(new_edge, old_vertex, he1, CSMEDGE_LADO_HEDGE_NEG, id_new_element, &hedge_to_new_vertex_loc);
+    csmopbas_addhe(new_edge, new_vertex, he2, CSMEDGE_LADO_HEDGE_POS, id_new_element, &hedge_from_new_vertex_loc);
 
     csmvertex_set_hedge(new_vertex, hedge_from_new_vertex_loc);
     

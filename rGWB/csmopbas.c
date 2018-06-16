@@ -80,7 +80,7 @@ void csmopbas_addhe(
                 struct csmvertex_t *vertex,
                 struct csmhedge_t *hedge,
                 enum csmedge_lado_hedge_t lado,
-                unsigned long *id_nuevo_elemento,
+                unsigned long *id_new_element,
                 struct csmhedge_t **new_hedge_opc)
 {
     struct csmhedge_t *new_hedge_loc;
@@ -95,7 +95,7 @@ void csmopbas_addhe(
     }
     else
     {
-        new_hedge_loc = csmhedge_crea(id_nuevo_elemento);
+        new_hedge_loc = csmhedge_crea(id_new_element);
         csmnode_insert_node2_before_node1(hedge, new_hedge_loc, csmhedge_t);
     }
     

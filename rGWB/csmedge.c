@@ -51,13 +51,13 @@ CONSTRUCTOR(static struct csmedge_t *, i_new, (
 
 // --------------------------------------------------------------------------------------------------------------
 
-struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
+struct csmedge_t *csmedge_crea(unsigned long *id_new_element)
 {
     unsigned long id;
     struct csmhedge_t *he1, *he2;
     CSMBOOL setop_is_null_edge;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
 
     he1 = NULL;
     he2 = NULL;
@@ -69,13 +69,13 @@ struct csmedge_t *csmedge_crea(unsigned long *id_nuevo_elemento)
 
 // --------------------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmedge_t *, i_duplicate_edge, (unsigned long *id_nuevo_elemento))
+CONSTRUCTOR(static struct csmedge_t *, i_duplicate_edge, (unsigned long *id_new_element))
 {
     unsigned long id;
     struct csmhedge_t *he1, *he2;
     CSMBOOL setop_is_null_edge;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
 
     he1 = NULL;
     he2 = NULL;
@@ -89,12 +89,12 @@ CONSTRUCTOR(static struct csmedge_t *, i_duplicate_edge, (unsigned long *id_nuev
 
 struct csmedge_t *csmedge_duplicate(
                         const struct csmedge_t *edge,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
 {
     struct csmedge_t *new_edge;
     
-    new_edge = i_duplicate_edge(id_nuevo_elemento);
+    new_edge = i_duplicate_edge(id_new_element);
     assert_no_null(new_edge);
     assert(new_edge->he1 == NULL);
     assert(new_edge->he2 == NULL);
@@ -128,17 +128,17 @@ unsigned long csmedge_id(const struct csmedge_t *edge)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmedge_reassign_id(struct csmedge_t *edge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
+void csmedge_reassign_id(struct csmedge_t *edge, unsigned long *id_new_element, unsigned long *new_id_opc)
 {
     assert_no_null(edge);
     
-    edge->id = csmid_new_id(id_nuevo_elemento, new_id_opc);
+    edge->id = csmid_new_id(id_new_element, new_id_opc);
     
     if (edge->he1 != NULL)
-        csmhedge_reassign_id(edge->he1, id_nuevo_elemento, NULL);
+        csmhedge_reassign_id(edge->he1, id_new_element, NULL);
     
     if (edge->he2 != NULL)
-        csmhedge_reassign_id(edge->he2, id_nuevo_elemento, NULL);
+        csmhedge_reassign_id(edge->he2, id_new_element, NULL);
 }
 
 // --------------------------------------------------------------------------------------------------------------

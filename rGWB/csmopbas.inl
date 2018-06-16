@@ -20,7 +20,7 @@ void csmopbas_addhe(
                 struct csmvertex_t *vertex,
                 struct csmhedge_t *hedge,
                 enum csmedge_lado_hedge_t lado,
-                unsigned long *id_nuevo_elemento,
+                unsigned long *id_new_element,
                 struct csmhedge_t **new_hedge_opc);
 
 void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_opc, struct csmhedge_t **hedge_next_opc);

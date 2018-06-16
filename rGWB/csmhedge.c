@@ -65,7 +65,7 @@ CONSTRUCTOR(static struct csmhedge_t *, i_new, (
 
 // --------------------------------------------------------------------------------------------------------------
 
-struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
+struct csmhedge_t *csmhedge_crea(unsigned long *id_new_element)
 {
     unsigned long id;
     struct csmedge_t *edge;
@@ -73,7 +73,7 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
     struct csmloop_t *loop;
     CSMBOOL setop_is_loose_end;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
 
     edge = NULL;
     vertex = NULL;
@@ -86,14 +86,14 @@ struct csmhedge_t *csmhedge_crea(unsigned long *id_nuevo_elemento)
 
 // --------------------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmhedge_t *, i_duplicate_hedge, (struct csmloop_t *loop, unsigned long *id_nuevo_elemento))
+CONSTRUCTOR(static struct csmhedge_t *, i_duplicate_hedge, (struct csmloop_t *loop, unsigned long *id_new_element))
 {
     unsigned long id;
     struct csmedge_t *edge;
     struct csmvertex_t *vertex;
     CSMBOOL setop_is_loose_end;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
 
     edge = NULL;
     vertex = NULL;
@@ -107,7 +107,7 @@ CONSTRUCTOR(static struct csmhedge_t *, i_duplicate_hedge, (struct csmloop_t *lo
 struct csmhedge_t *csmhedge_duplicate(
                         const struct csmhedge_t *hedge,
                         struct csmloop_t *loop,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
 {
@@ -116,7 +116,7 @@ struct csmhedge_t *csmhedge_duplicate(
     
     assert_no_null(hedge);
     
-    new_hedge = i_duplicate_hedge(loop, id_nuevo_elemento);
+    new_hedge = i_duplicate_hedge(loop, id_new_element);
     assert_no_null(new_hedge);
     assert(new_hedge->edge == NULL);
     assert(new_hedge->vertex == NULL);
@@ -143,10 +143,10 @@ unsigned long csmhedge_id(const struct csmhedge_t *hedge)
 
 // --------------------------------------------------------------------------------------------------------------
 
-void csmhedge_reassign_id(struct csmhedge_t *hedge, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
+void csmhedge_reassign_id(struct csmhedge_t *hedge, unsigned long *id_new_element, unsigned long *new_id_opc)
 {
     assert_no_null(hedge);
-    hedge->super.id = csmid_new_id(id_nuevo_elemento, new_id_opc);
+    hedge->super.id = csmid_new_id(id_new_element, new_id_opc);
 }
 
 // --------------------------------------------------------------------------------------------------------------

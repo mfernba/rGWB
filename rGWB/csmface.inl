@@ -2,12 +2,12 @@
 
 #include "csmfwddecl.hxx"
 
-CONSTRUCTOR(struct csmface_t *, csmface_new, (struct csmsolid_t *solid, unsigned long *id_nuevo_elemento));
+CONSTRUCTOR(struct csmface_t *, csmface_new, (struct csmsolid_t *solid, unsigned long *id_new_element));
 
 CONSTRUCTOR(struct csmface_t *, csmface_duplicate, (
                         struct csmface_t *face,
                         struct csmsolid_t *fsolid,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
@@ -15,7 +15,7 @@ void csmface_free(struct csmface_t **face);
 
 unsigned long csmface_id(const struct csmface_t *face);
 
-void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
+void csmface_reassign_id(struct csmface_t *face, unsigned long *id_new_element, unsigned long *new_id_opc);
 
 void csmface_set_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt);
 

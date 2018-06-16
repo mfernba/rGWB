@@ -37,14 +37,14 @@
 struct i_item_t;
 struct csmhashtb(i_item_t);
 
-typedef void (*i_FPtr_reassign_id)(struct i_item_t *item, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
+typedef void (*i_FPtr_reassign_id)(struct i_item_t *item, unsigned long *id_new_element, unsigned long *new_id_opc);
 #define i_CHECK_FUNC_REASSIGN_ID(function, type) ((void(*)(struct type *, unsigned long *, unsigned long *))function == function)
 
 // ----------------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmsolid_t *, i_new, (
                         char **name,
-                        unsigned long id_nuevo_elemento,
+                        unsigned long id_new_element,
                         struct csmhashtb(csmface_t) **sfaces,
                         struct csmhashtb(csmedge_t) **sedges,
                         struct csmhashtb(csmvertex_t) **svertexs,
@@ -58,7 +58,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_new, (
     
     solid->name = ASSIGN_POINTER_PP(name, char);
     
-    solid->id_nuevo_elemento = id_nuevo_elemento;
+    solid->id_new_element = id_new_element;
     
     solid->sfaces = ASSIGN_POINTER_PP_NOT_NULL(sfaces, struct csmhashtb(csmface_t));
     solid->sedges = ASSIGN_POINTER_PP_NOT_NULL(sedges, struct csmhashtb(csmedge_t));
@@ -74,10 +74,10 @@ CONSTRUCTOR(static struct csmsolid_t *, i_new, (
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
+struct csmsolid_t *csmsolid_new_empty_solid(unsigned long start_id_of_new_element)
 {
     char *name;
-    unsigned long id_nuevo_elemento;
+    unsigned long id_new_element;
     struct csmhashtb(csmface_t) *sfaces;
     struct csmhashtb(csmedge_t) *sedges;
     struct csmhashtb(csmvertex_t) *svertexs;
@@ -87,7 +87,7 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
     
     name = NULL;
     
-    id_nuevo_elemento = start_id_of_new_element;
+    id_new_element = start_id_of_new_element;
     
     sfaces = csmhashtb_create_empty(csmface_t);
     sedges = csmhashtb_create_empty(csmedge_t);
@@ -98,7 +98,7 @@ struct csmsolid_t *csmsolid_crea_vacio(unsigned long start_id_of_new_element)
     
     bbox = csmbbox_create_empty_box();
     
-    return i_new(&name, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox);
+    return i_new(&name, id_new_element, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ const struct csmbbox_t *csmsolid_get_bbox(const struct csmsolid_t *solid)
 
 CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (
 	                    const char *name,
-                        unsigned long id_nuevo_elemento,
+                        unsigned long id_new_element,
                         const struct csmmaterial_t *solid_visz_material_opt,
                         CSMBOOL draw_only_border_edges,
                         const struct csmbbox_t *bbox))
@@ -169,14 +169,14 @@ CONSTRUCTOR(static struct csmsolid_t *, i_duplicate_solid, (
     
     bbox_copy = csmbbox_copy(bbox);
     
-    return i_new(&name_copy, id_nuevo_elemento, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox_copy);
+    return i_new(&name_copy, id_new_element, &sfaces, &sedges, &svertexs, &visz_material_opt, draw_only_border_edges, &bbox_copy);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 static void i_duplicate_vertexs_table(
                         const struct csmhashtb(csmvertex_t) *svertexs,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmvertex_t) *new_svertexs,
                         struct csmhashtb(csmvertex_t) **relation_svertexs_old_to_new)
 {
@@ -196,7 +196,7 @@ static void i_duplicate_vertexs_table(
         
         csmhashtb_next_pair(iterator, NULL, &old_vertex, csmvertex_t);
         
-        new_vertex = csmvertex_duplicate(old_vertex, id_nuevo_elemento, relation_svertexs_old_to_new_loc);
+        new_vertex = csmvertex_duplicate(old_vertex, id_new_element, relation_svertexs_old_to_new_loc);
         csmhashtb_add_item(new_svertexs, csmvertex_id(new_vertex), new_vertex, csmvertex_t);
     }
     
@@ -210,7 +210,7 @@ static void i_duplicate_vertexs_table(
 static void i_duplicate_faces_table(
                         struct csmhashtb(csmface_t) *sfaces,
                         struct csmsolid_t *fsolid,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmface_t) *new_sfaces,
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) **relation_shedges_old_to_new)
@@ -231,7 +231,7 @@ static void i_duplicate_faces_table(
         
         csmhashtb_next_pair(iterator, NULL, &old_face, csmface_t);
         
-        new_face = csmface_duplicate(old_face, fsolid, id_nuevo_elemento, relation_svertexs_old_to_new, relation_shedges_old_to_new_loc);
+        new_face = csmface_duplicate(old_face, fsolid, id_new_element, relation_svertexs_old_to_new, relation_shedges_old_to_new_loc);
         csmhashtb_add_item(new_sfaces, csmface_id(new_face), new_face, csmface_t);
     }
     
@@ -245,7 +245,7 @@ static void i_duplicate_faces_table(
 static void i_duplicate_edges_table(
                         struct csmhashtb(csmedge_t) *sedges,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmedge_t) *new_sedges)
 {
     struct csmhashtb_iterator(csmedge_t) *iterator;
@@ -259,7 +259,7 @@ static void i_duplicate_edges_table(
         
         csmhashtb_next_pair(iterator, NULL, &old_edge, csmedge_t);
         
-        new_edge = csmedge_duplicate(old_edge, id_nuevo_elemento, relation_shedges_old_to_new);
+        new_edge = csmedge_duplicate(old_edge, id_new_element, relation_shedges_old_to_new);
         csmhashtb_add_item(new_sedges, csmedge_id(new_edge), new_edge, csmedge_t);
     }
     
@@ -278,15 +278,15 @@ struct csmsolid_t *csmsolid_duplicate(const struct csmsolid_t *solid)
     
     new_solid = i_duplicate_solid(
                         solid->name,
-                        solid->id_nuevo_elemento,
+                        solid->id_new_element,
                         solid->visz_material_opt,
                         solid->draw_only_border_edges,
                         solid->bbox);
     assert_no_null(new_solid);
 
-    i_duplicate_vertexs_table(solid->svertexs, &new_solid->id_nuevo_elemento, new_solid->svertexs, &relation_svertexs_old_to_new);
-    i_duplicate_faces_table(solid->sfaces, new_solid, &new_solid->id_nuevo_elemento, new_solid->sfaces, relation_svertexs_old_to_new, &relation_shedges_old_to_new);
-    i_duplicate_edges_table(solid->sedges, relation_shedges_old_to_new, &new_solid->id_nuevo_elemento, new_solid->sedges);
+    i_duplicate_vertexs_table(solid->svertexs, &new_solid->id_new_element, new_solid->svertexs, &relation_svertexs_old_to_new);
+    i_duplicate_faces_table(solid->sfaces, new_solid, &new_solid->id_new_element, new_solid->sfaces, relation_svertexs_old_to_new, &relation_shedges_old_to_new);
+    i_duplicate_edges_table(solid->sedges, relation_shedges_old_to_new, &new_solid->id_new_element, new_solid->sedges);
     
     csmhashtb_free(&relation_svertexs_old_to_new, csmvertex_t, NULL);
     csmhashtb_free(&relation_shedges_old_to_new, csmhedge_t, NULL);
@@ -321,7 +321,7 @@ void csmsolid_free(struct csmsolid_t **solid)
 unsigned long *csmsolid_id_new_element(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
-    return &solid->id_nuevo_elemento;
+    return &solid->id_new_element;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -453,7 +453,7 @@ void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid)
 
 static void i_nousar_move_elements_between_tables(
                         struct csmhashtb(i_item_t) *table_origin,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         i_FPtr_reassign_id func_reassign_id,
                         struct csmhashtb(i_item_t) *table_destination)
 {
@@ -469,7 +469,7 @@ static void i_nousar_move_elements_between_tables(
         struct i_item_t *item;
         
         csmhashtb_next_pair(iterator, NULL, &item, i_item_t);
-        func_reassign_id(item, id_nuevo_elemento, &item_id);
+        func_reassign_id(item, id_new_element, &item_id);
         
         csmhashtb_add_item(table_destination, item_id, item, i_item_t);
     }
@@ -480,7 +480,7 @@ static void i_nousar_move_elements_between_tables(
 
 #define i_move_elements_between_tables(\
                         table_origin,\
-                        id_nuevo_elemento,\
+                        id_new_element,\
                         func_reassign_id,\
                         table_destination,\
                         type)\
@@ -490,7 +490,7 @@ static void i_nousar_move_elements_between_tables(
     i_CHECK_FUNC_REASSIGN_ID(func_reassign_id, type),\
     i_nousar_move_elements_between_tables(\
                         (struct csmhashtb(i_item_t) *)table_origin,\
-                        id_nuevo_elemento,\
+                        id_new_element,\
                         (i_FPtr_reassign_id)func_reassign_id,\
                         (struct csmhashtb(i_item_t) *)table_destination)\
 )/*lint -restore*/
@@ -525,21 +525,21 @@ void csmsolid_merge_solids(struct csmsolid_t *solid, const struct csmsolid_t *so
     
     i_move_elements_between_tables(
                         solid_to_merge->sfaces,
-                        &solid->id_nuevo_elemento,
+                        &solid->id_new_element,
                         csmface_reassign_id,
                         solid->sfaces,
                         csmface_t);
     
     i_move_elements_between_tables(
                         solid_to_merge->sedges,
-                        &solid->id_nuevo_elemento,
+                        &solid->id_new_element,
                         csmedge_reassign_id,
                         solid->sedges,
                         csmedge_t);
     
     i_move_elements_between_tables(
                         solid_to_merge->svertexs,
-                        &solid->id_nuevo_elemento,
+                        &solid->id_new_element,
                         csmvertex_reassign_id,
                         solid->svertexs,
                         csmvertex_t);
@@ -617,7 +617,7 @@ void csmsolid_append_new_face(struct csmsolid_t *solid, struct csmface_t **face)
     assert_no_null(solid);
     assert_no_null(face);
     
-    face_loc = csmface_new(solid, &solid->id_nuevo_elemento);
+    face_loc = csmface_new(solid, &solid->id_new_element);
     csmhashtb_add_item(solid->sfaces, csmface_id(face_loc), face_loc, csmface_t);
     
     if (solid->visz_material_opt != NULL)
@@ -648,7 +648,7 @@ void csmsolid_move_face_to_solid(struct csmsolid_t *face_solid, struct csmface_t
     
     csmhashtb_remove_item(face_solid->sfaces, csmface_id(face), csmface_t);
     
-    csmface_reassign_id(face, &destination_solid->id_nuevo_elemento, NULL);
+    csmface_reassign_id(face, &destination_solid->id_new_element, NULL);
     csmhashtb_add_item(destination_solid->sfaces, csmface_id(face), face, csmface_t);
     
     csmface_set_fsolid(face, destination_solid);
@@ -679,7 +679,7 @@ void csmsolid_append_new_edge(struct csmsolid_t *solid, struct csmedge_t **edge)
     assert_no_null(solid);
     assert_no_null(edge);
     
-    edge_loc = csmedge_crea(&solid->id_nuevo_elemento);
+    edge_loc = csmedge_crea(&solid->id_new_element);
     csmhashtb_add_item(solid->sedges, csmedge_id(edge_loc), edge_loc, csmedge_t);
     
     *edge = edge_loc;
@@ -706,7 +706,7 @@ void csmsolid_move_edge_to_solid(struct csmsolid_t *edge_solid, struct csmedge_t
     
     csmhashtb_remove_item(edge_solid->sedges, csmedge_id(edge), csmedge_t);
     
-    csmedge_reassign_id(edge, &destination_solid->id_nuevo_elemento, NULL);
+    csmedge_reassign_id(edge, &destination_solid->id_new_element, NULL);
     csmhashtb_add_item(destination_solid->sedges, csmedge_id(edge), edge, csmedge_t);
 }
 
@@ -735,7 +735,7 @@ void csmsolid_append_new_vertex(struct csmsolid_t *solid, double x, double y, do
     assert_no_null(solid);
     assert_no_null(vertex);
     
-    vertex_loc = csmvertex_new(x, y, z, &solid->id_nuevo_elemento);
+    vertex_loc = csmvertex_new(x, y, z, &solid->id_new_element);
     csmhashtb_add_item(solid->svertexs, csmvertex_id(vertex_loc), vertex_loc, csmvertex_t);
     
     *vertex = vertex_loc;
@@ -762,7 +762,7 @@ void csmsolid_move_vertex_to_solid(struct csmsolid_t *vertex_solid, struct csmve
     
     csmhashtb_remove_item(vertex_solid->svertexs, csmvertex_id(vertex), csmvertex_t);
     
-    csmvertex_reassign_id(vertex, &destination_solid->id_nuevo_elemento, NULL);
+    csmvertex_reassign_id(vertex, &destination_solid->id_new_element, NULL);
     csmhashtb_add_item(destination_solid->svertexs, csmvertex_id(vertex), vertex, csmvertex_t);
 }
 

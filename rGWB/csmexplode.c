@@ -45,7 +45,7 @@ csmArrayStruct(csmsolid_t) *csmexplode_explode_shells(const struct csmsolid_t *s
             
             csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
             
-            independent_shell = csmsolid_crea_vacio(0);
+            independent_shell = csmsolid_new_empty_solid(0);
             csmsolid_set_name(independent_shell, "Independent shell");
             csmsetopcom_move_face_to_solid(0, face, work_solid, independent_shell);
             csmsetopcom_cleanup_solid(work_solid, independent_shell);

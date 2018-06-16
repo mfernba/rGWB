@@ -945,10 +945,10 @@ static void i_finish_split(
     if (csmdebug_debug_enabled() == CSMTRUE)
         csmsolid_print_debug(work_solid, CSMTRUE);
     
-    solid_above_loc = csmsolid_crea_vacio(0);
+    solid_above_loc = csmsolid_new_empty_solid(0);
     i_assign_result_material(work_solid, solid_above_loc);
     
-    solid_below_loc = csmsolid_crea_vacio(0);
+    solid_below_loc = csmsolid_new_empty_solid(0);
     i_assign_result_material(work_solid, solid_below_loc);
     
     for (i = 0; i < no_null_faces; i++)

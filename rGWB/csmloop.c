@@ -77,7 +77,7 @@ CONSTRUCTOR(static struct csmloop_t *, i_new, (
 
 // --------------------------------------------------------------------------------------------------------------
 
-struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_elemento)
+struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_new_element)
 {
     unsigned long id;
     struct csmhedge_t *ledge;
@@ -85,7 +85,7 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
     CSMBOOL setop_convert_loop_in_face;
     CSMBOOL setop_loop_was_a_hole;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
     
     ledge = NULL;
     lface = face;
@@ -98,14 +98,14 @@ struct csmloop_t *csmloop_crea(struct csmface_t *face, unsigned long *id_nuevo_e
 
 // --------------------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lface, unsigned long *id_nuevo_elemento))
+CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lface, unsigned long *id_new_element))
 {
     unsigned long id;
     struct csmhedge_t *ledge;
     CSMBOOL setop_convert_loop_in_face;
     CSMBOOL setop_loop_was_a_hole;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
     ledge = NULL;
     setop_convert_loop_in_face = CSMFALSE;
     setop_loop_was_a_hole = CSMFALSE;
@@ -118,7 +118,7 @@ CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lfac
 struct csmloop_t *csmloop_duplicate(
                         const struct csmloop_t *loop,
                         struct csmface_t *lface,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
 {
@@ -128,7 +128,7 @@ struct csmloop_t *csmloop_duplicate(
     
     assert_no_null(loop);
     
-    new_loop = i_duplicate_loop(lface, id_nuevo_elemento);
+    new_loop = i_duplicate_loop(lface, id_new_element);
     assert_no_null(new_loop);
     
     iterator = loop->ledge;
@@ -142,7 +142,7 @@ struct csmloop_t *csmloop_duplicate(
         assert(no_iterations < 10000);
         no_iterations++;
         
-        iterator_copy = csmhedge_duplicate(iterator, new_loop, id_nuevo_elemento, relation_svertexs_old_to_new, relation_shedges_old_to_new);
+        iterator_copy = csmhedge_duplicate(iterator, new_loop, id_new_element, relation_svertexs_old_to_new, relation_shedges_old_to_new);
         
         if (new_loop->ledge == NULL)
             new_loop->ledge = iterator_copy;

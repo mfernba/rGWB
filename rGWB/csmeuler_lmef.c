@@ -41,7 +41,7 @@ void csmeuler_lmef(
     struct csmloop_t *new_loop;
     register struct csmhedge_t *he_iterator;
     register unsigned long no_iterations;
-    unsigned long *id_nuevo_elemento;
+    unsigned long *id_new_element;
     struct csmhedge_t *new_he1, *new_he2;
     struct csmhedge_t *prev_new_he1, *prev_new_he2;
     
@@ -55,8 +55,8 @@ void csmeuler_lmef(
     
     csmface_copy_attributtes_from_face1(csmopbas_face_from_hedge(he1), new_face);
 
-    id_nuevo_elemento = csmsolid_id_new_element(he1_solid);
-    new_loop = csmloop_crea(new_face, id_nuevo_elemento);
+    id_new_element = csmsolid_id_new_element(he1_solid);
+    new_loop = csmloop_crea(new_face, id_new_element);
     csmface_set_flout(new_face, new_loop);
     
     he_iterator = he1;
@@ -71,8 +71,8 @@ void csmeuler_lmef(
         he_iterator = csmhedge_next(he_iterator);
     }
     
-    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he1, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &new_he1);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he2, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, &new_he2);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he1, CSMEDGE_LADO_HEDGE_NEG, id_new_element, &new_he1);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he2, CSMEDGE_LADO_HEDGE_POS, id_new_element, &new_he2);
 
     prev_new_he1 = csmhedge_prev(new_he1);
     csmhedge_set_next(prev_new_he1, new_he2);

@@ -54,13 +54,13 @@ CONSTRUCTOR(static struct csmvertex_t *, i_new, (
 
 // ----------------------------------------------------------------------------------------------------
 
-struct csmvertex_t *csmvertex_new(double x, double y, double z, unsigned long *id_nuevo_elemento)
+struct csmvertex_t *csmvertex_new(double x, double y, double z, unsigned long *id_new_element)
 {
     unsigned long id;
     struct csmhedge_t *hedge;
     csmvertex_mask_t algorithm_attrib_mask;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
     
     hedge = NULL;
     
@@ -71,13 +71,13 @@ struct csmvertex_t *csmvertex_new(double x, double y, double z, unsigned long *i
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y, double z, unsigned long *id_nuevo_elemento))
+CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y, double z, unsigned long *id_new_element))
 {
     unsigned long id;
     struct csmhedge_t *hedge;
     csmvertex_mask_t algorithm_attrib_mask;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
     
     hedge = NULL;
     
@@ -90,14 +90,14 @@ CONSTRUCTOR(static struct csmvertex_t *, i_duplicate_vertex, (double x, double y
 
 struct csmvertex_t *csmvertex_duplicate(
                         const struct csmvertex_t *vertex,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new)
 {
     struct csmvertex_t *new_vertex;
     
     assert_no_null(vertex);
     
-    new_vertex = i_duplicate_vertex(vertex->x, vertex->y, vertex->z, id_nuevo_elemento);
+    new_vertex = i_duplicate_vertex(vertex->x, vertex->y, vertex->z, id_new_element);
     assert_no_null(new_vertex);
     assert(new_vertex->hedge == NULL);
     
@@ -126,10 +126,10 @@ unsigned long csmvertex_id(const struct csmvertex_t *vertex)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmvertex_reassign_id(struct csmvertex_t *vertex, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
+void csmvertex_reassign_id(struct csmvertex_t *vertex, unsigned long *id_new_element, unsigned long *new_id_opc)
 {
     assert_no_null(vertex);
-    vertex->id = csmid_new_id(id_nuevo_elemento, new_id_opc);
+    vertex->id = csmid_new_id(id_new_element, new_id_opc);
 }
 
 // ----------------------------------------------------------------------------------------------------

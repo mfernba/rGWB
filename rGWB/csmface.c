@@ -124,7 +124,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
 
 // ------------------------------------------------------------------------------------------
 
-struct csmface_t *csmface_new(struct csmsolid_t *solid, unsigned long *id_nuevo_elemento)
+struct csmface_t *csmface_new(struct csmsolid_t *solid, unsigned long *id_new_element)
 {
     unsigned long id;
     struct csmsolid_t *fsolid, *fsolid_aux;
@@ -140,7 +140,7 @@ struct csmface_t *csmface_new(struct csmsolid_t *solid, unsigned long *id_nuevo_
     CSMBOOL setop_has_been_modified;
     unsigned long setop_shell_id;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
 
     fsolid = solid;
     fsolid_aux = NULL;
@@ -192,7 +192,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
 	                    struct csmmaterial_t **visz_material_opt,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         double x_center, double y_center, double z_center,
-                        unsigned long *id_nuevo_elemento))
+                        unsigned long *id_new_element))
 {
     unsigned long id;
     struct csmloop_t *flout, *floops;
@@ -201,7 +201,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     CSMBOOL setop_is_new_face;
     unsigned long setop_shell_id;
     
-    id = csmid_new_id(id_nuevo_elemento, NULL);
+    id = csmid_new_id(id_new_element, NULL);
     
     flout = NULL;
     floops = NULL;
@@ -234,7 +234,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
 struct csmface_t *csmface_duplicate(
                         struct csmface_t *face,
                         struct csmsolid_t *fsolid,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
 {
@@ -258,7 +258,7 @@ struct csmface_t *csmface_duplicate(
                         &visz_material_opt,
                         face->A, face->B, face->C, face->D, face->fuzzy_epsilon, face->dropped_coord,
                         face->x_center, face->y_center, face->z_center,
-                        id_nuevo_elemento);
+                        id_new_element);
     assert_no_null(new_face);
     
     iterator = face->floops;
@@ -271,7 +271,7 @@ struct csmface_t *csmface_duplicate(
         iterator_copy = csmloop_duplicate(
                         iterator,
                         new_face,
-                        id_nuevo_elemento,
+                        id_new_element,
                         relation_svertexs_old_to_new,
                         relation_shedges_old_to_new);
         
@@ -323,14 +323,14 @@ unsigned long csmface_id(const struct csmface_t *face)
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc)
+void csmface_reassign_id(struct csmface_t *face, unsigned long *id_new_element, unsigned long *new_id_opc)
 {
     register struct csmloop_t *iterator;
     unsigned long num_iters;
     
     assert_no_null(face);
     
-    face->id = csmid_new_id(id_nuevo_elemento, new_id_opc);
+    face->id = csmid_new_id(id_new_element, new_id_opc);
     
     iterator = face->floops;
     num_iters = 0;
@@ -340,7 +340,7 @@ void csmface_reassign_id(struct csmface_t *face, unsigned long *id_nuevo_element
         assert(num_iters < 100000);
         num_iters++;
 
-        csmloop_reassign_id(iterator, id_nuevo_elemento, NULL);
+        csmloop_reassign_id(iterator, id_new_element, NULL);
         iterator = csmloop_next(iterator);
         
     } while (iterator != NULL);

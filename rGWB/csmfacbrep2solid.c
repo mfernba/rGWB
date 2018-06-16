@@ -1096,7 +1096,7 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
                 unsigned long i;
                 struct csmtolerance_t *tolerances;
                 
-                solid_loc = csmsolid_crea_vacio(builder->id_new_element);
+                solid_loc = csmsolid_new_empty_solid(builder->id_new_element);
                 
                 i_generate_solid_vertexs(builder->vertexs, solid_loc);
                 

@@ -29,7 +29,7 @@ void csmeuler_lmekr(
     struct csmloop_t *he1_loop, *he2_loop;
     struct csmface_t *he1_and_he2_face;
     struct csmsolid_t *he1_and_he2_solid;
-    unsigned long *id_nuevo_elemento;
+    unsigned long *id_new_element;
     register struct csmhedge_t *he_iterator;
     register unsigned long no_iterations;
     struct csmedge_t *new_edge;
@@ -59,9 +59,9 @@ void csmeuler_lmekr(
     he1_and_he2_solid = csmface_fsolid(he1_and_he2_face);
     csmsolid_append_new_edge(he1_and_he2_solid, &new_edge);
 
-    id_nuevo_elemento = csmsolid_id_new_element(he1_and_he2_solid);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he1, CSMEDGE_LADO_HEDGE_POS, id_nuevo_elemento, &nhe1);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he2, CSMEDGE_LADO_HEDGE_NEG, id_nuevo_elemento, &nhe2);
+    id_new_element = csmsolid_id_new_element(he1_and_he2_solid);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he1, CSMEDGE_LADO_HEDGE_POS, id_new_element, &nhe1);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he2, CSMEDGE_LADO_HEDGE_NEG, id_new_element, &nhe2);
 
     csmhedge_set_next(nhe1, he2);
     csmhedge_set_next(nhe2, he1);

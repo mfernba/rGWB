@@ -13,7 +13,7 @@ struct csmsolid_t
 {
     char *name;
 
-    unsigned long id_nuevo_elemento;
+    unsigned long id_new_element;
 
     struct csmhashtb(csmface_t) *sfaces;
     struct csmhashtb(csmedge_t) *sedges;

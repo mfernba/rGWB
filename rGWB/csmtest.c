@@ -209,12 +209,12 @@ static void i_test_crea_lamina_con_hueco(void)
 static void i_test_crea_hexaedro(void)
 {
     struct csmsolid_t *solid;
-    unsigned long id_nuevo_elemento;
+    unsigned long id_new_element;
     struct csmhedge_t *hei, *he1, *he2, *he3, *he4;
     struct csmhedge_t *he1_top, *he2_top, *he3_top, *he4_top;
     struct csmhedge_t *he1_top_next, *he1_top_next_next, *he1_top_next_next_next;
     
-    id_nuevo_elemento = 0;
+    id_new_element = 0;
     
     solid = csmeuler_mvfs(0., 0., 0., 0, &hei);
     csmsolid_print_debug(solid, CSMTRUE);
@@ -248,7 +248,7 @@ static void i_test_crea_hexaedro(void)
     csmeuler_lmef(he3_top, he2_top, NULL, NULL, NULL);
     csmeuler_lmef(he2_top, he1_top, NULL, NULL, NULL);
 
-    //csmeuler_lmef(he1_top, he4_top, &id_nuevo_elemento, NULL, NULL, NULL);
+    //csmeuler_lmef(he1_top, he4_top, &id_new_element, NULL, NULL, NULL);
     
     he1_top_next = csmhedge_next(he1_top);
     assert(he1_top_next == he1);
@@ -271,13 +271,13 @@ static void i_test_crea_hexaedro(void)
 static void i_test_crea_hexaedro_y_copia(void)
 {
     struct csmsolid_t *solid;
-    unsigned long id_nuevo_elemento;
+    unsigned long id_new_element;
     struct csmhedge_t *hei, *he1, *he2, *he3, *he4;
     struct csmhedge_t *he1_top, *he2_top, *he3_top, *he4_top;
     struct csmhedge_t *he1_top_next, *he1_top_next_next, *he1_top_next_next_next;
     struct csmsolid_t *copia_solido;
     
-    id_nuevo_elemento = 0;
+    id_new_element = 0;
     
     solid = csmeuler_mvfs(0., 0., 0., 0, &hei);
     
@@ -306,7 +306,7 @@ static void i_test_crea_hexaedro_y_copia(void)
     csmeuler_lmef(he3_top, he2_top, NULL, NULL, NULL);
     csmeuler_lmef(he2_top, he1_top, NULL, NULL, NULL);
 
-    //csmeuler_lmef(he1_top, he4_top, &id_nuevo_elemento, NULL, NULL, NULL);
+    //csmeuler_lmef(he1_top, he4_top, &id_new_element, NULL, NULL, NULL);
     
     he1_top_next = csmhedge_next(he1_top);
     assert(he1_top_next == he1);

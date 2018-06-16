@@ -6,4 +6,4 @@
 //  Copyright © 2017 Manuel Fernández. All rights reserved.
 //
 
-unsigned long csmid_new_id(unsigned long *id_nuevo_elemento, unsigned long *id_asignado_opc);
+unsigned long csmid_new_id(unsigned long *id_new_element, unsigned long *id_asignado_opc);

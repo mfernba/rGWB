@@ -3,11 +3,11 @@
 #include "csmfwddecl.hxx"
 #include "csmvertex.hxx"
 
-CONSTRUCTOR(struct csmvertex_t *, csmvertex_new, (double x, double y, double z, unsigned long *id_nuevo_elemento));
+CONSTRUCTOR(struct csmvertex_t *, csmvertex_new, (double x, double y, double z, unsigned long *id_new_element));
 
 CONSTRUCTOR(struct csmvertex_t *, csmvertex_duplicate, (
                         const struct csmvertex_t *vertex,
-                        unsigned long *id_nuevo_elemento,
+                        unsigned long *id_new_element,
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new));
 
 void csmvertex_free(struct csmvertex_t **vertex);
@@ -15,7 +15,7 @@ void csmvertex_free(struct csmvertex_t **vertex);
 
 unsigned long csmvertex_id(const struct csmvertex_t *vertex);
 
-void csmvertex_reassign_id(struct csmvertex_t *vertex, unsigned long *id_nuevo_elemento, unsigned long *new_id_opc);
+void csmvertex_reassign_id(struct csmvertex_t *vertex, unsigned long *id_new_element, unsigned long *new_id_opc);
 
 
 // Topology...

@@ -579,7 +579,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         csmsolid_prepare_for_cleanup(solid_A);
         csmsolid_prepare_for_cleanup(solid_B);
     
-        result = csmsolid_crea_vacio(0);
+        result = csmsolid_new_empty_solid(0);
         i_assign_result_material(solid_A, solid_B, result);
         csmsolid_set_name(result, "Result");
     
@@ -703,7 +703,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_generate_op_result_with_no_null_edges,
             }
             else
             {
-                solid_res = csmsolid_crea_vacio(0);
+                solid_res = csmsolid_new_empty_solid(0);
                 
                 csmsolid_merge_solids(solid_res, solid_A);
                 csmsolid_merge_solids(solid_res, solid_B);
@@ -714,7 +714,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_generate_op_result_with_no_null_edges,
         case CSMSETOP_OPERATION_DIFFERENCE:
         {
             if (i_is_solid_A_contained_in_solid_B(solid_A, solid_B, tolerances) == CSMTRUE)
-                solid_res = csmsolid_crea_vacio(0);
+                solid_res = csmsolid_new_empty_solid(0);
             else
                 solid_res = csmsolid_duplicate(solid_A);
             break;
@@ -727,7 +727,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_generate_op_result_with_no_null_edges,
             else if (i_is_solid_A_contained_in_solid_B(solid_B, solid_A, tolerances) == CSMTRUE)
                 solid_res = csmsolid_duplicate(solid_B);
             else
-                solid_res = csmsolid_crea_vacio(0);
+                solid_res = csmsolid_new_empty_solid(0);
             break;
         }
             
