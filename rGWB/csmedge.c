@@ -231,13 +231,13 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
 {
     assert_no_null(edge);
     
-    if (csmhedge_id_igual(edge->he1, hedge) == CSMTRUE)
+    if (csmhedge_equal_id(edge->he1, hedge) == CSMTRUE)
     {
         return edge->he2;
     }
     else
     {
-        assert(csmhedge_id_igual(edge->he2, hedge) == CSMTRUE);
+        assert(csmhedge_equal_id(edge->he2, hedge) == CSMTRUE);
         return edge->he1;
     }
 }

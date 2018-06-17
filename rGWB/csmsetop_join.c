@@ -265,7 +265,7 @@ static void i_replace_loose_end(
     assert_no_null(he_destination_face);
     assert_no_null(he_has_been_replaced);
     
-    if (csmarrayc_contains_element_st(loose_ends, csmhedge_t, he_to_replace, struct csmhedge_t, csmhedge_id_igual, &idx) == CSMTRUE)
+    if (csmarrayc_contains_element_st(loose_ends, csmhedge_t, he_to_replace, struct csmhedge_t, csmhedge_equal_id, &idx) == CSMTRUE)
     {
         csmhedge_setop_set_loose_end(he_to_replacement, CSMTRUE);
         csmarrayc_set_st(loose_ends, idx, he_to_replacement, csmhedge_t);

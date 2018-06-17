@@ -16,7 +16,7 @@ unsigned long csmhedge_id(const struct csmhedge_t *hedge);
 
 void csmhedge_reassign_id(struct csmhedge_t *hedge, unsigned long *id_new_element, unsigned long *new_id_opc);
 
-CSMBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2);
+CSMBOOL csmhedge_equal_id(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2);
 
 
 // Topology...

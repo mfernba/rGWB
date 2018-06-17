@@ -151,7 +151,7 @@ void csmhedge_reassign_id(struct csmhedge_t *hedge, unsigned long *id_new_elemen
 
 // --------------------------------------------------------------------------------------------------------------
 
-CSMBOOL csmhedge_id_igual(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2)
+CSMBOOL csmhedge_equal_id(const struct csmhedge_t *hedge1, const struct csmhedge_t *hedge2)
 {
     assert_no_null(hedge1);
     assert_no_null(hedge2);

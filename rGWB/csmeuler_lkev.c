@@ -39,7 +39,7 @@ void csmeuler_lkev(
     
     he1_loc = ASSIGN_POINTER_PP_NOT_NULL(he1, struct csmhedge_t);
     he2_loc = ASSIGN_POINTER_PP_NOT_NULL(he2, struct csmhedge_t);
-    assert(csmhedge_id_igual(he1_loc, he2_loc) == CSMFALSE);
+    assert(csmhedge_equal_id(he1_loc, he2_loc) == CSMFALSE);
     assert(he1_loc != he2_loc);
     
     hes_solid = csmopbas_solid_from_hedges(he1_loc, he2_loc);
