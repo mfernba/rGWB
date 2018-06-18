@@ -163,6 +163,10 @@
 		55FA851720853B7200FB00EE /* csmstmodeler.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FA851520853B7200FB00EE /* csmstmodeler.c */; };
 		55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851620853B7200FB00EE /* csmstmodeler.h */; };
 		55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */; };
+		55FAB61B20D83CA6008E1DFF /* csmsave.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FAB61920D83CA6008E1DFF /* csmsave.c */; };
+		55FAB61C20D83CA6008E1DFF /* csmsave.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB61A20D83CA6008E1DFF /* csmsave.inl */; };
+		55FAB62220D8566F008E1DFF /* csmwriteablesolid.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */; };
+		55FAB62320D8566F008E1DFF /* csmwriteablesolid.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -393,6 +397,10 @@
 		55FA851520853B7200FB00EE /* csmstmodeler.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmstmodeler.c; sourceTree = "<group>"; };
 		55FA851620853B7200FB00EE /* csmstmodeler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmstmodeler.h; sourceTree = "<group>"; };
 		55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmstmodeler.hxx; sourceTree = "<group>"; };
+		55FAB61920D83CA6008E1DFF /* csmsave.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsave.c; sourceTree = "<group>"; };
+		55FAB61A20D83CA6008E1DFF /* csmsave.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsave.inl; sourceTree = "<group>"; };
+		55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmwriteablesolid.c; sourceTree = "<group>"; };
+		55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmwriteablesolid.inl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -642,6 +650,8 @@
 				5579549E1E5F942E000FC91E /* csmsolid.inl */,
 				55244B261EA02A68006F546E /* csmsolid.h */,
 				5579549D1E5F942E000FC91E /* csmsolid.c */,
+				55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */,
+				55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */,
 			);
 			name = "Half-Edge Data Structure";
 			sourceTree = "<group>";
@@ -657,6 +667,8 @@
 				557954751E5E0694000FC91E /* csmid.c */,
 				557954861E5E2DCB000FC91E /* csmstring.inl */,
 				557954851E5E2DCB000FC91E /* csmstring.c */,
+				55FAB61920D83CA6008E1DFF /* csmsave.c */,
+				55FAB61A20D83CA6008E1DFF /* csmsave.inl */,
 				550765C81F92038300E6BD2E /* Containers */,
 				550765BE1F92037200E6BD2E /* Geometry */,
 				550765C91F92039300E6BD2E /* Debug */,
@@ -843,6 +855,7 @@
 				5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */,
 				55244B251EA0255A006F546E /* csmtransform.inl in Headers */,
 				5532DDC01E9001390047B9DF /* csmtolerance.inl in Headers */,
+				55FAB62320D8566F008E1DFF /* csmwriteablesolid.inl in Headers */,
 				5507A6891E736714008B9F73 /* csmeuler_lringmv.inl in Headers */,
 				55308C3C1F92219600353A68 /* csmmaterial.h in Headers */,
 				5507A6851E736565008B9F73 /* csmeuler_lmfkrh.inl in Headers */,
@@ -867,6 +880,7 @@
 				5507A5C71E6624E7008B9F73 /* csmopbas.inl in Headers */,
 				5507A67D1E73484D008B9F73 /* csmeuler_lmekr.inl in Headers */,
 				55EA99201ED38E66006C063C /* csmsetop_vtxvtx.inl in Headers */,
+				55FAB61C20D83CA6008E1DFF /* csmsave.inl in Headers */,
 				557954961E5E4742000FC91E /* csmface.inl in Headers */,
 				55308C401F92269800353A68 /* csmmaterial.tli in Headers */,
 				557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */,
@@ -1028,6 +1042,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				55A9843A1FBE3A6A009F7516 /* csmArrPoint2D.c in Sources */,
+				55FAB62220D8566F008E1DFF /* csmwriteablesolid.c in Sources */,
 				55089F4E1E8996B500B9570B /* csmglue.c in Sources */,
 				550E55AF1F87A9440033864A /* csmarqsort.c in Sources */,
 				557012C01E832F9600DFC490 /* csmmath.c in Sources */,
@@ -1063,6 +1078,7 @@
 				55EA991A1ED389C0006C063C /* csmsetop_vtxfacc.c in Sources */,
 				55F83C6A1FC4A33B009DBBEF /* csmsurface.c in Sources */,
 				5559D4E4204F3F310058F6F5 /* csmsetop_join.c in Sources */,
+				55FAB61B20D83CA6008E1DFF /* csmsave.c in Sources */,
 				557954681E5DB0A8000FC91E /* csmassert.c in Sources */,
 				551D47591FC1CD50004F3B43 /* csmshape2d.c in Sources */,
 				557954991E5E4811000FC91E /* csmbbox.c in Sources */,
