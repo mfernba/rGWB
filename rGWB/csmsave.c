@@ -8,6 +8,8 @@
 
 #include "csmsave.inl"
 
+#include "csmarrayc.h"
+#include "csmArrULong.h"
 #include "csmstring.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
@@ -136,6 +138,52 @@ void csmsave_write_char(struct csmsave_t *csmsave, const char *value)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsave_write_arr_ulong(struct csmsave_t *csmsave, const csmArrULong *array)
+{
+    unsigned long i, count;
+    
+    assert_no_null(csmsave);
+    assert(csmsave->mode == i_MODE_WRITE);
+    
+    count = csmArrULong_count(array);
+    csmsave_write_ulong(csmsave, count);
+    
+    for (i = 0; i < count; i++)
+    {
+        unsigned long element;
+        
+        element = csmArrULong_get(array, i);
+        csmsave_write_ulong(csmsave, element);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsave_dontuse_write_arr_st(
+                        struct csmsave_t *csmsave,
+                        const csmArrayStruct(csmsave_item_t) *array,
+                        csmsave_FPtr_write_struct func_write_struct)
+{
+    unsigned long i, count;
+    
+    assert_no_null(csmsave);
+    assert(csmsave->mode == i_MODE_WRITE);
+    assert_no_null(func_write_struct);
+    
+    count = csmarrayc_count_st(array, csmsave_item_t);
+    csmsave_write_ulong(csmsave, count);
+    
+    for (i = 0; i < count; i++)
+    {
+        const struct csmsave_item_t *element;
+        
+        element = csmarrayc_get_const_st(array, i, csmsave_item_t);
+        func_write_struct(element, csmsave);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsave_read_block_separator(struct csmsave_t *csmsave)
 {
     int readed;
@@ -210,4 +258,55 @@ char *csmsave_read_char(struct csmsave_t *csmsave)
     assert(readed == 1);
     
     return csmstring_duplicate(value);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+csmArrULong *csmsave_read_arr_ulong(struct csmsave_t *csmsave)
+{
+    csmArrULong *array;
+    unsigned long i, count;
+    
+    assert_no_null(csmsave);
+    assert(csmsave->mode == i_MODE_READ);
+    
+    count = csmsave_read_ulong(csmsave);
+    array = csmArrULong_new(count);
+    
+    for (i = 0; i < count; i++)
+    {
+        unsigned long element;
+        
+        element = csmsave_read_ulong(csmsave);
+        csmArrULong_set(array, i, element);
+    }
+    
+    return array;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+csmArrayStruct(csmsave_item_t) *csmsave_dontuse_read_arr_st(
+                        struct csmsave_t *csmsave,
+                        csmsave_FPtr_read_struct func_read_struct)
+{
+    csmArrayStruct(csmsave_item_t) *array;
+    unsigned long i, count;
+    
+    assert_no_null(csmsave);
+    assert(csmsave->mode == i_MODE_READ);
+    assert_no_null(func_read_struct);
+    
+    count = csmsave_read_ulong(csmsave);
+    array = csmarrayc_new_st_array(count, csmsave_item_t);
+    
+    for (i = 0; i < count; i++)
+    {
+        struct csmsave_item_t *element;
+        
+        element = func_read_struct(csmsave);
+        csmarrayc_set_st(array, i, element, csmsave_item_t);
+    }
+    
+    return array;
 }

@@ -23,6 +23,7 @@ enum csmcompare_t
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmArrPoint2D.hxx"
 #include "csmArrPoint3D.hxx"
+#include "csmArrULong.hxx"
 #endif
 
 #endif /* csmtypes_h */

@@ -52,6 +52,7 @@ struct csmfacbrep2solid_t;
 struct csmfacbrep2solid_face_t;
 struct csmfacbrep2solid_loop_t;
 struct csmsave_t;
+struct csmsave_item_t;
     
 #ifdef __cplusplus
 enum csmedge_lado_hedge_t: int;
@@ -89,11 +90,13 @@ csmArrayStruct(csmedge_t);
 csmArrayStruct(csmsetop_vtxvtx_inters_t);
 csmArrayStruct(csmsetop_vtxfacc_inters_t);
 csmArrayStruct(csmedge_t);
-
+csmArrayStruct(csmsave_item_t);
+    
 struct bsmaterial_t;
     
 csmArrPoint2D;
 csmArrPoint3D;
+csmArrULong;
 
 #else
     

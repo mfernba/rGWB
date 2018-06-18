@@ -2,6 +2,13 @@
 
 #include "csmfwddecl.hxx"
 
+typedef void (*csmsave_FPtr_write_struct)(const struct csmsave_item_t *item, struct csmsave_t *csmsave);
+#define CSMSAVE_CHECK_FUNC_WRITE_STRUCT(function, type)  ((void (*)(const struct type *, struct csmsave_t *))function == function)
+
+typedef struct csmsave_item_t *(*csmsave_FPtr_read_struct)(struct csmsave_t *csmsave);
+#define CSMSAVE_CHECK_FUNC_READ_STRUCT(function, type)  ((struct type *(*)(struct csmsave_t *))function == function)
+
+
 CONSTRUCTOR(struct csmsave_t *, csmsave_new_file_writer, (const char *file_path));
 
 CONSTRUCTOR(struct csmsave_t *, csmsave_new_file_reader, (const char *file_path));
@@ -21,6 +28,17 @@ void csmsave_write_double(struct csmsave_t *csmsave, double value);
 
 void csmsave_write_char(struct csmsave_t *csmsave, const char *value);
 
+void csmsave_write_arr_ulong(struct csmsave_t *csmsave, const csmArrULong *array);
+
+void csmsave_dontuse_write_arr_st(
+                        struct csmsave_t *csmsave,
+                        const csmArrayStruct(csmsave_item_t) *array,
+                        csmsave_FPtr_write_struct func_write_struct);
+#define csmsave_write_arr_st(csmsave, array, func_write_struct, type)\
+(/*lint -save -e505*/\
+    CSMSAVE_CHECK_FUNC_WRITE_STRUCT(func_write_struct, type),\
+    csmsave_dontuse_write_arr_st(csmsave, (const csmArrayStruct(csmsave_item_t) *)array, (csmsave_FPtr_write_struct)func_write_struct)\
+)/*lint -restore*/
 
 // Read...
 
@@ -33,3 +51,14 @@ unsigned long csmsave_read_ulong(struct csmsave_t *csmsave);
 double csmsave_read_double(struct csmsave_t *csmsave);
 
 CONSTRUCTOR(char *, csmsave_read_char, (struct csmsave_t *csmsave));
+
+CONSTRUCTOR(csmArrULong *, csmsave_read_arr_ulong, (struct csmsave_t *csmsave));
+
+CONSTRUCTOR(csmArrayStruct(csmsave_item_t) *, csmsave_dontuse_read_arr_st, (
+                        struct csmsave_t *csmsave,
+                        csmsave_FPtr_read_struct func_read_struct));
+#define csmsave_read_arr_st(csmsave, func_read_struct, type)\
+(/*lint -save -e505*/\
+    CSMSAVE_CHECK_FUNC_READ_STRUCT(func_read_struct, type),\
+    (csmArrayStruct(type) *)csmsave_dontuse_read_arr_st(csmsave, (csmsave_FPtr_read_struct)func_read_struct)\
+)/*lint -restore*/
