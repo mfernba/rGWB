@@ -35,7 +35,6 @@
 #include "csmsolid.inl"
 #include "csmtolerance.inl"
 #include "csmsubdvfaces.inl"
-#include "csmvertex.inl"
 
 
 #ifdef __STANDALONE_DISTRIBUTABLE

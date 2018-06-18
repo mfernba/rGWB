@@ -4,6 +4,7 @@
 
 #include "csmbbox.inl"
 #include "csmdebug.inl"
+#include "csmgeom.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmmath.inl"
@@ -22,7 +23,6 @@
 #include "csmArrPoint2D.h"
 #include "csmArrPoint3D.h"
 #include "csmassert.inl"
-#include "csmgeom.inl"
 #include "csmedge.inl"
 #include "csmid.inl"
 #include "csmmaterial.tli"
@@ -1816,7 +1816,7 @@ void csmface_draw_edges(
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_vis_append_loop_to_shape(
+static void i_cyvis_append_loop_to_shape(
                         struct csmloop_t *loop,
                         double Xo, double Yo, double Zo,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
@@ -1930,14 +1930,14 @@ void csmface_append_datos_mesh(
     poligonos_3d_cara = arr_CreaPunteroTD(0, ArrPunto3D);
 
     flout = csmface_flout(face);
-    i_vis_append_loop_to_shape(flout, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+    i_cyvis_append_loop_to_shape(flout, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
 
     loop_iterator = csmface_floops(face);
     
     while (loop_iterator != NULL)
     {
         if (loop_iterator != flout)
-            i_vis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+            i_cyvis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
 
         loop_iterator = csmloop_next(loop_iterator);
     }
@@ -1976,6 +1976,79 @@ void csmface_append_datos_mesh(
     }
 
     arr_DestruyeEstructurasTD(&poligonos_3d_cara, ArrPunto3D, arr_DestruyePunto3D);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_append_cara_solido(
+                    struct csmface_t *face,
+                    CSMBOOL only_faces_towards_direction, double Wx, double Wy, double Wz, double tolerance_rad, 
+                    ArrArrPuntero(ArrPunto3D) *caras_solido)
+{
+    double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
+    CSMBOOL add_face;
+    
+    assert_no_null(face);
+
+    csmmath_plane_axis_from_implicit_plane_equation(
+                        face->A, face->B, face->C, face->D,
+                        &Xo, &Yo, &Zo,
+                        &Ux, &Uy, &Uz, &Vx, &Vy, &Vz);
+
+    if (only_faces_towards_direction == CSMTRUE)
+    {
+        double Wx_face, Wy_face, Wz_face;
+        double dot_product;
+
+        csmmath_cross_product3D(Ux, Uy, Uz, Vx, Vy, Vz, &Wx_face, &Wy_face, &Wz_face);
+        dot_product = csmmath_dot_product3D(-Wx_face, -Wy_face, -Wz_face, Wx, Wy, Wz);
+
+        if (dot_product > 0.)
+        {
+            double cos_tolerance_rad;
+
+            cos_tolerance_rad = csmmath_cos(tolerance_rad);
+
+            if (cos_tolerance_rad + 1.e-5 > dot_product)
+                add_face = CSMTRUE;
+            else
+                add_face = CSMFALSE;
+        }
+        else
+        {
+            add_face = CSMFALSE;
+        }
+    }
+    else
+    {
+        add_face = CSMTRUE;
+    }
+
+    if (add_face == CSMTRUE)
+    {
+        struct csmloop_t *flout, *loop_iterator;
+        ArrPuntero(ArrPunto3D) *poligonos_3d_cara;
+
+        poligonos_3d_cara = arr_CreaPunteroTD(0, ArrPunto3D);
+
+        flout = csmface_flout(face);
+        i_cyvis_append_loop_to_shape(flout, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+
+        loop_iterator = csmface_floops(face);
+        
+        while (loop_iterator != NULL)
+        {
+            if (loop_iterator != flout)
+                i_cyvis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+
+            loop_iterator = csmloop_next(loop_iterator);
+        }
+        
+        if (arr_NumElemsPunteroTD(poligonos_3d_cara, ArrPunto3D) > 0)
+            arr_AppendPunteroArrayTD(caras_solido, poligonos_3d_cara, ArrPunto3D);
+        else
+            arr_DestruyeEstructurasTD(&poligonos_3d_cara, ArrPunto3D, arr_DestruyePunto3D);
+    }
 }
 
 #endif

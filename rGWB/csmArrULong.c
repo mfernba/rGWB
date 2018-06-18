@@ -3,8 +3,14 @@
 #include "csmArrULong.h"
 
 #include "csmarrayc.h"
+
+#ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
+#else
+#include "cyassert.h"
+#include "cypespy.h"
+#endif
 
 struct i_ulong_t
 {

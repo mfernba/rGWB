@@ -185,4 +185,9 @@ void csmface_append_datos_mesh(
                     ArrPunto3D *puntos, ArrPunto3D *normales, ArrBool *es_borde,
                     ArrEnum(cplan_tipo_primitiva_t) *tipo_primitivas, ArrPuntero(ArrULong) *inds_caras);
 
+void csmface_append_cara_solido(
+                    struct csmface_t *face,
+                    CSMBOOL only_faces_towards_direction, double Wx, double Wy, double Wz, double tolerance_rad, 
+                    ArrArrPuntero(ArrPunto3D) *caras_solido);
+
 #endif

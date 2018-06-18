@@ -35,6 +35,10 @@ DLL_RGWB void csmsolid_vis_datos_mesh(
 
 DLL_RGWB CONSTRUCTOR(ArrPuntero(ArrPunto3D) *, csmsolid_vis_datos_lineas, (struct csmsolid_t *solid));
     
+DLL_RGWB CONSTRUCTOR(ArrArrPuntero(ArrPunto3D) *, csmsolid_vis_caras_solido, (
+                        struct csmsolid_t *solid,
+                        CSMBOOL only_faces_towards_direction, double Wx, double Wy, double Wz, double tolerance_rad));
+
 #endif
 
 #ifdef __cplusplus

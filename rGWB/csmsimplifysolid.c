@@ -23,7 +23,6 @@
 #include "csmopbas.inl"
 #include "csmsolid.inl"
 #include "csmvertex.inl"
-#include "csmvertex.tli"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"

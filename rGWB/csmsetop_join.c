@@ -15,14 +15,12 @@
 #include "csmeuler_lkef.inl"
 #include "csmeuler_lmef.inl"
 #include "csmface.inl"
-#include "csmhashtb.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmopbas.inl"
 #include "csmsetopcom.inl"
 #include "csmsolid.inl"
 #include "csmstring.inl"
-#include "csmvertex.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"

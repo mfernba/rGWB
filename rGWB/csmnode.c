@@ -8,8 +8,6 @@
 
 #include "csmnode.inl"
 
-#include "csmstring.inl"
-
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"

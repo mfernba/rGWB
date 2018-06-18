@@ -28,7 +28,6 @@
 #include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
-#include "csmvertex.tli"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"

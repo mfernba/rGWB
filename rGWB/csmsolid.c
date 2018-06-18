@@ -12,7 +12,6 @@
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
-#include "csmedge.tli"
 #include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"

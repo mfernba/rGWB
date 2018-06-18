@@ -14,7 +14,6 @@
 #include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
-#include "csmhedge.tli"
 #include "csmloop.inl"
 #include "csmmath.inl"
 #include "csmnode.inl"
@@ -35,7 +34,6 @@ csmArrayStruct(i_edge_t);
 
 #else
 
-#include "a_pto3d.h"
 #include "cyassert.h"
 #include "cypespy.h"
 
@@ -895,7 +893,6 @@ static struct csmhedge_t *i_get_he(
 static void i_generate_solid_hedges(
                         const csmArrayStruct(i_edge_t) *edges,
                         const csmArrayStruct(csmfacbrep2solid_face_t) *faces,
-                        unsigned long *id_new_element,
                         struct csmsolid_t *solid)
 {
     unsigned long i, no_edges;
@@ -1108,7 +1105,7 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
                     i_generate_solid_face(face, solid_loc, &builder->id_new_element, builder->vertexs);
                 }
                 
-                i_generate_solid_hedges(edges, builder->faces, &builder->id_new_element, solid_loc);
+                i_generate_solid_hedges(edges, builder->faces, solid_loc);
                 
                 tolerances = csmtolerance_new();
                 csmsimplifysolid_simplify(solid_loc, tolerances);

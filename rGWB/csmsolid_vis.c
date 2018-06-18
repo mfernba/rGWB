@@ -36,6 +36,16 @@
 
 #endif
 
+// ----------------------------------------------------------------------------------------------------
+
+static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
+{
+    struct csmloop_t *loop;
+    
+    loop = csmhedge_loop(hedge);
+    return csmloop_lface(loop);
+}
+
 #ifdef __STANDALONE_DISTRIBUTABLE
 
 // ----------------------------------------------------------------------------------------------------
@@ -63,16 +73,6 @@ static void i_draw_debug_info_vertex(struct csmvertex_t *vertex, struct bsgraphi
         bsgraphics2_desapila_transformacion(graphics);
         bsgraphics2_desapila_transformacion(graphics);
     }
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
-{
-    struct csmloop_t *loop;
-    
-    loop = csmhedge_loop(hedge);
-    return csmloop_lface(loop);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -471,16 +471,6 @@ static void i_genera_mesh_solido(
 
 // ----------------------------------------------------------------------------------------------------
 
-static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
-{
-    struct csmloop_t *loop;
-    
-    loop = csmhedge_loop(hedge);
-    return csmloop_lface(loop);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
 static void i_append_lineas_contorno(struct csmedge_t *edge, ArrPuntero(ArrPunto3D) *lineas_contorno)
 {
     struct csmhedge_t *he1, *he2;
@@ -597,4 +587,33 @@ ArrPuntero(ArrPunto3D) *csmsolid_vis_datos_lineas(struct csmsolid_t *solid)
     csmsolid_redo_geometric_generated_data(solid);
     return i_lineas_aristas(solid);
 }
+
+// ----------------------------------------------------------------------------------------------------
+
+ArrArrPuntero(ArrPunto3D) *csmsolid_vis_caras_solido(
+                        struct csmsolid_t *solid,
+                        CSMBOOL only_faces_towards_direction, double Wx, double Wy, double Wz, double tolerance_rad)
+{
+    ArrArrPuntero(ArrPunto3D) *caras_solido;
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+
+    csmsolid_redo_geometric_generated_data(solid);
+
+    face_iterator = csmsolid_face_iterator(solid);
+
+    caras_solido = arr_CreaPunteroArrayTD(0, ArrPunto3D);
+
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        csmface_append_cara_solido(face, only_faces_towards_direction, Wx, Wy, Wz, tolerance_rad, caras_solido);
+    }
+
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+
+    return caras_solido;
+}
+
 #endif

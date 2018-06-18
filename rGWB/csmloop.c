@@ -11,6 +11,7 @@
 #include "csmedge.inl"
 #include "csmedge.tli"
 #include "csmhedge.inl"
+#include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmid.inl"
@@ -18,7 +19,6 @@
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
-#include "csmstring.inl"
 #else
 #include "cyassert.h"
 #include "copiafor.h"
