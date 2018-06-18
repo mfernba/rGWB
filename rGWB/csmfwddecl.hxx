@@ -51,6 +51,7 @@ struct csmoptree_t;
 struct csmfacbrep2solid_t;
 struct csmfacbrep2solid_face_t;
 struct csmfacbrep2solid_loop_t;
+struct csmsave_t;
     
 #ifdef __cplusplus
 enum csmedge_lado_hedge_t: int;
