@@ -34,6 +34,8 @@ struct i_hedge_t
     
     unsigned long loop_id;
     unsigned long vertex_id;
+    
+    unsigned long hedge_prev_id, hedge_next_id;
 };
 
 struct i_loop_t
@@ -138,7 +140,10 @@ static void i_write_vertex(const struct i_vertex_t *vertex, struct csmsave_t *cs
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct i_hedge_t *, i_new_hedge, (unsigned long hedge_id, unsigned long loop_id, unsigned long vertex_id))
+CONSTRUCTOR(static struct i_hedge_t *, i_new_hedge, (
+                        unsigned long hedge_id,
+                        unsigned long loop_id, unsigned long vertex_id,
+                        unsigned long hedge_prev_id, unsigned long hedge_next_id))
 {
     struct i_hedge_t *hedge;
     
@@ -148,6 +153,9 @@ CONSTRUCTOR(static struct i_hedge_t *, i_new_hedge, (unsigned long hedge_id, uns
     
     hedge->loop_id = loop_id;
     hedge->vertex_id = vertex_id;
+    
+    hedge->hedge_prev_id = hedge_prev_id;
+    hedge->hedge_next_id = hedge_next_id;
     
     return hedge;
 }
@@ -167,13 +175,20 @@ static void i_free_hedge(struct i_hedge_t **hedge)
 CONSTRUCTOR(static struct i_hedge_t *, i_read_hedge, (struct csmsave_t *csmsave))
 {
     unsigned long hedge_id, loop_id, vertex_id;
+    unsigned long hedge_prev_id, hedge_next_id;
     
     hedge_id = csmsave_read_ulong(csmsave);
     
     loop_id = csmsave_read_ulong(csmsave);
     vertex_id = csmsave_read_ulong(csmsave);
     
-    return i_new_hedge(hedge_id, loop_id, vertex_id);
+    hedge_prev_id = csmsave_read_ulong(csmsave);
+    hedge_next_id = csmsave_read_ulong(csmsave);
+    
+    return i_new_hedge(
+                    hedge_id,
+                    loop_id, vertex_id,
+                    hedge_prev_id, hedge_next_id);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -186,6 +201,9 @@ static void i_write_hedge(const struct i_hedge_t *hedge, struct csmsave_t *csmsa
     
     csmsave_write_ulong(csmsave, hedge->loop_id);
     csmsave_write_ulong(csmsave, hedge->vertex_id);
+    
+    csmsave_write_ulong(csmsave, hedge->hedge_prev_id);
+    csmsave_write_ulong(csmsave, hedge->hedge_next_id);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -467,13 +485,14 @@ void csmwriteablesolid_append_vertex(
 void csmwriteablesolid_append_hedge(
                         struct csmwriteablesolid_t *writeable_solid,
                         unsigned long hedge_id,
-                        unsigned long loop_id, unsigned long vertex_id)
+                        unsigned long loop_id, unsigned long vertex_id,
+                        unsigned long hedge_prev_id, unsigned long hedge_next_id)
 {
     struct i_hedge_t *hedge;
     
     assert_no_null(writeable_solid);
     
-    hedge = i_new_hedge(hedge_id, loop_id, vertex_id);
+    hedge = i_new_hedge(hedge_id, loop_id, vertex_id, hedge_prev_id, hedge_next_id);
     csmarrayc_append_element_st(writeable_solid->hedges, hedge, i_hedge_t);
 }
 

@@ -376,12 +376,16 @@ static void i_append_hedge_to_writeable_solid(struct csmhedge_t *hedge, struct c
 {
     unsigned long hedge_id;
     unsigned long loop_id, vertex_id;
+    unsigned long hedge_prev_id, hedge_next_id;
     
     hedge_id = csmhedge_id(hedge);
     loop_id = csmloop_id(csmhedge_loop(hedge));
     vertex_id = csmvertex_id(csmhedge_vertex(hedge));
     
-    csmwriteablesolid_append_hedge(writeable_solid, hedge_id, loop_id, vertex_id);
+    hedge_prev_id = csmhedge_id(csmhedge_prev(hedge));
+    hedge_next_id = csmhedge_id(csmhedge_next(hedge));
+    
+    csmwriteablesolid_append_hedge(writeable_solid, hedge_id, loop_id, vertex_id, hedge_prev_id, hedge_next_id);
 }
 
 // ----------------------------------------------------------------------------------------------------

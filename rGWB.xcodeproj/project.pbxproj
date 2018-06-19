@@ -647,11 +647,11 @@
 				5579548F1E5E446C000FC91E /* csmloop.c */,
 				557954941E5E4742000FC91E /* csmface.inl */,
 				557954931E5E4742000FC91E /* csmface.c */,
-				5579549E1E5F942E000FC91E /* csmsolid.inl */,
 				55244B261EA02A68006F546E /* csmsolid.h */,
+				5579549E1E5F942E000FC91E /* csmsolid.inl */,
 				5579549D1E5F942E000FC91E /* csmsolid.c */,
-				55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */,
 				55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */,
+				55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */,
 			);
 			name = "Half-Edge Data Structure";
 			sourceTree = "<group>";

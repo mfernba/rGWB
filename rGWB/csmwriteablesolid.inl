@@ -22,7 +22,8 @@ void csmwriteablesolid_append_vertex(
 void csmwriteablesolid_append_hedge(
                         struct csmwriteablesolid_t *writeable_solid,
                         unsigned long hedge_id,
-                        unsigned long loop_id, unsigned long vertex_id);
+                        unsigned long loop_id, unsigned long vertex_id,
+                        unsigned long hedge_prev_id, unsigned long hedge_next_id);
 
 void csmwriteablesolid_append_loop(
                         struct csmwriteablesolid_t *writeable_solid,
