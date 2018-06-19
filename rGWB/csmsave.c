@@ -98,12 +98,22 @@ void csmsave_write_block_separator(struct csmsave_t *csmsave)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsave_write_bool(struct csmsave_t *csmsave, CSMBOOL value)
+{
+    assert_no_null(csmsave);
+    assert(csmsave->mode == i_MODE_WRITE);
+    
+    fprintf(csmsave->file_descriptor, "%hu ", value);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsave_write_uchar(struct csmsave_t *csmsave, unsigned char value)
 {
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_WRITE);
     
-    fprintf(csmsave->file_descriptor, "%lu ", value);
+    fprintf(csmsave->file_descriptor, "%hhu ", value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -124,6 +134,16 @@ void csmsave_write_double(struct csmsave_t *csmsave, double value)
     assert(csmsave->mode == i_MODE_WRITE);
 
     fprintf(csmsave->file_descriptor, "%lf ", value);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsave_write_float(struct csmsave_t *csmsave, float value)
+{
+    assert_no_null(csmsave);
+    assert(csmsave->mode == i_MODE_WRITE);
+
+    fprintf(csmsave->file_descriptor, "%f ", value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -179,6 +199,27 @@ void csmsave_dontuse_write_arr_st(
         
         element = csmarrayc_get_const_st(array, i, csmsave_item_t);
         func_write_struct(element, csmsave);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmsave_dontuse_write_optional_st(
+                        struct csmsave_t *csmsave,
+                        const struct csmsave_item_t *item,
+                        csmsave_FPtr_write_struct func_write_struct)
+{
+    assert_no_null(csmsave);
+    assert_no_null(func_write_struct);
+    
+    if (item == NULL)
+    {
+        csmsave_write_bool(csmsave, CSMFALSE);
+    }
+    else
+    {
+        csmsave_write_bool(csmsave, CSMTRUE);
+        func_write_struct(item, csmsave);
     }
 }
 

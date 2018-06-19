@@ -8,6 +8,7 @@
 
 #include "csmmaterial.h"
 #include "csmmaterial.tli"
+#include "csmsave.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -16,6 +17,8 @@
 #include "cyassert.h"
 #include "cypespy.h"
 #endif
+
+static const unsigned char i_FILE_VERSION = 0;
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -49,4 +52,18 @@ void csmmaterial_free(struct csmmaterial_t **material)
     assert_no_null(*material);
     
     FREE_PP(material, struct csmmaterial_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmmaterial_write(const struct csmmaterial_t *material, struct csmsave_t *csmsave)
+{
+    assert_no_null(material);
+    
+    csmsave_write_uchar(csmsave, i_FILE_VERSION);
+    
+    csmsave_write_float(csmsave, material->r);
+    csmsave_write_float(csmsave, material->g);
+    csmsave_write_float(csmsave, material->b);
+    csmsave_write_float(csmsave, material->a);
 }

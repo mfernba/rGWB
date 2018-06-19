@@ -8,6 +8,8 @@ void csmsolid_set_name(struct csmsolid_t *solid, const char *name);
 
 const char *csmsolid_get_name(const struct csmsolid_t *solid);
 
+void csmsolid_write(struct csmsolid_t *solid, struct csmsave_t *csmsave);
+
 
 // General...
 

@@ -20,11 +20,15 @@ void csmsave_free(struct csmsave_t **csmsave);
 
 void csmsave_write_block_separator(struct csmsave_t *csmsave);
 
+void csmsave_write_bool(struct csmsave_t *csmsave, CSMBOOL value);
+
 void csmsave_write_uchar(struct csmsave_t *csmsave, unsigned char value);
 
 void csmsave_write_ulong(struct csmsave_t *csmsave, unsigned long value);
 
 void csmsave_write_double(struct csmsave_t *csmsave, double value);
+
+void csmsave_write_float(struct csmsave_t *csmsave, float value);
 
 void csmsave_write_char(struct csmsave_t *csmsave, const char *value);
 
@@ -36,9 +40,23 @@ void csmsave_dontuse_write_arr_st(
                         csmsave_FPtr_write_struct func_write_struct);
 #define csmsave_write_arr_st(csmsave, array, func_write_struct, type)\
 (/*lint -save -e505*/\
+    ((const csmArrayStruct(type) *)array == array),\
     CSMSAVE_CHECK_FUNC_WRITE_STRUCT(func_write_struct, type),\
     csmsave_dontuse_write_arr_st(csmsave, (const csmArrayStruct(csmsave_item_t) *)array, (csmsave_FPtr_write_struct)func_write_struct)\
 )/*lint -restore*/
+
+void csmsave_dontuse_write_optional_st(
+                        struct csmsave_t *csmsave,
+                        const struct csmsave_item_t *item,
+                        csmsave_FPtr_write_struct func_write_struct);
+#define csmsave_write_optional_st(csmsave, item, func_write_struct, type)\
+(/*lint -save -e505*/\
+    ((const struct type *)item == item),\
+    CSMSAVE_CHECK_FUNC_WRITE_STRUCT(func_write_struct, type),\
+    csmsave_dontuse_write_optional_st(csmsave, (const struct csmsave_item_t *)item, (csmsave_FPtr_write_struct)func_write_struct)\
+)/*lint -restore*/
+
+
 
 // Read...
 

@@ -291,4 +291,3 @@ void csmvertex_print_debug_info(struct csmvertex_t *vertex)
     if (vertex->algorithm_attrib_mask &     CSMVERTEX_MASK_SETOP_VTX_FAC_CLASS)
         csmdebug_print_debug_info(" [VTXFACC] ");
 }
-
