@@ -8,6 +8,7 @@
 #include "csmhedge.inl"
 #include "csmid.inl"
 #include "csmvertex.inl"
+#include "csmwriteablesolid.tli"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -51,20 +52,27 @@ CONSTRUCTOR(static struct csmedge_t *, i_new, (
 
 // --------------------------------------------------------------------------------------------------------------
 
-struct csmedge_t *csmedge_new(unsigned long *id_new_element)
+CONSTRUCTOR(static struct csmedge_t *, i_new_empty_edge, (unsigned long id))
 {
-    unsigned long id;
     struct csmhedge_t *he1, *he2;
     CSMBOOL setop_is_null_edge;
     
-    id = csmid_new_id(id_new_element, NULL);
-
     he1 = NULL;
     he2 = NULL;
     
     setop_is_null_edge = CSMFALSE;
     
     return i_new(id, he1, he2, setop_is_null_edge);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+struct csmedge_t *csmedge_new(unsigned long *id_new_element)
+{
+    unsigned long id;
+    
+    id = csmid_new_id(id_new_element, NULL);
+    return i_new_empty_edge(id);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -106,6 +114,30 @@ struct csmedge_t *csmedge_duplicate(
     csmhedge_set_edge(new_edge->he2, new_edge);
     
     return new_edge;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+struct csmedge_t *csmedge_new_from_writeable_edge(
+                        const struct csmwriteablesolid_edge_t *w_edge,
+                        struct csmhashtb(csmhedge_t) *shedges)
+{
+    struct csmedge_t *edge;
+    
+    assert_no_null(w_edge);
+    
+    edge = i_new_empty_edge(w_edge->edge_id);
+    assert_no_null(edge);
+    assert(edge->he1 == NULL);
+    assert(edge->he2 == NULL);
+    
+    edge->he1 = csmhashtb_ptr_for_id(shedges, w_edge->hedge_pos_id, csmhedge_t);
+    csmhedge_set_edge(edge->he1, edge);
+    
+    edge->he2 = csmhashtb_ptr_for_id(shedges, w_edge->hedge_neg_id, csmhedge_t);
+    csmhedge_set_edge(edge->he2, edge);
+    
+    return edge;
 }
 
 // --------------------------------------------------------------------------------------------------------------

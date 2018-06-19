@@ -2,19 +2,22 @@
 
 #include "csmloop.inl"
 
+#include "csmarrayc.h"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
+#include "csmedge.inl"
+#include "csmedge.tli"
 #include "csmgeom.inl"
+#include "csmhashtb.inl"
+#include "csmhedge.inl"
+#include "csmid.inl"
 #include "csmmath.inl"
 #include "csmmath.tli"
 #include "csmnode.inl"
-#include "csmedge.inl"
-#include "csmedge.tli"
-#include "csmhedge.inl"
 #include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
-#include "csmid.inl"
+#include "csmwriteablesolid.tli"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -38,7 +41,7 @@ struct csmloop_t
 
 // --------------------------------------------------------------------------------------------------------------
 
-static void i_csmloop_destruye(struct csmloop_t **loop)
+static void i_csmloop_free(struct csmloop_t **loop)
 {
     assert_no_null(loop);
     assert_no_null(*loop);
@@ -64,7 +67,7 @@ CONSTRUCTOR(static struct csmloop_t *, i_new, (
     
     loop = MALLOC(struct csmloop_t);
     
-    csmnode_init(&loop->super, id, i_csmloop_destruye, csmloop_t);
+    csmnode_init(&loop->super, id, i_csmloop_free, csmloop_t);
     
     loop->ledge = ledge;
     loop->lface = lface;
@@ -77,19 +80,13 @@ CONSTRUCTOR(static struct csmloop_t *, i_new, (
 
 // --------------------------------------------------------------------------------------------------------------
 
-struct csmloop_t *csmloop_new(struct csmface_t *face, unsigned long *id_new_element)
+CONSTRUCTOR(static struct csmloop_t *, i_new_empty_loop, (unsigned long id, struct csmface_t *lface))
 {
-    unsigned long id;
     struct csmhedge_t *ledge;
-    struct csmface_t *lface;
     CSMBOOL setop_convert_loop_in_face;
     CSMBOOL setop_loop_was_a_hole;
     
-    id = csmid_new_id(id_new_element, NULL);
-    
     ledge = NULL;
-    lface = face;
-    
     setop_convert_loop_in_face = CSMFALSE;
     setop_loop_was_a_hole = CSMFALSE;
     
@@ -98,19 +95,22 @@ struct csmloop_t *csmloop_new(struct csmface_t *face, unsigned long *id_new_elem
 
 // --------------------------------------------------------------------------------------------------------------
 
+struct csmloop_t *csmloop_new(struct csmface_t *face, unsigned long *id_new_element)
+{
+    unsigned long id;
+    
+    id = csmid_new_id(id_new_element, NULL);
+    return i_new_empty_loop(id, face);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static struct csmloop_t *, i_duplicate_loop, (struct csmface_t *lface, unsigned long *id_new_element))
 {
     unsigned long id;
-    struct csmhedge_t *ledge;
-    CSMBOOL setop_convert_loop_in_face;
-    CSMBOOL setop_loop_was_a_hole;
     
     id = csmid_new_id(id_new_element, NULL);
-    ledge = NULL;
-    setop_convert_loop_in_face = CSMFALSE;
-    setop_loop_was_a_hole = CSMFALSE;
-    
-    return i_new(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
+    return i_new_empty_loop(id, lface);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -161,6 +161,55 @@ struct csmloop_t *csmloop_duplicate(
     csmhedge_set_prev(new_loop->ledge, last_hedge);
     
     return new_loop;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+struct csmloop_t *csmloop_new_from_writeable_loop(
+                        const struct csmwriteablesolid_loop_t *w_loop,
+                        struct csmface_t *face,
+                        struct csmhashtb(csmvertex_t) *svertexs,
+                        struct csmhashtb(csmhedge_t) *created_shedges)
+{
+    struct csmloop_t *loop;
+    unsigned long i, no_hedges;
+    struct csmhedge_t *prev_hedge;
+    
+    assert_no_null(w_loop);
+    
+    loop = i_new_empty_loop(w_loop->loop_id, face);
+    assert_no_null(loop);
+    
+    no_hedges = csmarrayc_count_st(w_loop->hedges, csmwriteablesolid_hedge_t);
+    prev_hedge = NULL;
+    
+    for (i = 0; i < no_hedges; i++)
+    {
+        const struct csmwriteablesolid_hedge_t *w_hedge;
+        struct csmhedge_t *hedge;
+        
+        w_hedge = csmarrayc_get_const_st(w_loop->hedges, i, csmwriteablesolid_hedge_t);
+        assert_no_null(w_hedge);
+        
+        hedge = csmhedge_new_from_writeable_hedge(w_hedge, loop, svertexs, created_shedges);
+        
+        if (i == 0)
+        {
+            loop->ledge = hedge;
+        }
+        else
+        {
+            csmhedge_set_next(prev_hedge, hedge);
+            csmhedge_set_prev(hedge, prev_hedge);
+        }
+        
+        prev_hedge = hedge;
+    }
+
+    csmhedge_set_next(prev_hedge, loop->ledge);
+    csmhedge_set_prev(loop->ledge, prev_hedge);
+    
+    return loop;
 }
 
 // --------------------------------------------------------------------------------------------------------------

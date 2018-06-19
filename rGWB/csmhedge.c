@@ -3,10 +3,10 @@
 #include "csmhedge.inl"
 
 #include "csmhashtb.inl"
+#include "csmid.inl"
 #include "csmnode.inl"
 #include "csmvertex.inl"
-
-#include "csmid.inl"
+#include "csmwriteablesolid.tli"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -131,6 +131,38 @@ struct csmhedge_t *csmhedge_duplicate(
     csmhashtb_add_item(relation_shedges_old_to_new, hedge->super.id, new_hedge, csmhedge_t);
     
     return new_hedge;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+struct csmhedge_t *csmhedge_new_from_writeable_hedge(
+                        const struct csmwriteablesolid_hedge_t *w_hedge,
+                        struct csmloop_t *loop,
+                        struct csmhashtb(csmvertex_t) *svertexs,
+                        struct csmhashtb(csmhedge_t) *created_shedges)
+{
+    struct csmhedge_t *hedge;
+    struct csmedge_t *edge;
+    struct csmvertex_t *vertex;
+    CSMBOOL setop_is_loose_end;
+    
+    assert_no_null(w_hedge);
+
+    edge = NULL;
+    vertex = csmhashtb_ptr_for_id(svertexs, w_hedge->vertex_id, csmvertex_t);
+    setop_is_loose_end = CSMFALSE;
+    
+    hedge = i_new(w_hedge->hedge_id, edge, vertex, loop, setop_is_loose_end);
+    
+    if (w_hedge->is_reference_hedge_of_vertex == CSMTRUE)
+    {
+        assert(csmvertex_hedge(vertex) == NULL);
+        csmvertex_set_hedge(vertex, hedge);
+    }
+    
+    csmhashtb_add_item(created_shedges, hedge->super.id, hedge, csmhedge_t);
+    
+    return hedge;
 }
 
 // --------------------------------------------------------------------------------------------------------------

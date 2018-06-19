@@ -11,6 +11,12 @@ CONSTRUCTOR(struct csmface_t *, csmface_duplicate, (
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
+CONSTRUCTOR(struct csmface_t *, csmface_new_from_writeable_face, (
+                        const struct csmwriteablesolid_face_t *w_face,
+                        struct csmsolid_t *solid,
+                        struct csmhashtb(csmvertex_t) *svertexs,
+                        struct csmhashtb(csmhedge_t) *created_shedges));
+
 void csmface_free(struct csmface_t **face);
 
 unsigned long csmface_id(const struct csmface_t *face);

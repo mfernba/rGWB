@@ -8,6 +8,7 @@
 #include "csmid.inl"
 #include "csmmath.inl"
 #include "csmtransform.inl"
+#include "csmwriteablesolid.tli"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -104,6 +105,21 @@ struct csmvertex_t *csmvertex_duplicate(
     csmhashtb_add_item(relation_svertexs_old_to_new, vertex->id, new_vertex, csmvertex_t);
     
     return new_vertex;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmvertex_t *csmvertex_new_from_writeable_vertex(const struct csmwriteablesolid_vertex_t *w_vertex)
+{
+    struct csmhedge_t *hedge;
+    csmvertex_mask_t algorithm_attrib_mask;
+    
+    assert_no_null(w_vertex);
+    
+    hedge = NULL;
+    algorithm_attrib_mask = CSMVERTEX_NULL_MASK;
+    
+    return i_new(w_vertex->vertex_id, w_vertex->x, w_vertex->y, w_vertex->z, hedge, algorithm_attrib_mask);
 }
 
 // ----------------------------------------------------------------------------------------------------

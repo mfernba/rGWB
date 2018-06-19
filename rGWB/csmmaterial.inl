@@ -10,4 +10,6 @@ CONSTRUCTOR(struct csmmaterial_t *, csmmaterial_copy, (const struct csmmaterial_
 
 void csmmaterial_free(struct csmmaterial_t **material);
 
+CONSTRUCTOR(struct csmmaterial_t *, csmmaterial_read, (struct csmsave_t *csmsave));
+
 void csmmaterial_write(const struct csmmaterial_t *material, struct csmsave_t *csmsave);

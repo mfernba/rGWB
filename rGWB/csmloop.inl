@@ -12,6 +12,11 @@ CONSTRUCTOR(struct csmloop_t *, csmloop_duplicate, (
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
+CONSTRUCTOR(struct csmloop_t *, csmloop_new_from_writeable_loop, (
+                        const struct csmwriteablesolid_loop_t *w_loop,
+                        struct csmface_t *face,
+                        struct csmhashtb(csmvertex_t) *svertexs,
+                        struct csmhashtb(csmhedge_t) *created_shedges));
 
 unsigned long csmloop_id(const struct csmloop_t *loop);
 

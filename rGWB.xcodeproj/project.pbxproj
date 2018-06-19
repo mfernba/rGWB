@@ -158,6 +158,7 @@
 		55EA99201ED38E66006C063C /* csmsetop_vtxvtx.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55EA991E1ED38E66006C063C /* csmsetop_vtxvtx.inl */; };
 		55EA99231ED38FCD006C063C /* csmsetop_procedges.c in Sources */ = {isa = PBXBuildFile; fileRef = 55EA99211ED38FCD006C063C /* csmsetop_procedges.c */; };
 		55EA99241ED38FCD006C063C /* csmsetop_procedges.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55EA99221ED38FCD006C063C /* csmsetop_procedges.inl */; };
+		55F72FA320D99FBC00E949EE /* csmwriteablesolid.tli in Headers */ = {isa = PBXBuildFile; fileRef = 55F72FA220D99FBC00E949EE /* csmwriteablesolid.tli */; };
 		55F83C6A1FC4A33B009DBBEF /* csmsurface.c in Sources */ = {isa = PBXBuildFile; fileRef = 55F83C681FC4A33B009DBBEF /* csmsurface.c */; };
 		55F83C6B1FC4A33B009DBBEF /* csmsurface.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55F83C691FC4A33B009DBBEF /* csmsurface.inl */; };
 		55FA851720853B7200FB00EE /* csmstmodeler.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FA851520853B7200FB00EE /* csmstmodeler.c */; };
@@ -306,7 +307,7 @@
 		55308C391F92219600353A68 /* csmmaterial.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmmaterial.c; sourceTree = "<group>"; };
 		55308C3A1F92219600353A68 /* csmmaterial.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmmaterial.h; sourceTree = "<group>"; };
 		55308C3D1F9222B500353A68 /* csmmaterial.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmmaterial.inl; sourceTree = "<group>"; };
-		55308C3F1F92269800353A68 /* csmmaterial.tli */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmmaterial.tli; sourceTree = "<group>"; };
+		55308C3F1F92269800353A68 /* csmmaterial.tli */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; lineEnding = 2; path = csmmaterial.tli; sourceTree = "<group>"; };
 		5532DDB61E8FFE810047B9DF /* csmloopglue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmloopglue.c; sourceTree = "<group>"; };
 		5532DDB71E8FFE810047B9DF /* csmloopglue.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmloopglue.inl; sourceTree = "<group>"; };
 		5532DDBD1E9001390047B9DF /* csmtolerance.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmtolerance.c; sourceTree = "<group>"; };
@@ -392,6 +393,7 @@
 		55EA991E1ED38E66006C063C /* csmsetop_vtxvtx.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmsetop_vtxvtx.inl; sourceTree = "<group>"; };
 		55EA99211ED38FCD006C063C /* csmsetop_procedges.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmsetop_procedges.c; sourceTree = "<group>"; };
 		55EA99221ED38FCD006C063C /* csmsetop_procedges.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmsetop_procedges.inl; sourceTree = "<group>"; };
+		55F72FA220D99FBC00E949EE /* csmwriteablesolid.tli */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; lineEnding = 2; path = csmwriteablesolid.tli; sourceTree = "<group>"; };
 		55F83C681FC4A33B009DBBEF /* csmsurface.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsurface.c; sourceTree = "<group>"; };
 		55F83C691FC4A33B009DBBEF /* csmsurface.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsurface.inl; sourceTree = "<group>"; };
 		55FA851520853B7200FB00EE /* csmstmodeler.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmstmodeler.c; sourceTree = "<group>"; };
@@ -399,8 +401,8 @@
 		55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmstmodeler.hxx; sourceTree = "<group>"; };
 		55FAB61920D83CA6008E1DFF /* csmsave.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsave.c; sourceTree = "<group>"; };
 		55FAB61A20D83CA6008E1DFF /* csmsave.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsave.inl; sourceTree = "<group>"; };
-		55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmwriteablesolid.c; sourceTree = "<group>"; };
-		55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmwriteablesolid.inl; sourceTree = "<group>"; };
+		55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmwriteablesolid.c; sourceTree = "<group>"; };
+		55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmwriteablesolid.inl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -652,6 +654,7 @@
 				5579549D1E5F942E000FC91E /* csmsolid.c */,
 				55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */,
 				55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */,
+				55F72FA220D99FBC00E949EE /* csmwriteablesolid.tli */,
 			);
 			name = "Half-Edge Data Structure";
 			sourceTree = "<group>";
@@ -855,6 +858,7 @@
 				5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */,
 				55244B251EA0255A006F546E /* csmtransform.inl in Headers */,
 				5532DDC01E9001390047B9DF /* csmtolerance.inl in Headers */,
+				55F72FA320D99FBC00E949EE /* csmwriteablesolid.tli in Headers */,
 				55FAB62320D8566F008E1DFF /* csmwriteablesolid.inl in Headers */,
 				5507A6891E736714008B9F73 /* csmeuler_lringmv.inl in Headers */,
 				55308C3C1F92219600353A68 /* csmmaterial.h in Headers */,

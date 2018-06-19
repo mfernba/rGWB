@@ -11,6 +11,11 @@ CONSTRUCTOR(struct csmhedge_t *, csmhedge_duplicate, (
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
+CONSTRUCTOR(struct csmhedge_t *, csmhedge_new_from_writeable_hedge, (
+                        const struct csmwriteablesolid_hedge_t *w_hedge,
+                        struct csmloop_t *loop,
+                        struct csmhashtb(csmvertex_t) *svertexs,
+                        struct csmhashtb(csmhedge_t) *created_shedges));
 
 unsigned long csmhedge_id(const struct csmhedge_t *hedge);
 

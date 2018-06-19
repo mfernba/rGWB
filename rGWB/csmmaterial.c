@@ -56,6 +56,24 @@ void csmmaterial_free(struct csmmaterial_t **material)
 
 // ----------------------------------------------------------------------------------------------------
 
+struct csmmaterial_t *csmmaterial_read(struct csmsave_t *csmsave)
+{
+    unsigned char file_version;
+    float r, g, b, a;
+    
+    file_version = csmsave_read_uchar(csmsave);
+    assert(file_version == 0);
+    
+    r = csmsave_read_float(csmsave);
+    g = csmsave_read_float(csmsave);
+    b = csmsave_read_float(csmsave);
+    a = csmsave_read_float(csmsave);
+    
+    return csmmaterial_new_flat_material(r, g, b, a);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmmaterial_write(const struct csmmaterial_t *material, struct csmsave_t *csmsave)
 {
     assert_no_null(material);
@@ -67,3 +85,4 @@ void csmmaterial_write(const struct csmmaterial_t *material, struct csmsave_t *c
     csmsave_write_float(csmsave, material->b);
     csmsave_write_float(csmsave, material->a);
 }
+

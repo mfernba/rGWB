@@ -2,6 +2,7 @@
 
 #include "csmface.inl"
 
+#include "csmarrayc.h"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmgeom.inl"
@@ -15,6 +16,7 @@
 #include "csmvertex.inl"
 #include "csmid.inl"
 #include "csmsurface.inl"
+#include "csmwriteablesolid.tli"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 
@@ -124,9 +126,8 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
 
 // ------------------------------------------------------------------------------------------
 
-struct csmface_t *csmface_new(struct csmsolid_t *solid, unsigned long *id_new_element)
+CONSTRUCTOR(static struct csmface_t *, i_new_empty_face, (unsigned long id, struct csmsolid_t *solid))
 {
-    unsigned long id;
     struct csmsolid_t *fsolid, *fsolid_aux;
     struct csmloop_t *flout;
     struct csmloop_t *floops;
@@ -140,8 +141,6 @@ struct csmface_t *csmface_new(struct csmsolid_t *solid, unsigned long *id_new_el
     CSMBOOL setop_has_been_modified;
     unsigned long setop_shell_id;
     
-    id = csmid_new_id(id_new_element, NULL);
-
     fsolid = solid;
     fsolid_aux = NULL;
     flout = NULL;
@@ -182,6 +181,16 @@ struct csmface_t *csmface_new(struct csmsolid_t *solid, unsigned long *id_new_el
                 setop_is_null_face,
                 setop_has_been_modified,
                 setop_shell_id);
+}
+
+// ------------------------------------------------------------------------------------------
+
+struct csmface_t *csmface_new(struct csmsolid_t *solid, unsigned long *id_new_element)
+{
+    unsigned long id;
+    
+    id = csmid_new_id(id_new_element, NULL);
+    return i_new_empty_face(id, solid);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -291,6 +300,52 @@ struct csmface_t *csmface_duplicate(
     assert_no_null(new_face->floops);
     
     return new_face;
+}
+
+// ------------------------------------------------------------------------------------------
+
+struct csmface_t *csmface_new_from_writeable_face(
+                        const struct csmwriteablesolid_face_t *w_face,
+                        struct csmsolid_t *solid,
+                        struct csmhashtb(csmvertex_t) *svertexs,
+                        struct csmhashtb(csmhedge_t) *created_shedges)
+{
+    struct csmface_t *face;
+    unsigned long i, no_loops;
+    struct csmloop_t *prev_loop;
+    
+    assert_no_null(w_face);
+    
+    face = i_new_empty_face(w_face->face_id, solid);
+    assert_no_null(face);
+    
+    no_loops = csmarrayc_count_st(w_face->floops, csmwriteablesolid_loop_t);
+    prev_loop = NULL;
+    
+    for (i = 0; i < no_loops; i++)
+    {
+        const struct csmwriteablesolid_loop_t *w_loop;
+        struct csmloop_t *loop;
+        
+        w_loop = csmarrayc_get_const_st(w_face->floops, i, csmwriteablesolid_loop_t);
+        loop = csmloop_new_from_writeable_loop(w_loop, face, svertexs, created_shedges);
+        
+        if (i == 0)
+            face->floops = loop;
+        else
+            csmnode_insert_node2_after_node1(face->floops, loop, csmloop_t);
+        
+        if (csmloop_id(loop) == w_face->outer_loop_id)
+        {
+            assert(face->flout == NULL);
+            face->flout = loop;
+        }
+    }
+    
+    assert_no_null(face->flout);
+    assert_no_null(face->floops);
+    
+    return face;
 }
 
 // ------------------------------------------------------------------------------------------

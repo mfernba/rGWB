@@ -53,6 +53,12 @@ struct csmfacbrep2solid_face_t;
 struct csmfacbrep2solid_loop_t;
 struct csmsave_t;
 struct csmsave_item_t;
+struct csmwriteablesolid_t;
+struct csmwriteablesolid_vertex_t;
+struct csmwriteablesolid_hedge_t;
+struct csmwriteablesolid_loop_t;
+struct csmwriteablesolid_face_t;
+struct csmwriteablesolid_edge_t;
     
 #ifdef __cplusplus
 enum csmedge_lado_hedge_t: int;
@@ -91,6 +97,10 @@ csmArrayStruct(csmsetop_vtxvtx_inters_t);
 csmArrayStruct(csmsetop_vtxfacc_inters_t);
 csmArrayStruct(csmedge_t);
 csmArrayStruct(csmsave_item_t);
+csmArrayStruct(csmwriteablesolid_vertex_t);
+csmArrayStruct(csmwriteablesolid_hedge_t);
+csmArrayStruct(csmwriteablesolid_loop_t);
+csmArrayStruct(csmwriteablesolid_faces_t);
     
 struct bsmaterial_t;
     

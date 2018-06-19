@@ -9,6 +9,10 @@ CONSTRUCTOR(struct csmedge_t *, csmedge_duplicate, (
                         unsigned long *id_new_element,
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new));
 
+CONSTRUCTOR(struct csmedge_t *, csmedge_new_from_writeable_edge, (
+                        const struct csmwriteablesolid_edge_t *w_edge,
+                        struct csmhashtb(csmhedge_t) *shedges));
+
 void csmedge_destruye(struct csmedge_t **edge);
 
 unsigned long csmedge_id(const struct csmedge_t *edge);

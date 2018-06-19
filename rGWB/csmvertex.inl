@@ -10,6 +10,8 @@ CONSTRUCTOR(struct csmvertex_t *, csmvertex_duplicate, (
                         unsigned long *id_new_element,
                         struct csmhashtb(csmvertex_t) *relation_svertexs_old_to_new));
 
+CONSTRUCTOR(struct csmvertex_t *, csmvertex_new_from_writeable_vertex, (const struct csmwriteablesolid_vertex_t *w_vertex));
+
 void csmvertex_free(struct csmvertex_t **vertex);
 
 

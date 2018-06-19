@@ -19,23 +19,25 @@ void csmwriteablesolid_append_vertex(
                         double x, double y, double z,
                         unsigned long hedge_id);
 
-void csmwriteablesolid_append_hedge(
-                        struct csmwriteablesolid_t *writeable_solid,
+CONSTRUCTOR(struct csmwriteablesolid_hedge_t *, csmwriteablesolid_new_hedge, (
                         unsigned long hedge_id,
-                        unsigned long loop_id, unsigned long vertex_id,
-                        unsigned long hedge_prev_id, unsigned long hedge_next_id);
-
-void csmwriteablesolid_append_loop(
-                        struct csmwriteablesolid_t *writeable_solid,
                         unsigned long loop_id,
-                        unsigned long ledge_id, unsigned long face_id);
+                        unsigned long vertex_id, CSMBOOL is_reference_hedge_of_vertex));
+
+CONSTRUCTOR(struct csmwriteablesolid_loop_t *, csmwriteablesolid_loop_new, (
+                        unsigned long loop_id,
+                        csmArrayStruct(csmwriteablesolid_hedge_t) **hedges, unsigned long face_id));
 
 void csmwriteablesolid_append_face(
                         struct csmwriteablesolid_t *writeable_solid,
                         unsigned long face_id,
-                        unsigned long outer_loop_id, csmArrULong **loops_ids);
+                        unsigned long outer_loop_id, csmArrayStruct(csmwriteablesolid_loop_t) **floops);
 
 void csmwriteablesolid_append_edge(
                         struct csmwriteablesolid_t *writeable_solid,
                         unsigned long edge_id,
                         unsigned long hedge_pos_id, unsigned long hedge_neg_id);
+
+// Reading...
+
+

@@ -9,6 +9,7 @@
 #include "csmsolid.h"
 #include "csmsolid.inl"
 
+#include "csmarrayc.h"
 #include "csmArrULong.h"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
@@ -27,6 +28,7 @@
 #include "csmtransform.inl"
 #include "csmvertex.inl"
 #include "csmwriteablesolid.inl"
+#include "csmwriteablesolid.tli"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -338,6 +340,160 @@ void csmsolid_free(struct csmsolid_t **solid)
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_fill_svertexs_from_writeable_solid(const csmArrayStruct(csmwriteablesolid_vertex_t) *vertexs, struct csmhashtb(csmvertex_t) *svertexs)
+{
+    unsigned long i, no_vertexs;
+    
+    no_vertexs = csmarrayc_count_st(vertexs, csmwriteablesolid_vertex_t);
+    
+    for (i = 0; i < no_vertexs; i++)
+    {
+        const struct csmwriteablesolid_vertex_t *w_vertex;
+        struct csmvertex_t *s_vertex;
+        
+        w_vertex = csmarrayc_get_const_st(vertexs, i, csmwriteablesolid_vertex_t);
+        
+        s_vertex = csmvertex_new_from_writeable_vertex(w_vertex);
+        csmhashtb_add_item(svertexs, csmvertex_id(s_vertex), s_vertex, csmvertex_t);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_fill_sfaces_from_writeable_solid(
+                        const csmArrayStruct(csmwriteablesolid_face_t) *faces,
+                        struct csmsolid_t *solid,
+                        struct csmhashtb(csmface_t) *sfaces,
+                        struct csmhashtb(csmvertex_t) *svertexs,
+                        struct csmhashtb(csmhedge_t) **created_shedges)
+{
+    struct csmhashtb(csmhedge_t) *created_shedges_loc;
+    unsigned long i, no_faces;
+    
+    assert_no_null(created_shedges);
+    
+    no_faces = csmarrayc_count_st(faces, csmwriteablesolid_face_t);
+    created_shedges_loc = csmhashtb_create_empty(csmhedge_t);
+    
+    for (i = 0; i < no_faces; i++)
+    {
+        const struct csmwriteablesolid_face_t *w_face;
+        struct csmface_t *s_face;
+        
+        w_face = csmarrayc_get_const_st(faces, i, csmwriteablesolid_face_t);
+        
+        s_face = csmface_new_from_writeable_face(w_face, solid, svertexs, created_shedges_loc);
+        csmhashtb_add_item(sfaces, csmface_id(s_face), s_face, csmface_t);
+    }
+    
+    *created_shedges = created_shedges_loc;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_fill_sedges_from_writeable_solid(
+                        const csmArrayStruct(csmwriteablesolid_edge_t) *edges,
+                        struct csmhashtb(csmhedge_t) *created_shedges,
+                        struct csmhashtb(csmedge_t) *sedges)
+{
+    unsigned long i, no_edges;
+    
+    no_edges = csmarrayc_count_st(edges, csmwriteablesolid_edge_t);
+    
+    for (i = 0; i < no_edges; i++)
+    {
+        const struct csmwriteablesolid_edge_t *w_edge;
+        struct csmedge_t *s_edge;
+        
+        w_edge = csmarrayc_get_const_st(edges, i, csmwriteablesolid_edge_t);
+        
+        s_edge = csmedge_new_from_writeable_edge(w_edge, created_shedges);
+        csmhashtb_add_item(sedges, csmedge_id(s_edge), s_edge, csmedge_t);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_read_solid_parameters(
+                        struct csmsave_t *csmsave,
+                        char **name,
+                        unsigned long *id_new_element,
+                        struct csmwriteablesolid_t **writeable_solid,
+                        struct csmmaterial_t **visz_material_opt,
+                        CSMBOOL *draw_only_border_edges)
+{
+    unsigned char file_version;
+    
+    assert_no_null(name);
+    assert_no_null(id_new_element);
+    assert_no_null(writeable_solid);
+    assert_no_null(visz_material_opt);
+    assert_no_null(draw_only_border_edges);
+    
+    file_version = csmsave_read_uchar(csmsave);
+    assert(file_version == 0);
+    
+    *name = csmsave_read_string_optional(csmsave);
+    *id_new_element = csmsave_read_ulong(csmsave);
+    
+    *writeable_solid = csmwriteablesolid_read(csmsave);
+    
+    *visz_material_opt = csmsave_read_optional_st(csmsave, csmmaterial_read, csmmaterial_t);
+    *draw_only_border_edges = csmsave_read_bool(csmsave);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmsolid_t *, i_new_empty_solid_for_reading, (
+                        char **name,
+                        unsigned long id_new_element,
+                        struct csmmaterial_t **visz_material_opt,
+                        CSMBOOL draw_only_border_edges))
+{
+    struct csmhashtb(csmface_t) *sfaces;
+    struct csmhashtb(csmedge_t) *sedges;
+    struct csmhashtb(csmvertex_t) *svertexs;
+    struct csmbbox_t *bbox;
+    
+    sfaces = csmhashtb_create_empty(csmface_t);
+    sedges = csmhashtb_create_empty(csmedge_t);
+    svertexs = csmhashtb_create_empty(csmvertex_t);
+    
+    bbox = csmbbox_create_empty_box();
+    
+    return i_new(name, id_new_element, &sfaces, &sedges, &svertexs, visz_material_opt, draw_only_border_edges, &bbox);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+struct csmsolid_t *csmsolid_read(struct csmsave_t *csmsave)
+{
+    struct csmsolid_t *solid;
+    char *name;
+    unsigned long id_new_element;
+    struct csmwriteablesolid_t *writeable_solid;
+    struct csmmaterial_t *visz_material_opt;
+    CSMBOOL draw_only_border_edges;
+    struct csmhashtb(csmhedge_t) *created_shedges;
+    
+    i_read_solid_parameters(csmsave, &name, &id_new_element, &writeable_solid, &visz_material_opt, &draw_only_border_edges);
+    assert_no_null(writeable_solid);
+
+    solid = i_new_empty_solid_for_reading(&name, id_new_element, &visz_material_opt, draw_only_border_edges);
+    assert_no_null(solid);
+    
+    i_fill_svertexs_from_writeable_solid(writeable_solid->vertexs, solid->svertexs);
+    i_fill_sfaces_from_writeable_solid(writeable_solid->faces, solid, solid->sfaces, solid->svertexs, &created_shedges);
+    i_fill_sedges_from_writeable_solid(writeable_solid->edges, created_shedges, solid->sedges);
+    
+    csmwriteablesolid_free(&writeable_solid);
+    csmhashtb_free(&created_shedges, csmhedge_t, NULL);
+    
+    return solid;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_append_vertex_to_writeable_solid(struct csmvertex_t *vertex, struct csmwriteablesolid_t *writeable_solid)
 {
     unsigned long vertex_id;
@@ -372,50 +528,55 @@ static void i_append_vertexs_to_writeable_solid(struct csmhashtb(csmvertex_t) *s
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_append_hedge_to_writeable_solid(struct csmhedge_t *hedge, struct csmwriteablesolid_t *writeable_solid)
+static void i_append_hedge_to_writeable_solid(struct csmhedge_t *hedge, csmArrayStruct(csmwriteablesolid_hedge_t) *writeable_hedges)
 {
     unsigned long hedge_id;
     unsigned long loop_id, vertex_id;
-    unsigned long hedge_prev_id, hedge_next_id;
+    CSMBOOL is_reference_hedge_of_vertex;
+    struct csmwriteablesolid_hedge_t *w_hedge;
     
     hedge_id = csmhedge_id(hedge);
     loop_id = csmloop_id(csmhedge_loop(hedge));
+    
     vertex_id = csmvertex_id(csmhedge_vertex(hedge));
+    is_reference_hedge_of_vertex = IS_TRUE(csmvertex_hedge(csmhedge_vertex(hedge)) == hedge);
     
-    hedge_prev_id = csmhedge_id(csmhedge_prev(hedge));
-    hedge_next_id = csmhedge_id(csmhedge_next(hedge));
-    
-    csmwriteablesolid_append_hedge(writeable_solid, hedge_id, loop_id, vertex_id, hedge_prev_id, hedge_next_id);
+    w_hedge = csmwriteablesolid_new_hedge(hedge_id, loop_id, vertex_id, is_reference_hedge_of_vertex);
+    csmarrayc_append_element_st(writeable_hedges, w_hedge, csmwriteablesolid_hedge_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_append_loop_to_writeable_solid(struct csmloop_t *loop, struct csmwriteablesolid_t *writeable_solid)
+static void i_append_loop_to_writeable_solid(struct csmloop_t *loop, csmArrayStruct(csmwriteablesolid_loop_t) *writeable_loops)
 {
     struct csmhedge_t *ledge, *he_iterator;
     unsigned long no_iters;
     unsigned long loop_id;
-    unsigned long ledge_id, face_id;
+    csmArrayStruct(csmwriteablesolid_hedge_t) *writeable_hedges;
+    unsigned long face_id;
+    struct csmwriteablesolid_loop_t *w_loop;
     
     ledge = csmloop_ledge(loop);
     he_iterator = ledge;
     no_iters = 0;
+    
+    writeable_hedges = csmarrayc_new_st_array(0, csmwriteablesolid_hedge_t);
     
     do
     {
         assert(no_iters < 10000);
         no_iters++;
         
-        i_append_hedge_to_writeable_solid(he_iterator, writeable_solid);
+        i_append_hedge_to_writeable_solid(he_iterator, writeable_hedges);
         he_iterator = csmhedge_next(he_iterator);
         
     } while (he_iterator != ledge);
 
     loop_id = csmloop_id(loop);
-    ledge_id = csmhedge_id(ledge);
     face_id = csmface_id(csmloop_lface(loop));
     
-    csmwriteablesolid_append_loop(writeable_solid, loop_id, ledge_id, face_id);
+    w_loop = csmwriteablesolid_loop_new(loop_id, &writeable_hedges, face_id);
+    csmarrayc_append_element_st(writeable_loops, w_loop, csmwriteablesolid_loop_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -424,25 +585,23 @@ static void i_append_face_to_writeable_solid(struct csmface_t *face, struct csmw
 {
     unsigned long face_id;
     unsigned long outer_loop_id;
-    csmArrULong *loops_ids;
+    csmArrayStruct(csmwriteablesolid_loop_t) *writeable_loops;
     struct csmloop_t *loop_iterator;
     
     face_id = csmface_id(face);
     outer_loop_id = csmloop_id(csmface_flout(face));
     
     loop_iterator = csmface_floops(face);
-    loops_ids = csmArrULong_new(0);
+    writeable_loops = csmarrayc_new_st_array(0, csmwriteablesolid_loop_t);
     
     do
     {
-        i_append_loop_to_writeable_solid(loop_iterator, writeable_solid);
-        csmArrULong_append(loops_ids, csmloop_id(loop_iterator));
-        
+        i_append_loop_to_writeable_solid(loop_iterator, writeable_loops);
         loop_iterator = csmloop_next(loop_iterator);
         
     } while (loop_iterator != NULL);
     
-    csmwriteablesolid_append_face(writeable_solid, face_id, outer_loop_id, &loops_ids);
+    csmwriteablesolid_append_face(writeable_solid, face_id, outer_loop_id, &writeable_loops);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -526,7 +685,7 @@ void csmsolid_write(struct csmsolid_t *solid, struct csmsave_t *csmsave)
     
     csmsave_write_uchar(csmsave, i_FILE_VERSION);
     
-    csmsave_write_char(csmsave, solid->name);
+    csmsave_write_string_optional(csmsave, solid->name);
     csmsave_write_ulong(csmsave, solid->id_new_element);
     
     i_write_solid_data_to_csmsave(solid->sfaces, solid->sedges, solid->svertexs, csmsave);
