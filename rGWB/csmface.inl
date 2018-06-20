@@ -23,9 +23,16 @@ unsigned long csmface_id(const struct csmface_t *face);
 
 void csmface_reassign_id(struct csmface_t *face, unsigned long *id_new_element, unsigned long *new_id_opc);
 
+
+const struct csmmaterial_t *csmface_get_visualization_material(const struct csmface_t *face);
+
 void csmface_set_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt);
 
+
+const struct csmsurface_t *csmface_get_surface_eq(const struct csmface_t *face);
+
 void csmface_set_surface_eq(struct csmface_t *face, const struct csmsurface_t *surface_eq);
+
 
 void csmface_copy_attributes_from_face1(const struct csmface_t *face1, struct csmface_t *face2);
 

@@ -12,6 +12,8 @@
 #include "csmarrayc.h"
 #include "csmArrULong.h"
 #include "csmsave.inl"
+#include "csmmaterial.inl"
+#include "csmsurface.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -216,7 +218,9 @@ static void i_write_loop(const struct csmwriteablesolid_loop_t *loop, struct csm
 
 CONSTRUCTOR(static struct csmwriteablesolid_face_t *, i_new_face, (
                         unsigned long face_id,
-                        unsigned long outer_loop_id, csmArrayStruct(csmwriteablesolid_loop_t) **floops))
+                        unsigned long outer_loop_id, csmArrayStruct(csmwriteablesolid_loop_t) **floops,
+                        struct csmsurface_t **surface_eq,
+                        struct csmmaterial_t **visz_material_opt))
 {
     struct csmwriteablesolid_face_t *face;
     
@@ -226,6 +230,9 @@ CONSTRUCTOR(static struct csmwriteablesolid_face_t *, i_new_face, (
     
     face->outer_loop_id = outer_loop_id;
     face->floops = ASSIGN_POINTER_PP_NOT_NULL(floops, csmArrayStruct(csmwriteablesolid_loop_t));
+    
+    face->surface_eq = ASSIGN_POINTER_PP_NOT_NULL(surface_eq, struct csmsurface_t);
+    face->visz_material_opt = ASSIGN_POINTER_PP_NOT_NULL(visz_material_opt, struct csmmaterial_t);
     
     return face;
 }
@@ -239,6 +246,11 @@ static void i_free_face(struct csmwriteablesolid_face_t **face)
     
     csmarrayc_free_st(&(*face)->floops, csmwriteablesolid_loop_t, i_free_loop);
     
+    csmsurface_free(&(*face)->surface_eq);
+    
+    if ((*face)->visz_material_opt != NULL)
+        csmmaterial_free(&(*face)->visz_material_opt);
+    
     FREE_PP(face, struct csmwriteablesolid_face_t);
 }
 
@@ -249,13 +261,18 @@ CONSTRUCTOR(static struct csmwriteablesolid_face_t *, i_read_face, (struct csmsa
     unsigned long face_id;
     unsigned long outer_loop_id;
     csmArrayStruct(csmwriteablesolid_loop_t) *floops;
+    struct csmsurface_t *surface_eq;
+    struct csmmaterial_t *visz_material_opt;
     
     face_id = csmsave_read_ulong(csmsave);
     
     outer_loop_id = csmsave_read_ulong(csmsave);
     floops = csmsave_read_arr_st(csmsave, i_read_loop, csmwriteablesolid_loop_t);
+
+    surface_eq = csmsurface_read(csmsave);
+    visz_material_opt = csmsave_read_optional_st(csmsave, csmmaterial_read, csmmaterial_t);
     
-    return i_new_face(face_id, outer_loop_id, &floops);
+    return i_new_face(face_id, outer_loop_id, &floops, &surface_eq, &visz_material_opt);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -268,6 +285,9 @@ static void i_write_face(const struct csmwriteablesolid_face_t *face, struct csm
     
     csmsave_write_ulong(csmsave, face->outer_loop_id);
     csmsave_write_arr_st(csmsave, face->floops, i_write_loop, csmwriteablesolid_loop_t);
+    
+    csmsurface_write(face->surface_eq, csmsave);
+    csmsave_write_optional_st(csmsave, face->visz_material_opt, csmmaterial_write, csmmaterial_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -426,13 +446,15 @@ void csmwriteablesolid_append_vertex(
 void csmwriteablesolid_append_face(
                         struct csmwriteablesolid_t *writeable_solid,
                         unsigned long face_id,
-                        unsigned long outer_loop_id, csmArrayStruct(csmwriteablesolid_loop_t) **floops)
+                        unsigned long outer_loop_id, csmArrayStruct(csmwriteablesolid_loop_t) **floops,
+                        struct csmsurface_t **surface_eq,
+                        struct csmmaterial_t **visz_material_opt)
 {
     struct csmwriteablesolid_face_t *face;
     
     assert_no_null(writeable_solid);
     
-    face = i_new_face(face_id, outer_loop_id, floops);
+    face = i_new_face(face_id, outer_loop_id, floops, surface_eq, visz_material_opt);
     csmarrayc_append_element_st(writeable_solid->faces, face, csmwriteablesolid_face_t);
 }
 

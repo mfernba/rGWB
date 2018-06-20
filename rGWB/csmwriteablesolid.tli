@@ -31,6 +31,9 @@ struct csmwriteablesolid_face_t
 
     unsigned long outer_loop_id;
     csmArrayStruct(csmwriteablesolid_loop_t) *floops;
+
+    struct csmsurface_t *surface_eq;
+    struct csmmaterial_t *visz_material_opt;
 };
 
 struct csmwriteablesolid_edge_t

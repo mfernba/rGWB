@@ -24,6 +24,11 @@ CONSTRUCTOR(struct csmsurface_t *, csmsurface_copy, (const struct csmsurface_t *
 
 void csmsurface_free(struct csmsurface_t **surface);
 
+CONSTRUCTOR(struct csmsurface_t *, csmsurface_read, (struct csmsave_t *csmsave));
+
+void csmsurface_write(const struct csmsurface_t *surface, struct csmsave_t *csmsave);
+
+
 CSMBOOL csmsurface_surfaces_define_border_edge(
                         const struct csmsurface_t *surface1, double A1, double B1, double C1,
                         const struct csmsurface_t *surface2, double A2, double B2, double C2);

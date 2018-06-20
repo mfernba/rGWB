@@ -24,6 +24,7 @@
 #include "csmnode.inl"
 #include "csmsave.inl"
 #include "csmstring.inl"
+#include "csmsurface.inl"
 #include "csmtolerance.inl"
 #include "csmtransform.inl"
 #include "csmvertex.inl"
@@ -587,6 +588,8 @@ static void i_append_face_to_writeable_solid(struct csmface_t *face, struct csmw
     unsigned long outer_loop_id;
     csmArrayStruct(csmwriteablesolid_loop_t) *writeable_loops;
     struct csmloop_t *loop_iterator;
+    struct csmsurface_t *surface_eq;
+    struct csmmaterial_t *visz_material_opt;
     
     face_id = csmface_id(face);
     outer_loop_id = csmloop_id(csmface_flout(face));
@@ -600,8 +603,20 @@ static void i_append_face_to_writeable_solid(struct csmface_t *face, struct csmw
         loop_iterator = csmloop_next(loop_iterator);
         
     } while (loop_iterator != NULL);
+
+    surface_eq = csmsurface_copy(csmface_get_surface_eq(face));
     
-    csmwriteablesolid_append_face(writeable_solid, face_id, outer_loop_id, &writeable_loops);
+    if (csmface_get_visualization_material(face) != NULL)
+        visz_material_opt = csmmaterial_copy(csmface_get_visualization_material(face));
+    else
+        visz_material_opt = NULL;
+    
+    csmwriteablesolid_append_face(
+                        writeable_solid,
+                        face_id,
+                        outer_loop_id, &writeable_loops,
+                        &surface_eq,
+                        &visz_material_opt);
 }
 
 // ----------------------------------------------------------------------------------------------------

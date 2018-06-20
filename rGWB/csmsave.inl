@@ -22,6 +22,9 @@ void csmsave_write_bool(struct csmsave_t *csmsave, CSMBOOL value);
 
 void csmsave_write_uchar(struct csmsave_t *csmsave, unsigned char value);
 
+void csmsave_write_ushort(struct csmsave_t *csmsave, unsigned short value);
+#define csmsave_write_enum(csmsave, value) csmsave_write_ushort(csmsave, (unsigned short)value)
+
 void csmsave_write_ulong(struct csmsave_t *csmsave, unsigned long value);
 
 void csmsave_write_double(struct csmsave_t *csmsave, double value);
@@ -74,6 +77,9 @@ void csmsave_dontuse_write_optional_st(
 CSMBOOL csmsave_read_bool(struct csmsave_t *csmsave);
 
 unsigned char csmsave_read_uchar(struct csmsave_t *csmsave);
+
+unsigned short csmsave_read_ushort(struct csmsave_t *csmsave);
+#define csmsave_read_enum(csmsave, enum_type) (enum enum_type)csmsave_read_ushort(csmsave)
 
 unsigned long csmsave_read_ulong(struct csmsave_t *csmsave);
 

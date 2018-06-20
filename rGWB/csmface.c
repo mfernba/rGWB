@@ -318,6 +318,13 @@ struct csmface_t *csmface_new_from_writeable_face(
     
     face = i_new_empty_face(w_face->face_id, solid);
     assert_no_null(face);
+    assert(face->visz_material_opt == NULL);
+    
+    csmsurface_free(&face->surface_eq);
+    face->surface_eq = csmsurface_copy(w_face->surface_eq);
+    
+    if (w_face->visz_material_opt != NULL)
+        face->visz_material_opt = csmmaterial_copy(w_face->visz_material_opt);
     
     no_loops = csmarrayc_count_st(w_face->floops, csmwriteablesolid_loop_t);
     prev_loop = NULL;
@@ -416,6 +423,14 @@ static void i_set_visualization_material(const struct csmmaterial_t *visz_materi
 
 // ----------------------------------------------------------------------------------------------------
 
+const struct csmmaterial_t *csmface_get_visualization_material(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->visz_material_opt;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmface_set_visualization_material(struct csmface_t *face, const struct csmmaterial_t *visz_material_opt)
 {
     assert_no_null(face);
@@ -430,6 +445,14 @@ static void i_set_surface_eq(struct csmsurface_t **surface_eq_solid, const struc
     
     csmsurface_free(surface_eq_solid);
     *surface_eq_solid = csmsurface_copy(surface_eq);
+}
+
+// ------------------------------------------------------------------------------------------
+
+const struct csmsurface_t *csmface_get_surface_eq(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->surface_eq;
 }
 
 // ------------------------------------------------------------------------------------------

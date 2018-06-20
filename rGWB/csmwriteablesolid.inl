@@ -31,7 +31,9 @@ CONSTRUCTOR(struct csmwriteablesolid_loop_t *, csmwriteablesolid_loop_new, (
 void csmwriteablesolid_append_face(
                         struct csmwriteablesolid_t *writeable_solid,
                         unsigned long face_id,
-                        unsigned long outer_loop_id, csmArrayStruct(csmwriteablesolid_loop_t) **floops);
+                        unsigned long outer_loop_id, csmArrayStruct(csmwriteablesolid_loop_t) **floops,
+                        struct csmsurface_t **surface_eq,
+                        struct csmmaterial_t **visz_material_opt);
 
 void csmwriteablesolid_append_edge(
                         struct csmwriteablesolid_t *writeable_solid,

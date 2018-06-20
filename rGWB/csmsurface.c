@@ -9,6 +9,7 @@
 #include "csmsurface.inl"
 
 #include "csmmath.inl"
+#include "csmsave.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -63,6 +64,8 @@ struct csmsurface_t
 
 static const double i_COS_15_DEGREES = 0.9659358;
 static const double i_COS_45_DEGREES = 0.70710678;
+
+static const unsigned char i_FILE_VERSION = 0;
 
 // --------------------------------------------------------------------------------
 
@@ -210,6 +213,102 @@ void csmsurface_free(struct csmsurface_t **surface)
     assert_no_null(*surface);
     
     FREE_PP(surface, struct csmsurface_t);
+}
+
+// --------------------------------------------------------------------------------
+
+struct csmsurface_t *csmsurface_read(struct csmsave_t *csmsave)
+{
+    struct csmsurface_t *surface;
+    unsigned char file_version;
+    enum i_type_t type;
+    
+    file_version = csmsave_read_uchar(csmsave);
+    assert(file_version == 0);
+    
+    type = csmsave_read_enum(csmsave, i_type_t);
+    surface = i_new(type);
+    
+    switch (surface->type)
+    {
+        case i_TYPE_UNDEFINED:
+            break;
+            
+        case i_TYPE_ELLIPSOID:
+            
+            surface->ellipsoid.rx = csmsave_read_double(csmsave);
+            surface->ellipsoid.ry = csmsave_read_double(csmsave);
+            surface->ellipsoid.rz = csmsave_read_double(csmsave);
+            break;
+            
+        case i_TYPE_CONE:
+        case i_TYPE_CYLINDER:
+            
+            surface->cone_or_cylinder.heigth = csmsave_read_double(csmsave);
+            surface->cone_or_cylinder.radius = csmsave_read_double(csmsave);
+            break;
+            
+        case i_TYPE_TORUS:
+            
+            surface->torus.R = csmsave_read_double(csmsave);
+            surface->torus.r = csmsave_read_double(csmsave);
+            break;
+            
+        case i_TYPE_HYPERBOLOID:
+            
+            surface->hyperboloid.a = csmsave_read_double(csmsave);
+            surface->hyperboloid.c = csmsave_read_double(csmsave);
+            break;
+            
+        default_error();
+    }
+    
+    return surface;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmsurface_write(const struct csmsurface_t *surface, struct csmsave_t *csmsave)
+{
+    assert_no_null(surface);
+    
+    csmsave_write_uchar(csmsave, i_FILE_VERSION);
+    
+    csmsave_write_enum(csmsave, surface->type);
+    
+    switch (surface->type)
+    {
+        case i_TYPE_UNDEFINED:
+            break;
+            
+        case i_TYPE_ELLIPSOID:
+            
+            csmsave_write_double(csmsave, surface->ellipsoid.rx);
+            csmsave_write_double(csmsave, surface->ellipsoid.ry);
+            csmsave_write_double(csmsave, surface->ellipsoid.rz);
+            break;
+            
+        case i_TYPE_CONE:
+        case i_TYPE_CYLINDER:
+            
+            csmsave_write_double(csmsave, surface->cone_or_cylinder.heigth);
+            csmsave_write_double(csmsave, surface->cone_or_cylinder.radius);
+            break;
+            
+        case i_TYPE_TORUS:
+
+            csmsave_write_double(csmsave, surface->torus.R);
+            csmsave_write_double(csmsave, surface->torus.r);
+            break;
+            
+        case i_TYPE_HYPERBOLOID:
+
+            csmsave_write_double(csmsave, surface->hyperboloid.a);
+            csmsave_write_double(csmsave, surface->hyperboloid.c);
+            break;
+            
+        default_error();
+    }
 }
 
 // --------------------------------------------------------------------------------

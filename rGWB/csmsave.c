@@ -101,6 +101,16 @@ void csmsave_write_bool(struct csmsave_t *csmsave, CSMBOOL value)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsave_write_ushort(struct csmsave_t *csmsave, unsigned short value)
+{
+    assert_no_null(csmsave);
+    assert(csmsave->mode == i_MODE_WRITE);
+    
+    fprintf(csmsave->file_descriptor, "%hu\n", value);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsave_write_uchar(struct csmsave_t *csmsave, unsigned char value)
 {
     assert_no_null(csmsave);
@@ -275,6 +285,21 @@ unsigned char csmsave_read_uchar(struct csmsave_t *csmsave)
     assert(value < 255);
     
     return (unsigned char)value;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+unsigned short csmsave_read_ushort(struct csmsave_t *csmsave)
+{
+    unsigned short value;
+    int readed;
+    
+    assert_no_null(csmsave);
+
+    readed = fscanf(csmsave->file_descriptor, "%hu\n", &value);
+    assert(readed == 1);
+    
+    return (CSMBOOL)value;
 }
 
 // ----------------------------------------------------------------------------------------------------

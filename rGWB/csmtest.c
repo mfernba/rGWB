@@ -3399,7 +3399,7 @@ CONSTRUCTOR(static struct csmsolid_t *, i_make_horizontal_hollow_hole_cylinder, 
 
 // ------------------------------------------------------------------------------------------
 
-static void i_test_mechanical5(void)
+static struct csmsolid_t *i_test_mechanical5_ex(void)
 {
     struct csmsolid_t *solid;
     struct csmsolid_t *solid_aux;
@@ -3566,6 +3566,17 @@ static void i_test_mechanical5(void)
     csmsolid_free(&hollow_hole_cylinder_left);
     csmsolid_free(&hollow_hole_cylinder_right);
     csmsolid_free(&torus);
+    
+    return solid;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_mechanical5(void)
+{
+    struct csmsolid_t *solid;
+    
+    solid = i_test_mechanical5_ex();
     csmsolid_free(&solid);
 }
 
@@ -5932,22 +5943,10 @@ static void i_test_save0(void)
 
 static void i_test_save1(struct csmviewer_t *viewer)
 {
-    struct csmshape2d_t *shape2d;
-    double lenght;
     struct csmsolid_t *solid;
     struct csmsave_t *csmsave;
     
-    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
-    csmshape2d_move(shape2d, 0.5, 0.5);
-    lenght = 3.;
-    
-    solid = csmsweep_create_solid_from_shape_debug(
-                        shape2d, 0., 0., lenght, 1., 0., 0., 0., 1., 0.,
-                        shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
-                        0);
-    
-    csmdebug_set_viewer_results(solid, NULL);
-    csmdebug_show_viewer();
+    solid = i_test_mechanical5_ex();
     
     csmsave = csmsave_new_file_writer("/Users/manueru/_save_test1.hle");
     csmsolid_write(solid, csmsave);
@@ -5960,6 +5959,7 @@ static void i_test_save1(struct csmviewer_t *viewer)
     
     csmdebug_set_viewer_results(solid, NULL);
     csmdebug_show_viewer();
+    csmdebug_set_viewer_results(NULL, NULL);
     csmsolid_free(&solid);
 }
 
