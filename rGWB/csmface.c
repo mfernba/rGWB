@@ -24,16 +24,12 @@
 #include "csmmem.inl"
 #include "csmArrPoint2D.h"
 #include "csmArrPoint3D.h"
-#include "csmassert.inl"
 #include "csmedge.inl"
 #include "csmid.inl"
 #include "csmmaterial.tli"
-#include "csmmem.inl"
-#include "csmnode.inl"
 #include "csmshape2d.h"
 #include "csmshape2d.inl"
 #include "csmsurface.inl"
-#include "csmtolerance.inl"
 
 #include <basicSystem/bsmaterial.h>
 #include <basicGraphics/bsgraphics2.h>
