@@ -700,3 +700,43 @@ enum csmoptree_result_t csmoptree_evaluate(struct csmoptree_t *node, struct csms
  
     return node->evaluation_result;
 }
+
+// ------------------------------------------------------------------------------------------
+
+void csmoptree_clean_results(struct csmoptree_t *node)
+{
+    assert_no_null(node);
+    
+    if (node->evaluation_result != i_UNEVALUATED_RESULT)
+    {
+        switch (node->type)
+        {
+            case i_TYPE_SOLID:
+                break;
+            
+            case i_TYPE_OPERATION_SETOP_UNION:
+            case i_TYPE_OPERATION_SETOP_DIFFERENCE:
+            case i_TYPE_OPERATION_SETOP_INTERSECTION:
+            
+                csmoptree_clean_results(node->operands.setop_operation.node1);
+                csmoptree_clean_results(node->operands.setop_operation.node2);
+                break;
+
+            case i_TYPE_OPERATION_SPLIT_ABOVE:
+            case i_TYPE_OPERATION_SPLIT_BELOW:
+            
+                csmoptree_clean_results(node->operands.split_plane.node);
+                break;
+                
+            case i_TYPE_OPERATION_GENERAL_TRANSFORM:
+            
+                csmoptree_clean_results(node->operands.transform.node);
+                break;
+                
+            default_error();
+        }
+    
+        node->evaluation_result = i_UNEVALUATED_RESULT;
+        csmsolid_free(&node->solid_result);
+    }
+}

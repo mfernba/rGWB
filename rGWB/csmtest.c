@@ -42,6 +42,8 @@
 #include "csmfacbrep2solid.h"
 #include "csmArrPoint3D.h"
 #include "csmsave.inl"
+#include "csmoptree.h"
+#include "csmoptree.hxx"
 
 // ------------------------------------------------------------------------------------------
 
@@ -5965,6 +5967,59 @@ static void i_test_save1(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_save2(struct csmviewer_t *viewer)
+{
+    struct csmshape2d_t *shape2d1, *shape2d2;
+    struct csmsolid_t *solid1, *solid2, *solid_res;
+    struct csmoptree_t *optree1, *optree2, *optree;
+    struct csmsave_t *csmsave;
+    
+    shape2d1 = csmbasicshape2d_rectangular_shape(1., 0.1);
+    shape2d2 = csmbasicshape2d_rectangular_shape(0.1, 1.);
+    
+    solid1 = csmsweep_create_solid_from_shape_debug(
+                        shape2d1, 0., 0., 1., 1., 0., 0., 0., 1., 0.,
+                        shape2d1, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    solid2 = csmsweep_create_solid_from_shape_debug(
+                        shape2d2,  0., -0.05, 0.05, 0., 0., 1., 1., 0., 0.,
+                        shape2d2,  0., -1., 0.05, 0., 0., 1., 1., 0., 0.,
+                        0);
+    
+    optree1 = csmoptree_new_node_solid(&solid1);
+    optree2 = csmoptree_new_node_solid(&solid2);
+    optree = csmoptree_new_node_boolean_union(&optree1, &optree2);
+    
+    assert(csmoptree_evaluate(optree, &solid_res) == CSMOPTREE_RESULT_OK);
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+    csmdebug_set_viewer_results(NULL, NULL);
+    csmsolid_free(&solid_res);
+    
+    csmsave = csmsave_new_file_writer("/Users/manueru/_save_test2.optree");
+    csmoptree_write(optree, csmsave);
+    csmsave_free(&csmsave);
+    csmoptree_free(&optree);
+
+    csmsave = csmsave_new_file_reader("/Users/manueru/_save_test2.optree");
+    optree = csmoptree_read(csmsave);
+    csmsave_free(&csmsave);
+
+    csmoptree_clean_results(optree);
+    assert(csmoptree_evaluate(optree, &solid_res) == CSMOPTREE_RESULT_OK);
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+    csmdebug_set_viewer_results(NULL, NULL);
+    csmsolid_free(&solid_res);
+    csmoptree_free(&optree);
+    
+    csmshape2d_free(&shape2d1);
+    csmshape2d_free(&shape2d2);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -5973,12 +6028,9 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
     csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
-    i_test_save0();
-    i_test_save1(viewer);
-    i_test_union_solidos8(viewer);
+    //i_test_union_solidos8(viewer);
     //i_test_interseccion_solidos7(viewer);
 
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
@@ -6011,6 +6063,9 @@ void csmtest_test(void)
     i_test_solid_from_shape2D();
     i_test_solid_from_shape2D_with_hole();
     i_test_union_solidos_por_loopglue();
+    i_test_save0();
+    i_test_save1(viewer);
+    i_test_save2(viewer);
     
     if (process_all_test == CSMFALSE)
     {

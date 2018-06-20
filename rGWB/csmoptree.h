@@ -49,6 +49,7 @@ DLL_RGWB CONSTRUCTOR(struct csmoptree_t *, csmoptree_new_node_transform, (
 
 DLL_RGWB enum csmoptree_result_t csmoptree_evaluate(struct csmoptree_t *node, struct csmsolid_t **solid);
     
+DLL_RGWB void csmoptree_clean_results(struct csmoptree_t *node);
 
 #ifdef __cplusplus
 }
