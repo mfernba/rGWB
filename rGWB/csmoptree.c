@@ -15,6 +15,7 @@
 #include "csmsolid.h"
 #include "csmsplit.h"
 #include "csmsplit.hxx"
+#include "csmsave.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmmem.inl"
@@ -78,8 +79,9 @@ struct csmoptree_t
     struct csmsolid_t *solid_result;
 };
 
+static const unsigned char i_FILE_VERSION = 0;
 
-static const enum csmoptree_result_t i_UNEVALUATED_RESULT = (enum csmoptree_result_t)-1;
+static const enum csmoptree_result_t i_UNEVALUATED_RESULT = (enum csmoptree_result_t)9999;
 
 // ------------------------------------------------------------------------------------------
 
@@ -97,6 +99,21 @@ CONSTRUCTOR(static struct csmoptree_t *, i_new, (unsigned long node_id, enum i_t
     optree->solid_result = ASSIGN_POINTER_PP(solid_result, struct csmsolid_t);
     
     return optree;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmoptree_t *, i_new_unevaluated_optree, (enum i_type_t type))
+{
+    unsigned long node_id;
+    struct csmsolid_t *solid_result;
+    enum csmoptree_result_t evaluation_result;
+    
+    node_id = 0;
+    solid_result = NULL;
+    evaluation_result = i_UNEVALUATED_RESULT;
+    
+    return i_new(node_id, type, evaluation_result, &solid_result);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -143,17 +160,165 @@ void csmoptree_free(struct csmoptree_t **optree)
 
 // ------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmoptree_t *, i_new_unevaluated_optree, (enum i_type_t type))
+CONSTRUCTOR(static struct csmoptree_t *, i_read_optree, (struct csmsave_t *csmsave))
 {
+    struct csmoptree_t *optree;
     unsigned long node_id;
-    struct csmsolid_t *solid_result;
-    enum csmoptree_result_t evaluation_result;
+    enum i_type_t type;
     
-    node_id = 0;
-    solid_result = NULL;
-    evaluation_result = i_UNEVALUATED_RESULT;
+    node_id = csmsave_read_ulong(csmsave);
+    type = csmsave_read_enum(csmsave, i_type_t);
     
-    return i_new(node_id, type, evaluation_result, &solid_result);
+    optree = i_new_unevaluated_optree(type);
+    assert_no_null(optree);
+    
+    optree->node_id = node_id;
+    
+    switch (optree->type)
+    {
+        case i_TYPE_SOLID:
+        {
+            optree->operands.solid = csmsolid_read(csmsave);
+            break;
+        }
+        
+        case i_TYPE_OPERATION_SETOP_UNION:
+        case i_TYPE_OPERATION_SETOP_DIFFERENCE:
+        case i_TYPE_OPERATION_SETOP_INTERSECTION:
+        {
+            optree->operands.setop_operation.node1 = i_read_optree(csmsave);
+            optree->operands.setop_operation.node2 = i_read_optree(csmsave);
+            break;
+        }
+
+        case i_TYPE_OPERATION_SPLIT_ABOVE:
+        case i_TYPE_OPERATION_SPLIT_BELOW:
+        {
+            optree->operands.split_plane.A = csmsave_read_double(csmsave);
+            optree->operands.split_plane.B = csmsave_read_double(csmsave);
+            optree->operands.split_plane.C = csmsave_read_double(csmsave);
+            optree->operands.split_plane.D = csmsave_read_double(csmsave);
+            
+            optree->operands.split_plane.node = i_read_optree(csmsave);
+            break;
+        }
+            
+        case i_TYPE_OPERATION_GENERAL_TRANSFORM:
+        {
+            optree->operands.transform.Ux = csmsave_read_double(csmsave);
+            optree->operands.transform.Uy = csmsave_read_double(csmsave);
+            optree->operands.transform.Uz = csmsave_read_double(csmsave);
+            optree->operands.transform.Dx = csmsave_read_double(csmsave);
+            
+            optree->operands.transform.Vx = csmsave_read_double(csmsave);
+            optree->operands.transform.Vy = csmsave_read_double(csmsave);
+            optree->operands.transform.Vz = csmsave_read_double(csmsave);
+            optree->operands.transform.Dy = csmsave_read_double(csmsave);
+            
+            optree->operands.transform.Wx = csmsave_read_double(csmsave);
+            optree->operands.transform.Wy = csmsave_read_double(csmsave);
+            optree->operands.transform.Wz = csmsave_read_double(csmsave);
+            optree->operands.transform.Dz = csmsave_read_double(csmsave);
+            
+            optree->operands.transform.node = i_read_optree(csmsave);
+            break;
+        }
+            
+        default_error();
+    }
+    
+    optree->evaluation_result = csmsave_read_enum(csmsave, csmoptree_result_t);
+    optree->solid_result = csmsave_read_optional_st(csmsave, csmsolid_read, csmsolid_t);
+    
+    return optree;
+}
+
+// ------------------------------------------------------------------------------------------
+
+struct csmoptree_t *csmoptree_read(struct csmsave_t *csmsave)
+{
+    unsigned char file_version;
+    
+    file_version = csmsave_read_uchar(csmsave);
+    assert(file_version == 0);
+    
+    return i_read_optree(csmsave);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_write_optree(const struct csmoptree_t *optree, struct csmsave_t *csmsave)
+{
+    assert_no_null(optree);
+    
+    csmsave_write_ulong(csmsave, optree->node_id);
+    csmsave_write_enum(csmsave, optree->type);
+    
+    switch (optree->type)
+    {
+        case i_TYPE_SOLID:
+        {
+            csmsolid_write(optree->operands.solid, csmsave);
+            break;
+        }
+        
+        case i_TYPE_OPERATION_SETOP_UNION:
+        case i_TYPE_OPERATION_SETOP_DIFFERENCE:
+        case i_TYPE_OPERATION_SETOP_INTERSECTION:
+        {
+            i_write_optree(optree->operands.setop_operation.node1, csmsave);
+            i_write_optree(optree->operands.setop_operation.node2, csmsave);
+            break;
+        }
+
+        case i_TYPE_OPERATION_SPLIT_ABOVE:
+        case i_TYPE_OPERATION_SPLIT_BELOW:
+        {
+            csmsave_write_double(csmsave, optree->operands.split_plane.A);
+            csmsave_write_double(csmsave, optree->operands.split_plane.B);
+            csmsave_write_double(csmsave, optree->operands.split_plane.C);
+            csmsave_write_double(csmsave, optree->operands.split_plane.D);
+            
+            i_write_optree(optree->operands.split_plane.node, csmsave);
+            break;
+        }
+            
+        case i_TYPE_OPERATION_GENERAL_TRANSFORM:
+        {
+            csmsave_write_double(csmsave, optree->operands.transform.Ux);
+            csmsave_write_double(csmsave, optree->operands.transform.Uy);
+            csmsave_write_double(csmsave, optree->operands.transform.Uz);
+            csmsave_write_double(csmsave, optree->operands.transform.Dx);
+                                 
+            csmsave_write_double(csmsave, optree->operands.transform.Vx);
+            csmsave_write_double(csmsave, optree->operands.transform.Vy);
+            csmsave_write_double(csmsave, optree->operands.transform.Vz);
+            csmsave_write_double(csmsave, optree->operands.transform.Dy);
+            
+            csmsave_write_double(csmsave, optree->operands.transform.Wx);
+            csmsave_write_double(csmsave, optree->operands.transform.Wy);
+            csmsave_write_double(csmsave, optree->operands.transform.Wz);
+            csmsave_write_double(csmsave, optree->operands.transform.Dz);
+            
+            i_write_optree(optree->operands.transform.node, csmsave);
+            break;
+        }
+            
+        default_error();
+    }
+    
+    csmsave_write_enum(csmsave, optree->evaluation_result);
+    csmsave_write_optional_st(csmsave, optree->solid_result, csmsolid_write, csmsolid_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmoptree_write(const struct csmoptree_t *optree, struct csmsave_t *csmsave)
+{
+    assert_no_null(optree);
+ 
+    csmsave_write_uchar(csmsave, i_FILE_VERSION);
+    i_write_optree(optree, csmsave);
 }
 
 // ------------------------------------------------------------------------------------------

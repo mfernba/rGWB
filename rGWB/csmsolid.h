@@ -12,7 +12,7 @@ DLL_RGWB void csmsolid_free(struct csmsolid_t **solid);
 
 DLL_RGWB CONSTRUCTOR(struct csmsolid_t *, csmsolid_read, (struct csmsave_t *csmsave));
 
-DLL_RGWB void csmsolid_write(struct csmsolid_t *solid, struct csmsave_t *csmsave);
+DLL_RGWB void csmsolid_write(const struct csmsolid_t *solid, struct csmsave_t *csmsave);
 
 
 // Transformations...

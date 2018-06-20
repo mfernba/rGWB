@@ -16,7 +16,11 @@ extern "C" {
 
 DLL_RGWB void csmoptree_free(struct csmoptree_t **optree);
 
-
+DLL_RGWB CONSTRUCTOR(struct csmoptree_t * , csmoptree_read, (struct csmsave_t *csmsave));
+    
+DLL_RGWB void csmoptree_write(const struct csmoptree_t *optree, struct csmsave_t *csmsave);
+    
+    
 // Nodes...
 
 DLL_RGWB CONSTRUCTOR(struct csmoptree_t *, csmoptree_new_node_solid, (struct csmsolid_t **solid));
@@ -44,6 +48,7 @@ DLL_RGWB CONSTRUCTOR(struct csmoptree_t *, csmoptree_new_node_transform, (
 // Evaluation...
 
 DLL_RGWB enum csmoptree_result_t csmoptree_evaluate(struct csmoptree_t *node, struct csmsolid_t **solid);
+    
 
 #ifdef __cplusplus
 }

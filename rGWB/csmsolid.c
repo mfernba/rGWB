@@ -694,7 +694,7 @@ static void i_write_solid_data_to_csmsave(
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_write(struct csmsolid_t *solid, struct csmsave_t *csmsave)
+void csmsolid_write(const struct csmsolid_t *solid, struct csmsave_t *csmsave)
 {
     assert_no_null(solid);
     
