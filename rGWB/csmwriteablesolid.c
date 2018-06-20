@@ -11,7 +11,7 @@
 
 #include "csmarrayc.h"
 #include "csmArrULong.h"
-#include "csmsave.inl"
+#include "csmsave.h"
 #include "csmmaterial.inl"
 #include "csmsurface.inl"
 

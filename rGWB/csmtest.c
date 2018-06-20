@@ -41,7 +41,7 @@
 #include "csmviewer.inl"
 #include "csmfacbrep2solid.h"
 #include "csmArrPoint3D.h"
-#include "csmsave.inl"
+#include "csmsave.h"
 #include "csmoptree.h"
 #include "csmoptree.hxx"
 

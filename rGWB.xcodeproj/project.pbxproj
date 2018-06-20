@@ -165,7 +165,7 @@
 		55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851620853B7200FB00EE /* csmstmodeler.h */; };
 		55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */; };
 		55FAB61B20D83CA6008E1DFF /* csmsave.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FAB61920D83CA6008E1DFF /* csmsave.c */; };
-		55FAB61C20D83CA6008E1DFF /* csmsave.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB61A20D83CA6008E1DFF /* csmsave.inl */; };
+		55FAB61C20D83CA6008E1DFF /* csmsave.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB61A20D83CA6008E1DFF /* csmsave.h */; };
 		55FAB62220D8566F008E1DFF /* csmwriteablesolid.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */; };
 		55FAB62320D8566F008E1DFF /* csmwriteablesolid.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */; };
 /* End PBXBuildFile section */
@@ -400,7 +400,7 @@
 		55FA851620853B7200FB00EE /* csmstmodeler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmstmodeler.h; sourceTree = "<group>"; };
 		55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmstmodeler.hxx; sourceTree = "<group>"; };
 		55FAB61920D83CA6008E1DFF /* csmsave.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsave.c; sourceTree = "<group>"; };
-		55FAB61A20D83CA6008E1DFF /* csmsave.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsave.inl; sourceTree = "<group>"; };
+		55FAB61A20D83CA6008E1DFF /* csmsave.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmsave.h; sourceTree = "<group>"; };
 		55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmwriteablesolid.c; sourceTree = "<group>"; };
 		55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmwriteablesolid.inl; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -671,7 +671,7 @@
 				557954861E5E2DCB000FC91E /* csmstring.inl */,
 				557954851E5E2DCB000FC91E /* csmstring.c */,
 				55FAB61920D83CA6008E1DFF /* csmsave.c */,
-				55FAB61A20D83CA6008E1DFF /* csmsave.inl */,
+				55FAB61A20D83CA6008E1DFF /* csmsave.h */,
 				550765C81F92038300E6BD2E /* Containers */,
 				550765BE1F92037200E6BD2E /* Geometry */,
 				550765C91F92039300E6BD2E /* Debug */,
@@ -884,7 +884,7 @@
 				5507A5C71E6624E7008B9F73 /* csmopbas.inl in Headers */,
 				5507A67D1E73484D008B9F73 /* csmeuler_lmekr.inl in Headers */,
 				55EA99201ED38E66006C063C /* csmsetop_vtxvtx.inl in Headers */,
-				55FAB61C20D83CA6008E1DFF /* csmsave.inl in Headers */,
+				55FAB61C20D83CA6008E1DFF /* csmsave.h in Headers */,
 				557954961E5E4742000FC91E /* csmface.inl in Headers */,
 				55308C401F92269800353A68 /* csmmaterial.tli in Headers */,
 				557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */,

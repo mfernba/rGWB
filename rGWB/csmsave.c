@@ -6,7 +6,7 @@
 //  Copyright © 2018 Manuel Fernández. All rights reserved.
 //
 
-#include "csmsave.inl"
+#include "csmsave.h"
 
 #include "csmarrayc.h"
 #include "csmArrULong.h"
