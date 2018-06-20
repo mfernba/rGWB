@@ -82,6 +82,7 @@ void csmsave_free(struct csmsave_t **csmsave)
     assert_no_null(*csmsave);
     assert_no_null((*csmsave)->file_descriptor);
     
+    fflush((*csmsave)->file_descriptor);
     fclose((*csmsave)->file_descriptor);
     (*csmsave)->file_descriptor = NULL;
     
@@ -95,7 +96,7 @@ void csmsave_write_bool(struct csmsave_t *csmsave, CSMBOOL value)
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_WRITE);
     
-    fprintf(csmsave->file_descriptor, "%hu ", value);
+    fprintf(csmsave->file_descriptor, "%hu\n", value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -105,7 +106,7 @@ void csmsave_write_uchar(struct csmsave_t *csmsave, unsigned char value)
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_WRITE);
     
-    fprintf(csmsave->file_descriptor, "%hhu ", value);
+    fprintf(csmsave->file_descriptor, "%hhu\n", value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -115,7 +116,7 @@ void csmsave_write_ulong(struct csmsave_t *csmsave, unsigned long value)
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_WRITE);
     
-    fprintf(csmsave->file_descriptor, "%lu ", value);
+    fprintf(csmsave->file_descriptor, "%lu\n", value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -125,7 +126,7 @@ void csmsave_write_double(struct csmsave_t *csmsave, double value)
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_WRITE);
 
-    fprintf(csmsave->file_descriptor, "%lf ", value);
+    fprintf(csmsave->file_descriptor, "%.17lf\n", value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -135,7 +136,7 @@ void csmsave_write_float(struct csmsave_t *csmsave, float value)
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_WRITE);
 
-    fprintf(csmsave->file_descriptor, "%f ", value);
+    fprintf(csmsave->file_descriptor, "%.9f\n", value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -145,7 +146,7 @@ void csmsave_write_string(struct csmsave_t *csmsave, const char *value)
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_WRITE);
 
-    fprintf(csmsave->file_descriptor, "%s ", value);
+    fprintf(csmsave->file_descriptor, "%s\n", value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -171,7 +172,7 @@ void csmsave_write_arr_ulong(struct csmsave_t *csmsave, const csmArrULong *array
     
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_WRITE);
-    
+
     count = csmArrULong_count(array);
     csmsave_write_ulong(csmsave, count);
     
@@ -219,7 +220,7 @@ void csmsave_dontuse_write_st(
     assert_no_null(csmsave);
     assert_no_null(func_write_struct);
     
-    fprintf(csmsave->file_descriptor, "[%s]\n", type_name);
+    fprintf(csmsave->file_descriptor, "%s\n", type_name);
     func_write_struct(item, csmsave);
 }
 
@@ -232,8 +233,6 @@ void csmsave_dontuse_write_optional_st(
 {
     assert_no_null(csmsave);
     assert_no_null(func_write_struct);
-    
-    fprintf(csmsave->file_descriptor, "[%s]\n", type_name);
     
     if (item == NULL)
     {
@@ -255,7 +254,7 @@ CSMBOOL csmsave_read_bool(struct csmsave_t *csmsave)
     
     assert_no_null(csmsave);
 
-    readed = fscanf(csmsave->file_descriptor, "%hu", &value);
+    readed = fscanf(csmsave->file_descriptor, "%hu\n", &value);
     assert(readed == 1);
     assert(value == 0 || value == 1);
     
@@ -287,7 +286,7 @@ unsigned long csmsave_read_ulong(struct csmsave_t *csmsave)
     
     assert_no_null(csmsave);
 
-    readed = fscanf(csmsave->file_descriptor, "%lu", &value);
+    readed = fscanf(csmsave->file_descriptor, "%lu\n", &value);
     assert(readed == 1);
     
     return value;
@@ -302,7 +301,7 @@ double csmsave_read_double(struct csmsave_t *csmsave)
     
     assert_no_null(csmsave);
 
-    readed = fscanf(csmsave->file_descriptor, "%lf", &value);
+    readed = fscanf(csmsave->file_descriptor, "%lf\n", &value);
     assert(readed == 1);
     
     return value;
@@ -317,7 +316,7 @@ float csmsave_read_float(struct csmsave_t *csmsave)
     
     assert_no_null(csmsave);
 
-    readed = fscanf(csmsave->file_descriptor, "%f", &value);
+    readed = fscanf(csmsave->file_descriptor, "%f\n", &value);
     assert(readed == 1);
     
     return value;
@@ -333,7 +332,7 @@ char *csmsave_read_string(struct csmsave_t *csmsave)
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_READ);
     
-    readed = fscanf(csmsave->file_descriptor, "%s", value);
+    readed = fscanf(csmsave->file_descriptor, "%s\n", value);
     assert(readed == 1);
     
     return csmstring_duplicate(value);
@@ -415,7 +414,7 @@ struct csmsave_item_t *csmsave_dontuse_read_st(
     assert_no_null(func_read_struct);
     assert(csmsave->mode == i_MODE_READ);
     
-    readed = fscanf(csmsave->file_descriptor, "[%s]\n", value);
+    readed = fscanf(csmsave->file_descriptor, "%s\n", value);
     assert(readed == 1);
     assert(csmstring_equal_strings(value, type_name) == CSMTRUE);
     

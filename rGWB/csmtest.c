@@ -41,6 +41,7 @@
 #include "csmviewer.inl"
 #include "csmfacbrep2solid.h"
 #include "csmArrPoint3D.h"
+#include "csmsave.inl"
 
 // ------------------------------------------------------------------------------------------
 
@@ -5872,6 +5873,98 @@ static void i_test_facetedbrep2(struct csmviewer_t *viewer, CSMBOOL test_error)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_save0(void)
+{
+    struct csmsave_t *csmsave;
+    
+    csmsave = csmsave_new_file_writer("/Users/manueru/_save_test0.hle");
+    {
+        csmsave_write_bool(csmsave, CSMTRUE);
+        csmsave_write_uchar(csmsave, 42);
+        csmsave_write_ulong(csmsave, 100);
+        csmsave_write_double(csmsave, 1000.699);
+        csmsave_write_float(csmsave, -0.25);
+        csmsave_write_string(csmsave, "manuel");
+        csmsave_write_string_optional(csmsave, NULL);
+        csmsave_write_string_optional(csmsave, "marisol");
+    }
+    csmsave_free(&csmsave);
+    
+    csmsave = csmsave_new_file_reader("/Users/manueru/_save_test0.hle");
+    {
+        CSMBOOL bool_value;
+        unsigned char uchar_value;
+        unsigned long ulong_value;
+        double double_value;
+        float float_value;
+        char *string;
+        
+        bool_value = csmsave_read_bool(csmsave);
+        assert(bool_value == CSMTRUE);
+        
+        uchar_value = csmsave_read_uchar(csmsave);
+        assert(uchar_value == 42);
+        
+        ulong_value = csmsave_read_ulong(csmsave);
+        assert(ulong_value == 100);
+        
+        double_value = csmsave_read_double(csmsave);
+        assert(double_value == 1000.699);
+        
+        float_value = csmsave_read_float(csmsave);
+        assert(float_value == -0.25);
+        
+        string = csmsave_read_string(csmsave);
+        assert(csmstring_equal_strings(string, "manuel") == CSMTRUE);
+        csmstring_free(&string);
+        
+        string = csmsave_read_string_optional(csmsave);
+        assert(string == NULL);
+        
+        string = csmsave_read_string_optional(csmsave);
+        assert(csmstring_equal_strings(string, "marisol") == CSMTRUE);
+        csmstring_free(&string);
+    }
+    csmsave_free(&csmsave);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_save1(struct csmviewer_t *viewer)
+{
+    struct csmshape2d_t *shape2d;
+    double lenght;
+    struct csmsolid_t *solid;
+    struct csmsave_t *csmsave;
+    
+    shape2d = csmbasicshape2d_rectangular_shape(1., 1.);
+    csmshape2d_move(shape2d, 0.5, 0.5);
+    lenght = 3.;
+    
+    solid = csmsweep_create_solid_from_shape_debug(
+                        shape2d, 0., 0., lenght, 1., 0., 0., 0., 1., 0.,
+                        shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.,
+                        0);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    
+    csmsave = csmsave_new_file_writer("/Users/manueru/_save_test1.hle");
+    csmsolid_write(solid, csmsave);
+    csmsave_free(&csmsave);
+    csmsolid_free(&solid);
+
+    csmsave = csmsave_new_file_reader("/Users/manueru/_save_test1.hle");
+    solid = csmsolid_read(csmsave);
+    csmsave_free(&csmsave);
+    
+    csmdebug_set_viewer_results(solid, NULL);
+    csmdebug_show_viewer();
+    csmsolid_free(&solid);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -5880,8 +5973,11 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
+    
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
     csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    i_test_save0();
+    i_test_save1(viewer);
     i_test_union_solidos8(viewer);
     //i_test_interseccion_solidos7(viewer);
 

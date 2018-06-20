@@ -101,7 +101,7 @@ struct csmwriteablesolid_hedge_t *csmwriteablesolid_new_hedge(
     
     hedge = MALLOC(struct csmwriteablesolid_hedge_t);
     
-    hedge->vertex_id = vertex_id;
+    hedge->hedge_id = hedge_id;
     
     hedge->loop_id = loop_id;
     hedge->vertex_id = vertex_id;
@@ -146,7 +146,7 @@ static void i_write_hedge(const struct csmwriteablesolid_hedge_t *hedge, struct 
 {
     assert_no_null(hedge);
     
-    csmsave_write_ulong(csmsave, hedge->vertex_id);
+    csmsave_write_ulong(csmsave, hedge->hedge_id);
     
     csmsave_write_ulong(csmsave, hedge->loop_id);
     
@@ -376,9 +376,14 @@ void csmwriteablesolid_free(struct csmwriteablesolid_t **writeable_solid)
 
 struct csmwriteablesolid_t *csmwriteablesolid_read(struct csmsave_t *csmsave)
 {
+    unsigned char file_version;
+    
     csmArrayStruct(csmwriteablesolid_vertex_t) *vertexs;
     csmArrayStruct(csmwriteablesolid_face_t) *faces;
     csmArrayStruct(csmwriteablesolid_edge_t) *edges;
+    
+    file_version = csmsave_read_uchar(csmsave);
+    assert(file_version == 0);
     
     vertexs = csmsave_read_arr_st(csmsave, i_read_vertex, csmwriteablesolid_vertex_t);
     faces = csmsave_read_arr_st(csmsave, i_read_face, csmwriteablesolid_face_t);
