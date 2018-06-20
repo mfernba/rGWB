@@ -15,7 +15,7 @@ typedef struct csmsave_item_t *(*csmsave_FPtr_read_struct)(struct csmsave_t *csm
 
 DLL_RGWB CONSTRUCTOR(struct csmsave_t *, csmsave_new_file_writer, (const char *file_path));
 
-DLL_RGWBCONSTRUCTOR(struct csmsave_t *, csmsave_new_file_reader, (const char *file_path));
+DLL_RGWB CONSTRUCTOR(struct csmsave_t *, csmsave_new_file_reader, (const char *file_path));
 
 DLL_RGWB void csmsave_free(struct csmsave_t **csmsave);
 
