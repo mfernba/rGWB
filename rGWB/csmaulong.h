@@ -1,7 +1,7 @@
 // unsigned long array...
 
 #include "csmfwddecl.hxx"
-#include "csmArrULong.hxx"
+#include "csmaulong.hxx"
 
 #ifdef __cplusplus
 extern "C" {

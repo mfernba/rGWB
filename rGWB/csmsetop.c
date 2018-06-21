@@ -4,7 +4,7 @@
 #include "csmsetop.tli"
 
 #include "csmarrayc.h"
-#include "csmArrULong.h"
+#include "csmaulong.h"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.tli"

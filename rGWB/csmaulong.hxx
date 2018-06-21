@@ -1,5 +1,5 @@
 //
-//  csmArrULong.hxx
+//  csmaulong.hxx
 //  rGWB
 //
 //  Created by Manuel Fernández on 28/5/18.

@@ -14,8 +14,8 @@
 #include "csmmath.inl"
 #include "csmgeom.inl"
 #include "csmarrayc.h"
-#include "csmArrPoint2D.h"
-#include "csmArrPoint3D.h"
+#include "csmapto2d.h"
+#include "csmapto3d.h"
 
 #include "basicGraphics/bsgraphics2.h"
 #include <OpenGL/OpenGL.h>

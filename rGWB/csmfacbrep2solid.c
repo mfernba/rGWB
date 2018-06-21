@@ -25,7 +25,7 @@
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 
-#include "csmArrPoint3D.h"
+#include "csmapto3d.h"
 #include "csmassert.inl"
 #include "csmmem.inl"
 

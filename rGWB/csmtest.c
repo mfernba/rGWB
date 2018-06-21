@@ -2,7 +2,7 @@
 
 #include "csmtest.h"
 
-#include "csmArrPoint2D.h"
+#include "csmapto2d.h"
 #include "csmarrayc.h"
 #include "csmassert.inl"
 #include "csmbasicshape2d.h"
@@ -40,7 +40,7 @@
 #include "csmtolerance.inl"
 #include "csmviewer.inl"
 #include "csmfacbrep2solid.h"
-#include "csmArrPoint3D.h"
+#include "csmapto3d.h"
 #include "csmsave.h"
 #include "csmoptree.h"
 #include "csmoptree.hxx"

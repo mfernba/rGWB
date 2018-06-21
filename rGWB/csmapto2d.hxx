@@ -1,5 +1,5 @@
 //
-//  csmArrPoint2D.hxx
+//  csmapto2d.hxx
 //  rGWB
 //
 //  Created by Manuel Fernández on 16/11/17.

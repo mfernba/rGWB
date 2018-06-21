@@ -22,8 +22,8 @@
 
 #include "csmassert.inl"
 #include "csmmem.inl"
-#include "csmArrPoint2D.h"
-#include "csmArrPoint3D.h"
+#include "csmapto2d.h"
+#include "csmapto3d.h"
 #include "csmedge.inl"
 #include "csmid.inl"
 #include "csmmaterial.tli"

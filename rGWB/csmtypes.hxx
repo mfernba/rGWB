@@ -21,9 +21,9 @@ enum csmcompare_t
 };
 
 #ifdef __STANDALONE_DISTRIBUTABLE
-#include "csmArrPoint2D.hxx"
-#include "csmArrPoint3D.hxx"
-#include "csmArrULong.hxx"
+#include "csmapto2d.hxx"
+#include "csmapto3d.hxx"
+#include "csmaulong.hxx"
 #endif
 
 #endif /* csmtypes_h */

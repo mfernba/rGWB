@@ -1,5 +1,5 @@
 //
-//  csmArrPoint3D.hxx
+//  csmapto3d.hxx
 //  rGWB
 //
 //  Created by Manuel Fernández on 16/11/17.

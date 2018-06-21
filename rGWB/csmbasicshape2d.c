@@ -9,7 +9,7 @@
 #include "csmbasicshape2d.h"
 
 #include "csmassert.inl"
-#include "csmArrPoint2D.h"
+#include "csmapto2d.h"
 #include "csmshape2d.h"
 
 // ------------------------------------------------------------------------------------------

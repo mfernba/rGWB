@@ -54,9 +54,9 @@
 		5513277C1ECBA0CC00F2B04D /* csmsetop.c in Sources */ = {isa = PBXBuildFile; fileRef = 5513277A1ECBA0CC00F2B04D /* csmsetop.c */; };
 		5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */ = {isa = PBXBuildFile; fileRef = 5513277B1ECBA0CC00F2B04D /* csmsetop.h */; };
 		55161B2B1F82DC3000FF0F24 /* csmarrayc.c in Sources */ = {isa = PBXBuildFile; fileRef = 55161B2A1F82DC3000FF0F24 /* csmarrayc.c */; };
-		5517CD9320BC82FE00DA6690 /* csmArrULong.c in Sources */ = {isa = PBXBuildFile; fileRef = 5517CD9120BC82FE00DA6690 /* csmArrULong.c */; };
-		5517CD9420BC82FE00DA6690 /* csmArrULong.h in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9220BC82FE00DA6690 /* csmArrULong.h */; };
-		5517CD9620BC831100DA6690 /* csmArrULong.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9520BC831100DA6690 /* csmArrULong.hxx */; };
+		5517CD9320BC82FE00DA6690 /* csmaulong.c in Sources */ = {isa = PBXBuildFile; fileRef = 5517CD9120BC82FE00DA6690 /* csmaulong.c */; };
+		5517CD9420BC82FE00DA6690 /* csmaulong.h in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9220BC82FE00DA6690 /* csmaulong.h */; };
+		5517CD9620BC831100DA6690 /* csmaulong.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9520BC831100DA6690 /* csmaulong.hxx */; };
 		551D47591FC1CD50004F3B43 /* csmshape2d.c in Sources */ = {isa = PBXBuildFile; fileRef = 551D47571FC1CD50004F3B43 /* csmshape2d.c */; };
 		551D475A1FC1CD50004F3B43 /* csmshape2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 551D47581FC1CD50004F3B43 /* csmshape2d.h */; };
 		551D475C1FC1CED3004F3B43 /* csmshape2d.inl in Resources */ = {isa = PBXBuildFile; fileRef = 551D475B1FC1CED3004F3B43 /* csmshape2d.inl */; };
@@ -141,12 +141,12 @@
 		5598D6691F24EE4000EA1876 /* cyscngraf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6641F24EE4000EA1876 /* cyscngraf.framework */; };
 		5598D66A1F24EE4000EA1876 /* SnapFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6651F24EE4000EA1876 /* SnapFramework.framework */; };
 		55A9842C1FBCC9DC009F7516 /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 55A9842B1FBCC9DC009F7516 /* License.txt */; };
-		55A9843A1FBE3A6A009F7516 /* csmArrPoint2D.c in Sources */ = {isa = PBXBuildFile; fileRef = 55A984361FBE3A6A009F7516 /* csmArrPoint2D.c */; };
-		55A9843B1FBE3A6A009F7516 /* csmArrPoint2D.h in Headers */ = {isa = PBXBuildFile; fileRef = 55A984371FBE3A6A009F7516 /* csmArrPoint2D.h */; };
-		55A9843C1FBE3A6A009F7516 /* csmArrPoint3D.c in Sources */ = {isa = PBXBuildFile; fileRef = 55A984381FBE3A6A009F7516 /* csmArrPoint3D.c */; };
-		55A9843D1FBE3A6A009F7516 /* csmArrPoint3D.h in Headers */ = {isa = PBXBuildFile; fileRef = 55A984391FBE3A6A009F7516 /* csmArrPoint3D.h */; };
-		55A9843F1FBE3A8D009F7516 /* csmArrPoint3D.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55A9843E1FBE3A8D009F7516 /* csmArrPoint3D.hxx */; };
-		55A984411FBE434A009F7516 /* csmArrPoint2D.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55A984401FBE434A009F7516 /* csmArrPoint2D.hxx */; };
+		55A9843A1FBE3A6A009F7516 /* csmapto2d.c in Sources */ = {isa = PBXBuildFile; fileRef = 55A984361FBE3A6A009F7516 /* csmapto2d.c */; };
+		55A9843B1FBE3A6A009F7516 /* csmapto2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 55A984371FBE3A6A009F7516 /* csmapto2d.h */; };
+		55A9843C1FBE3A6A009F7516 /* csmapto3d.c in Sources */ = {isa = PBXBuildFile; fileRef = 55A984381FBE3A6A009F7516 /* csmapto3d.c */; };
+		55A9843D1FBE3A6A009F7516 /* csmapto3d.h in Headers */ = {isa = PBXBuildFile; fileRef = 55A984391FBE3A6A009F7516 /* csmapto3d.h */; };
+		55A9843F1FBE3A8D009F7516 /* csmapto3d.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55A9843E1FBE3A8D009F7516 /* csmapto3d.hxx */; };
+		55A984411FBE434A009F7516 /* csmapto2d.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55A984401FBE434A009F7516 /* csmapto2d.hxx */; };
 		55B54B771FBA4C5E00DE5833 /* csmexplode.c in Sources */ = {isa = PBXBuildFile; fileRef = 55B54B751FBA4C5E00DE5833 /* csmexplode.c */; };
 		55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */ = {isa = PBXBuildFile; fileRef = 55B54B761FBA4C5E00DE5833 /* csmexplode.h */; };
 		55C6F71F1F82E7CF005EA51D /* csmassert.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55C6F71E1F82E7CF005EA51D /* csmassert.inl */; };
@@ -285,9 +285,9 @@
 		5513277B1ECBA0CC00F2B04D /* csmsetop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmsetop.h; sourceTree = "<group>"; };
 		55161B201F82DC3000FF0F24 /* csmarrayc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmarrayc.h; sourceTree = "<group>"; };
 		55161B2A1F82DC3000FF0F24 /* csmarrayc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmarrayc.c; sourceTree = "<group>"; };
-		5517CD9120BC82FE00DA6690 /* csmArrULong.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmArrULong.c; sourceTree = "<group>"; };
-		5517CD9220BC82FE00DA6690 /* csmArrULong.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmArrULong.h; sourceTree = "<group>"; };
-		5517CD9520BC831100DA6690 /* csmArrULong.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmArrULong.hxx; sourceTree = "<group>"; };
+		5517CD9120BC82FE00DA6690 /* csmaulong.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmaulong.c; sourceTree = "<group>"; };
+		5517CD9220BC82FE00DA6690 /* csmaulong.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmaulong.h; sourceTree = "<group>"; };
+		5517CD9520BC831100DA6690 /* csmaulong.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmaulong.hxx; sourceTree = "<group>"; };
 		551D47571FC1CD50004F3B43 /* csmshape2d.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; lineEnding = 2; path = csmshape2d.c; sourceTree = "<group>"; };
 		551D47581FC1CD50004F3B43 /* csmshape2d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmshape2d.h; sourceTree = "<group>"; };
 		551D475B1FC1CED3004F3B43 /* csmshape2d.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmshape2d.inl; sourceTree = "<group>"; };
@@ -375,12 +375,12 @@
 		5598D6641F24EE4000EA1876 /* cyscngraf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = cyscngraf.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/cyscngraf.framework"; sourceTree = "<group>"; };
 		5598D6651F24EE4000EA1876 /* SnapFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SnapFramework.framework; path = "../../../../Library/Developer/Xcode/DerivedData/xDesignC-brysnyrrtihbqzdzzkdvmbefqlxi/Build/Products/Debug/SnapFramework.framework"; sourceTree = "<group>"; };
 		55A9842B1FBCC9DC009F7516 /* License.txt */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = License.txt; sourceTree = "<group>"; };
-		55A984361FBE3A6A009F7516 /* csmArrPoint2D.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmArrPoint2D.c; sourceTree = "<group>"; };
-		55A984371FBE3A6A009F7516 /* csmArrPoint2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmArrPoint2D.h; sourceTree = "<group>"; };
-		55A984381FBE3A6A009F7516 /* csmArrPoint3D.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmArrPoint3D.c; sourceTree = "<group>"; };
-		55A984391FBE3A6A009F7516 /* csmArrPoint3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmArrPoint3D.h; sourceTree = "<group>"; };
-		55A9843E1FBE3A8D009F7516 /* csmArrPoint3D.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmArrPoint3D.hxx; sourceTree = "<group>"; };
-		55A984401FBE434A009F7516 /* csmArrPoint2D.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmArrPoint2D.hxx; sourceTree = "<group>"; };
+		55A984361FBE3A6A009F7516 /* csmapto2d.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmapto2d.c; sourceTree = "<group>"; };
+		55A984371FBE3A6A009F7516 /* csmapto2d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmapto2d.h; sourceTree = "<group>"; };
+		55A984381FBE3A6A009F7516 /* csmapto3d.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmapto3d.c; sourceTree = "<group>"; };
+		55A984391FBE3A6A009F7516 /* csmapto3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmapto3d.h; sourceTree = "<group>"; };
+		55A9843E1FBE3A8D009F7516 /* csmapto3d.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmapto3d.hxx; sourceTree = "<group>"; };
+		55A984401FBE434A009F7516 /* csmapto2d.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmapto2d.hxx; sourceTree = "<group>"; };
 		55B54B751FBA4C5E00DE5833 /* csmexplode.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmexplode.c; sourceTree = "<group>"; };
 		55B54B761FBA4C5E00DE5833 /* csmexplode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmexplode.h; sourceTree = "<group>"; };
 		55C6F71E1F82E7CF005EA51D /* csmassert.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmassert.inl; sourceTree = "<group>"; };
@@ -717,15 +717,15 @@
 		5581A8941F96B0E200524631 /* Array */ = {
 			isa = PBXGroup;
 			children = (
-				55A984361FBE3A6A009F7516 /* csmArrPoint2D.c */,
-				55A984371FBE3A6A009F7516 /* csmArrPoint2D.h */,
-				55A984401FBE434A009F7516 /* csmArrPoint2D.hxx */,
-				55A984381FBE3A6A009F7516 /* csmArrPoint3D.c */,
-				55A984391FBE3A6A009F7516 /* csmArrPoint3D.h */,
-				55A9843E1FBE3A8D009F7516 /* csmArrPoint3D.hxx */,
-				5517CD9120BC82FE00DA6690 /* csmArrULong.c */,
-				5517CD9220BC82FE00DA6690 /* csmArrULong.h */,
-				5517CD9520BC831100DA6690 /* csmArrULong.hxx */,
+				55A984361FBE3A6A009F7516 /* csmapto2d.c */,
+				55A984371FBE3A6A009F7516 /* csmapto2d.h */,
+				55A984401FBE434A009F7516 /* csmapto2d.hxx */,
+				55A984381FBE3A6A009F7516 /* csmapto3d.c */,
+				55A984391FBE3A6A009F7516 /* csmapto3d.h */,
+				55A9843E1FBE3A8D009F7516 /* csmapto3d.hxx */,
+				5517CD9120BC82FE00DA6690 /* csmaulong.c */,
+				5517CD9220BC82FE00DA6690 /* csmaulong.h */,
+				5517CD9520BC831100DA6690 /* csmaulong.hxx */,
 				55161B201F82DC3000FF0F24 /* csmarrayc.h */,
 				550E55AA1F876AB90033864A /* csmarrayc.hxx */,
 				55161B2A1F82DC3000FF0F24 /* csmarrayc.c */,
@@ -841,7 +841,7 @@
 				55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */,
 				5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */,
 				557012C11E832F9600DFC490 /* csmmath.inl in Headers */,
-				5517CD9620BC831100DA6690 /* csmArrULong.hxx in Headers */,
+				5517CD9620BC831100DA6690 /* csmaulong.hxx in Headers */,
 				551290C82089054600D0E419 /* csmsimplifysolid.inl in Headers */,
 				55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */,
 				5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */,
@@ -866,17 +866,17 @@
 				55EA99241ED38FCD006C063C /* csmsetop_procedges.inl in Headers */,
 				550E55AB1F876AB90033864A /* csmarrayc.hxx in Headers */,
 				5507A6511E705618008B9F73 /* csmeuler_kvfs.inl in Headers */,
-				55A9843B1FBE3A6A009F7516 /* csmArrPoint2D.h in Headers */,
+				55A9843B1FBE3A6A009F7516 /* csmapto2d.h in Headers */,
 				558DE34A208B2ADD00AC42F4 /* csmfacbrep2solid.h in Headers */,
 				557954821E5E1AA9000FC91E /* csmnode.inl in Headers */,
 				550E55B01F87A9440033864A /* csmarqsort.inl in Headers */,
 				557954A61E60D0EF000FC91E /* csmeuler_mvfs.inl in Headers */,
-				55A9843D1FBE3A6A009F7516 /* csmArrPoint3D.h in Headers */,
+				55A9843D1FBE3A6A009F7516 /* csmapto3d.h in Headers */,
 				557954A01E5F942E000FC91E /* csmsolid.inl in Headers */,
 				557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */,
 				558DE34F208B379700AC42F4 /* csmfacbrep2solid.hxx in Headers */,
 				557954781E5E0694000FC91E /* csmid.inl in Headers */,
-				55A984411FBE434A009F7516 /* csmArrPoint2D.hxx in Headers */,
+				55A984411FBE434A009F7516 /* csmapto2d.hxx in Headers */,
 				553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */,
 				55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */,
 				55308C381F921A5600353A68 /* csmtest_array.inl in Headers */,
@@ -894,7 +894,7 @@
 				5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */,
 				5585C6B81FCB3DFA0045898B /* csmsubdvfaces.inl in Headers */,
 				55244B271EA02AED006F546E /* csmsolid.h in Headers */,
-				55A9843F1FBE3A8D009F7516 /* csmArrPoint3D.hxx in Headers */,
+				55A9843F1FBE3A8D009F7516 /* csmapto3d.hxx in Headers */,
 				551327781ECB9A6000F2B04D /* csmsetopcom.inl in Headers */,
 				55089F4F1E8996B500B9570B /* csmglue.h in Headers */,
 				5589F1ED2083EBE200526923 /* csmoptree.h in Headers */,
@@ -902,7 +902,7 @@
 				557954701E5DB24E000FC91E /* csmvertex.inl in Headers */,
 				5507A6F51E7B451E008B9F73 /* csmhashtb.inl in Headers */,
 				5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */,
-				5517CD9420BC82FE00DA6690 /* csmArrULong.h in Headers */,
+				5517CD9420BC82FE00DA6690 /* csmaulong.h in Headers */,
 				551D47601FC1E012004F3B43 /* csmbasicshape2d.h in Headers */,
 				559452871F79A0E5002AF198 /* csmquadrics.h in Headers */,
 			);
@@ -1045,7 +1045,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				55A9843A1FBE3A6A009F7516 /* csmArrPoint2D.c in Sources */,
+				55A9843A1FBE3A6A009F7516 /* csmapto2d.c in Sources */,
 				55FAB62220D8566F008E1DFF /* csmwriteablesolid.c in Sources */,
 				55089F4E1E8996B500B9570B /* csmglue.c in Sources */,
 				550E55AF1F87A9440033864A /* csmarqsort.c in Sources */,
@@ -1095,7 +1095,7 @@
 				55FA851720853B7200FB00EE /* csmstmodeler.c in Sources */,
 				5598D6131F24E7F600EA1876 /* csmviewer.mm in Sources */,
 				5507A67C1E73484D008B9F73 /* csmeuler_lmekr.c in Sources */,
-				55A9843C1FBE3A6A009F7516 /* csmArrPoint3D.c in Sources */,
+				55A9843C1FBE3A6A009F7516 /* csmapto3d.c in Sources */,
 				5507A6801E7362EF008B9F73 /* csmeuler_lkfmrh.c in Sources */,
 				5585C6B71FCB3DFA0045898B /* csmsubdvfaces.c in Sources */,
 				5579549F1E5F942E000FC91E /* csmsolid.c in Sources */,
@@ -1108,7 +1108,7 @@
 				5532DDBF1E9001390047B9DF /* csmtolerance.c in Sources */,
 				558DE349208B2ADD00AC42F4 /* csmfacbrep2solid.c in Sources */,
 				55308C261F920D1800353A68 /* csmsolid_vis.c in Sources */,
-				5517CD9320BC82FE00DA6690 /* csmArrULong.c in Sources */,
+				5517CD9320BC82FE00DA6690 /* csmaulong.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

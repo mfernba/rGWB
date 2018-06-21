@@ -10,7 +10,7 @@
 #include "csmwriteablesolid.tli"
 
 #include "csmarrayc.h"
-#include "csmArrULong.h"
+#include "csmaulong.h"
 #include "csmsave.h"
 #include "csmmaterial.inl"
 #include "csmsurface.inl"

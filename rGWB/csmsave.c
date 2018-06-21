@@ -9,7 +9,7 @@
 #include "csmsave.h"
 
 #include "csmarrayc.h"
-#include "csmArrULong.h"
+#include "csmaulong.h"
 #include "csmstring.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
