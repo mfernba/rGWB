@@ -16,5 +16,7 @@ FOUNDATION_EXPORT const unsigned char rGWBVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <rGWB/PublicHeader.h>
 
-
+#import <rGWB/csmfwddecl.hxx>
+#import <rGWB/csmtypes.hxx>
 #import <rGWB/csmtest.h>
+#import <rGWB/csmsolid.h>

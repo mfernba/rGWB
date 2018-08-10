@@ -38,10 +38,10 @@
 		5507A6F21E7B450C008B9F73 /* csmhashtb.c in Sources */ = {isa = PBXBuildFile; fileRef = 5507A6F01E7B450C008B9F73 /* csmhashtb.c */; };
 		5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F11E7B450C008B9F73 /* csmhashtb.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		5507A6F51E7B451E008B9F73 /* csmhashtb.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6F41E7B451E008B9F73 /* csmhashtb.inl */; };
-		5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6FA1E7B47CB008B9F73 /* csmuthash.hxx */; };
+		5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5507A6FA1E7B47CB008B9F73 /* csmuthash.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		55089F4E1E8996B500B9570B /* csmglue.c in Sources */ = {isa = PBXBuildFile; fileRef = 55089F4C1E8996B500B9570B /* csmglue.c */; };
-		55089F4F1E8996B500B9570B /* csmglue.h in Headers */ = {isa = PBXBuildFile; fileRef = 55089F4D1E8996B500B9570B /* csmglue.h */; };
-		550E55AB1F876AB90033864A /* csmarrayc.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 550E55AA1F876AB90033864A /* csmarrayc.hxx */; };
+		55089F4F1E8996B500B9570B /* csmglue.h in Headers */ = {isa = PBXBuildFile; fileRef = 55089F4D1E8996B500B9570B /* csmglue.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		550E55AB1F876AB90033864A /* csmarrayc.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 550E55AA1F876AB90033864A /* csmarrayc.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		550E55AF1F87A9440033864A /* csmarqsort.c in Sources */ = {isa = PBXBuildFile; fileRef = 550E55AD1F87A9440033864A /* csmarqsort.c */; };
 		550E55B01F87A9440033864A /* csmarqsort.inl in Headers */ = {isa = PBXBuildFile; fileRef = 550E55AE1F87A9440033864A /* csmarqsort.inl */; };
 		551290C72089054600D0E419 /* csmsimplifysolid.c in Sources */ = {isa = PBXBuildFile; fileRef = 551290C52089054600D0E419 /* csmsimplifysolid.c */; };
@@ -52,29 +52,30 @@
 		551327771ECB9A6000F2B04D /* csmsetopcom.c in Sources */ = {isa = PBXBuildFile; fileRef = 551327751ECB9A6000F2B04D /* csmsetopcom.c */; };
 		551327781ECB9A6000F2B04D /* csmsetopcom.inl in Headers */ = {isa = PBXBuildFile; fileRef = 551327761ECB9A6000F2B04D /* csmsetopcom.inl */; };
 		5513277C1ECBA0CC00F2B04D /* csmsetop.c in Sources */ = {isa = PBXBuildFile; fileRef = 5513277A1ECBA0CC00F2B04D /* csmsetop.c */; };
-		5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */ = {isa = PBXBuildFile; fileRef = 5513277B1ECBA0CC00F2B04D /* csmsetop.h */; };
+		5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */ = {isa = PBXBuildFile; fileRef = 5513277B1ECBA0CC00F2B04D /* csmsetop.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55161B2B1F82DC3000FF0F24 /* csmarrayc.c in Sources */ = {isa = PBXBuildFile; fileRef = 55161B2A1F82DC3000FF0F24 /* csmarrayc.c */; };
 		5517CD9320BC82FE00DA6690 /* csmaulong.c in Sources */ = {isa = PBXBuildFile; fileRef = 5517CD9120BC82FE00DA6690 /* csmaulong.c */; };
-		5517CD9420BC82FE00DA6690 /* csmaulong.h in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9220BC82FE00DA6690 /* csmaulong.h */; };
-		5517CD9620BC831100DA6690 /* csmaulong.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9520BC831100DA6690 /* csmaulong.hxx */; };
+		5517CD9420BC82FE00DA6690 /* csmaulong.h in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9220BC82FE00DA6690 /* csmaulong.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5517CD9620BC831100DA6690 /* csmaulong.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5517CD9520BC831100DA6690 /* csmaulong.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		551D47591FC1CD50004F3B43 /* csmshape2d.c in Sources */ = {isa = PBXBuildFile; fileRef = 551D47571FC1CD50004F3B43 /* csmshape2d.c */; };
 		551D475A1FC1CD50004F3B43 /* csmshape2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 551D47581FC1CD50004F3B43 /* csmshape2d.h */; };
 		551D475C1FC1CED3004F3B43 /* csmshape2d.inl in Resources */ = {isa = PBXBuildFile; fileRef = 551D475B1FC1CED3004F3B43 /* csmshape2d.inl */; };
 		551D475F1FC1E012004F3B43 /* csmbasicshape2d.c in Sources */ = {isa = PBXBuildFile; fileRef = 551D475D1FC1E012004F3B43 /* csmbasicshape2d.c */; };
-		551D47601FC1E012004F3B43 /* csmbasicshape2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 551D475E1FC1E012004F3B43 /* csmbasicshape2d.h */; };
+		551D47601FC1E012004F3B43 /* csmbasicshape2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 551D475E1FC1E012004F3B43 /* csmbasicshape2d.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		552053E4211DF02E00D7BBA4 /* csmtypes.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 550E55AC1F87811A0033864A /* csmtypes.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		55244B1D1E9F9DC0006F546E /* csmeuler_laringmv.c in Sources */ = {isa = PBXBuildFile; fileRef = 55244B1B1E9F9DC0006F546E /* csmeuler_laringmv.c */; };
 		55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55244B1C1E9F9DC0006F546E /* csmeuler_laringmv.inl */; };
 		55244B241EA0255A006F546E /* csmtransform.c in Sources */ = {isa = PBXBuildFile; fileRef = 55244B221EA0255A006F546E /* csmtransform.c */; };
 		55244B251EA0255A006F546E /* csmtransform.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55244B231EA0255A006F546E /* csmtransform.inl */; };
 		55244B271EA02AED006F546E /* csmsolid.h in Headers */ = {isa = PBXBuildFile; fileRef = 55244B261EA02A68006F546E /* csmsolid.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55244B2A1EAA57C4006F546E /* csmsplit.c in Sources */ = {isa = PBXBuildFile; fileRef = 55244B281EAA57C4006F546E /* csmsplit.c */; };
-		55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */ = {isa = PBXBuildFile; fileRef = 55244B291EAA57C4006F546E /* csmsplit.h */; };
+		55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */ = {isa = PBXBuildFile; fileRef = 55244B291EAA57C4006F546E /* csmsplit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55308C261F920D1800353A68 /* csmsolid_vis.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C241F920D1800353A68 /* csmsolid_vis.c */; };
-		55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */ = {isa = PBXBuildFile; fileRef = 55308C251F920D1800353A68 /* csmsolid_vis.h */; };
+		55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */ = {isa = PBXBuildFile; fileRef = 55308C251F920D1800353A68 /* csmsolid_vis.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55308C371F921A5600353A68 /* csmtest_array.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C351F921A5600353A68 /* csmtest_array.c */; };
 		55308C381F921A5600353A68 /* csmtest_array.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55308C361F921A5600353A68 /* csmtest_array.inl */; };
 		55308C3B1F92219600353A68 /* csmmaterial.c in Sources */ = {isa = PBXBuildFile; fileRef = 55308C391F92219600353A68 /* csmmaterial.c */; };
-		55308C3C1F92219600353A68 /* csmmaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 55308C3A1F92219600353A68 /* csmmaterial.h */; };
+		55308C3C1F92219600353A68 /* csmmaterial.h in Headers */ = {isa = PBXBuildFile; fileRef = 55308C3A1F92219600353A68 /* csmmaterial.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55308C3E1F9222B500353A68 /* csmmaterial.inl in Resources */ = {isa = PBXBuildFile; fileRef = 55308C3D1F9222B500353A68 /* csmmaterial.inl */; };
 		55308C401F92269800353A68 /* csmmaterial.tli in Headers */ = {isa = PBXBuildFile; fileRef = 55308C3F1F92269800353A68 /* csmmaterial.tli */; };
 		5532DDB81E8FFE810047B9DF /* csmloopglue.c in Sources */ = {isa = PBXBuildFile; fileRef = 5532DDB61E8FFE810047B9DF /* csmloopglue.c */; };
@@ -84,8 +85,8 @@
 		55354A441E9AE595007B0692 /* csmmath.tli in Headers */ = {isa = PBXBuildFile; fileRef = 55354A431E9AE595007B0692 /* csmmath.tli */; settings = {ATTRIBUTES = (Public, ); }; };
 		5536C8731FC1F4DB005CE275 /* WinFrames2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5536C86C1FC1F4B7005CE275 /* WinFrames2.framework */; };
 		5536C8741FC1F4DB005CE275 /* WinFrames3.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5536C8631FC1F4AD005CE275 /* WinFrames3.framework */; };
-		553E63E71FF6990400A15475 /* csmsplit.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 553E63E61FF6990400A15475 /* csmsplit.hxx */; };
-		553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 553E63E81FF69E0600A15475 /* csmsetop.hxx */; };
+		553E63E71FF6990400A15475 /* csmsplit.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 553E63E61FF6990400A15475 /* csmsplit.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
+		553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 553E63E81FF69E0600A15475 /* csmsetop.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		5559D4E4204F3F310058F6F5 /* csmsetop_join.c in Sources */ = {isa = PBXBuildFile; fileRef = 5559D4E2204F3F310058F6F5 /* csmsetop_join.c */; };
 		5559D4E5204F3F310058F6F5 /* csmsetop_join.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5559D4E3204F3F310058F6F5 /* csmsetop_join.inl */; };
 		557012A01E8328E400DFC490 /* csmsweep.c in Sources */ = {isa = PBXBuildFile; fileRef = 5570129E1E8328E400DFC490 /* csmsweep.c */; };
@@ -107,7 +108,7 @@
 		5579547E1E5E1403000FC91E /* csmhedge.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5579547C1E5E1403000FC91E /* csmhedge.inl */; };
 		557954811E5E1AA9000FC91E /* csmnode.c in Sources */ = {isa = PBXBuildFile; fileRef = 5579547F1E5E1AA9000FC91E /* csmnode.c */; };
 		557954821E5E1AA9000FC91E /* csmnode.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954801E5E1AA9000FC91E /* csmnode.inl */; };
-		557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 557954831E5E1AE9000FC91E /* csmnode.hxx */; };
+		557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 557954831E5E1AE9000FC91E /* csmnode.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		557954871E5E2DCB000FC91E /* csmstring.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954851E5E2DCB000FC91E /* csmstring.c */; };
 		557954881E5E2DCB000FC91E /* csmstring.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954861E5E2DCB000FC91E /* csmstring.inl */; };
 		5579548C1E5E41C1000FC91E /* csmedge.c in Sources */ = {isa = PBXBuildFile; fileRef = 5579548A1E5E41C1000FC91E /* csmedge.c */; };
@@ -125,13 +126,13 @@
 		5585C6B71FCB3DFA0045898B /* csmsubdvfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 5585C6B51FCB3DFA0045898B /* csmsubdvfaces.c */; };
 		5585C6B81FCB3DFA0045898B /* csmsubdvfaces.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5585C6B61FCB3DFA0045898B /* csmsubdvfaces.inl */; };
 		5589F1EC2083EBE200526923 /* csmoptree.c in Sources */ = {isa = PBXBuildFile; fileRef = 5589F1EA2083EBE200526923 /* csmoptree.c */; };
-		5589F1ED2083EBE200526923 /* csmoptree.h in Headers */ = {isa = PBXBuildFile; fileRef = 5589F1EB2083EBE200526923 /* csmoptree.h */; };
-		5589F1EF2083EFE400526923 /* csmoptree.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5589F1EE2083EFE400526923 /* csmoptree.hxx */; };
+		5589F1ED2083EBE200526923 /* csmoptree.h in Headers */ = {isa = PBXBuildFile; fileRef = 5589F1EB2083EBE200526923 /* csmoptree.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5589F1EF2083EFE400526923 /* csmoptree.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5589F1EE2083EFE400526923 /* csmoptree.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		558DE349208B2ADD00AC42F4 /* csmfacbrep2solid.c in Sources */ = {isa = PBXBuildFile; fileRef = 558DE347208B2ADD00AC42F4 /* csmfacbrep2solid.c */; };
-		558DE34A208B2ADD00AC42F4 /* csmfacbrep2solid.h in Headers */ = {isa = PBXBuildFile; fileRef = 558DE348208B2ADD00AC42F4 /* csmfacbrep2solid.h */; };
-		558DE34F208B379700AC42F4 /* csmfacbrep2solid.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 558DE34E208B379700AC42F4 /* csmfacbrep2solid.hxx */; };
+		558DE34A208B2ADD00AC42F4 /* csmfacbrep2solid.h in Headers */ = {isa = PBXBuildFile; fileRef = 558DE348208B2ADD00AC42F4 /* csmfacbrep2solid.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		558DE34F208B379700AC42F4 /* csmfacbrep2solid.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 558DE34E208B379700AC42F4 /* csmfacbrep2solid.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		559452861F79A0E5002AF198 /* csmquadrics.c in Sources */ = {isa = PBXBuildFile; fileRef = 559452841F79A0E5002AF198 /* csmquadrics.c */; };
-		559452871F79A0E5002AF198 /* csmquadrics.h in Headers */ = {isa = PBXBuildFile; fileRef = 559452851F79A0E5002AF198 /* csmquadrics.h */; };
+		559452871F79A0E5002AF198 /* csmquadrics.h in Headers */ = {isa = PBXBuildFile; fileRef = 559452851F79A0E5002AF198 /* csmquadrics.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5598D6131F24E7F600EA1876 /* csmviewer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5598D6111F24E7F600EA1876 /* csmviewer.mm */; };
 		5598D6141F24E7F600EA1876 /* csmviewer.inl in Resources */ = {isa = PBXBuildFile; fileRef = 5598D6121F24E7F600EA1876 /* csmviewer.inl */; };
 		5598D65C1F24EE4000EA1876 /* basicGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6341F24E8AF00EA1876 /* basicGraphics.framework */; };
@@ -142,13 +143,13 @@
 		5598D66A1F24EE4000EA1876 /* SnapFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6651F24EE4000EA1876 /* SnapFramework.framework */; };
 		55A9842C1FBCC9DC009F7516 /* License.txt in Resources */ = {isa = PBXBuildFile; fileRef = 55A9842B1FBCC9DC009F7516 /* License.txt */; };
 		55A9843A1FBE3A6A009F7516 /* csmapto2d.c in Sources */ = {isa = PBXBuildFile; fileRef = 55A984361FBE3A6A009F7516 /* csmapto2d.c */; };
-		55A9843B1FBE3A6A009F7516 /* csmapto2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 55A984371FBE3A6A009F7516 /* csmapto2d.h */; };
+		55A9843B1FBE3A6A009F7516 /* csmapto2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 55A984371FBE3A6A009F7516 /* csmapto2d.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55A9843C1FBE3A6A009F7516 /* csmapto3d.c in Sources */ = {isa = PBXBuildFile; fileRef = 55A984381FBE3A6A009F7516 /* csmapto3d.c */; };
-		55A9843D1FBE3A6A009F7516 /* csmapto3d.h in Headers */ = {isa = PBXBuildFile; fileRef = 55A984391FBE3A6A009F7516 /* csmapto3d.h */; };
-		55A9843F1FBE3A8D009F7516 /* csmapto3d.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55A9843E1FBE3A8D009F7516 /* csmapto3d.hxx */; };
-		55A984411FBE434A009F7516 /* csmapto2d.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55A984401FBE434A009F7516 /* csmapto2d.hxx */; };
+		55A9843D1FBE3A6A009F7516 /* csmapto3d.h in Headers */ = {isa = PBXBuildFile; fileRef = 55A984391FBE3A6A009F7516 /* csmapto3d.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55A9843F1FBE3A8D009F7516 /* csmapto3d.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55A9843E1FBE3A8D009F7516 /* csmapto3d.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
+		55A984411FBE434A009F7516 /* csmapto2d.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55A984401FBE434A009F7516 /* csmapto2d.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		55B54B771FBA4C5E00DE5833 /* csmexplode.c in Sources */ = {isa = PBXBuildFile; fileRef = 55B54B751FBA4C5E00DE5833 /* csmexplode.c */; };
-		55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */ = {isa = PBXBuildFile; fileRef = 55B54B761FBA4C5E00DE5833 /* csmexplode.h */; };
+		55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */ = {isa = PBXBuildFile; fileRef = 55B54B761FBA4C5E00DE5833 /* csmexplode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55C6F71F1F82E7CF005EA51D /* csmassert.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55C6F71E1F82E7CF005EA51D /* csmassert.inl */; };
 		55E30FA91F24BAB300EDE74F /* csmdebug.mm in Sources */ = {isa = PBXBuildFile; fileRef = 55E30FA71F24BAB300EDE74F /* csmdebug.mm */; };
 		55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55E30FA81F24BAB300EDE74F /* csmdebug.inl */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -162,10 +163,10 @@
 		55F83C6A1FC4A33B009DBBEF /* csmsurface.c in Sources */ = {isa = PBXBuildFile; fileRef = 55F83C681FC4A33B009DBBEF /* csmsurface.c */; };
 		55F83C6B1FC4A33B009DBBEF /* csmsurface.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55F83C691FC4A33B009DBBEF /* csmsurface.inl */; };
 		55FA851720853B7200FB00EE /* csmstmodeler.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FA851520853B7200FB00EE /* csmstmodeler.c */; };
-		55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851620853B7200FB00EE /* csmstmodeler.h */; };
-		55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */; };
+		55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851620853B7200FB00EE /* csmstmodeler.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 55FA851C20853B8B00FB00EE /* csmstmodeler.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		55FAB61B20D83CA6008E1DFF /* csmsave.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FAB61920D83CA6008E1DFF /* csmsave.c */; };
-		55FAB61C20D83CA6008E1DFF /* csmsave.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB61A20D83CA6008E1DFF /* csmsave.h */; };
+		55FAB61C20D83CA6008E1DFF /* csmsave.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB61A20D83CA6008E1DFF /* csmsave.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55FAB62220D8566F008E1DFF /* csmwriteablesolid.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */; };
 		55FAB62320D8566F008E1DFF /* csmwriteablesolid.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */; };
 /* End PBXBuildFile section */
@@ -825,35 +826,53 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */,
-				55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */,
-				55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */,
 				55E30FAA1F24BAB300EDE74F /* csmdebug.inl in Headers */,
 				5579545D1E5DB074000FC91E /* rGWB.h in Headers */,
+				55B54B781FBA4C5E00DE5833 /* csmexplode.h in Headers */,
+				55FA851820853B7200FB00EE /* csmstmodeler.h in Headers */,
+				55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */,
 				5507A6811E7362EF008B9F73 /* csmeuler_lkfmrh.inl in Headers */,
 				55C6F71F1F82E7CF005EA51D /* csmassert.inl in Headers */,
+				5517CD9620BC831100DA6690 /* csmaulong.hxx in Headers */,
 				55354A441E9AE595007B0692 /* csmmath.tli in Headers */,
+				55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */,
+				5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */,
 				5507A6F31E7B450C008B9F73 /* csmhashtb.hxx in Headers */,
+				5589F1EF2083EFE400526923 /* csmoptree.hxx in Headers */,
+				553E63E71FF6990400A15475 /* csmsplit.hxx in Headers */,
 				557954721E5DB275000FC91E /* csmfwddecl.hxx in Headers */,
+				55A9843B1FBE3A6A009F7516 /* csmapto2d.h in Headers */,
+				558DE34A208B2ADD00AC42F4 /* csmfacbrep2solid.h in Headers */,
+				550E55AB1F876AB90033864A /* csmarrayc.hxx in Headers */,
+				55308C3C1F92219600353A68 /* csmmaterial.h in Headers */,
+				55A9843D1FBE3A6A009F7516 /* csmapto3d.h in Headers */,
+				558DE34F208B379700AC42F4 /* csmfacbrep2solid.hxx in Headers */,
+				55A984411FBE434A009F7516 /* csmapto2d.hxx in Headers */,
+				553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */,
+				55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */,
+				55FAB61C20D83CA6008E1DFF /* csmsave.h in Headers */,
+				557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */,
+				55089F4F1E8996B500B9570B /* csmglue.h in Headers */,
+				5589F1ED2083EBE200526923 /* csmoptree.h in Headers */,
+				5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */,
+				5517CD9420BC82FE00DA6690 /* csmaulong.h in Headers */,
+				551D47601FC1E012004F3B43 /* csmbasicshape2d.h in Headers */,
+				559452871F79A0E5002AF198 /* csmquadrics.h in Headers */,
 				5512FD1520B4857D00809018 /* csmeuler_mvfb.inl in Headers */,
 				5507A62A1E700F7C008B9F73 /* csmeuler_lmef.inl in Headers */,
 				5507A6251E6B8714008B9F73 /* csmtest.h in Headers */,
-				55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */,
 				5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */,
 				557012C11E832F9600DFC490 /* csmmath.inl in Headers */,
-				5517CD9620BC831100DA6690 /* csmaulong.hxx in Headers */,
+				552053E4211DF02E00D7BBA4 /* csmtypes.hxx in Headers */,
 				551290C82089054600D0E419 /* csmsimplifysolid.inl in Headers */,
 				55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */,
-				5507A6FB1E7B47CB008B9F73 /* csmuthash.hxx in Headers */,
 				557954881E5E2DCB000FC91E /* csmstring.inl in Headers */,
 				5559D4E5204F3F310058F6F5 /* csmsetop_join.inl in Headers */,
 				557954921E5E446C000FC91E /* csmloop.inl in Headers */,
 				557012A11E8328E400DFC490 /* csmsweep.h in Headers */,
 				55F83C6B1FC4A33B009DBBEF /* csmsurface.inl in Headers */,
 				551327701EC3AF1100F2B04D /* csmvertex.tli in Headers */,
-				5589F1EF2083EFE400526923 /* csmoptree.hxx in Headers */,
 				5507A62E1E701441008B9F73 /* csmeuler_lkef.inl in Headers */,
-				553E63E71FF6990400A15475 /* csmsplit.hxx in Headers */,
 				5507A5CB1E662758008B9F73 /* csmeuler_lmev.inl in Headers */,
 				5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */,
 				55244B251EA0255A006F546E /* csmtransform.inl in Headers */,
@@ -861,33 +880,22 @@
 				55F72FA320D99FBC00E949EE /* csmwriteablesolid.tli in Headers */,
 				55FAB62320D8566F008E1DFF /* csmwriteablesolid.inl in Headers */,
 				5507A6891E736714008B9F73 /* csmeuler_lringmv.inl in Headers */,
-				55308C3C1F92219600353A68 /* csmmaterial.h in Headers */,
 				5507A6851E736565008B9F73 /* csmeuler_lmfkrh.inl in Headers */,
 				55EA99241ED38FCD006C063C /* csmsetop_procedges.inl in Headers */,
-				550E55AB1F876AB90033864A /* csmarrayc.hxx in Headers */,
 				5507A6511E705618008B9F73 /* csmeuler_kvfs.inl in Headers */,
-				55A9843B1FBE3A6A009F7516 /* csmapto2d.h in Headers */,
-				558DE34A208B2ADD00AC42F4 /* csmfacbrep2solid.h in Headers */,
 				557954821E5E1AA9000FC91E /* csmnode.inl in Headers */,
 				550E55B01F87A9440033864A /* csmarqsort.inl in Headers */,
 				557954A61E60D0EF000FC91E /* csmeuler_mvfs.inl in Headers */,
-				55A9843D1FBE3A6A009F7516 /* csmapto3d.h in Headers */,
 				557954A01E5F942E000FC91E /* csmsolid.inl in Headers */,
 				557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */,
-				558DE34F208B379700AC42F4 /* csmfacbrep2solid.hxx in Headers */,
 				557954781E5E0694000FC91E /* csmid.inl in Headers */,
-				55A984411FBE434A009F7516 /* csmapto2d.hxx in Headers */,
-				553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */,
-				55FA851D20853B8B00FB00EE /* csmstmodeler.hxx in Headers */,
 				55308C381F921A5600353A68 /* csmtest_array.inl in Headers */,
 				551D475A1FC1CD50004F3B43 /* csmshape2d.h in Headers */,
 				5507A5C71E6624E7008B9F73 /* csmopbas.inl in Headers */,
 				5507A67D1E73484D008B9F73 /* csmeuler_lmekr.inl in Headers */,
 				55EA99201ED38E66006C063C /* csmsetop_vtxvtx.inl in Headers */,
-				55FAB61C20D83CA6008E1DFF /* csmsave.h in Headers */,
 				557954961E5E4742000FC91E /* csmface.inl in Headers */,
 				55308C401F92269800353A68 /* csmmaterial.tli in Headers */,
-				557954841E5E1AE9000FC91E /* csmnode.hxx in Headers */,
 				55EA991B1ED389C0006C063C /* csmsetop_vtxfacc.inl in Headers */,
 				5507A6211E6B744A008B9F73 /* csmeuler_lkev.inl in Headers */,
 				5579549A1E5E4811000FC91E /* csmbbox.inl in Headers */,
@@ -896,15 +904,9 @@
 				55244B271EA02AED006F546E /* csmsolid.h in Headers */,
 				55A9843F1FBE3A8D009F7516 /* csmapto3d.hxx in Headers */,
 				551327781ECB9A6000F2B04D /* csmsetopcom.inl in Headers */,
-				55089F4F1E8996B500B9570B /* csmglue.h in Headers */,
-				5589F1ED2083EBE200526923 /* csmoptree.h in Headers */,
 				5579547E1E5E1403000FC91E /* csmhedge.inl in Headers */,
 				557954701E5DB24E000FC91E /* csmvertex.inl in Headers */,
 				5507A6F51E7B451E008B9F73 /* csmhashtb.inl in Headers */,
-				5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */,
-				5517CD9420BC82FE00DA6690 /* csmaulong.h in Headers */,
-				551D47601FC1E012004F3B43 /* csmbasicshape2d.h in Headers */,
-				559452871F79A0E5002AF198 /* csmquadrics.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
