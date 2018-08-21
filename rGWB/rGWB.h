@@ -36,3 +36,5 @@ FOUNDATION_EXPORT const unsigned char rGWBVersionString[];
 #import <rGWB/csmapto3d.h>
 #import <rGWB/csmapto3d.hxx>
 
+#import <rGWB/csmtest.h>
+
