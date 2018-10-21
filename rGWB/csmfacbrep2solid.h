@@ -18,6 +18,11 @@ DLL_RGWB CONSTRUCTOR(struct csmfacbrep2solid_t *, csmfacbrep2solid_new, (double 
 DLL_RGWB void csmfacbrep2solid_free(struct csmfacbrep2solid_t **builder);
 
 
+// Points...
+    
+DLL_RGWB unsigned long csmfacbrep2solid_append_point(struct csmfacbrep2solid_t *builder, double x, double y, double z);
+    
+
 // Faces...
     
 DLL_RGWB void csmfacbrep2solid_append_face(struct csmfacbrep2solid_t *builder, struct csmfacbrep2solid_face_t **face);
@@ -33,6 +38,8 @@ DLL_RGWB void csmfacbrep2solid_append_inner_loop_to_face(struct csmfacbrep2solid
 DLL_RGWB CONSTRUCTOR(struct csmfacbrep2solid_loop_t *, csmfacbrep2solid_new_loop, (void));
     
 DLL_RGWB void csmfacbrep2solid_append_point_to_loop(struct csmfacbrep2solid_loop_t *loop, double x, double y, double z);
+
+DLL_RGWB void csmfacbrep2solid_append_indexed_point_to_loop(struct csmfacbrep2solid_loop_t *loop, unsigned long point_idx);
 
 DLL_RGWB void csmfacbrep2solid_reverse(struct csmfacbrep2solid_loop_t *loop);
 

@@ -342,6 +342,19 @@ void csmfacbrep2solid_append_point_to_loop(struct csmfacbrep2solid_loop_t *loop,
 
 // ------------------------------------------------------------------------------------------
 
+void csmfacbrep2solid_append_indexed_point_to_loop(struct csmfacbrep2solid_loop_t *loop, unsigned long point_idx)
+{
+    struct i_loop_point_t *point;
+    struct csmhedge_t *shedge;
+    
+    shedge = NULL;
+    point = i_new_loop_point(0., 0., 0., point_idx, ULONG_MAX, shedge);
+    
+    csmarrayc_append_element_st(loop->points, point, i_loop_point_t);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmfacbrep2solid_reverse(struct csmfacbrep2solid_loop_t *loop)
 {
     assert_no_null(loop);
@@ -415,9 +428,24 @@ static void i_register_loop_vertexs(
         
         loop_point = csmarrayc_get_st(loop->points, i, i_loop_point_t);
         assert_no_null(loop_point);
-        assert(loop_point->vertex_idx == ULONG_MAX);
         
-        loop_point->vertex_idx = i_get_vertex_idx_for_point(loop_point->x, loop_point->y, loop_point->z, tolerance, vertexs);
+        if (loop_point->vertex_idx == ULONG_MAX)
+        {
+            loop_point->vertex_idx = i_get_vertex_idx_for_point(loop_point->x, loop_point->y, loop_point->z, tolerance, vertexs);
+        }
+        else
+        {
+            struct i_vertex_t *vertex;
+            
+            vertex = csmarrayc_get_st(vertexs, loop_point->vertex_idx, i_vertex_t);
+            assert_no_null(vertex);
+            
+            loop_point->x = vertex->x;
+            loop_point->y = vertex->y;
+            loop_point->z = vertex->z;
+            
+            vertex->no_uses++;
+        }
     }
 }
 
@@ -440,7 +468,26 @@ static void i_register_inner_loops_vertexs(
         i_register_loop_vertexs(inner_loop, tolerance, vertexs);
     }
 }
+
+// ------------------------------------------------------------------------------------------
+
+unsigned long csmfacbrep2solid_append_point(struct csmfacbrep2solid_t *builder, double x, double y, double z)
+{
+    struct i_vertex_t *vertex;
+    unsigned long no_uses;
+    struct csmvertex_t *svertex;
     
+    assert_no_null(builder);
+
+    no_uses = 0;
+    svertex = NULL;
+
+    vertex = i_new_vertex(x, y, z, no_uses, svertex);
+    csmarrayc_append_element_st(builder->vertexs, vertex, i_vertex_t);
+
+    return csmarrayc_count_st(builder->vertexs, i_vertex_t) - 1;
+}
+
 // ------------------------------------------------------------------------------------------
 
 void csmfacbrep2solid_append_face(struct csmfacbrep2solid_t *builder, struct csmfacbrep2solid_face_t **face)
