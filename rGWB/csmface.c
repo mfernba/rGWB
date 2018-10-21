@@ -2083,7 +2083,7 @@ void csmface_append_cara_solido(
 
             cos_tolerance_rad = csmmath_cos(tolerance_rad);
 
-            if (cos_tolerance_rad + 1.e-5 > dot_product)
+            if (dot_product + 1.e-5 > cos_tolerance_rad)
                 add_face = CSMTRUE;
             else
                 add_face = CSMFALSE;
