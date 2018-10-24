@@ -88,59 +88,70 @@ static CSMBOOL i_did_find_3_non_collinear_vertexs_in_loop(
 static CSMBOOL i_did_subdivide_face(struct csmface_t *face)
 {
     CSMBOOL did_subdivide_face;
-    struct csmloop_t *flout;
-    struct csmvertex_t *v1, *v2, *v3;
     
     assert(csmface_has_holes(face) == CSMFALSE);
-
-    flout = csmface_flout(face);
     
-    if (i_did_find_3_non_collinear_vertexs_in_loop(flout, &v1, &v2, &v3) == CSMFALSE)
+    if (csmface_simplifyop_skip_face(face) == CSMTRUE)
     {
         did_subdivide_face = CSMFALSE;
     }
     else
     {
-        double A, B, C, D;
-        struct csmhedge_t *ledge, *he_iterator;
+        struct csmloop_t *flout;
+        struct csmvertex_t *v1, *v2, *v3;
         
-        did_subdivide_face = CSMFALSE;
-        csmvertex_implicit_plane_equation_given_3_vertexs(v1, v2, v3, &A, &B, &C, &D);
+        flout = csmface_flout(face);
         
-        ledge = csmloop_ledge(flout);
-        he_iterator = ledge;
-        
-        do
+        if (i_did_find_3_non_collinear_vertexs_in_loop(flout, &v1, &v2, &v3) == CSMFALSE)
         {
-            struct csmvertex_t *vertex;
-            double distance_to_plane;
+            did_subdivide_face = CSMFALSE;
+        }
+        else
+        {
+            double A, B, C, D;
+            struct csmhedge_t *ledge, *he_iterator;
             
-            vertex = csmhedge_vertex(he_iterator);
-            distance_to_plane = csmvertex_signed_distance_to_plane(vertex, A, B, C, D);
+            did_subdivide_face = CSMFALSE;
+            csmvertex_implicit_plane_equation_given_3_vertexs(v1, v2, v3, &A, &B, &C, &D);
             
-            if (csmmath_compare_doubles(distance_to_plane, 0., 1.e-6) != CSMCOMPARE_EQUAL)
+            ledge = csmloop_ledge(flout);
+            he_iterator = ledge;
+            
+            do
             {
-                struct csmface_t *new_face;
+                struct csmvertex_t *vertex;
+                double distance_to_plane;
                 
-                assert(vertex != v1 && vertex != v2 && vertex != v3);
+                vertex = csmhedge_vertex(he_iterator);
+                distance_to_plane = csmvertex_signed_distance_to_plane(vertex, A, B, C, D);
                 
-                did_subdivide_face = CSMTRUE;
-                
-                csmeuler_lmef(ledge, csmhedge_prev(he_iterator), &new_face, NULL, NULL);
-                
-                if (csmdebug_debug_enabled() == CSMTRUE)
+                if (csmmath_compare_doubles(distance_to_plane, 0., 1.e-6) != CSMCOMPARE_EQUAL)
                 {
-                    csmface_print_info_debug(face, CSMTRUE, NULL);
-                    csmface_print_info_debug(new_face, CSMTRUE, NULL);
+                    struct csmface_t *new_face;
+                    
+                    assert(vertex != v1 && vertex != v2 && vertex != v3);
+                    
+                    did_subdivide_face = CSMTRUE;
+                    
+                    csmeuler_lmef(ledge, csmhedge_prev(he_iterator), &new_face, NULL, NULL);
+                    
+                    if (csmdebug_debug_enabled() == CSMTRUE)
+                    {
+                        csmface_print_info_debug(face, CSMTRUE, NULL);
+                        csmface_print_info_debug(new_face, CSMTRUE, NULL);
+                    }
                 }
-            }
-            
-            if (did_subdivide_face == CSMTRUE)
-                break;
-            else
-                he_iterator = csmhedge_next(he_iterator);
-            
-        } while (he_iterator != ledge);
+                
+                if (did_subdivide_face == CSMTRUE)
+                    break;
+                else
+                    he_iterator = csmhedge_next(he_iterator);
+                
+            } while (he_iterator != ledge);
+        }
+        
+        if (did_subdivide_face == CSMFALSE)
+            csmface_simplifyop_mark_skip_face(face);
     }
     
     return did_subdivide_face;
@@ -155,6 +166,7 @@ void csmsubdvfaces_subdivide_faces(struct csmsolid_t *solid)
     
     assert_no_null(solid);
     
+    csmsolid_clear_algorithm_data(solid);
     did_modify_solid = CSMFALSE;
     
     do
@@ -186,6 +198,9 @@ void csmsubdvfaces_subdivide_faces(struct csmsolid_t *solid)
     } while (faces_subdivided == CSMTRUE);
     
     if (did_modify_solid == CSMTRUE)
+    {
         csmsolid_redo_geometric_face_data(solid);
+        csmsolid_clear_algorithm_data(solid);
+    }
 }
 

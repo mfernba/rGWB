@@ -163,6 +163,8 @@ CSMBOOL csmface_setop_has_shell_id(const struct csmface_t *face);
 unsigned long csmface_setop_shell_id(const struct csmface_t *face);
 void csmface_set_setop_shell_id(struct csmface_t *face, unsigned long shell_id);
 
+void csmface_simplifyop_mark_skip_face(struct csmface_t *face);
+CSMBOOL csmface_simplifyop_skip_face(const struct csmface_t *face);
 
 // Debug...
 

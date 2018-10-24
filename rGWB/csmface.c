@@ -68,6 +68,7 @@ struct csmface_t
     CSMBOOL setop_is_null_face;
     CSMBOOL setop_has_been_modified;
     unsigned long setop_shell_id;
+    CSMBOOL simplifyop_skip_face;
 };
 
 // ------------------------------------------------------------------------------------------
@@ -84,7 +85,8 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
                         struct csmbbox_t **bbox,
                         CSMBOOL setop_is_null_face,
                         CSMBOOL setop_has_been_modified,
-                        unsigned long setop_shell_id))
+                        unsigned long setop_shell_id,
+                        CSMBOOL simplifyop_skip_face))
 {
     struct csmface_t *face;
     
@@ -117,6 +119,8 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
     face->setop_has_been_modified = setop_has_been_modified;
     face->setop_shell_id = setop_shell_id;
     
+    face->simplifyop_skip_face = simplifyop_skip_face;
+    
     return face;
 }
 
@@ -136,6 +140,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new_empty_face, (unsigned long id, stru
     CSMBOOL setop_is_null_face;
     CSMBOOL setop_has_been_modified;
     unsigned long setop_shell_id;
+    CSMBOOL simplifyop_skip_face;
     
     fsolid = solid;
     fsolid_aux = NULL;
@@ -161,6 +166,8 @@ CONSTRUCTOR(static struct csmface_t *, i_new_empty_face, (unsigned long id, stru
     setop_has_been_modified = CSMTRUE;
     setop_shell_id = ULONG_MAX;
     
+    simplifyop_skip_face = CSMFALSE;
+    
     return i_new(
                 id,
                 fsolid,
@@ -176,7 +183,8 @@ CONSTRUCTOR(static struct csmface_t *, i_new_empty_face, (unsigned long id, stru
                 &bbox,
                 setop_is_null_face,
                 setop_has_been_modified,
-                setop_shell_id);
+                setop_shell_id,
+                simplifyop_skip_face);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -205,6 +213,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     CSMBOOL setop_is_null_face;
     CSMBOOL setop_is_new_face;
     unsigned long setop_shell_id;
+    CSMBOOL simplifyop_skip_face;
     
     id = csmid_new_id(id_new_element, NULL);
     
@@ -215,6 +224,8 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     setop_is_null_face = CSMFALSE;
     setop_is_new_face = CSMFALSE;
     setop_shell_id = ULONG_MAX;
+    
+    simplifyop_skip_face = CSMFALSE;
     
     return i_new(
                 id,
@@ -231,7 +242,8 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                 &bbox,
                 setop_is_null_face,
                 setop_is_new_face,
-                setop_shell_id);
+                setop_shell_id,
+                simplifyop_skip_face);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1438,6 +1450,8 @@ void csmface_clear_algorithm_mask(struct csmface_t *face)
     face->setop_has_been_modified = CSMFALSE;
     face->setop_shell_id = ULONG_MAX;
     
+    face->simplifyop_skip_face = CSMFALSE;
+    
     loop_iterator = face->floops;
     
     while (loop_iterator != NULL)
@@ -1493,6 +1507,22 @@ void csmface_set_setop_shell_id(struct csmface_t *face, unsigned long shell_id)
 {
     assert_no_null(face);
     face->setop_shell_id = shell_id;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmface_simplifyop_mark_skip_face(struct csmface_t *face)
+{
+    assert_no_null(face);
+    face->simplifyop_skip_face = CSMTRUE;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CSMBOOL csmface_simplifyop_skip_face(const struct csmface_t *face)
+{
+    assert_no_null(face);
+    return face->simplifyop_skip_face;
 }
 
 // ----------------------------------------------------------------------------------------------------
