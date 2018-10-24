@@ -702,10 +702,17 @@ CONSTRUCTOR(static struct csmsolid_t *, i_generate_op_result_with_no_null_edges,
             }
             else
             {
-                solid_res = csmsolid_new_empty_solid(0);
+                struct csmsolid_t *solid_A_copy, *solid_B_copy;
+
+                solid_A_copy = csmsolid_duplicate(solid_A);
+                solid_B_copy = csmsolid_duplicate(solid_B);
                 
-                csmsolid_merge_solids(solid_res, solid_A);
-                csmsolid_merge_solids(solid_res, solid_B);
+                solid_res = csmsolid_new_empty_solid(0);
+                csmsolid_merge_solids(solid_res, solid_A_copy);
+                csmsolid_merge_solids(solid_res, solid_B_copy);
+                
+                csmsolid_free(&solid_A_copy);
+                csmsolid_free(&solid_B_copy);
             }
             break;
         }
@@ -732,6 +739,8 @@ CONSTRUCTOR(static struct csmsolid_t *, i_generate_op_result_with_no_null_edges,
             
         default_error();
     }
+    
+    csmsolid_redo_geometric_generated_data(solid_res);
     
     return solid_res;
 }

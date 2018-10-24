@@ -2324,7 +2324,12 @@ static void i_test_cilindro9(struct csmviewer_t *viewer)
         csmdebug_print_debug_info("******* Solid 1 union solid 2 [begin]");
      
 
-        assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
+        {
+            assert(csmsetop_difference_A_minus_B(solid2, solid1, &solid_res) == CSMSETOP_OPRESULT_OK);
+        }
+        csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    
         csmviewer_set_results(viewer, solid_res, NULL);
         csmviewer_show(viewer);
         csmsolid_free(&solid_res);

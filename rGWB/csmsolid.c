@@ -919,7 +919,7 @@ static void i_assign_faces_to_solid(struct csmhashtb(csmface_t) *sfaces, struct 
 
 // ----------------------------------------------------------------------------------------------------
 
-void csmsolid_merge_solids(struct csmsolid_t *solid, const struct csmsolid_t *solid_to_merge)
+void csmsolid_merge_solids(struct csmsolid_t *solid, struct csmsolid_t *solid_to_merge)
 {
     assert_no_null(solid);
     assert_no_null(solid_to_merge);
