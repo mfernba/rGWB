@@ -27,6 +27,8 @@ struct csmbbox_t
     
     double x_center, y_center, z_center;
     double radius_sq;
+    double x_min_ext, y_min_ext, z_min_ext;
+    double x_max_ext, y_max_ext, z_max_ext;
 };
 
 // ------------------------------------------------------------------------------------------
@@ -35,7 +37,9 @@ CONSTRUCTOR(static struct csmbbox_t *, i_new, (
                         CSMBOOL initialized,
                         double x_min, double y_min, double z_min,
                         double x_max, double y_max, double z_max,
-                        double x_center, double y_center, double z_center, double radius_sq))
+                        double x_center, double y_center, double z_center, double radius_sq,
+                        double x_min_ext, double y_min_ext, double z_min_ext,
+                        double x_max_ext, double y_max_ext, double z_max_ext))
 {
     struct csmbbox_t *bbox;
     
@@ -55,6 +59,14 @@ CONSTRUCTOR(static struct csmbbox_t *, i_new, (
     bbox->y_center = y_center;
     bbox->z_center = z_center;
     bbox->radius_sq = radius_sq;
+
+    bbox->x_min_ext = x_min_ext;
+    bbox->y_min_ext = y_min_ext;
+    bbox->z_min_ext = z_min_ext;
+
+    bbox->x_max_ext = x_max_ext;
+    bbox->y_max_ext = y_max_ext;
+    bbox->z_max_ext = z_max_ext;
     
     return bbox;
 }
@@ -66,7 +78,7 @@ struct csmbbox_t *csmbbox_create_empty_box(void)
     CSMBOOL initialized;
     
     initialized = CSMFALSE;
-    return i_new(initialized, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
+    return i_new(initialized, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -78,7 +90,8 @@ struct csmbbox_t *csmbbox_copy(const struct csmbbox_t *bbox)
     return i_new(
                 bbox->initialized,
                 bbox->x_min, bbox->y_min, bbox->z_min, bbox->x_max, bbox->y_max, bbox->z_max,
-                bbox->x_center, bbox->y_center, bbox->z_center, bbox->radius_sq);
+                bbox->x_center, bbox->y_center, bbox->z_center, bbox->radius_sq,
+                bbox->x_min_ext, bbox->y_min_ext, bbox->z_min_ext, bbox->x_max_ext, bbox->y_max_ext, bbox->z_max_ext);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -111,6 +124,14 @@ void csmbbox_reset(struct csmbbox_t *bbox)
     bbox->y_center = 0.;
     bbox->z_center = 0.;
     bbox->radius_sq = 0.;
+    
+    bbox->x_min_ext = 0.;
+    bbox->y_min_ext = 0.;
+    bbox->z_min_ext = 0.;
+    
+    bbox->x_max_ext = 0.;
+    bbox->y_max_ext = 0.;
+    bbox->z_max_ext = 0.;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -208,21 +229,29 @@ void csmbbox_compute_bsphere_and_margins(struct csmbbox_t *bbox)
     
     assert_no_null(bbox);
     
-    i_increase_coordinates(&bbox->x_min, &bbox->x_max);
-    i_increase_coordinates(&bbox->y_min, &bbox->y_max);
-    i_increase_coordinates(&bbox->z_min, &bbox->z_max);
+    bbox->x_min_ext = bbox->x_min;
+    bbox->y_min_ext = bbox->y_min;
+    bbox->z_min_ext = bbox->z_min;
+
+    bbox->x_max_ext = bbox->x_max;
+    bbox->y_max_ext = bbox->y_max;
+    bbox->z_max_ext = bbox->z_max;
     
-    bbox->x_center = 0.5 * (bbox->x_min + bbox->x_max);
-    bbox->y_center = 0.5 * (bbox->y_min + bbox->y_max);
-    bbox->z_center = 0.5 * (bbox->z_min + bbox->z_max);
+    i_increase_coordinates(&bbox->x_min_ext, &bbox->x_max_ext);
+    i_increase_coordinates(&bbox->y_min_ext, &bbox->y_max_ext);
+    i_increase_coordinates(&bbox->z_min_ext, &bbox->z_max_ext);
     
-    radius = 0.5 * CSMMATH_MAX(CSMMATH_MAX(bbox->x_max - bbox->x_min, bbox->y_max - bbox->y_min), bbox->z_max - bbox->z_min);
+    bbox->x_center = 0.5 * (bbox->x_min_ext + bbox->x_max_ext);
+    bbox->y_center = 0.5 * (bbox->y_min_ext + bbox->y_max_ext);
+    bbox->z_center = 0.5 * (bbox->z_min_ext + bbox->z_max_ext);
+    
+    radius = 0.5 * CSMMATH_MAX(CSMMATH_MAX(bbox->x_max_ext - bbox->x_min_ext, bbox->y_max_ext - bbox->y_min_ext), bbox->z_max_ext - bbox->z_min_ext);
     bbox->radius_sq = CSMMATH_CUAD(radius);
 }
 
 // ------------------------------------------------------------------------------------------
 
-void csmbbox_get_extension(
+void csmbbox_get_extension_real(
                         const struct csmbbox_t *bbox,
                         double *x_min, double *y_min, double *z_min,
                         double *x_max, double *y_max, double *z_max)
@@ -246,6 +275,30 @@ void csmbbox_get_extension(
 
 // ------------------------------------------------------------------------------------------
 
+void csmbbox_get_extension_ext(
+                        const struct csmbbox_t *bbox,
+                        double *x_min, double *y_min, double *z_min,
+                        double *x_max, double *y_max, double *z_max)
+{
+    assert_no_null(bbox);
+    assert_no_null(x_min);
+    assert_no_null(y_min);
+    assert_no_null(z_min);
+    assert_no_null(x_max);
+    assert_no_null(y_max);
+    assert_no_null(z_max);
+    
+    *x_min = bbox->x_min_ext;
+    *y_min = bbox->y_min_ext;
+    *z_min = bbox->z_min_ext;
+    
+    *x_max = bbox->x_max_ext;
+    *y_max = bbox->y_max_ext;
+    *z_max = bbox->z_max_ext;
+}
+
+// ------------------------------------------------------------------------------------------
+
 double csmbbox_minimun_side_length(const struct csmbbox_t *bbox)
 {
     double minimun_side_length;
@@ -253,9 +306,9 @@ double csmbbox_minimun_side_length(const struct csmbbox_t *bbox)
     
     assert_no_null(bbox);
     
-    diff_x = bbox->x_max - bbox->x_min;
-    diff_y = bbox->y_max - bbox->y_min;
-    diff_z = bbox->z_max - bbox->z_min;
+    diff_x = bbox->x_max_ext - bbox->x_min_ext;
+    diff_y = bbox->y_max_ext - bbox->y_min_ext;
+    diff_z = bbox->z_max_ext - bbox->z_min_ext;
     
     minimun_side_length = CSMMATH_MIN(diff_x, diff_y);
     minimun_side_length = CSMMATH_MIN(minimun_side_length, diff_z);
@@ -269,13 +322,13 @@ CSMBOOL csmbbox_contains_point(const struct csmbbox_t *bbox, double x, double y,
 {
     assert_no_null(bbox);
     
-    if (x < bbox->x_min || x > bbox->x_max)
+    if (x < bbox->x_min_ext || x > bbox->x_max_ext)
         return CSMFALSE;
     
-    if (y < bbox->y_min || y > bbox->y_max)
+    if (y < bbox->y_min_ext || y > bbox->y_max_ext)
         return CSMFALSE;
     
-    if (z < bbox->z_min || z > bbox->z_max)
+    if (z < bbox->z_min_ext || z > bbox->z_max_ext)
         return CSMFALSE;
     
     return CSMTRUE;
@@ -332,16 +385,16 @@ CSMBOOL csmbbox_intersects_with_other_bbox(const struct csmbbox_t *bbox1, const 
         else
         {
             if (i_exists_intersection_between_bbboxes(
-                        bbox1->x_min, bbox1->y_min, bbox1->z_min, bbox1->x_max, bbox1->y_max, bbox1->z_max,
-                        bbox2->x_min, bbox2->y_min, bbox2->z_min, bbox2->x_max, bbox2->y_max, bbox2->z_max) == CSMTRUE)
+                        bbox1->x_min_ext, bbox1->y_min_ext, bbox1->z_min_ext, bbox1->x_max_ext, bbox1->y_max_ext, bbox1->z_max_ext,
+                        bbox2->x_min_ext, bbox2->y_min_ext, bbox2->z_min_ext, bbox2->x_max_ext, bbox2->y_max_ext, bbox2->z_max_ext) == CSMTRUE)
             {
                 return CSMTRUE;
             }
             else
             {
                 return i_exists_intersection_between_bbboxes(
-                        bbox2->x_min, bbox2->y_min, bbox2->z_min, bbox2->x_max, bbox2->y_max, bbox2->z_max,
-                        bbox1->x_min, bbox1->y_min, bbox1->z_min, bbox1->x_max, bbox1->y_max, bbox1->z_max);
+                        bbox2->x_min_ext, bbox2->y_min_ext, bbox2->z_min_ext, bbox2->x_max_ext, bbox2->y_max_ext, bbox2->z_max_ext,
+                        bbox1->x_min_ext, bbox1->y_min_ext, bbox1->z_min_ext, bbox1->x_max_ext, bbox1->y_max_ext, bbox1->z_max_ext);
             }
         }
     }
@@ -360,7 +413,7 @@ CSMBOOL csmbbox_intersects_with_segment(
     x_min1 = CSMMATH_MIN(x1, x2);
     x_max1 = CSMMATH_MAX(x1, x2);
 
-    if (x_max1 < bbox->x_min || x_min1 > bbox->x_max)
+    if (x_max1 < bbox->x_min_ext || x_min1 > bbox->x_max_ext)
     {
         return CSMFALSE;
     }
@@ -371,7 +424,7 @@ CSMBOOL csmbbox_intersects_with_segment(
         y_min1 = CSMMATH_MIN(y1, y2);
         y_max1 = CSMMATH_MAX(y1, y2);
         
-        if (y_max1 < bbox->y_min || y_min1 > bbox->y_max)
+        if (y_max1 < bbox->y_min_ext || y_min1 > bbox->y_max_ext)
         {
             return CSMFALSE;
         }
@@ -382,7 +435,7 @@ CSMBOOL csmbbox_intersects_with_segment(
             z_min1 = CSMMATH_MIN(z1, z2);
             z_max1 = CSMMATH_MAX(z1, z2);
             
-            if (z_max1 < bbox->z_min || z_min1 > bbox->z_max)
+            if (z_max1 < bbox->z_min_ext || z_min1 > bbox->z_max_ext)
                 return CSMFALSE;
             else
                 return CSMTRUE;

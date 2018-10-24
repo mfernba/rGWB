@@ -831,6 +831,8 @@ static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *s
         csmface_maximize_bbox(face, solid_bbox);
     }
     
+    csmbbox_compute_bsphere_and_margins(solid_bbox);
+    
     csmhashtb_free_iterator(&iterator, csmface_t);
 }
 
@@ -1456,6 +1458,17 @@ double csmsolid_volume(const struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_get_bbox_extension(
+                        const struct csmsolid_t *solid,
+                        double *x_min, double *y_min, double *z_min,
+                        double *x_max, double *y_max, double *z_max)
+{
+    assert_no_null(solid);
+    csmbbox_get_extension_ext(solid->bbox, x_min, y_min, z_min, x_max, y_max, z_max);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static const struct csmface_t *i_get_next_face(struct csmhashtb(csmface_t) *sfaces, unsigned long *last_face)
 {
     const struct csmface_t *selected_face;
@@ -1500,7 +1513,7 @@ CSMBOOL csmsolid_does_solid_contain_point(const struct csmsolid_t *solid, double
     
     assert_no_null(solid);
     
-    csmbbox_get_extension(solid->bbox, &x_min, &y_min, &z_min, &x_max, &y_max, &z_max);
+    csmbbox_get_extension_ext(solid->bbox, &x_min, &y_min, &z_min, &x_max, &y_max, &z_max);
     max_bbox_side = CSMMATH_MAX(CSMMATH_MAX(x_max - x_min, y_max - y_min), z_max - z_min);
     
     is_point_inside_solid = CSMFALSE;

@@ -44,6 +44,10 @@ DLL_RGWB CSMBOOL csmsolid_does_solid_contain_point(
 
 DLL_RGWB double csmsolid_volume(const struct csmsolid_t *solid);
 
+DLL_RGWB void csmsolid_get_bbox_extension(
+                        const struct csmsolid_t *solid,
+                        double *x_min, double *y_min, double *z_min,
+                        double *x_max, double *y_max, double *z_max);
 
 // Visualization...
 
