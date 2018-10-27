@@ -813,6 +813,14 @@ void csmsolid_clear_algorithm_data(struct csmsolid_t *solid)
 
 // ----------------------------------------------------------------------------------------------------
 
+void csmsolid_clear_algorithm_edge_data(struct csmsolid_t *solid)
+{
+    assert_no_null(solid);
+    i_clear_algorithm_edge_mask(solid->sedges);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *solid_bbox)
 {
     struct csmhashtb_iterator(csmface_t) *iterator;
