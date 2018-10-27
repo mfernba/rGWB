@@ -167,10 +167,10 @@ CONSTRUCTOR(static csmArrayStruct(csmvertex_t) *, i_split_edges_by_plane, (
         
         csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
         
-        hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+        hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
         i_classify_hedge_respect_to_plane(hedge_pos, A, B, C, D, tolerances, &vertex_pos, &dist_to_plane_pos, &cl_resp_plane_pos);
         
-        hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+        hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
         i_classify_hedge_respect_to_plane(hedge_neg, A, B, C, D, tolerances, &vertex_neg, &dist_to_plane_neg, &cl_resp_plane_neg);
         
         if (csmsetopcom_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(edge) == CSMTRUE)
@@ -844,8 +844,8 @@ static void i_join_null_edges(
         idx = i - no_null_edges_deleted;
         next_edge = csmarrayc_get_st(set_of_null_edges, idx, csmedge_t);
         
-        he1_next_edge = csmedge_hedge_lado(next_edge, CSMEDGE_LADO_HEDGE_POS);
-        he2_next_edge = csmedge_hedge_lado(next_edge, CSMEDGE_LADO_HEDGE_NEG);
+        he1_next_edge = csmedge_hedge_lado(next_edge, CSMEDGE_HEDGE_SIDE_POS);
+        he2_next_edge = csmedge_hedge_lado(next_edge, CSMEDGE_HEDGE_SIDE_NEG);
      
         if (i_can_join_he(he1_next_edge, loose_ends, &matching_loose_end_he1) == CSMTRUE)
         {

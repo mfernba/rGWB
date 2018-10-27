@@ -60,8 +60,8 @@ void csmeuler_lmekr(
     csmsolid_append_new_edge(he1_and_he2_solid, &new_edge);
 
     id_new_element = csmsolid_id_new_element(he1_and_he2_solid);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he1, CSMEDGE_LADO_HEDGE_POS, id_new_element, &nhe1);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he2, CSMEDGE_LADO_HEDGE_NEG, id_new_element, &nhe2);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he1, CSMEDGE_HEDGE_SIDE_POS, id_new_element, &nhe1);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he2, CSMEDGE_HEDGE_SIDE_NEG, id_new_element, &nhe2);
 
     csmhedge_set_next(nhe1, he2);
     csmhedge_set_next(nhe2, he1);

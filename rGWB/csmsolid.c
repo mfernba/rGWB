@@ -646,8 +646,8 @@ static void i_append_edge_to_writeable_solid(struct csmedge_t *edge, struct csmw
     unsigned long hedge_pos_id, hedge_neg_id;
     
     edge_id = csmedge_id(edge);
-    hedge_pos_id = csmhedge_id(csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS));
-    hedge_neg_id = csmhedge_id(csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG));
+    hedge_pos_id = csmhedge_id(csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS));
+    hedge_neg_id = csmhedge_id(csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG));
     
     csmwriteablesolid_append_edge(writeable_solid, edge_id, hedge_pos_id, hedge_neg_id);
 }

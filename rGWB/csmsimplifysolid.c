@@ -62,11 +62,11 @@ static void i_delete_null_area_faces(struct csmsolid_t *solid, CSMBOOL *changed)
             
             csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
             
-            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+            he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
             face_he1 = csmopbas_face_from_hedge(he1);
             face_he1_area = csmface_loop_area_in_face(face_he1, csmface_flout(face_he1));
             
-            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+            he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
             face_he2 = csmopbas_face_from_hedge(he2);
             face_he2_area = csmface_loop_area_in_face(face_he2, csmface_flout(face_he2));
             
@@ -214,10 +214,10 @@ static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmt
             
             csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
             
-            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+            he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
             face_he1 = csmopbas_face_from_hedge(he1);
             
-            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+            he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
             face_he2 = csmopbas_face_from_hedge(he2);
             
             if (csmface_flout(face_he1) == csmhedge_loop(he1) && csmface_flout(face_he2) == csmhedge_loop(he2))

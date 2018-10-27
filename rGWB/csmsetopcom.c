@@ -160,8 +160,8 @@ CSMBOOL csmsetopcom_is_edge_on_cycle_of_edges_with_a_side_on_a_hole(struct csmed
 {
     struct csmhedge_t *hedge_pos, *hedge_neg;
     
-    hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-    hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+    hedge_pos = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
+    hedge_neg = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
     
     if (i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(hedge_pos) == CSMTRUE
             || i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(hedge_neg) == CSMTRUE)
@@ -194,12 +194,12 @@ CSMBOOL csmsetopcom_hedges_are_neighbors(struct csmhedge_t *he1, struct csmhedge
         struct csmhedge_t *he1_edge_he2, *he2_edge_he2;
         
         edge_he1 = csmhedge_edge(he1);
-        he1_edge_he1 = csmedge_hedge_lado(edge_he1, CSMEDGE_LADO_HEDGE_POS);
-        he2_edge_he1 = csmedge_hedge_lado(edge_he1, CSMEDGE_LADO_HEDGE_NEG);
+        he1_edge_he1 = csmedge_hedge_lado(edge_he1, CSMEDGE_HEDGE_SIDE_POS);
+        he2_edge_he1 = csmedge_hedge_lado(edge_he1, CSMEDGE_HEDGE_SIDE_NEG);
         
         edge_he2 = csmhedge_edge(he2);
-        he1_edge_he2 = csmedge_hedge_lado(edge_he2, CSMEDGE_LADO_HEDGE_POS);
-        he2_edge_he2 = csmedge_hedge_lado(edge_he2, CSMEDGE_LADO_HEDGE_NEG);
+        he1_edge_he2 = csmedge_hedge_lado(edge_he2, CSMEDGE_HEDGE_SIDE_POS);
+        he2_edge_he2 = csmedge_hedge_lado(edge_he2, CSMEDGE_HEDGE_SIDE_NEG);
         
         if (he1 == he1_edge_he1 && he2 == he2_edge_he2)
             return CSMTRUE;
@@ -220,11 +220,11 @@ static enum csmcompare_t i_compare_edges_by_coord(
     const struct csmvertex_t *vertex1, *vertex2;
     double x1, y1, z1, x2, y2, z2;
     
-    he1_edge1 = csmedge_hedge_lado_const(edge1, CSMEDGE_LADO_HEDGE_POS);
+    he1_edge1 = csmedge_hedge_lado_const(edge1, CSMEDGE_HEDGE_SIDE_POS);
     vertex1 = csmhedge_vertex_const(he1_edge1);
     csmvertex_get_coords(vertex1, &x1, &y1, &z1);
     
-    he1_edge2 = csmedge_hedge_lado_const(edge2, CSMEDGE_LADO_HEDGE_POS);
+    he1_edge2 = csmedge_hedge_lado_const(edge2, CSMEDGE_HEDGE_SIDE_POS);
     vertex2 = csmhedge_vertex_const(he1_edge2);
     csmvertex_get_coords(vertex2, &x2, &y2, &z2);
     
@@ -237,7 +237,7 @@ static const struct csmvertex_t *i_edge_reference_for_ordering(const struct csme
 {
     const struct csmhedge_t *he1_edge;
 
-    he1_edge = csmedge_hedge_lado_const(edge, CSMEDGE_LADO_HEDGE_POS);
+    he1_edge = csmedge_hedge_lado_const(edge, CSMEDGE_HEDGE_SIDE_POS);
     return csmhedge_vertex_const(he1_edge);
 }
 
@@ -345,8 +345,8 @@ void csmsetopcom_print_set_of_null_edges(const csmArrayStruct(csmedge_t) *set_of
         edge = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
         assert_no_null(edge);
         
-        he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-        he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+        he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
+        he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
         
         is_loose_he1 = csmsetopcom_is_loose_end(he1, loose_ends);
         is_loose_he2 = csmsetopcom_is_loose_end(he2, loose_ends);
@@ -446,8 +446,8 @@ void csmsetopcom_print_debug_info_faces_null_edges(const char *solid_reference, 
         edge = csmarrayc_get_st(null_edges, i, csmedge_t);
         csmdebug_print_debug_info("Null edge: %lu\n", csmedge_id(edge));
         
-        he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-        he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+        he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
+        he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
         
         if (csmopbas_face_from_hedge(he1) == csmopbas_face_from_hedge(he2))
         {
@@ -659,8 +659,8 @@ void csmsetopcom_cut_he(
     solid = csmopbas_solid_from_hedge(hedge);
     
     edge = csmhedge_edge(hedge);
-    he1_edge = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-    he2_edge = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+    he1_edge = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
+    he2_edge = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
 
     contains_element = csmarrayc_contains_element_st(set_of_null_edges, csmedge_t, edge, struct csmedge_t, i_is_same_edge_by_ptr, &idx);
     assert(contains_element == CSMTRUE);
@@ -784,8 +784,8 @@ void csmsetopcom_remove_null_edges(csmArrayStruct(csmedge_t) *set_of_null_edges)
         idx = i - no_deleted;
         null_edge = csmarrayc_get_st(set_of_null_edges, idx, csmedge_t);
         
-        he1 = csmedge_hedge_lado(null_edge, CSMEDGE_LADO_HEDGE_POS);
-        he2 = csmedge_hedge_lado(null_edge, CSMEDGE_LADO_HEDGE_NEG);
+        he1 = csmedge_hedge_lado(null_edge, CSMEDGE_HEDGE_SIDE_POS);
+        he2 = csmedge_hedge_lado(null_edge, CSMEDGE_HEDGE_SIDE_NEG);
         
         if (csmopbas_face_from_hedge(he1) != csmopbas_face_from_hedge(he2))
         {
@@ -1710,7 +1710,7 @@ void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_
                 
                 if (edge != NULL)
                 {
-                    if (csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS) == he_iterator)
+                    if (csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS) == he_iterator)
                         csmsolid_move_edge_to_solid(origin_solid, edge, destination_solid);
                     
                     if (csmvertex_hedge(vertex) == he_iterator)
@@ -1784,7 +1784,7 @@ void csmsetopcom_cleanup_solid_setop(
                 
                 if (edge != NULL)
                 {
-                    if (csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS) == he_iterator)
+                    if (csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS) == he_iterator)
                     {
                         assert(origin_solid == origin_solid_A || origin_solid == origin_solid_B);
                         csmsolid_move_edge_to_solid(origin_solid, edge, destination_solid);
