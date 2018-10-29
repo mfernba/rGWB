@@ -22,12 +22,12 @@ void csmedge_reassign_id(struct csmedge_t *edge, unsigned long *id_new_element, 
 
 // Topology...
 
-struct csmhedge_t *csmedge_hedge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lado);
-const struct csmhedge_t *csmedge_hedge_lado_const(const struct csmedge_t *edge, enum csmedge_lado_hedge_t lado);
+struct csmhedge_t *csmedge_hedge_lado(struct csmedge_t *edge, enum csmedge_hedge_side_t lado);
+const struct csmhedge_t *csmedge_hedge_lado_const(const struct csmedge_t *edge, enum csmedge_hedge_side_t lado);
 
-void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lado, struct csmhedge_t *hedge);
+void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_hedge_side_t lado, struct csmhedge_t *hedge);
 
-enum csmedge_lado_hedge_t csmedge_hedge_side(const struct csmedge_t *edge, const struct csmhedge_t *hedge);
+enum csmedge_hedge_side_t csmedge_hedge_side(const struct csmedge_t *edge, const struct csmhedge_t *hedge);
 
 void csmedge_remove_hedge(struct csmedge_t *edge, struct csmhedge_t *hedge);
 
@@ -35,10 +35,16 @@ struct csmhedge_t *csmedge_mate(struct csmedge_t *edge, const struct csmhedge_t 
 
 void csmedge_reverse_orientation(struct csmedge_t *edge);
 
+
+// Algorithm mask...
+
 void csmedge_clear_algorithm_mask(struct csmedge_t *edge);
 
 void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CSMBOOL is_null_edge);
-CSMBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge);
+CSMBOOL csmedge_setop_is_null_edge(const struct csmedge_t *edge);
+
+CSMBOOL csmedge_simplifyop_skip_edge(const struct csmedge_t *edge);
+void csmedge_set_simplifyop_skip_edge(struct csmedge_t *edge, CSMBOOL skip_edge);
 
 
 // Geometry...

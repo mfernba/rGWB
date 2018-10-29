@@ -26,6 +26,7 @@ struct csmedge_t
     struct csmhedge_t *he2;
 
     CSMBOOL setop_is_null_edge;
+    CSMBOOL simplifyop_skip_edge;
 };
 
 // --------------------------------------------------------------------------------------------------------------
@@ -34,7 +35,8 @@ CONSTRUCTOR(static struct csmedge_t *, i_new, (
                         unsigned long id,
                         struct csmhedge_t *he1,
                         struct csmhedge_t *he2,
-                        CSMBOOL setop_is_null_edge))
+                        CSMBOOL setop_is_null_edge,
+                        CSMBOOL simplifyop_skip_edge))
 {
     struct csmedge_t *edge;
     
@@ -46,6 +48,7 @@ CONSTRUCTOR(static struct csmedge_t *, i_new, (
     edge->he2 = he2;
     
     edge->setop_is_null_edge = setop_is_null_edge;
+    edge->simplifyop_skip_edge = simplifyop_skip_edge;
     
     return edge;
 }
@@ -56,13 +59,15 @@ CONSTRUCTOR(static struct csmedge_t *, i_new_empty_edge, (unsigned long id))
 {
     struct csmhedge_t *he1, *he2;
     CSMBOOL setop_is_null_edge;
+    CSMBOOL simplifyop_skip_edge;
     
     he1 = NULL;
     he2 = NULL;
     
     setop_is_null_edge = CSMFALSE;
+    simplifyop_skip_edge = CSMFALSE;
     
-    return i_new(id, he1, he2, setop_is_null_edge);
+    return i_new(id, he1, he2, setop_is_null_edge, simplifyop_skip_edge);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -82,6 +87,7 @@ CONSTRUCTOR(static struct csmedge_t *, i_duplicate_edge, (unsigned long *id_new_
     unsigned long id;
     struct csmhedge_t *he1, *he2;
     CSMBOOL setop_is_null_edge;
+    CSMBOOL simplifyop_skip_edge;
     
     id = csmid_new_id(id_new_element, NULL);
 
@@ -89,8 +95,9 @@ CONSTRUCTOR(static struct csmedge_t *, i_duplicate_edge, (unsigned long *id_new_
     he2 = NULL;
     
     setop_is_null_edge = CSMFALSE;
+    simplifyop_skip_edge = CSMFALSE;
     
-    return i_new(id, he1, he2, setop_is_null_edge);
+    return i_new(id, he1, he2, setop_is_null_edge, simplifyop_skip_edge);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -175,46 +182,46 @@ void csmedge_reassign_id(struct csmedge_t *edge, unsigned long *id_new_element, 
 
 // --------------------------------------------------------------------------------------------------------------
 
-struct csmhedge_t *csmedge_hedge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lado)
+struct csmhedge_t *csmedge_hedge_lado(struct csmedge_t *edge, enum csmedge_hedge_side_t lado)
 {
     assert_no_null(edge);
     
     switch (lado)
     {
-        case CSMEDGE_LADO_HEDGE_POS: return edge->he1;
-        case CSMEDGE_LADO_HEDGE_NEG: return edge->he2;
+        case CSMEDGE_HEDGE_SIDE_POS: return edge->he1;
+        case CSMEDGE_HEDGE_SIDE_NEG: return edge->he2;
         default_error();
     }
 }
 
 // --------------------------------------------------------------------------------------------------------------
 
-const struct csmhedge_t *csmedge_hedge_lado_const(const struct csmedge_t *edge, enum csmedge_lado_hedge_t lado)
+const struct csmhedge_t *csmedge_hedge_lado_const(const struct csmedge_t *edge, enum csmedge_hedge_side_t lado)
 {
     assert_no_null(edge);
     
     switch (lado)
     {
-        case CSMEDGE_LADO_HEDGE_POS: return edge->he1;
-        case CSMEDGE_LADO_HEDGE_NEG: return edge->he2;
+        case CSMEDGE_HEDGE_SIDE_POS: return edge->he1;
+        case CSMEDGE_HEDGE_SIDE_NEG: return edge->he2;
         default_error();
     }
 }
 
 // --------------------------------------------------------------------------------------------------------------
 
-void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lado, struct csmhedge_t *hedge)
+void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_hedge_side_t lado, struct csmhedge_t *hedge)
 {
     assert_no_null(edge);
 
     switch (lado)
     {
-        case CSMEDGE_LADO_HEDGE_POS:
+        case CSMEDGE_HEDGE_SIDE_POS:
             
             edge->he1 = hedge;
             break;
             
-        case CSMEDGE_LADO_HEDGE_NEG:
+        case CSMEDGE_HEDGE_SIDE_NEG:
             
             edge->he2 = hedge;
             break;
@@ -225,18 +232,18 @@ void csmedge_set_edge_lado(struct csmedge_t *edge, enum csmedge_lado_hedge_t lad
 
 // ----------------------------------------------------------------------------------------------------
 
-enum csmedge_lado_hedge_t csmedge_hedge_side(const struct csmedge_t *edge, const struct csmhedge_t *hedge)
+enum csmedge_hedge_side_t csmedge_hedge_side(const struct csmedge_t *edge, const struct csmhedge_t *hedge)
 {
     assert_no_null(edge);
     
     if (edge->he1 == hedge)
     {
-        return CSMEDGE_LADO_HEDGE_POS;
+        return CSMEDGE_HEDGE_SIDE_POS;
     }
     else
     {
         assert(edge->he2 == hedge);
-        return CSMEDGE_LADO_HEDGE_NEG;
+        return CSMEDGE_HEDGE_SIDE_NEG;
     }
 }
 
@@ -294,6 +301,7 @@ void csmedge_clear_algorithm_mask(struct csmedge_t *edge)
     assert_no_null(edge);
     
     edge->setop_is_null_edge = CSMFALSE;
+    edge->simplifyop_skip_edge = CSMFALSE;
     
     csmhedge_clear_algorithm_mask(edge->he1);
     csmhedge_clear_algorithm_mask(edge->he2);
@@ -312,10 +320,26 @@ void csmedge_setop_set_is_null_edge(struct csmedge_t *edge, CSMBOOL is_null_edge
 
 // ----------------------------------------------------------------------------------------------------
 
-CSMBOOL csmedge_setop_is_null_edge(struct csmedge_t *edge)
+CSMBOOL csmedge_setop_is_null_edge(const struct csmedge_t *edge)
 {
     assert_no_null(edge);
     return edge->setop_is_null_edge;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+CSMBOOL csmedge_simplifyop_skip_edge(const struct csmedge_t *edge)
+{
+    assert_no_null(edge);
+    return edge->simplifyop_skip_edge;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+void csmedge_set_simplifyop_skip_edge(struct csmedge_t *edge, CSMBOOL skip_edge)
+{
+    assert_no_null(edge);
+    edge->simplifyop_skip_edge = skip_edge;
 }
 
 // ----------------------------------------------------------------------------------------------------

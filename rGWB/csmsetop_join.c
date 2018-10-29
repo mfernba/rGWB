@@ -105,7 +105,7 @@ static CSMBOOL i_there_are_only_null_edges_that_cannot_be_matched(csmArrayStruct
         struct csmhedge_t *he1;
         
         edge_i = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
-        he1 = csmedge_hedge_lado(edge_i, CSMEDGE_LADO_HEDGE_POS);
+        he1 = csmedge_hedge_lado(edge_i, CSMEDGE_HEDGE_SIDE_POS);
         
         for (j = 0; j < no_null_edges; j++)
         {
@@ -113,7 +113,7 @@ static CSMBOOL i_there_are_only_null_edges_that_cannot_be_matched(csmArrayStruct
             struct csmhedge_t *he2;
             
             edge_j = csmarrayc_get_st(set_of_null_edges, j, csmedge_t);
-            he2 = csmedge_hedge_lado(edge_j, CSMEDGE_LADO_HEDGE_NEG);
+            he2 = csmedge_hedge_lado(edge_j, CSMEDGE_HEDGE_SIDE_NEG);
             
             if (csmsetopcom_hedges_are_neighbors(he1, he2) == CSMTRUE)
                 return CSMTRUE;
@@ -245,7 +245,7 @@ static void i_validate_edges_belong_to_solid(struct csmsolid_t *solid, csmArrayS
         
         edge = csmarrayc_get_st(set_of_null_edges, i, csmedge_t);
         
-        he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+        he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
         assert(solid == csmopbas_solid_from_hedge(he1));
     }
 }
@@ -436,7 +436,7 @@ static CSMBOOL i_could_make_hedges_reachable(
     }
     else
     {
-        enum csmedge_lado_hedge_t side_he1, side_he2;
+        enum csmedge_hedge_side_t side_he1, side_he2;
         
         side_he1 = csmedge_hedge_side(csmhedge_edge(he1), he1);
         side_he2 = csmedge_hedge_side(csmhedge_edge(*he2), *he2);
@@ -762,8 +762,8 @@ void csmsetop_join_null_edges(
         next_edge_A = csmarrayc_get_st(set_of_null_edges_A, i - no_null_edges_deleted_A, csmedge_t);
         next_edge_B = csmarrayc_get_st(set_of_null_edges_B, i - no_null_edges_deleted_B, csmedge_t);
         
-        he1_next_edge_A = csmedge_hedge_lado(next_edge_A, CSMEDGE_LADO_HEDGE_POS);
-        he2_next_edge_B = csmedge_hedge_lado(next_edge_B, CSMEDGE_LADO_HEDGE_NEG);
+        he1_next_edge_A = csmedge_hedge_lado(next_edge_A, CSMEDGE_HEDGE_SIDE_POS);
+        he2_next_edge_B = csmedge_hedge_lado(next_edge_B, CSMEDGE_HEDGE_SIDE_NEG);
      
         if (i_can_join(he1_next_edge_A, he2_next_edge_B, loose_ends_A, loose_ends_B, &h1a, &h2b) == CSMTRUE)
         {
@@ -793,8 +793,8 @@ void csmsetop_join_null_edges(
             h2b = NULL;
         }
 
-        he2_next_edge_A = csmedge_hedge_lado(next_edge_A, CSMEDGE_LADO_HEDGE_NEG);
-        he1_next_edge_B = csmedge_hedge_lado(next_edge_B, CSMEDGE_LADO_HEDGE_POS);
+        he2_next_edge_A = csmedge_hedge_lado(next_edge_A, CSMEDGE_HEDGE_SIDE_NEG);
+        he1_next_edge_B = csmedge_hedge_lado(next_edge_B, CSMEDGE_HEDGE_SIDE_POS);
      
         if (i_can_join(he2_next_edge_A, he1_next_edge_B, loose_ends_A, loose_ends_B, &h2a, &h1b) == CSMTRUE)
         {

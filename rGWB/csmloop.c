@@ -1049,8 +1049,8 @@ void csmloop_print_info_debug(
             else
                 is_null_edge = csmstring_duplicate("");
             
-            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+            he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
+            he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
             he_mate = (iterator == he1) ? he2: he1;
             he_position = (iterator == he1) ? "HE1": "HE2";
             

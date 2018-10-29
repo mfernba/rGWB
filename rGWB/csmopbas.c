@@ -79,7 +79,7 @@ void csmopbas_addhe(
                 struct csmedge_t *edge,
                 struct csmvertex_t *vertex,
                 struct csmhedge_t *hedge,
-                enum csmedge_lado_hedge_t lado,
+                enum csmedge_hedge_side_t lado,
                 unsigned long *id_new_element,
                 struct csmhedge_t **new_hedge_opc)
 {

@@ -1993,7 +1993,7 @@ static void i_separateEdgeSequence(
         struct csmhedge_t *from_prv_edge_he2;
         
         from_prv_edge = csmhedge_edge(from_prv);
-        from_prv_edge_he2 = csmedge_hedge_lado(from_prv_edge, CSMEDGE_LADO_HEDGE_NEG);
+        from_prv_edge_he2 = csmedge_hedge_lado(from_prv_edge, CSMEDGE_HEDGE_SIDE_NEG);
         
         // look at orientation
         if (from_prv == from_prv_edge_he2)
@@ -2008,7 +2008,7 @@ static void i_separateEdgeSequence(
         struct csmhedge_t *to_prv_edge_he1;
         
         to_prv_edge = csmhedge_edge(to_prv);
-        to_prv_edge_he1 = csmedge_hedge_lado(to_prv_edge, CSMEDGE_LADO_HEDGE_POS);
+        to_prv_edge_he1 = csmedge_hedge_lado(to_prv_edge, CSMEDGE_HEDGE_SIDE_POS);
         
         // look at orientation
         if (to_prv == to_prv_edge_he1)
@@ -2078,8 +2078,8 @@ static void i_separateInteriorHedge(
         struct csmhedge_t *he1_edge_he_prv, *he2_edge_he_prv;
         
         he_prv_edge = csmhedge_edge(he_prv);
-        he1_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_POS);
-        he2_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_LADO_HEDGE_NEG);
+        he1_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_HEDGE_SIDE_POS);
+        he2_edge_he_prv = csmedge_hedge_lado(he_prv_edge, CSMEDGE_HEDGE_SIDE_NEG);
         
         if (he_prv == he1_edge_he_prv && orient == CSMTRUE)
             he = he_prv;

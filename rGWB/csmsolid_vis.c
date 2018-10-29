@@ -95,7 +95,7 @@ static void i_draw_debug_info_hedge(
     
     edge = csmhedge_edge(he);
     
-    if (csmedge_hedge_lado_const(edge, CSMEDGE_LADO_HEDGE_POS) == he)
+    if (csmedge_hedge_lado_const(edge, CSMEDGE_HEDGE_SIDE_POS) == he)
         is_he_pos = CSMTRUE;
     else
         is_he_pos = CSMFALSE;
@@ -272,7 +272,7 @@ static void i_draw_null_edge(struct csmedge_t *edge, struct bsgraphics2_t *graph
         {
             struct csmhedge_t *he1, *he1_prev, *he1_prev_prev;
             
-            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+            he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
             he1_prev = csmhedge_prev(he1);
             he1_prev_prev = csmhedge_prev(he1_prev);
             
@@ -375,10 +375,10 @@ static void i_draw_border_edge(struct csmedge_t *edge, CSMBOOL draw_only_border_
     struct csmhedge_t *he1, *he2;
     struct csmface_t *face_he1, *face_he2;
 
-    he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+    he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
     face_he1 = i_face_from_hedge(he1);
     
-    he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+    he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
     face_he2 = i_face_from_hedge(he2);
     
     if (draw_only_border_edges == CSMFALSE || csmface_faces_define_border_edge(face_he1, face_he2) == CSMTRUE)
@@ -476,10 +476,10 @@ static void i_append_lineas_contorno(struct csmedge_t *edge, ArrPuntero(ArrPunto
     struct csmhedge_t *he1, *he2;
     struct csmface_t *face_he1, *face_he2;
 
-    he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
+    he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
     face_he1 = i_face_from_hedge(he1);
     
-    he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
+    he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
     face_he2 = i_face_from_hedge(he2);
     
     if (csmface_faces_define_border_edge(face_he1, face_he2) == CSMTRUE)

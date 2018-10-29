@@ -19,6 +19,8 @@ CSMBOOL csmsolid_draw_only_border_edges(const struct csmsolid_t *solid);
 
 void csmsolid_clear_algorithm_data(struct csmsolid_t *solid);
 
+void csmsolid_clear_algorithm_edge_data(struct csmsolid_t *solid);
+
 void csmsolid_redo_geometric_face_data(struct csmsolid_t *solid);
 
 void csmsolid_redo_geometric_generated_data(struct csmsolid_t *solid);

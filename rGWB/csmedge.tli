@@ -2,8 +2,8 @@
 
 #include "csmfwddecl.hxx"
 
-enum csmedge_lado_hedge_t
+enum csmedge_hedge_side_t
 {
-    CSMEDGE_LADO_HEDGE_POS,
-    CSMEDGE_LADO_HEDGE_NEG
+    CSMEDGE_HEDGE_SIDE_POS,
+    CSMEDGE_HEDGE_SIDE_NEG
 };

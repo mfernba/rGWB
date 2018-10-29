@@ -703,8 +703,8 @@ static void i_discard_invalid_intersections(csmArrayStruct(i_edge_intersection_t
                         struct csmhedge_t *he1_j, *he2_j;
                         
                         edge_j = csmhedge_edge(edge_intersection_j->hit_hedge_at_face);
-                        he1_j = csmedge_hedge_lado(edge_j, CSMEDGE_LADO_HEDGE_POS);
-                        he2_j = csmedge_hedge_lado(edge_j, CSMEDGE_LADO_HEDGE_NEG);
+                        he1_j = csmedge_hedge_lado(edge_j, CSMEDGE_HEDGE_SIDE_POS);
+                        he2_j = csmedge_hedge_lado(edge_j, CSMEDGE_HEDGE_SIDE_NEG);
                         
                         if (csmopbas_face_from_hedge(he1_j) == edge_intersection_i->face
                                 || csmopbas_face_from_hedge(he2_j) == edge_intersection_i->face)
@@ -774,7 +774,7 @@ static void i_update_splitted_hedge_on_intersections(
                                 edge_intersection->tolerance_equal_coords,
                                 NULL) == CSMTRUE);
 
-                        he_replacement = csmedge_hedge_lado(hit_edge_at_face_replacement, CSMEDGE_LADO_HEDGE_POS);
+                        he_replacement = csmedge_hedge_lado(hit_edge_at_face_replacement, CSMEDGE_HEDGE_SIDE_POS);
 
                         if (csmhedge_next(edge_intersection->hit_hedge_at_face) == he_replacement
                                     || csmhedge_prev(edge_intersection->hit_hedge_at_face) == he_replacement)
@@ -783,7 +783,7 @@ static void i_update_splitted_hedge_on_intersections(
                         }
                         else
                         {
-                            he_replacement = csmedge_hedge_lado(hit_edge_at_face_replacement, CSMEDGE_LADO_HEDGE_NEG);
+                            he_replacement = csmedge_hedge_lado(hit_edge_at_face_replacement, CSMEDGE_HEDGE_SIDE_NEG);
 
                             assert(csmhedge_next(edge_intersection->hit_hedge_at_face) == he_replacement
                                     || csmhedge_prev(edge_intersection->hit_hedge_at_face) == he_replacement);
@@ -900,10 +900,10 @@ static void i_process_edge_intersections(
                                     NULL) == CSMTRUE);
                     }
                 
-                    hedge_pos = csmedge_hedge_lado(edge_to_split, CSMEDGE_LADO_HEDGE_POS);
+                    hedge_pos = csmedge_hedge_lado(edge_to_split, CSMEDGE_HEDGE_SIDE_POS);
                     hedge_pos_next = csmhedge_next(hedge_pos);
             
-                    hedge_neg = csmedge_hedge_lado(edge_to_split, CSMEDGE_LADO_HEDGE_NEG);
+                    hedge_neg = csmedge_hedge_lado(edge_to_split, CSMEDGE_HEDGE_SIDE_NEG);
             
                     csmeuler_lmev(
                             hedge_neg, hedge_pos_next,
@@ -1071,11 +1071,11 @@ static void i_generate_intersections_edge_with_solid_faces(
     
     optimized_edge_data.edge_id = csmedge_id(edge_A);
     
-    hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_POS);
+    hedge_pos = csmedge_hedge_lado(edge_A, CSMEDGE_HEDGE_SIDE_POS);
     optimized_edge_data.vertex_pos = csmhedge_vertex(hedge_pos);
     csmvertex_get_coords(optimized_edge_data.vertex_pos, &optimized_edge_data.x1, &optimized_edge_data.y1, &optimized_edge_data.z1);
     
-    hedge_neg = csmedge_hedge_lado(edge_A, CSMEDGE_LADO_HEDGE_NEG);
+    hedge_neg = csmedge_hedge_lado(edge_A, CSMEDGE_HEDGE_SIDE_NEG);
     optimized_edge_data.vertex_neg = csmhedge_vertex(hedge_neg);
     csmvertex_get_coords(optimized_edge_data.vertex_neg, &optimized_edge_data.x2, &optimized_edge_data.y2, &optimized_edge_data.z2);
     

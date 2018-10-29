@@ -71,8 +71,8 @@ void csmeuler_lmef(
         he_iterator = csmhedge_next(he_iterator);
     }
     
-    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he1, CSMEDGE_LADO_HEDGE_NEG, id_new_element, &new_he1);
-    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he2, CSMEDGE_LADO_HEDGE_POS, id_new_element, &new_he2);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he2), he1, CSMEDGE_HEDGE_SIDE_NEG, id_new_element, &new_he1);
+    csmopbas_addhe(new_edge, csmhedge_vertex(he1), he2, CSMEDGE_HEDGE_SIDE_POS, id_new_element, &new_he2);
 
     prev_new_he1 = csmhedge_prev(new_he1);
     csmhedge_set_next(prev_new_he1, new_he2);

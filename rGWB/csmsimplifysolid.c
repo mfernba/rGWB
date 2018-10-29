@@ -15,6 +15,7 @@
 #include "csmeuler_lkemr.inl"
 #include "csmeuler_lkev.inl"
 #include "csmeuler_lringmv.inl"
+#include "csmedge.inl"
 #include "csmface.inl"
 #include "csmhashtb.inl"
 #include "csmhedge.inl"
@@ -32,6 +33,40 @@
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_mark_edge_of_next_hedge_need_analysis(struct csmhedge_t *he)
+{
+    struct csmhedge_t *he_next;
+    
+    he_next = csmhedge_next(he);
+    
+    if (he_next != NULL)
+    {
+        struct csmedge_t *edge;
+        
+        edge = csmhedge_edge(he);
+        csmedge_set_simplifyop_skip_edge(edge, CSMFALSE);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_mark_edge_neighbours_need_analysis(struct csmedge_t *edge)
+{
+    struct csmhedge_t *he1, *he2;
+
+    he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
+    
+    if (he1 != NULL)
+        i_mark_edge_of_next_hedge_need_analysis(he1);
+    
+    he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
+    
+    if (he2 != NULL)
+        i_mark_edge_of_next_hedge_need_analysis(he2);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 static void i_delete_null_area_faces(struct csmsolid_t *solid, CSMBOOL *changed)
 {
     CSMBOOL there_are_changes;
@@ -40,6 +75,7 @@ static void i_delete_null_area_faces(struct csmsolid_t *solid, CSMBOOL *changed)
     assert_no_null(changed);
     
     csmdebug_print_debug_info("Deleting null area faces...\n");
+    csmsolid_clear_algorithm_edge_data(solid);
     
     no_iters = 0;
     
@@ -62,29 +98,38 @@ static void i_delete_null_area_faces(struct csmsolid_t *solid, CSMBOOL *changed)
             
             csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
             
-            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-            face_he1 = csmopbas_face_from_hedge(he1);
-            face_he1_area = csmface_loop_area_in_face(face_he1, csmface_flout(face_he1));
-            
-            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
-            face_he2 = csmopbas_face_from_hedge(he2);
-            face_he2_area = csmface_loop_area_in_face(face_he2, csmface_flout(face_he2));
-            
-            if (face_he1_area == 0. || face_he2_area == 0.)
+            if (csmedge_simplifyop_skip_edge(edge) == CSMFALSE)
             {
-                if (face_he1_area == 0.)
+                he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
+                face_he1 = csmopbas_face_from_hedge(he1);
+                face_he1_area = csmface_loop_area_in_face(face_he1, csmface_flout(face_he1));
+                
+                he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
+                face_he2 = csmopbas_face_from_hedge(he2);
+                face_he2_area = csmface_loop_area_in_face(face_he2, csmface_flout(face_he2));
+                
+                if (face_he1_area == 0. || face_he2_area == 0.)
                 {
-                    csmeuler_lkef(&he2, &he1);
-                    csmface_redo_geometric_generated_data(face_he2);
+                    i_mark_edge_neighbours_need_analysis(edge);
+                    
+                    if (face_he1_area == 0.)
+                    {
+                        csmeuler_lkef(&he2, &he1);
+                        csmface_redo_geometric_generated_data(face_he2);
+                    }
+                    else
+                    {
+                        csmeuler_lkef(&he1, &he2);
+                        csmface_redo_geometric_generated_data(face_he1);
+                    }
+                    
+                    there_are_changes = CSMTRUE;
+                    break;
                 }
                 else
                 {
-                    csmeuler_lkef(&he1, &he2);
-                    csmface_redo_geometric_generated_data(face_he1);
+                    csmedge_set_simplifyop_skip_edge(edge, CSMTRUE);
                 }
-                
-                there_are_changes = CSMTRUE;
-                break;
             }
         }
         
@@ -192,6 +237,7 @@ static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmt
     assert_no_null(changed);
     
     csmdebug_print_debug_info("Deleting coplanar faces...\n");
+    csmsolid_clear_algorithm_edge_data(solid);
     
     no_iters = 0;
     
@@ -208,80 +254,90 @@ static void i_delete_redundant_faces(struct csmsolid_t *solid, const struct csmt
         while (csmhashtb_has_next(edge_iterator, csmedge_t) == CSMTRUE)
         {
             struct csmedge_t *edge;
-            struct csmhedge_t *he1, *he2;
-            struct csmface_t *face_he1, *face_he2;
-            CSMBOOL same_sense;
             
             csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
             
-            he1 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_POS);
-            face_he1 = csmopbas_face_from_hedge(he1);
-            
-            he2 = csmedge_hedge_lado(edge, CSMEDGE_LADO_HEDGE_NEG);
-            face_he2 = csmopbas_face_from_hedge(he2);
-            
-            if (csmface_flout(face_he1) == csmhedge_loop(he1) && csmface_flout(face_he2) == csmhedge_loop(he2))
+            if (csmedge_simplifyop_skip_edge(edge) == CSMFALSE)
             {
-                if (face_he1 == face_he2)
-                {
-                    struct csmloop_t *outer_loop, *new_loop;
-                    double A, B, C, D, xc, yc, zc;
-                    
-                    there_are_changes = CSMTRUE;
-                    
-                    outer_loop = csmface_flout(face_he1);
-                    csmloop_face_equation(outer_loop, &A, &B, &C, &D, &xc, &yc, &zc);
-
-                    if (csmdebug_debug_enabled() == CSMTRUE)
-                    {
-                        //csmdebug_set_debug_screen(CSMTRUE);
-                        csmsolid_print_debug_forced(solid);
-                        csmdebug_show_face(face_he1, NULL);
-                    }
-                    
-                    csmeuler_lkemr(&he1, &he2, NULL, NULL, &new_loop);
-                    
-                    if (csmface_is_loop_contained_in_face_outer_loop(face_he1, new_loop, tolerances) == CSMFALSE)
-                    {
-                        double A_new, B_new, C_new, D_new, xc_new, yc_new, zc_new;
-                        CSMBOOL parallel;
-
-                        csmloop_face_equation(new_loop, &A_new, &B_new, &C_new, &D_new, &xc_new, &yc_new, &zc_new);
-                        
-                        parallel = csmmath_unit_vectors_are_parallel_ex(A, B, C, A_new, B_new, C_new, tolerances, &same_sense);
-                        assert(parallel == CSMTRUE);
-                        
-                        if (same_sense == CSMFALSE)
-                            csmloop_revert_loop_orientation(new_loop);
-                        
-                        csmeuler_lringmv(new_loop, face_he1, CSMTRUE);
-                        csmface_reorient_loops_in_face(face_he1, tolerances);
-                    }
-                    
-                    if (csmdebug_debug_enabled() == CSMTRUE)
-                        csmdebug_show_face(face_he1, NULL);
-                }
-                else if (csmface_are_coplanar_faces(face_he1, face_he2, tolerances, &same_sense) == CSMTRUE && same_sense == CSMTRUE)
-                {
-                    there_are_changes = CSMTRUE;
-                    
-                    if (csmdebug_debug_enabled() == CSMTRUE)
-                    {
-                        csmsolid_print_debug_forced(solid);
-                        csmdebug_show_face(face_he1, face_he2);
-                    }
+                struct csmhedge_t *he1, *he2;
+                struct csmface_t *face_he1, *face_he2;
+                CSMBOOL same_sense;
+            
+                he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
+                face_he1 = csmopbas_face_from_hedge(he1);
                 
-                    csmeuler_lkef(&he1, &he2);
-                    
-                    if (csmdebug_debug_enabled() == CSMTRUE)
-                        csmdebug_show_face(face_he1, NULL);
-                }
+                he2 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_NEG);
+                face_he2 = csmopbas_face_from_hedge(he2);
                 
-                if (there_are_changes == CSMTRUE)
+                if (csmface_flout(face_he1) == csmhedge_loop(he1) && csmface_flout(face_he2) == csmhedge_loop(he2))
                 {
-                    i_delete_overlaped_hedges_in_same_face_loop(face_he1, changed);
-                    csmface_redo_geometric_generated_data(face_he1);
-                    break;
+                    if (face_he1 == face_he2)
+                    {
+                        struct csmloop_t *outer_loop, *new_loop;
+                        double A, B, C, D, xc, yc, zc;
+                        
+                        there_are_changes = CSMTRUE;
+                        
+                        outer_loop = csmface_flout(face_he1);
+                        csmloop_face_equation(outer_loop, &A, &B, &C, &D, &xc, &yc, &zc);
+
+                        if (csmdebug_debug_enabled() == CSMTRUE)
+                        {
+                            //csmdebug_set_debug_screen(CSMTRUE);
+                            csmsolid_print_debug_forced(solid);
+                            csmdebug_show_face(face_he1, NULL);
+                        }
+                        
+                        i_mark_edge_neighbours_need_analysis(edge);
+                        csmeuler_lkemr(&he1, &he2, NULL, NULL, &new_loop);
+                        
+                        if (csmface_is_loop_contained_in_face_outer_loop(face_he1, new_loop, tolerances) == CSMFALSE)
+                        {
+                            double A_new, B_new, C_new, D_new, xc_new, yc_new, zc_new;
+                            CSMBOOL parallel;
+
+                            csmloop_face_equation(new_loop, &A_new, &B_new, &C_new, &D_new, &xc_new, &yc_new, &zc_new);
+                            
+                            parallel = csmmath_unit_vectors_are_parallel_ex(A, B, C, A_new, B_new, C_new, tolerances, &same_sense);
+                            assert(parallel == CSMTRUE);
+                            
+                            if (same_sense == CSMFALSE)
+                                csmloop_revert_loop_orientation(new_loop);
+                            
+                            csmeuler_lringmv(new_loop, face_he1, CSMTRUE);
+                            csmface_reorient_loops_in_face(face_he1, tolerances);
+                        }
+                        
+                        if (csmdebug_debug_enabled() == CSMTRUE)
+                            csmdebug_show_face(face_he1, NULL);
+                    }
+                    else if (csmface_are_coplanar_faces(face_he1, face_he2, tolerances, &same_sense) == CSMTRUE && same_sense == CSMTRUE)
+                    {
+                        there_are_changes = CSMTRUE;
+                        
+                        if (csmdebug_debug_enabled() == CSMTRUE)
+                        {
+                            csmsolid_print_debug_forced(solid);
+                            csmdebug_show_face(face_he1, face_he2);
+                        }
+                    
+                        i_mark_edge_neighbours_need_analysis(edge);
+                        csmeuler_lkef(&he1, &he2);
+                        
+                        if (csmdebug_debug_enabled() == CSMTRUE)
+                            csmdebug_show_face(face_he1, NULL);
+                    }
+                    
+                    if (there_are_changes == CSMTRUE)
+                    {
+                        i_delete_overlaped_hedges_in_same_face_loop(face_he1, changed);
+                        csmface_redo_geometric_generated_data(face_he1);
+                        break;
+                    }
+                    else
+                    {
+                        csmedge_set_simplifyop_skip_edge(edge, CSMTRUE);
+                    }
                 }
             }
         }

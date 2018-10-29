@@ -964,10 +964,10 @@ static void i_generate_solid_hedges(
         
         csmsolid_append_new_edge(solid, &sedge);
         
-        csmedge_set_edge_lado(sedge, CSMEDGE_LADO_HEDGE_POS, she1);
+        csmedge_set_edge_lado(sedge, CSMEDGE_HEDGE_SIDE_POS, she1);
         csmhedge_set_edge(she1, sedge);
         
-        csmedge_set_edge_lado(sedge, CSMEDGE_LADO_HEDGE_NEG, she2);
+        csmedge_set_edge_lado(sedge, CSMEDGE_HEDGE_SIDE_NEG, she2);
         csmhedge_set_edge(she2, sedge);
     }
 }
