@@ -6044,6 +6044,40 @@ static void i_test_importacion_stl1(void)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_importacion_stl2(void)
+{
+    enum csmstlimporter_result_t res;
+    struct csmsolid_t *solid_res;
+    
+    res = csmstlimporter_did_read_ascii_stl("stl_models/block100.stl", &solid_res);
+    assert(res == CSMSTLIMPORTER_RESULT_OK);
+    
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+    csmdebug_set_viewer_results(NULL, NULL);
+    
+    csmsolid_free(&solid_res);
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_test_importacion_stl3(void)
+{
+    enum csmstlimporter_result_t res;
+    struct csmsolid_t *solid_res;
+    
+    res = csmstlimporter_did_read_ascii_stl("stl_models/teapot.stl", &solid_res);
+    assert(res == CSMSTLIMPORTER_RESULT_OK);
+    
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+    csmdebug_set_viewer_results(NULL, NULL);
+    
+    csmsolid_free(&solid_res);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -6071,6 +6105,8 @@ void csmtest_test(void)
     //return;
     
     i_test_importacion_stl1();
+    i_test_importacion_stl2();
+    //i_test_importacion_stl3();
     
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();

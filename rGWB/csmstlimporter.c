@@ -89,12 +89,11 @@ static CSMBOOL i_is_stl_solid_with_attrib(const struct i_stl_solid_t *stl_solid,
 
 // --------------------------------------------------------------------------------
 
-static void i_append_face_to_stl_solid(struct i_stl_solid_t *stl_solid, const struct i_stl_facet_t *facet)
+static void i_append_facet_to_brep_builder(const struct i_stl_facet_t *facet, struct csmfacbrep2solid_t *brep_builder)
 {
     struct csmfacbrep2solid_loop_t *outer_loop;
     struct csmfacbrep2solid_face_t *face;
     
-    assert_no_null(stl_solid);
     assert_no_null(facet);
 
     outer_loop = csmfacbrep2solid_new_loop();
@@ -105,7 +104,93 @@ static void i_append_face_to_stl_solid(struct i_stl_solid_t *stl_solid, const st
     face = csmfacbrep2solid_new_face();
     csmfacbrep2solid_append_outer_loop_to_face(face, &outer_loop);
     
-    csmfacbrep2solid_append_face(stl_solid->brep_builder, &face);
+    csmfacbrep2solid_append_face(brep_builder, &face);
+}
+
+// --------------------------------------------------------------------------------
+
+static void i_append_face_to_stl_solid(struct i_stl_solid_t *stl_solid, const struct i_stl_facet_t *facet)
+{
+    assert_no_null(stl_solid);
+    i_append_facet_to_brep_builder(facet, stl_solid->brep_builder);
+}
+
+// --------------------------------------------------------------------------------
+
+static CSMBOOL i_did_evaluate_brep(
+                        struct csmfacbrep2solid_t *brep_builder,
+                        struct csmsolid_t **solid,
+                        enum csmstlimporter_result_t *err_code)
+{
+    CSMBOOL did_evaluate;
+    enum csmstlimporter_result_t err_code_loc;
+    enum csmfacbrep2solid_result_t brepbuilder_result;
+    
+    assert_no_null(err_code);
+    
+    brepbuilder_result = csmfacbrep2solid_build(brep_builder, solid);
+
+    switch (brepbuilder_result)
+    {
+        case CSMFACBREP2SOLID_RESULT_OK:
+        case CSMFACBREP2SOLID_RESULT_EMPTY_SOLID:
+            
+            did_evaluate = CSMTRUE;
+            err_code_loc = CSMSTLIMPORTER_RESULT_OK;
+            break;
+            
+        case CSMFACBREP2SOLID_RESULT_NON_MANIFOLD_FACETED_BREP:
+            
+            did_evaluate = CSMFALSE;
+            err_code_loc = CSMSTLIMPORTER_RESULT_NON_MANIFOLD_FACETED_BREP;
+            break;
+            
+        case CSMFACBREP2SOLID_RESULT_MALFORMED_FACETED_BREP:
+            
+            did_evaluate = CSMFALSE;
+            err_code_loc = CSMSTLIMPORTER_RESULT_MALFORMED_FACETED_BREP;
+            break;
+            
+        case CSMFACBREP2SOLID_RESULT_INCONSISTENT_INNER_LOOP_ORIENTATION:
+            
+            did_evaluate = CSMFALSE;
+            err_code_loc = CSMSTLIMPORTER_RESULT_INCONSISTENT_INNER_LOOP_ORIENTATION;
+            break;
+            
+        default_error();
+    }
+    
+    *err_code = err_code_loc;
+    
+    return did_evaluate;
+}
+
+// --------------------------------------------------------------------------------
+
+static enum csmstlimporter_result_t i_did_evaluate_optree(struct csmoptree_t *optree, struct csmsolid_t **solid)
+{
+    enum csmoptree_result_t optree_result;
+    
+    optree_result = csmoptree_evaluate(optree, solid);
+    
+    switch (optree_result)
+    {
+        case CSMOPTREE_RESULT_OK:
+            
+            return CSMSTLIMPORTER_RESULT_OK;
+            
+        case CSMOPTREE_RESULT_SETOP_NON_MANIFOLD:
+            
+            return CSMSTLIMPORTER_RESULT_NON_MANIFOLD_FACETED_BREP;
+            
+        case CSMOPTREE_RESULT_SETOP_IMPROPER_INTERSECTIONS:
+            
+            return CSMSTLIMPORTER_RESULT_INCONSISTENT_IMPROPER_INTERSECTIONS;
+            
+        case CSMOPTREE_RESULT_SPLIT_NO_SPLIT:
+        case CSMOPTREE_RESULT_SPLIT_IMPROPER_CUT:
+        default_error();
+    }
 }
 
 // --------------------------------------------------------------------------------
@@ -128,54 +213,28 @@ static enum csmstlimporter_result_t i_new_solid_from_stl_solids(csmArrayStruct(i
     for (i = 0; i < no_stl_solids; i++)
     {
         struct i_stl_solid_t *stl_solid;
-        enum csmfacbrep2solid_result_t brepbuilder_result;
         struct csmsolid_t *solid_i;
         
         stl_solid = csmarrayc_get_st(stl_solids, i, i_stl_solid_t);
         assert_no_null(stl_solid);
         
-        brepbuilder_result = csmfacbrep2solid_build(stl_solid->brep_builder, &solid_i);
-        
-        switch (brepbuilder_result)
+        if (i_did_evaluate_brep(stl_solid->brep_builder, &solid_i, &result) == CSMFALSE)
         {
-            case CSMFACBREP2SOLID_RESULT_OK:
+            exists_error = CSMTRUE;
+        }
+        else
+        {
+            if (optree == NULL)
             {
-                if (optree == NULL)
-                {
-                    optree = csmoptree_new_node_solid(&solid_i);
-                }
-                else
-                {
-                    struct csmoptree_t *optree_i;
-                    
-                    optree_i = csmoptree_new_node_solid(&solid_i);
-                    optree = csmoptree_new_node_boolean_union(&optree, &optree_i);
-                }
-                break;
+                optree = csmoptree_new_node_solid(&solid_i);
             }
+            else
+            {
+                struct csmoptree_t *optree_i;
                 
-            case CSMFACBREP2SOLID_RESULT_EMPTY_SOLID:
-                break;
-                
-            case CSMFACBREP2SOLID_RESULT_NON_MANIFOLD_FACETED_BREP:
-                
-                exists_error = CSMTRUE;
-                result = CSMSTLIMPORTER_RESULT_NON_MANIFOLD_FACETED_BREP;
-                break;
-                
-            case CSMFACBREP2SOLID_RESULT_MALFORMED_FACETED_BREP:
-                
-                exists_error = CSMTRUE;
-                result = CSMSTLIMPORTER_RESULT_MALFORMED_FACETED_BREP;
-                break;
-                
-            case CSMFACBREP2SOLID_RESULT_INCONSISTENT_INNER_LOOP_ORIENTATION:
-                
-                exists_error = CSMTRUE;
-                result = CSMSTLIMPORTER_RESULT_INCONSISTENT_INNER_LOOP_ORIENTATION;
-                break;
-                
-            default_error();
+                optree_i = csmoptree_new_node_solid(&solid_i);
+                optree = csmoptree_new_node_boolean_union(&optree, &optree_i);
+            }
         }
         
         if (exists_error == CSMTRUE)
@@ -183,38 +242,10 @@ static enum csmstlimporter_result_t i_new_solid_from_stl_solids(csmArrayStruct(i
     }
     
     if (exists_error == CSMTRUE)
-    {
         solid_loc = NULL;
-    }
     else
-    {
-        enum csmoptree_result_t optree_result;
+        result = i_did_evaluate_optree(optree, &solid_loc);
         
-        optree_result = csmoptree_evaluate(optree, &solid_loc);
-        
-        switch (optree_result)
-        {
-            case CSMOPTREE_RESULT_OK:
-                
-                result = CSMSTLIMPORTER_RESULT_OK;
-                break;
-                
-            case CSMOPTREE_RESULT_SETOP_NON_MANIFOLD:
-                
-                result = CSMSTLIMPORTER_RESULT_NON_MANIFOLD_FACETED_BREP;
-                break;
-                
-            case CSMOPTREE_RESULT_SETOP_IMPROPER_INTERSECTIONS:
-                
-                result = CSMSTLIMPORTER_RESULT_INCONSISTENT_IMPROPER_INTERSECTIONS;
-                break;
-                
-            case CSMOPTREE_RESULT_SPLIT_NO_SPLIT:
-            case CSMOPTREE_RESULT_SPLIT_IMPROPER_CUT:
-            default_error();
-        }
-    }
-            
     *solid = solid_loc;
     
     if (optree != NULL)
@@ -316,6 +347,131 @@ enum csmstlimporter_result_t csmstlimporter_did_read_binary_stl(const char *file
     else
     {
         result = i_did_read_binary_file(file, &solid_loc);
+        fclose(file);
+    }
+    
+    *solid = solid_loc;
+    
+    return result;
+}
+
+// --------------------------------------------------------------------------------
+
+static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csmsolid_t **solid)
+{
+    enum csmstlimporter_result_t result;
+    struct csmsolid_t *solid_loc;
+    unsigned long no_facets;
+    struct csmoptree_t *optree;
+    CSMBOOL exists_error;
+    
+    assert_no_null(solid);
+    
+    result = CSMSTLIMPORTER_RESULT_EMPTY_SOLID;
+    solid_loc = NULL;
+    no_facets = 0;
+    
+    optree = NULL;
+    exists_error = CSMFALSE;
+    
+    do
+    {
+        char solid_name[256];
+        int readed;
+        struct i_stl_facet_t facet;
+        struct csmfacbrep2solid_t *brep_builder;
+        struct csmsolid_t *solid_i;
+        
+        readed = fscanf(file, "solid %s\n", solid_name);
+        assert(readed == 1 || readed == 0);
+
+        brep_builder = csmfacbrep2solid_new(1.e-9, CSMTRUE);
+        
+        while (fscanf(file, "facet normal %f %f %f\n", &facet.nx, &facet.ny, &facet.nz) == 3)
+        {
+            no_facets++;
+            
+            readed = fscanf(file, "outer loop\n");
+            assert(readed == 0);
+            {
+                readed = fscanf(file, "vertex %f %f %f\n", &facet.v1x, &facet.v1y, &facet.v1z);
+                assert(readed == 3);
+                
+                readed = fscanf(file, "vertex %f %f %f\n", &facet.v2x, &facet.v2y, &facet.v2z);
+                assert(readed == 3);
+                
+                readed = fscanf(file, "vertex %f %f %f\n", &facet.v3x, &facet.v3y, &facet.v3z);
+                assert(readed == 3);
+
+            }
+            readed = fscanf(file, "endloop\n");
+            assert(readed == 0);
+
+            readed = fscanf(file, "endfacet\n");
+            assert(readed == 0);
+            
+            i_append_facet_to_brep_builder(&facet, brep_builder);
+        }
+        
+        readed = fscanf(file, "endsolid %s\n", solid_name);
+        assert(readed == 1 || readed == 0 || readed == -1);
+        
+        if (i_did_evaluate_brep(brep_builder, &solid_i, &result) == CSMFALSE)
+        {
+            exists_error = CSMTRUE;
+        }
+        else
+        {
+            if (optree == NULL)
+            {
+                optree = csmoptree_new_node_solid(&solid_i);
+            }
+            else
+            {
+                struct csmoptree_t *optree_i;
+                
+                optree_i = csmoptree_new_node_solid(&solid_i);
+                optree = csmoptree_new_node_boolean_union(&optree, &optree_i);
+            }
+        }
+        
+        csmfacbrep2solid_free(&brep_builder);
+        
+    } while (!feof(file) && exists_error == CSMFALSE);
+    
+    if (exists_error == CSMTRUE)
+        solid_loc = NULL;
+    else
+        result = i_did_evaluate_optree(optree, &solid_loc);
+        
+    *solid = solid_loc;
+    
+    if (optree != NULL)
+        csmoptree_free(&optree);
+    
+    return result;
+}
+
+// --------------------------------------------------------------------------------
+
+enum csmstlimporter_result_t csmstlimporter_did_read_ascii_stl(const char *file_path, struct csmsolid_t **solid)
+{
+    enum csmstlimporter_result_t result;
+    struct csmsolid_t *solid_loc;
+    FILE *file;
+    
+    assert_no_null(solid);
+    
+    file = fopen(file_path, "rt");
+    
+    if (file == NULL)
+    {
+        result = CSMSTLIMPORTER_RESULT_FILE_NOT_FOUND;
+        solid_loc = NULL;
+    }
+    else
+    {
+        result = i_did_read_ascii_file(file, &solid_loc);
         fclose(file);
     }
     
