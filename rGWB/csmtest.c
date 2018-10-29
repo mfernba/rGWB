@@ -6032,7 +6032,7 @@ static void i_test_importacion_stl1(void)
     enum csmstlimporter_result_t res;
     struct csmsolid_t *solid_res;
     
-    res = csmstlimporter_did_read_binary_stl("stl_models/dashboard.stl", &solid_res);
+    res = csmstlimporter_did_read_binary_stl("stl_models/cube.stl", &solid_res);
     assert(res == CSMSTLIMPORTER_RESULT_OK);
     
     csmdebug_set_viewer_results(solid_res, NULL);
