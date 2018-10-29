@@ -89,6 +89,8 @@
 		553E63E91FF69E0600A15475 /* csmsetop.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 553E63E81FF69E0600A15475 /* csmsetop.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		5559D4E4204F3F310058F6F5 /* csmsetop_join.c in Sources */ = {isa = PBXBuildFile; fileRef = 5559D4E2204F3F310058F6F5 /* csmsetop_join.c */; };
 		5559D4E5204F3F310058F6F5 /* csmsetop_join.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5559D4E3204F3F310058F6F5 /* csmsetop_join.inl */; };
+		555B4A0D2187AF6A0051F657 /* csmstlimporter.c in Sources */ = {isa = PBXBuildFile; fileRef = 555B4A0B2187AF6A0051F657 /* csmstlimporter.c */; };
+		555B4A0E2187AF6A0051F657 /* csmstlimporter.h in Headers */ = {isa = PBXBuildFile; fileRef = 555B4A0C2187AF6A0051F657 /* csmstlimporter.h */; };
 		557012A01E8328E400DFC490 /* csmsweep.c in Sources */ = {isa = PBXBuildFile; fileRef = 5570129E1E8328E400DFC490 /* csmsweep.c */; };
 		557012A11E8328E400DFC490 /* csmsweep.h in Headers */ = {isa = PBXBuildFile; fileRef = 5570129F1E8328E400DFC490 /* csmsweep.h */; };
 		557012BC1E832F0300DFC490 /* csmgeom.c in Sources */ = {isa = PBXBuildFile; fileRef = 557012BA1E832F0300DFC490 /* csmgeom.c */; };
@@ -320,6 +322,9 @@
 		553E63E81FF69E0600A15475 /* csmsetop.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmsetop.hxx; sourceTree = "<group>"; };
 		5559D4E2204F3F310058F6F5 /* csmsetop_join.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsetop_join.c; sourceTree = "<group>"; };
 		5559D4E3204F3F310058F6F5 /* csmsetop_join.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsetop_join.inl; sourceTree = "<group>"; };
+		555B4A0B2187AF6A0051F657 /* csmstlimporter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmstlimporter.c; sourceTree = "<group>"; };
+		555B4A0C2187AF6A0051F657 /* csmstlimporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmstlimporter.h; sourceTree = "<group>"; };
+		555B4A0F2187B07A0051F657 /* csmstlimporter.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmstlimporter.hxx; sourceTree = "<group>"; };
 		5570129E1E8328E400DFC490 /* csmsweep.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmsweep.c; sourceTree = "<group>"; };
 		5570129F1E8328E400DFC490 /* csmsweep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmsweep.h; sourceTree = "<group>"; };
 		557012BA1E832F0300DFC490 /* csmgeom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmgeom.c; sourceTree = "<group>"; };
@@ -579,6 +584,16 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		555B4A072187AF3C0051F657 /* Importers */ = {
+			isa = PBXGroup;
+			children = (
+				555B4A0C2187AF6A0051F657 /* csmstlimporter.h */,
+				555B4A0F2187B07A0051F657 /* csmstlimporter.hxx */,
+				555B4A0B2187AF6A0051F657 /* csmstlimporter.c */,
+			);
+			name = Importers;
+			sourceTree = "<group>";
+		};
 		5570129B1E83286400DFC490 /* Algorithms */ = {
 			isa = PBXGroup;
 			children = (
@@ -618,6 +633,7 @@
 				5579545C1E5DB074000FC91E /* Info.plist */,
 				550E55AC1F87811A0033864A /* csmtypes.hxx */,
 				557954711E5DB275000FC91E /* csmfwddecl.hxx */,
+				555B4A072187AF3C0051F657 /* Importers */,
 				5589F1E92083EBC000526923 /* Solid building utilities */,
 				5579549B1E5E4823000FC91E /* Utility */,
 				551D47561FC1CD1A004F3B43 /* 2D Tools */,
@@ -888,6 +904,7 @@
 				557954A61E60D0EF000FC91E /* csmeuler_mvfs.inl in Headers */,
 				557954A01E5F942E000FC91E /* csmsolid.inl in Headers */,
 				557012BD1E832F0300DFC490 /* csmgeom.inl in Headers */,
+				555B4A0E2187AF6A0051F657 /* csmstlimporter.h in Headers */,
 				557954781E5E0694000FC91E /* csmid.inl in Headers */,
 				55308C381F921A5600353A68 /* csmtest_array.inl in Headers */,
 				551D475A1FC1CD50004F3B43 /* csmshape2d.h in Headers */,
@@ -1064,6 +1081,7 @@
 				55B54B771FBA4C5E00DE5833 /* csmexplode.c in Sources */,
 				5507A6841E736565008B9F73 /* csmeuler_lmfkrh.c in Sources */,
 				557954A51E60D0EF000FC91E /* csmeuler_mvfs.c in Sources */,
+				555B4A0D2187AF6A0051F657 /* csmstlimporter.c in Sources */,
 				557954911E5E446C000FC91E /* csmloop.c in Sources */,
 				5507A5C61E6624E7008B9F73 /* csmopbas.c in Sources */,
 				5507A6781E7341CD008B9F73 /* csmeuler_lkemr.c in Sources */,

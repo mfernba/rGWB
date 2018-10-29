@@ -44,6 +44,8 @@
 #include "csmsave.h"
 #include "csmoptree.h"
 #include "csmoptree.hxx"
+#include "csmstlimporter.h"
+#include "csmstlimporter.hxx"
 
 // ------------------------------------------------------------------------------------------
 
@@ -6025,6 +6027,23 @@ static void i_test_save2(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_importacion_stl1(void)
+{
+    enum csmstlimporter_result_t res;
+    struct csmsolid_t *solid_res;
+    
+    res = csmstlimporter_did_read_binary_stl("stl_models/dashboard.stl", &solid_res);
+    assert(res == CSMSTLIMPORTER_RESULT_OK);
+    
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+    csmdebug_set_viewer_results(NULL, NULL);
+    
+    csmsolid_free(&solid_res);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -6050,6 +6069,8 @@ void csmtest_test(void)
     //i_test_facetedbrep2(viewer, CSMFALSE);
     //i_test_difference10(viewer);
     //return;
+    
+    i_test_importacion_stl1();
     
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();
