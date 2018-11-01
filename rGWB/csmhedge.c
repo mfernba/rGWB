@@ -277,7 +277,7 @@ CSMBOOL csmhedge_setop_is_loose_end(const struct csmhedge_t *hedge)
 struct csmhedge_t *csmhedge_next(struct csmhedge_t *hedge)
 {
     assert_no_null(hedge);
-    return csmnode_downcast(csmnode_next(CSMNODE(hedge)), csmhedge_t);
+    return (struct csmhedge_t *)hedge->super.next;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -285,7 +285,7 @@ struct csmhedge_t *csmhedge_next(struct csmhedge_t *hedge)
 void csmhedge_set_next(struct csmhedge_t *hedge, struct csmhedge_t *next_hedge)
 {
     assert_no_null(hedge);
-    csmnode_set_ptr_next(CSMNODE(hedge), CSMNODE(next_hedge));
+    csmnode_set_ptr_next(&hedge->super, &next_hedge->super);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -293,7 +293,7 @@ void csmhedge_set_next(struct csmhedge_t *hedge, struct csmhedge_t *next_hedge)
 struct csmhedge_t *csmhedge_prev(struct csmhedge_t *hedge)
 {
     assert_no_null(hedge);
-    return csmnode_downcast(csmnode_prev(CSMNODE(hedge)), csmhedge_t);
+    return (struct csmhedge_t *)hedge->super.prev;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -301,7 +301,7 @@ struct csmhedge_t *csmhedge_prev(struct csmhedge_t *hedge)
 void csmhedge_set_prev(struct csmhedge_t *hedge, struct csmhedge_t *prev_hedge)
 {
     assert_no_null(hedge);
-    csmnode_set_ptr_prev(CSMNODE(hedge), CSMNODE(prev_hedge));
+    csmnode_set_ptr_prev(&hedge->super, &prev_hedge->super);
 }
 
 
