@@ -40,6 +40,7 @@ void csmface_copy_attributes_from_face1(const struct csmface_t *face1, struct cs
 // Geometry...
 
 void csmface_redo_geometric_generated_data(struct csmface_t *face);
+void csmface_mark_geometric_generated_data_needs_update(struct csmface_t *face);
 
 CSMBOOL csmface_should_analyze_intersections_between_faces(const struct csmface_t *face1, const struct csmface_t *face2);
 

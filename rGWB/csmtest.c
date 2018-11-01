@@ -6315,9 +6315,9 @@ void csmtest_test(void)
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
     //i_test_performance_2(viewer);
-    //i_test_performance_1(viewer);
+    i_test_performance_1(viewer);
     
-    //return;
+    return;
     
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
     csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);

@@ -1324,6 +1324,25 @@ static void i_apply_transformation_to_vertexs(
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_mark_faces_generated_data_needs_update(struct csmhashtb(csmface_t) *sfaces)
+{
+    struct csmhashtb_iterator(csmface_t) *face_iterator;
+    
+    face_iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
+        csmface_mark_geometric_generated_data_needs_update(face);
+    }
+
+    csmhashtb_free_iterator(&face_iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 void csmsolid_move(struct csmsolid_t *solid, double dx, double dy, double dz)
 {
     struct csmtransform_t *transform;
@@ -1332,6 +1351,8 @@ void csmsolid_move(struct csmsolid_t *solid, double dx, double dy, double dz)
     
     transform = csmtransform_make_displacement(dx, dy, dz);
     i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform, solid->bbox);
+    
+    i_mark_faces_generated_data_needs_update(solid->sfaces);
     
     csmtransform_free(&transform);
 }
@@ -1351,6 +1372,8 @@ void csmsolid_scale(struct csmsolid_t *solid, double Sx, double Sy, double Sz)
     
     i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform, solid->bbox);
     
+    i_mark_faces_generated_data_needs_update(solid->sfaces);
+    
     csmtransform_free(&transform);
 }
 
@@ -1367,6 +1390,8 @@ void csmsolid_rotate(
     
     transform = csmtransform_make_arbitrary_axis_rotation(angulo_rotacion_rad, Xo, Yo, Zo, Ux, Uy, Uz);
     i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform, solid->bbox);
+    
+    i_mark_faces_generated_data_needs_update(solid->sfaces);
     
     csmtransform_free(&transform);
 }
@@ -1389,6 +1414,8 @@ void csmsolid_general_transform(
                     Wx, Wy, Wz, Dz);
     
     i_apply_transformation_to_vertexs(solid->sfaces, solid->svertexs, transform, solid->bbox);
+    
+    i_mark_faces_generated_data_needs_update(solid->sfaces);
     
     csmtransform_free(&transform);
 }

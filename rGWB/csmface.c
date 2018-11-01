@@ -59,6 +59,7 @@ struct csmface_t
     struct csmsurface_t *surface_eq;
     struct csmmaterial_t *visz_material_opt;
     
+    CSMBOOL generated_face_data_needs_update;
     double A, B, C, D;
     double fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;
@@ -80,6 +81,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
                         struct csmloop_t *floops,
                         struct csmsurface_t **surface_eq,
                         struct csmmaterial_t **visz_material_opt,
+                        CSMBOOL generated_face_data_needs_update,
                         double A, double B, double C, double D, double fuzzy_epsilon, enum csmmath_dropped_coord_t dropped_coord,
                         double x_center, double y_center, double z_center,
                         struct csmbbox_t **bbox,
@@ -103,6 +105,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new, (
     face->surface_eq = ASSIGN_POINTER_PP_NOT_NULL(surface_eq, struct csmsurface_t);
     face->visz_material_opt = ASSIGN_POINTER_PP(visz_material_opt, struct csmmaterial_t);
     
+    face->generated_face_data_needs_update = generated_face_data_needs_update;
     face->A = A;
     face->B = B;
     face->C = C;
@@ -133,6 +136,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new_empty_face, (unsigned long id, stru
     struct csmloop_t *floops;
     struct csmsurface_t *surface_eq;
     struct csmmaterial_t *visz_material_opt;
+    CSMBOOL generated_face_data_needs_update;
     double A, B, C, D, fuzzy_epsilon;
     enum csmmath_dropped_coord_t dropped_coord;
     double x_center, y_center, z_center;
@@ -150,6 +154,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new_empty_face, (unsigned long id, stru
     surface_eq = csmsurface_new_undefined();
     visz_material_opt = NULL;
     
+    generated_face_data_needs_update = CSMTRUE;
     A = 0.;
     B = 0.;
     C = 0.;
@@ -176,6 +181,7 @@ CONSTRUCTOR(static struct csmface_t *, i_new_empty_face, (unsigned long id, stru
                 floops,
                 &surface_eq,
                 &visz_material_opt,
+                generated_face_data_needs_update,
                 A, B, C, D,
                 fuzzy_epsilon,
                 dropped_coord,
@@ -209,6 +215,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
 {
     unsigned long id;
     struct csmloop_t *flout, *floops;
+    CSMBOOL generated_face_data_needs_update;
     struct csmbbox_t *bbox;
     CSMBOOL setop_is_null_face;
     CSMBOOL setop_is_new_face;
@@ -219,6 +226,8 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
     
     flout = NULL;
     floops = NULL;
+    
+    generated_face_data_needs_update = CSMTRUE;
     bbox = csmbbox_create_empty_box();
     
     setop_is_null_face = CSMFALSE;
@@ -235,6 +244,7 @@ CONSTRUCTOR(static struct csmface_t *, i_duplicate_face, (
                 floops,
                 surface_eq,
                 visz_material_opt,
+                generated_face_data_needs_update,
                 A, B, C, D,
                 fuzzy_epsilon,
                 dropped_coord,
@@ -545,53 +555,52 @@ static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, do
 
 void csmface_redo_geometric_generated_data(struct csmface_t *face)
 {
-    double max_tolerable_distance;
-    struct csmloop_t *loop_iterator;
-    
     assert_no_null(face);
     assert_no_null(face->flout);
     assert_no_null(face->floops);
     
-    csmloop_face_equation(
+    if (face->generated_face_data_needs_update == CSMTRUE)
+    {
+        double max_tolerable_distance;
+        struct csmloop_t *loop_iterator;
+        
+        csmloop_face_equation(
                         face->flout,
                         &face->A, &face->B, &face->C, &face->D,
                         &face->x_center, &face->y_center, &face->z_center);
     
-    max_tolerable_distance = 1.1 * csmloop_max_distance_to_plane(face->flout, face->A, face->B, face->C, face->D);
-    
-    loop_iterator = face->floops;
-    
-    while (loop_iterator != NULL)
-    {
-        if (loop_iterator != face->flout)
+        max_tolerable_distance = 1.1 * csmloop_max_distance_to_plane(face->flout, face->A, face->B, face->C, face->D);
+        
+        loop_iterator = face->floops;
+        
+        while (loop_iterator != NULL)
         {
-            double max_tolerable_distance_inner_loop;
+            if (loop_iterator != face->flout)
+            {
+                double max_tolerable_distance_inner_loop;
+                
+                max_tolerable_distance_inner_loop = 1.1 * csmloop_max_distance_to_plane(loop_iterator, face->A, face->B, face->C, face->D);
+                max_tolerable_distance = CSMMATH_MAX(max_tolerable_distance, max_tolerable_distance_inner_loop);
+            }
             
-            max_tolerable_distance_inner_loop = 1.1 * csmloop_max_distance_to_plane(loop_iterator, face->A, face->B, face->C, face->D);
-            max_tolerable_distance = CSMMATH_MAX(max_tolerable_distance, max_tolerable_distance_inner_loop);
+            loop_iterator = csmloop_next(loop_iterator);
         }
         
-        loop_iterator = csmloop_next(loop_iterator);
-    }
+        face->fuzzy_epsilon = i_compute_fuzzy_epsilon_for_containing_test(face->A, face->B, face->C, face->D, max_tolerable_distance, face->floops);
+        face->dropped_coord = csmmath_dropped_coord(face->A, face->B, face->C);
         
-    face->fuzzy_epsilon = i_compute_fuzzy_epsilon_for_containing_test(face->A, face->B, face->C, face->D, max_tolerable_distance, face->floops);
-    face->dropped_coord = csmmath_dropped_coord(face->A, face->B, face->C);
-    
-    i_compute_bounding_box(face->floops, face->bbox);
+        i_compute_bounding_box(face->floops, face->bbox);
+        
+        face->generated_face_data_needs_update = CSMFALSE;
+    }
 }
 
-// ------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------
 
-void csmface_face_baricenter(const struct csmface_t *face, double *x, double *y, double *z)
+void csmface_mark_geometric_generated_data_needs_update(struct csmface_t *face)
 {
     assert_no_null(face);
-    assert_no_null(x);
-    assert_no_null(y);
-    assert_no_null(z);
-    
-    *x = face->x_center;
-    *y = face->y_center;
-    *z = face->z_center;
+    face->generated_face_data_needs_update = CSMTRUE;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -599,7 +608,9 @@ void csmface_face_baricenter(const struct csmface_t *face, double *x, double *y,
 CSMBOOL csmface_should_analyze_intersections_between_faces(const struct csmface_t *face1, const struct csmface_t *face2)
 {
     assert_no_null(face1);
+    //assert(face1->generated_face_data_needs_update == CSMFALSE);
     assert_no_null(face2);
+    //assert(face2->generated_face_data_needs_update == CSMFALSE);
     
     return csmbbox_intersects_with_other_bbox(face1->bbox, face2->bbox);
 }
@@ -1118,7 +1129,9 @@ CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface
     double d1, d2;
     
     assert_no_null(face1);
+    //assert(face1->generated_face_data_needs_update == CSMFALSE);
     assert_no_null(face2);
+    //assert(face2->generated_face_data_needs_update == CSMFALSE);
     
     csmmath_plane_axis_from_implicit_plane_equation(
 						face1->A, face1->B, face1->C, face1->D,
@@ -1151,7 +1164,9 @@ CSMBOOL csmface_are_coplanar_faces(struct csmface_t *face1, const struct csmface
 CSMBOOL csmface_are_coplanar_faces_at_common_base_vertex(struct csmface_t *face1, const struct csmface_t *face2, const struct csmtolerance_t *tolerances)
 {
     assert_no_null(face1);
+    //assert(face1->generated_face_data_needs_update == CSMFALSE);
     assert_no_null(face2);
+    //assert(face2->generated_face_data_needs_update == CSMFALSE);
     
     return csmmath_vectors_are_parallel(
                         face1->A, face1->B, face1->C, face2->A, face2->B, face2->C,
@@ -1163,7 +1178,9 @@ CSMBOOL csmface_are_coplanar_faces_at_common_base_vertex(struct csmface_t *face1
 CSMBOOL csmface_faces_define_border_edge(const struct csmface_t *face1, const struct csmface_t *face2)
 {
     assert_no_null(face1);
+    //assert(face1->generated_face_data_needs_update == CSMFALSE);
     assert_no_null(face2);
+    //assert(face2->generated_face_data_needs_update == CSMFALSE);
     
     return csmsurface_surfaces_define_border_edge(
                         face1->surface_eq, face1->A, face1->B, face1->C,
@@ -1203,6 +1220,20 @@ void csmface_face_equation(
 
 // ------------------------------------------------------------------------------------------
 
+void csmface_face_baricenter(const struct csmface_t *face, double *x, double *y, double *z)
+{
+    assert_no_null(face);
+    assert_no_null(x);
+    assert_no_null(y);
+    assert_no_null(z);
+    
+    *x = face->x_center;
+    *y = face->y_center;
+    *z = face->z_center;
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmface_face_equation_info(
                         const struct csmface_t *face,
                         double *A, double *B, double *C, double *D)
@@ -1224,6 +1255,8 @@ void csmface_face_equation_info(
 void csmface_maximize_bbox(const struct csmface_t *face, struct csmbbox_t *bbox)
 {
     assert_no_null(face);
+    assert(face->generated_face_data_needs_update == CSMFALSE);
+    
     csmbbox_maximize_bbox(bbox, face->bbox);
 }
 
@@ -1234,6 +1267,7 @@ double csmface_loop_area_in_face(const struct csmface_t *face, const struct csml
     double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
     
     assert_no_null(face);
+    assert(face->generated_face_data_needs_update == CSMFALSE);
 
     csmmath_plane_axis_from_implicit_plane_equation(
 						face->A, face->B, face->C, face->D,
@@ -1276,6 +1310,8 @@ void csmface_reorient_loops_in_face(struct csmface_t *face, const struct csmtole
         
         iterator = csmloop_next(iterator);
     }
+    
+    face->generated_face_data_needs_update = CSMTRUE;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1291,7 +1327,9 @@ struct csmsolid_t *csmface_fsolid(struct csmface_t *face)
 void csmface_set_fsolid(struct csmface_t *face, struct csmsolid_t *solid)
 {
     assert_no_null(face);
+    
     face->fsolid = solid;
+    face->generated_face_data_needs_update = CSMTRUE;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1324,13 +1362,14 @@ void csmface_set_flout(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
     
+    if (loop != NULL)
+        csmloop_mark_local_bounding_box_needs_update(loop);
+    
     if (face->floops == NULL)
         face->floops = loop;
     
     face->flout = loop;
-    
-    if (loop != NULL)
-        csmloop_mark_local_bounding_box_needs_update(loop);
+    face->generated_face_data_needs_update = CSMTRUE;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1347,10 +1386,11 @@ void csmface_set_floops(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
     
-    face->floops = loop;
-    
     if (loop != NULL)
         csmloop_mark_local_bounding_box_needs_update(loop);
+    
+    face->floops = loop;
+    face->generated_face_data_needs_update = CSMTRUE;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1388,7 +1428,10 @@ void csmface_add_loop_while_removing_from_old(struct csmface_t *face, struct csm
     }
     
     loop_old_face->setop_has_been_modified = CSMTRUE;
+    loop_old_face->generated_face_data_needs_update = CSMTRUE;
+    
     face->setop_has_been_modified = CSMTRUE;
+    face->generated_face_data_needs_update = CSMTRUE;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -1404,6 +1447,8 @@ void csmface_remove_loop(struct csmface_t *face, struct csmloop_t **loop)
 
     if (face->flout == *loop)
         face->flout = face->floops;
+    
+    face->generated_face_data_needs_update = CSMTRUE;
     
     csmnode_free_node_in_list(loop, csmloop_t);
 }
@@ -1443,6 +1488,8 @@ void csmface_revert(struct csmface_t *face)
         csmloop_revert_loop_orientation(loop_iterator);
         loop_iterator = csmloop_next(loop_iterator);
     }
+    
+    face->generated_face_data_needs_update = CSMTRUE;
 }
 
 // ----------------------------------------------------------------------------------------------------
