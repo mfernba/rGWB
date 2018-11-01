@@ -32,6 +32,8 @@ void csmloop_face_equation(
 
 void csmloop_update_bounding_box(const struct csmloop_t *loop, struct csmbbox_t *bbox);
 
+void csmloop_mark_local_bounding_box_needs_update(struct csmloop_t *loop);
+
 double csmloop_max_distance_to_plane(
                         const struct csmloop_t *loop,
                         double A, double B, double C, double D);
@@ -42,7 +44,7 @@ double csmloop_compute_area(
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz);
 
 CSMBOOL csmloop_is_point_inside_loop(
-                        const struct csmloop_t *loop,
+                        struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         const struct csmtolerance_t *tolerances,
                         enum csmmath_containment_point_loop_t *type_of_containment_opc,

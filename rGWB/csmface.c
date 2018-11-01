@@ -1328,6 +1328,9 @@ void csmface_set_flout(struct csmface_t *face, struct csmloop_t *loop)
         face->floops = loop;
     
     face->flout = loop;
+    
+    if (loop != NULL)
+        csmloop_mark_local_bounding_box_needs_update(loop);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1343,7 +1346,11 @@ struct csmloop_t *csmface_floops(struct csmface_t *face)
 void csmface_set_floops(struct csmface_t *face, struct csmloop_t *loop)
 {
     assert_no_null(face);
+    
     face->floops = loop;
+    
+    if (loop != NULL)
+        csmloop_mark_local_bounding_box_needs_update(loop);
 }
 
 // ----------------------------------------------------------------------------------------------------

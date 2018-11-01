@@ -101,6 +101,13 @@ double csmtolerance_equal_coords(const struct csmtolerance_t *tolerance)
     assert_no_null(tolerance);
     return tolerance->tolerance_equal_coords;
 }
+// --------------------------------------------------------------------------------
+
+double csmtolerance_loop_bbox_tolerance(const struct csmtolerance_t *tolerance)
+{
+    assert_no_null(tolerance);
+    return 10. * tolerance->tolerance_equal_coords;
+}
 
 // --------------------------------------------------------------------------------
 

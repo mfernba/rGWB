@@ -28,16 +28,105 @@
 #include "cypespy.h"
 #endif
 
+struct i_generated_bbox_data_t
+{
+    CSMBOOL bbox_needs_update;
+    double x_min_bbox, y_min_bbox, x_max_bbox, y_max_bbox;
+    enum csmmath_dropped_coord_t dropped_coord_bbox;
+};
+
+struct i_generated_area_data_t
+{
+    CSMBOOL computed_area_needs_update;
+    
+    double loop_area;
+    
+    double Xo_face, Yo_face, Zo_face;
+    double Ux_face, Uy_face, Uz_face, Vx_face, Vy_face, Vz_face;
+};
+
 struct csmloop_t
 {
     struct csmnode_t super;
     
     struct csmhedge_t *ledge;
     struct csmface_t *lface;
+
+    struct i_generated_bbox_data_t *generated_projected_bbox_data;
+    struct i_generated_area_data_t *generated_area_data;
     
     CSMBOOL setop_convert_loop_in_face;
     CSMBOOL setop_loop_was_a_hole;
 };
+
+// --------------------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct i_generated_bbox_data_t *, i_new_generated_bbox_data, (
+                        CSMBOOL bbox_needs_update,
+                        double x_min_bbox, double y_min_bbox, double x_max_bbox, double y_max_bbox,
+                        enum csmmath_dropped_coord_t dropped_coord_bbox))
+{
+    struct i_generated_bbox_data_t *local_bbox;
+    
+    local_bbox = MALLOC(struct i_generated_bbox_data_t);
+    
+    local_bbox->bbox_needs_update = bbox_needs_update;
+    
+    local_bbox->x_min_bbox = x_min_bbox;
+    local_bbox->y_min_bbox = y_min_bbox;
+
+    local_bbox->x_max_bbox = x_max_bbox;
+    local_bbox->y_max_bbox = y_max_bbox;
+    
+    local_bbox->dropped_coord_bbox = dropped_coord_bbox;
+    
+    return local_bbox;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+static void i_free_generated_bbox_data(struct i_generated_bbox_data_t **local_bbox)
+{
+    FREE_PP(local_bbox, struct i_generated_bbox_data_t);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct i_generated_area_data_t *, i_new_generated_area_data, (
+                        CSMBOOL computed_area_needs_update,
+                        double loop_area,
+                        double Xo_face, double Yo_face, double Zo_face,
+                        double Ux_face, double Uy_face, double Uz_face, double Vx_face, double Vy_face, double Vz_face))
+{
+    struct i_generated_area_data_t *generated_area_data;
+    
+    generated_area_data = MALLOC(struct i_generated_area_data_t);
+    
+    generated_area_data->computed_area_needs_update = computed_area_needs_update;
+    
+    generated_area_data->loop_area = loop_area;
+    
+    generated_area_data->Xo_face = Xo_face;
+    generated_area_data->Yo_face = Yo_face;
+    generated_area_data->Zo_face = Zo_face;
+    
+    generated_area_data->Ux_face = Ux_face;
+    generated_area_data->Uy_face = Uy_face;
+    generated_area_data->Uz_face = Uz_face;
+
+    generated_area_data->Vx_face = Vx_face;
+    generated_area_data->Vy_face = Vy_face;
+    generated_area_data->Vz_face = Vz_face;
+    
+    return generated_area_data;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+static void i_free_generated_area_data(struct i_generated_area_data_t **generated_area_data)
+{
+    FREE_PP(generated_area_data, struct i_generated_area_data_t);
+}
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -51,6 +140,9 @@ static void i_csmloop_free(struct csmloop_t **loop)
     if ((*loop)->ledge != NULL)
         csmnode_free_node_list(&(*loop)->ledge, csmhedge_t);
     
+    i_free_generated_bbox_data(&(*loop)->generated_projected_bbox_data);
+    i_free_generated_area_data(&(*loop)->generated_area_data);
+    
     FREE_PP(loop, struct csmloop_t);
 }
 
@@ -60,6 +152,8 @@ CONSTRUCTOR(static struct csmloop_t *, i_new, (
                         unsigned long id,
                         struct csmhedge_t *ledge,
                         struct csmface_t *lface,
+                        struct i_generated_bbox_data_t **generated_projected_bbox_data,
+                        struct i_generated_area_data_t **generated_area_data,
                         CSMBOOL setop_convert_loop_in_face,
                         CSMBOOL setop_loop_was_a_hole))
 {
@@ -72,6 +166,9 @@ CONSTRUCTOR(static struct csmloop_t *, i_new, (
     loop->ledge = ledge;
     loop->lface = lface;
     
+    loop->generated_projected_bbox_data = ASSIGN_POINTER_PP_NOT_NULL(generated_projected_bbox_data, struct i_generated_bbox_data_t);
+    loop->generated_area_data = ASSIGN_POINTER_PP_NOT_NULL(generated_area_data, struct i_generated_area_data_t);
+    
     loop->setop_convert_loop_in_face = setop_convert_loop_in_face;
     loop->setop_loop_was_a_hole = setop_loop_was_a_hole;
     
@@ -83,14 +180,27 @@ CONSTRUCTOR(static struct csmloop_t *, i_new, (
 CONSTRUCTOR(static struct csmloop_t *, i_new_empty_loop, (unsigned long id, struct csmface_t *lface))
 {
     struct csmhedge_t *ledge;
+    struct i_generated_bbox_data_t *generated_projected_bbox_data;
+    struct i_generated_area_data_t *generated_area_data;
     CSMBOOL setop_convert_loop_in_face;
     CSMBOOL setop_loop_was_a_hole;
     
     ledge = NULL;
+    
+    generated_projected_bbox_data = i_new_generated_bbox_data(CSMTRUE, 0., 0., 0., 0., (enum csmmath_dropped_coord_t)USHRT_MAX);
+    generated_area_data = i_new_generated_area_data(CSMTRUE, 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.);
+    
     setop_convert_loop_in_face = CSMFALSE;
     setop_loop_was_a_hole = CSMFALSE;
     
-    return i_new(id, ledge, lface, setop_convert_loop_in_face, setop_loop_was_a_hole);
+    return i_new(
+                id,
+                ledge,
+                lface,
+                &generated_projected_bbox_data,
+                &generated_area_data,
+                setop_convert_loop_in_face,
+                setop_loop_was_a_hole);
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -352,6 +462,27 @@ void csmloop_update_bounding_box(const struct csmloop_t *loop, struct csmbbox_t 
 
 // --------------------------------------------------------------------------------------------------------------
 
+static void i_invalidate_internal_generated_data(
+                        struct i_generated_bbox_data_t *generated_projected_bbox_data,
+                        struct i_generated_area_data_t *generated_area_data)
+{
+    assert_no_null(generated_projected_bbox_data);
+    generated_projected_bbox_data->bbox_needs_update = CSMTRUE;
+    
+    assert_no_null(generated_area_data);
+    generated_area_data->computed_area_needs_update = CSMTRUE;
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
+void csmloop_mark_local_bounding_box_needs_update(struct csmloop_t *loop)
+{
+    assert_no_null(loop);
+    i_invalidate_internal_generated_data(loop->generated_projected_bbox_data, loop->generated_area_data);
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 double csmloop_max_distance_to_plane(
                         const struct csmloop_t *loop,
                         double A, double B, double C, double D)
@@ -399,41 +530,69 @@ double csmloop_compute_area(
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz)
 {
     double area;
-    struct csmhedge_t *iterator;
-    unsigned long no_iterations;
     
     assert_no_null(loop);
     
-    iterator = loop->ledge;
-    no_iterations = 0;
-    
-    area = 0.0;
-    
-    do
+    if (loop->generated_area_data->computed_area_needs_update == CSMTRUE
+            || csmmath_fabs(loop->generated_area_data->Xo_face - Xo) > 1.e-6
+            || csmmath_fabs(loop->generated_area_data->Yo_face - Yo) > 1.e-6
+            || csmmath_fabs(loop->generated_area_data->Zo_face - Zo) > 1.e-6
+            || csmmath_fabs(loop->generated_area_data->Ux_face - Ux) > 1.e-6
+            || csmmath_fabs(loop->generated_area_data->Uy_face - Uy) > 1.e-6
+            || csmmath_fabs(loop->generated_area_data->Uz_face - Uz) > 1.e-6
+            || csmmath_fabs(loop->generated_area_data->Vx_face - Vx) > 1.e-6
+            || csmmath_fabs(loop->generated_area_data->Vy_face - Vy) > 1.e-6
+            || csmmath_fabs(loop->generated_area_data->Vz_face - Vz) > 1.e-6)
     {
-        struct csmvertex_t *vertex_i, *vertex_i_1;
-        double x_3d, y_3d, z_3d;
-        double x_i, y_i, x_i_1, y_i_1;
-        double area_i;
+        struct csmhedge_t *iterator;
+        unsigned long no_iterations;
         
-        assert(no_iterations < 10000);
-        no_iterations++;
+        iterator = loop->ledge;
+        no_iterations = 0;
         
-        vertex_i = csmhedge_vertex(iterator);
-        csmvertex_get_coords(vertex_i, &x_3d, &y_3d, &z_3d);
-        csmgeom_project_coords_3d_to_2d(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, x_3d, y_3d, z_3d, &x_i, &y_i);
+        area = 0.0;
         
-        iterator = csmhedge_next(iterator);
-        vertex_i_1 = csmhedge_vertex(iterator);
-        csmvertex_get_coords(vertex_i_1, &x_3d, &y_3d, &z_3d);
-        csmgeom_project_coords_3d_to_2d(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, x_3d, y_3d, z_3d, &x_i_1, &y_i_1);
-        
-        area_i = x_i * y_i_1 - y_i * x_i_1;
-        area += area_i;
-        
-    } while (iterator != loop->ledge);
+        do
+        {
+            struct csmvertex_t *vertex_i, *vertex_i_1;
+            double x_3d, y_3d, z_3d;
+            double x_i, y_i, x_i_1, y_i_1;
+            double area_i;
+            
+            assert(no_iterations < 10000);
+            no_iterations++;
+            
+            vertex_i = csmhedge_vertex(iterator);
+            csmvertex_get_coords(vertex_i, &x_3d, &y_3d, &z_3d);
+            csmgeom_project_coords_3d_to_2d(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, x_3d, y_3d, z_3d, &x_i, &y_i);
+            
+            iterator = csmhedge_next(iterator);
+            vertex_i_1 = csmhedge_vertex(iterator);
+            csmvertex_get_coords(vertex_i_1, &x_3d, &y_3d, &z_3d);
+            csmgeom_project_coords_3d_to_2d(Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, x_3d, y_3d, z_3d, &x_i_1, &y_i_1);
+            
+            area_i = x_i * y_i_1 - y_i * x_i_1;
+            area += area_i;
+            
+        } while (iterator != loop->ledge);
     
-    return 0.5 * area;
+        loop->generated_area_data->computed_area_needs_update = CSMFALSE;
+        loop->generated_area_data->loop_area = 0.5 * area;
+        
+        loop->generated_area_data->Xo_face = Xo;
+        loop->generated_area_data->Yo_face = Yo;
+        loop->generated_area_data->Zo_face = Zo;
+        
+        loop->generated_area_data->Ux_face = Ux;
+        loop->generated_area_data->Uy_face = Uy;
+        loop->generated_area_data->Uz_face = Uz;
+        
+        loop->generated_area_data->Vx_face = Vx;
+        loop->generated_area_data->Vy_face = Vy;
+        loop->generated_area_data->Vz_face = Vz;
+    }
+    
+    return loop->generated_area_data->loop_area;
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -566,65 +725,84 @@ static CSMBOOL i_are_hedges_collinear(
 
 // --------------------------------------------------------------------------------------------------------------
 
+static void i_compute_loop_bbox(struct i_generated_bbox_data_t *generated_projected_bbox_data, struct csmhedge_t *ledge, enum csmmath_dropped_coord_t dropped_coord)
+{
+    assert_no_null(generated_projected_bbox_data);
+    
+    if (generated_projected_bbox_data->bbox_needs_update == CSMTRUE || generated_projected_bbox_data->dropped_coord_bbox != dropped_coord)
+    {
+        register struct csmhedge_t *iterator;
+        unsigned long no_iterations;
+        CSMBOOL initialized;
+        double x_not_dropped, y_not_dropped;
+        
+        iterator = ledge;
+        no_iterations = 0;
+
+        initialized = CSMFALSE;
+        generated_projected_bbox_data->x_min_bbox = 0.;
+        generated_projected_bbox_data->y_min_bbox = 0.;
+        generated_projected_bbox_data->x_max_bbox = 0.;
+        generated_projected_bbox_data->y_max_bbox = 0.;
+        
+        do
+        {
+            struct csmvertex_t *vertex;
+            double x_vertex, y_vertex, z_vertex;
+            
+            assert(no_iterations < 10000);
+            no_iterations++;
+            
+            vertex = csmhedge_vertex(iterator);
+            csmvertex_get_coords(vertex, &x_vertex, &y_vertex, &z_vertex);
+
+            csmmath_select_not_dropped_coords(x_vertex, y_vertex, z_vertex, dropped_coord, &x_not_dropped, &y_not_dropped);
+            
+            if (initialized == CSMFALSE || x_not_dropped < generated_projected_bbox_data->x_min_bbox)
+                generated_projected_bbox_data->x_min_bbox = x_not_dropped;
+            
+            if (initialized == CSMFALSE || y_not_dropped < generated_projected_bbox_data->y_min_bbox)
+                generated_projected_bbox_data->y_min_bbox = y_not_dropped;
+            
+            if (initialized == CSMFALSE || x_not_dropped > generated_projected_bbox_data->x_max_bbox)
+                generated_projected_bbox_data->x_max_bbox = x_not_dropped;
+            
+            if (initialized == CSMFALSE || y_not_dropped > generated_projected_bbox_data->y_max_bbox)
+                generated_projected_bbox_data->y_max_bbox = y_not_dropped;
+            
+            iterator = csmhedge_next(iterator);
+            initialized = CSMTRUE;
+            
+        } while (iterator != ledge);
+        
+        assert(initialized == CSMTRUE);
+        
+        generated_projected_bbox_data->bbox_needs_update = CSMFALSE;
+        generated_projected_bbox_data->dropped_coord_bbox = dropped_coord;
+    }
+}
+
+// --------------------------------------------------------------------------------------------------------------
+
 static CSMBOOL i_is_point_in_loop_bbox(
                         struct csmhedge_t *ledge,
+                        struct i_generated_bbox_data_t *generated_projected_bbox_data,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         const struct csmtolerance_t *tolerances)
 {
-    register struct csmhedge_t *iterator;
-    unsigned long no_iterations;
-    CSMBOOL initialized;
-    double x_min, y_min, x_max, y_max;
     double x_not_dropped, y_not_dropped;
     double tolerance;
     
-    iterator = ledge;
-    no_iterations = 0;
-
-    initialized = CSMFALSE;
-    x_min = 0.;
-    y_min = 0.;
-    x_max = 0.;
-    y_max = 0.;
+    assert_no_null(generated_projected_bbox_data);
     
-    do
-    {
-        struct csmvertex_t *vertex;
-        double x_vertex, y_vertex, z_vertex;
-        
-        assert(no_iterations < 10000);
-        no_iterations++;
-        
-        vertex = csmhedge_vertex(iterator);
-        csmvertex_get_coords(vertex, &x_vertex, &y_vertex, &z_vertex);
-
-        csmmath_select_not_dropped_coords(x_vertex, y_vertex, z_vertex, dropped_coord, &x_not_dropped, &y_not_dropped);
-        
-        if (initialized == CSMFALSE || x_not_dropped < x_min)
-            x_min = x_not_dropped;
-        
-        if (initialized == CSMFALSE || y_not_dropped < y_min)
-            y_min = y_not_dropped;
-        
-        if (initialized == CSMFALSE || x_not_dropped > x_max)
-            x_max = x_not_dropped;
-        
-        if (initialized == CSMFALSE || y_not_dropped > y_max)
-            y_max = y_not_dropped;
-        
-        iterator = csmhedge_next(iterator);
-        initialized = CSMTRUE;
-        
-    } while (iterator != ledge);
-    
-    assert(initialized == CSMTRUE);
+    i_compute_loop_bbox(generated_projected_bbox_data, ledge, dropped_coord);
     
     csmmath_select_not_dropped_coords(x, y, z, dropped_coord, &x_not_dropped, &y_not_dropped);
-    tolerance = 10. * csmtolerance_equal_coords(tolerances);
+    tolerance = csmtolerance_loop_bbox_tolerance(tolerances);
     
-    if (x_not_dropped + tolerance < x_min || x_not_dropped - tolerance > x_max)
+    if (x_not_dropped + tolerance < generated_projected_bbox_data->x_min_bbox || x_not_dropped - tolerance > generated_projected_bbox_data->x_max_bbox)
         return CSMFALSE;
-    else if (y_not_dropped + tolerance < y_min || y_not_dropped - tolerance > y_max)
+    else if (y_not_dropped + tolerance < generated_projected_bbox_data->y_min_bbox || y_not_dropped - tolerance > generated_projected_bbox_data->y_max_bbox)
         return CSMFALSE;
     else
         return CSMTRUE;
@@ -633,7 +811,7 @@ static CSMBOOL i_is_point_in_loop_bbox(
 // --------------------------------------------------------------------------------------------------------------
 
 CSMBOOL csmloop_is_point_inside_loop(
-                        const struct csmloop_t *loop,
+                        struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         const struct csmtolerance_t *tolerances,
                         enum csmmath_containment_point_loop_t *type_of_containment_opc,
@@ -648,7 +826,11 @@ CSMBOOL csmloop_is_point_inside_loop(
 
     assert_no_null(loop);
     
-    if (i_is_point_in_loop_bbox(loop->ledge, x, y, z, dropped_coord, tolerances) == CSMFALSE)
+    if (i_is_point_in_loop_bbox(
+                        loop->ledge,
+                        loop->generated_projected_bbox_data,
+                        x, y, z, dropped_coord,
+                        tolerances) == CSMFALSE)
     {
         is_point_inside_loop = CSMFALSE;
         type_of_containment_loc = CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR;
@@ -934,7 +1116,9 @@ struct csmhedge_t *csmloop_ledge(struct csmloop_t *loop)
 void csmloop_set_ledge(struct csmloop_t *loop, struct csmhedge_t *ledge)
 {
     assert_no_null(loop);
+    
     loop->ledge = ledge;
+    i_invalidate_internal_generated_data(loop->generated_projected_bbox_data, loop->generated_area_data);
  }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -952,8 +1136,10 @@ struct csmface_t *csmloop_lface(struct csmloop_t *loop)
 void csmloop_set_lface(struct csmloop_t *loop, struct csmface_t *face)
 {
     assert_no_null(loop);
+    
     loop->lface = face;
- }
+    i_invalidate_internal_generated_data(loop->generated_projected_bbox_data, loop->generated_area_data);
+}
 
 // --------------------------------------------------------------------------------------------------------------
 
@@ -1021,6 +1207,8 @@ void csmloop_revert_loop_orientation(struct csmloop_t *loop)
         he_iterator = csmhedge_next(he_iterator);
     }
     while (he_iterator != loop->ledge);
+    
+    i_invalidate_internal_generated_data(loop->generated_projected_bbox_data, loop->generated_area_data);
 }
 
 // ----------------------------------------------------------------------------------------------------

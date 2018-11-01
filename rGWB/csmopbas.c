@@ -106,6 +106,9 @@ void csmopbas_addhe(
     csmhedge_set_loop(new_hedge_loc, loop);
     
     csmhedge_set_vertex(new_hedge_loc, vertex);
+
+    if (loop != NULL)
+        csmloop_mark_local_bounding_box_needs_update(loop);
     
     ASSIGN_OPTIONAL_VALUE(new_hedge_opc, new_hedge_loc);
 }
@@ -161,6 +164,9 @@ void csmopbas_delhe(struct csmhedge_t **hedge, struct csmhedge_t **hedge_prev_op
         csmhedge_set_edge(hedge_loc, NULL);
         csmedge_remove_hedge(edge, hedge_loc);
     }
+    
+    if (loop != NULL)
+        csmloop_mark_local_bounding_box_needs_update(loop);
     
     if (destroy_hedge == CSMTRUE)
     {

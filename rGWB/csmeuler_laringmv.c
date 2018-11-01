@@ -28,11 +28,14 @@ void csmeuler_laringmv(
 {
     register struct csmloop_t *iterator_face1;
     unsigned long no_iterations;
+    struct csmloop_t *flout_face1;
     
     csmface_redo_geometric_generated_data(face1);
     
     iterator_face1 = csmface_floops(face1);
     no_iterations = 0;
+    
+    flout_face1 = csmface_flout(face1);
     
     do
     {
@@ -43,7 +46,7 @@ void csmeuler_laringmv(
         
         next_loop = csmloop_next(iterator_face1);
         
-        if (iterator_face1 != csmface_flout(face1))
+        if (iterator_face1 != flout_face1)
         {
             struct csmhedge_t *ledge;
             struct csmvertex_t *vtx;

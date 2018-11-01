@@ -8,6 +8,8 @@ void csmtolerance_free(struct csmtolerance_t **tolerance);
 
 double csmtolerance_equal_coords(const struct csmtolerance_t *tolerance);
 
+double csmtolerance_loop_bbox_tolerance(const struct csmtolerance_t *tolerance);
+
 double csmtolerance_point_on_plane(const struct csmtolerance_t *tolerance);
 
 double csmtolerance_angle_rad(const struct csmtolerance_t *tolerance);

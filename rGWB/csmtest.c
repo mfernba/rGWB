@@ -6194,6 +6194,118 @@ static void i_test_performance_1(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_test_performance_2(struct csmviewer_t *viewer)
+{
+    struct csmshape2d_t *shape2d;
+    struct csmsolid_t *solid1;
+    double l1, e1, l2, h1;
+    double length;
+
+    l1 = 0.1;
+    e1 = 0.01;
+    l2 = 0.02;
+    h1 = 0.04;
+    
+    {
+        csmArrPoint2D *points;
+        
+        points = csmArrPoint2D_new(0);
+        
+        csmArrPoint2D_append(points, -0.5 * l1, 0.);
+        csmArrPoint2D_append(points, -0.5 * l1, e1);
+        csmArrPoint2D_append(points, -0.5 * l1, e1 + e1);
+        csmArrPoint2D_append(points, -0.5 * l1 + l2, h1);
+        csmArrPoint2D_append(points, -0.5 * l1, h1);
+        csmArrPoint2D_append(points, -0.5 * l1, h1 + e1);
+        csmArrPoint2D_append(points, -0.5 * l1 + 2. * l2, h1 + e1);
+        csmArrPoint2D_append(points, -0.5 * l1 + 2. * l2, h1);
+        csmArrPoint2D_append(points, -0.5 * l1 + l2 + e1, h1);
+        csmArrPoint2D_append(points, -0.5 * l1 + e1, e1 + e1);
+        csmArrPoint2D_append(points, -0.5 * l1 + e1, e1);
+
+        csmArrPoint2D_append(points, 0.5 * l1 - e1, e1);
+        csmArrPoint2D_append(points, 0.5 * l1 - e1, e1 + e1);
+        csmArrPoint2D_append(points, 0.5 * l1 - l2 - e1, h1);
+        csmArrPoint2D_append(points, 0.5 * l1 - 2. * l2, h1);
+        csmArrPoint2D_append(points, 0.5 * l1 - 2. * l2, h1 + e1);
+        csmArrPoint2D_append(points, 0.5 * l1, h1 + e1);
+        csmArrPoint2D_append(points, 0.5 * l1, h1);
+        csmArrPoint2D_append(points, 0.5 * l1 - l2, h1);
+        csmArrPoint2D_append(points, 0.5 * l1, e1 + e1);
+        csmArrPoint2D_append(points, 0.5 * l1, e1);
+        csmArrPoint2D_append(points, 0.5 * l1, 0.);
+        
+        csmArrPoint2D_invert(points);
+
+        shape2d = csmshape2d_new();
+        csmshape2d_append_new_polygon_with_points(shape2d, &points);
+    }
+    
+    length = 3.;
+    solid1 = csmsweep_create_solid_from_shape(shape2d, 0., 0., length, 1., 0., 0., 0., 1., 0., shape2d, 0., 0., 0., 1., 0., 0., 0., 1., 0.);
+    
+    {
+        double hole_diameter;
+        struct csmshape2d_t *hole_shape;
+        double dist_between_rows;
+        unsigned long no_rows, no_columns;
+        double dist_between_columns;
+        struct csmsolid_t *hole_solid, *solid_aux;
+        enum csmsetop_opresult_t res;
+
+        hole_diameter = 0.01;
+        
+        hole_shape = csmshape2d_new();
+        
+        dist_between_rows = hole_diameter + 0.01;
+        no_rows = (unsigned long)floor((length - 2. * hole_diameter) / dist_between_rows);
+        
+        no_columns = 2;
+        dist_between_columns = (l1 - 4. * hole_diameter) / (no_columns - 1);
+        
+        for (unsigned long i = 0; i < no_rows; i++)
+        {
+            double row_coord;
+            
+            row_coord = hole_diameter + i * dist_between_rows;
+            
+            for (unsigned long j = 0; j < no_columns; j++)
+            {
+                double column_coord;
+                csmArrPoint2D *points;
+                
+                column_coord = -0.5 * l1 + 2. * hole_diameter + j * dist_between_columns;
+                
+                points = csmArrPoint2D_new(0);
+                csmArrPoint2D_append_circle_points(points, column_coord, row_coord, 0.5 * hole_diameter, 16, CSMFALSE);
+                
+                csmshape2d_append_new_polygon_with_points(hole_shape, &points);
+            }
+        }
+        
+        hole_solid = csmsweep_create_solid_from_shape(
+                        hole_shape, 0., -0.01, 0., 1., 0., 0., 0., 0., 1.,
+                        hole_shape, 0.,  0.01, 0., 1., 0., 0., 0., 0., 1.);
+                
+        solid_aux = solid1;
+        res = csmsetop_difference_A_minus_B(solid_aux, hole_solid, &solid1);
+        assert(res == CSMSETOP_OPRESULT_OK);
+        
+        csmsolid_free(&solid_aux);
+        csmsolid_free(&hole_solid);
+        csmshape2d_free(&hole_shape);
+    }
+    
+    csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    csmviewer_set_results(viewer, solid1, NULL);
+    csmviewer_show(viewer);
+    
+    csmshape2d_free(&shape2d);
+    csmsolid_free(&solid1);
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmtest_test(void)
 {
     struct csmviewer_t *viewer;
@@ -6202,9 +6314,10 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    i_test_performance_1(viewer);
+    //i_test_performance_2(viewer);
+    //i_test_performance_1(viewer);
     
-    return;
+    //return;
     
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
     csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);

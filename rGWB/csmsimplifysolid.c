@@ -92,14 +92,15 @@ static void i_delete_null_area_faces(struct csmsolid_t *solid, CSMBOOL *changed)
         while (csmhashtb_has_next(edge_iterator, csmedge_t) == CSMTRUE)
         {
             struct csmedge_t *edge;
-            struct csmhedge_t *he1, *he2;
-            struct csmface_t *face_he1, *face_he2;
-            double face_he1_area, face_he2_area;
             
             csmhashtb_next_pair(edge_iterator, NULL, &edge, csmedge_t);
             
             if (csmedge_simplifyop_skip_edge(edge) == CSMFALSE)
             {
+                struct csmhedge_t *he1, *he2;
+                struct csmface_t *face_he1, *face_he2;
+                double face_he1_area, face_he2_area;
+                
                 he1 = csmedge_hedge_lado(edge, CSMEDGE_HEDGE_SIDE_POS);
                 face_he1 = csmopbas_face_from_hedge(he1);
                 face_he1_area = csmface_loop_area_in_face(face_he1, csmface_flout(face_he1));
