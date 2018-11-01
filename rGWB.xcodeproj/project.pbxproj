@@ -641,7 +641,6 @@
 				5579545C1E5DB074000FC91E /* Info.plist */,
 				550E55AC1F87811A0033864A /* csmtypes.hxx */,
 				557954711E5DB275000FC91E /* csmfwddecl.hxx */,
-				555B4A072187AF3C0051F657 /* Importers */,
 				5589F1E92083EBC000526923 /* Solid building utilities */,
 				5579549B1E5E4823000FC91E /* Utility */,
 				551D47561FC1CD1A004F3B43 /* 2D Tools */,
@@ -762,6 +761,7 @@
 		5583DE36218AD59C0002AABB /* Input / output */ = {
 			isa = PBXGroup;
 			children = (
+				555B4A072187AF3C0051F657 /* Importers */,
 				55FAB61A20D83CA6008E1DFF /* csmsave.h */,
 				5583DE34218AD56E0002AABB /* csmsave.inl */,
 				5583DE2F218AD33C0002AABB /* csmsave.hxx */,
