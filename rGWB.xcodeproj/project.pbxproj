@@ -125,6 +125,10 @@
 		557954A01E5F942E000FC91E /* csmsolid.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5579549E1E5F942E000FC91E /* csmsolid.inl */; };
 		557954A51E60D0EF000FC91E /* csmeuler_mvfs.c in Sources */ = {isa = PBXBuildFile; fileRef = 557954A31E60D0EF000FC91E /* csmeuler_mvfs.c */; };
 		557954A61E60D0EF000FC91E /* csmeuler_mvfs.inl in Headers */ = {isa = PBXBuildFile; fileRef = 557954A41E60D0EF000FC91E /* csmeuler_mvfs.inl */; };
+		5583DE30218AD33C0002AABB /* csmsave.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 5583DE2F218AD33C0002AABB /* csmsave.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
+		5583DE35218AD56E0002AABB /* csmsave.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5583DE34218AD56E0002AABB /* csmsave.inl */; };
+		5583DE39218AD5D30002AABB /* csmsavetxt.h in Headers */ = {isa = PBXBuildFile; fileRef = 5583DE37218AD5D30002AABB /* csmsavetxt.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5583DE3A218AD5D30002AABB /* csmsavetxt.c in Sources */ = {isa = PBXBuildFile; fileRef = 5583DE38218AD5D30002AABB /* csmsavetxt.c */; };
 		5585C6B71FCB3DFA0045898B /* csmsubdvfaces.c in Sources */ = {isa = PBXBuildFile; fileRef = 5585C6B51FCB3DFA0045898B /* csmsubdvfaces.c */; };
 		5585C6B81FCB3DFA0045898B /* csmsubdvfaces.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5585C6B61FCB3DFA0045898B /* csmsubdvfaces.inl */; };
 		5589F1EC2083EBE200526923 /* csmoptree.c in Sources */ = {isa = PBXBuildFile; fileRef = 5589F1EA2083EBE200526923 /* csmoptree.c */; };
@@ -362,6 +366,10 @@
 		5579549E1E5F942E000FC91E /* csmsolid.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmsolid.inl; sourceTree = "<group>"; };
 		557954A31E60D0EF000FC91E /* csmeuler_mvfs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmeuler_mvfs.c; sourceTree = "<group>"; };
 		557954A41E60D0EF000FC91E /* csmeuler_mvfs.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmeuler_mvfs.inl; sourceTree = "<group>"; };
+		5583DE2F218AD33C0002AABB /* csmsave.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmsave.hxx; sourceTree = "<group>"; };
+		5583DE34218AD56E0002AABB /* csmsave.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsave.inl; sourceTree = "<group>"; };
+		5583DE37218AD5D30002AABB /* csmsavetxt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmsavetxt.h; sourceTree = "<group>"; };
+		5583DE38218AD5D30002AABB /* csmsavetxt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmsavetxt.c; sourceTree = "<group>"; };
 		5585C6B51FCB3DFA0045898B /* csmsubdvfaces.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsubdvfaces.c; sourceTree = "<group>"; };
 		5585C6B61FCB3DFA0045898B /* csmsubdvfaces.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsubdvfaces.inl; sourceTree = "<group>"; };
 		5589F1EA2083EBE200526923 /* csmoptree.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmoptree.c; sourceTree = "<group>"; };
@@ -679,6 +687,7 @@
 		5579549B1E5E4823000FC91E /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				5583DE36218AD59C0002AABB /* Input / output */,
 				55C6F71E1F82E7CF005EA51D /* csmassert.inl */,
 				557954641E5DB0A8000FC91E /* csmassert.c */,
 				557954651E5DB0A8000FC91E /* csmmem.inl */,
@@ -687,8 +696,6 @@
 				557954751E5E0694000FC91E /* csmid.c */,
 				557954861E5E2DCB000FC91E /* csmstring.inl */,
 				557954851E5E2DCB000FC91E /* csmstring.c */,
-				55FAB61A20D83CA6008E1DFF /* csmsave.h */,
-				55FAB61920D83CA6008E1DFF /* csmsave.c */,
 				550765C81F92038300E6BD2E /* Containers */,
 				550765BE1F92037200E6BD2E /* Geometry */,
 				550765C91F92039300E6BD2E /* Debug */,
@@ -750,6 +757,19 @@
 				550E55AD1F87A9440033864A /* csmarqsort.c */,
 			);
 			name = Array;
+			sourceTree = "<group>";
+		};
+		5583DE36218AD59C0002AABB /* Input / output */ = {
+			isa = PBXGroup;
+			children = (
+				55FAB61A20D83CA6008E1DFF /* csmsave.h */,
+				5583DE34218AD56E0002AABB /* csmsave.inl */,
+				5583DE2F218AD33C0002AABB /* csmsave.hxx */,
+				55FAB61920D83CA6008E1DFF /* csmsave.c */,
+				5583DE37218AD5D30002AABB /* csmsavetxt.h */,
+				5583DE38218AD5D30002AABB /* csmsavetxt.c */,
+			);
+			name = "Input / output";
 			sourceTree = "<group>";
 		};
 		5589F1E92083EBC000526923 /* Solid building utilities */ = {
@@ -849,6 +869,7 @@
 				55308C271F920D1800353A68 /* csmsolid_vis.h in Headers */,
 				5507A6811E7362EF008B9F73 /* csmeuler_lkfmrh.inl in Headers */,
 				55C6F71F1F82E7CF005EA51D /* csmassert.inl in Headers */,
+				5583DE30218AD33C0002AABB /* csmsave.hxx in Headers */,
 				5517CD9620BC831100DA6690 /* csmaulong.hxx in Headers */,
 				55354A441E9AE595007B0692 /* csmmath.tli in Headers */,
 				55244B2B1EAA57C4006F546E /* csmsplit.h in Headers */,
@@ -889,6 +910,7 @@
 				55F83C6B1FC4A33B009DBBEF /* csmsurface.inl in Headers */,
 				551327701EC3AF1100F2B04D /* csmvertex.tli in Headers */,
 				5507A62E1E701441008B9F73 /* csmeuler_lkef.inl in Headers */,
+				5583DE39218AD5D30002AABB /* csmsavetxt.h in Headers */,
 				5507A5CB1E662758008B9F73 /* csmeuler_lmev.inl in Headers */,
 				5507A6791E7341CD008B9F73 /* csmeuler_lkemr.inl in Headers */,
 				55244B251EA0255A006F546E /* csmtransform.inl in Headers */,
@@ -916,6 +938,7 @@
 				55EA991B1ED389C0006C063C /* csmsetop_vtxfacc.inl in Headers */,
 				5507A6211E6B744A008B9F73 /* csmeuler_lkev.inl in Headers */,
 				5579549A1E5E4811000FC91E /* csmbbox.inl in Headers */,
+				5583DE35218AD56E0002AABB /* csmsave.inl in Headers */,
 				5532DDB91E8FFE810047B9DF /* csmloopglue.inl in Headers */,
 				5585C6B81FCB3DFA0045898B /* csmsubdvfaces.inl in Headers */,
 				55244B271EA02AED006F546E /* csmsolid.h in Headers */,
@@ -1111,6 +1134,7 @@
 				557954871E5E2DCB000FC91E /* csmstring.c in Sources */,
 				5589F1EC2083EBE200526923 /* csmoptree.c in Sources */,
 				557954811E5E1AA9000FC91E /* csmnode.c in Sources */,
+				5583DE3A218AD5D30002AABB /* csmsavetxt.c in Sources */,
 				5507A6F21E7B450C008B9F73 /* csmhashtb.c in Sources */,
 				55FA851720853B7200FB00EE /* csmstmodeler.c in Sources */,
 				5598D6131F24E7F600EA1876 /* csmviewer.mm in Sources */,

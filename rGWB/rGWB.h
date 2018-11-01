@@ -20,6 +20,14 @@ FOUNDATION_EXPORT const unsigned char rGWBVersionString[];
 #import <rGWB/csmtypes.hxx>
 #import <rGWB/csmtest.h>
 
+#import <rGWB/csmaulong.h>
+#import <rGWB/csmglue.h>
+#import <rGWB/csmoptree.h>
+#import <rGWB/csmfacbrep2solid.h>
+#import <rGWB/csmmaterial.h>
+#import <rGWB/csmstmodeler.h>
+#import <rGWB/csmbasicshape2d.h>
+
 #import <rGWB/csmsolid.h>
 #import <rGWB/csmsolid_vis.h>
 
@@ -30,11 +38,15 @@ FOUNDATION_EXPORT const unsigned char rGWBVersionString[];
 
 #import <rGWB/csmsplit.h>
 #import <rGWB/csmsplit.hxx>
+#import <rGWB/csmexplode.h>
 
 #import <rGWB/csmapto2d.h>
 #import <rGWB/csmapto2d.hxx>
 #import <rGWB/csmapto3d.h>
 #import <rGWB/csmapto3d.hxx>
 
+#import <rGWB/csmsave.h>
+#import <rGWB/csmsave.hxx>
+#import <rGWB/csmsavetxt.h>
 #import <rGWB/csmtest.h>
 

@@ -9,7 +9,7 @@
 #include "csmsurface.inl"
 
 #include "csmmath.inl"
-#include "csmsave.h"
+#include "csmsave.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"

@@ -8,7 +8,7 @@
 
 #include "csmmaterial.h"
 #include "csmmaterial.tli"
-#include "csmsave.h"
+#include "csmsave.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"

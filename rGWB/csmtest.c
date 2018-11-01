@@ -42,6 +42,8 @@
 #include "csmfacbrep2solid.h"
 #include "csmapto3d.h"
 #include "csmsave.h"
+#include "csmsave.inl"
+#include "csmsavetxt.h"
 #include "csmoptree.h"
 #include "csmoptree.hxx"
 #include "csmstlimporter.h"
@@ -5897,7 +5899,7 @@ static void i_test_save0(void)
 {
     struct csmsave_t *csmsave;
     
-    csmsave = csmsave_new_file_writer("/Users/manueru/_save_test0.hle");
+    csmsave = csmsavetxt_new_file_writer("/Users/manueru/_save_test0.hle");
     {
         csmsave_write_bool(csmsave, CSMTRUE);
         csmsave_write_uchar(csmsave, 42);
@@ -5910,7 +5912,7 @@ static void i_test_save0(void)
     }
     csmsave_free(&csmsave);
     
-    csmsave = csmsave_new_file_reader("/Users/manueru/_save_test0.hle");
+    csmsave = csmsavetxt_new_file_reader("/Users/manueru/_save_test0.hle");
     {
         CSMBOOL bool_value;
         unsigned char uchar_value;
@@ -5957,12 +5959,12 @@ static void i_test_save1(struct csmviewer_t *viewer)
     
     solid = i_test_mechanical5_ex();
     
-    csmsave = csmsave_new_file_writer("/Users/manueru/_save_test1.hle");
+    csmsave = csmsavetxt_new_file_writer("/Users/manueru/_save_test1.hle");
     csmsolid_write(solid, csmsave);
     csmsave_free(&csmsave);
     csmsolid_free(&solid);
 
-    csmsave = csmsave_new_file_reader("/Users/manueru/_save_test1.hle");
+    csmsave = csmsavetxt_new_file_reader("/Users/manueru/_save_test1.hle");
     solid = csmsolid_read(csmsave);
     csmsave_free(&csmsave);
     
@@ -6004,12 +6006,12 @@ static void i_test_save2(struct csmviewer_t *viewer)
     csmdebug_set_viewer_results(NULL, NULL);
     csmsolid_free(&solid_res);
     
-    csmsave = csmsave_new_file_writer("/Users/manueru/_save_test2.optree");
+    csmsave = csmsavetxt_new_file_writer("/Users/manueru/_save_test2.optree");
     csmoptree_write(optree, csmsave);
     csmsave_free(&csmsave);
     csmoptree_free(&optree);
 
-    csmsave = csmsave_new_file_reader("/Users/manueru/_save_test2.optree");
+    csmsave = csmsavetxt_new_file_reader("/Users/manueru/_save_test2.optree");
     optree = csmoptree_read(csmsave);
     csmsave_free(&csmsave);
 
@@ -6104,12 +6106,12 @@ void csmtest_test(void)
     //i_test_difference10(viewer);
     //return;
     
-    i_test_importacion_stl1();
-    i_test_importacion_stl2();
+    //i_test_importacion_stl1();
+    //i_test_importacion_stl2();
     //i_test_importacion_stl3();
     
     process_all_test = CSMTRUE;
-    csmdebug_configure_for_fast_testing();
+    //csmdebug_configure_for_fast_testing();
     //csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
     
     //csmtest_array_test1();

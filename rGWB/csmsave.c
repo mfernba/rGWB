@@ -7,6 +7,7 @@
 //
 
 #include "csmsave.h"
+#include "csmsave.inl"
 
 #include "csmarrayc.h"
 #include "csmaulong.h"
@@ -20,58 +21,80 @@
 #include "cypespy.h"
 #endif
 
-enum i_mode_t
-{
-    i_MODE_WRITE,
-    i_MODE_READ
-};
-
 struct csmsave_t
 {
-    FILE *file_descriptor;
-    enum i_mode_t mode;
+    struct csmsave_item_t *csmsave_item;
+    csmsave_FPtr_free_item func_free_item;
+    
+    csmsave_FPtr_write_bool func_write_bool;
+    csmsave_FPtr_write_uchar func_write_uchar;
+    csmsave_FPtr_write_ushort func_write_ushort;
+    csmsave_FPtr_write_ulong func_write_ulong;
+    csmsave_FPtr_write_double func_write_double;
+    csmsave_FPtr_write_float func_write_float;
+    csmsave_FPtr_write_string func_write_string;
+    
+    csmsave_FPtr_read_bool func_read_bool;
+    csmsave_FPtr_read_uchar func_read_uchar;
+    csmsave_FPtr_read_ushort func_read_ushort;
+    csmsave_FPtr_read_ulong func_read_ulong;
+    csmsave_FPtr_read_double func_read_double;
+    csmsave_FPtr_read_float func_read_float;
+    csmsave_FPtr_read_string func_read_string;
+    
+    csmsave_FPtr_write_string func_write_st_mark;
+    csmsave_FPtr_read_string func_read_st_mark;
 };
-
-#define i_STRING_BUFFER_SIZE 1024 * 1024
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct csmsave_t *, i_new, (FILE **file_descriptor, enum i_mode_t mode))
+struct csmsave_t *csmsave_dontuse_new(
+                        struct csmsave_item_t **csmsave_item,
+                        csmsave_FPtr_free_item func_free_item,
+                        csmsave_FPtr_write_bool func_write_bool,
+                        csmsave_FPtr_write_uchar func_write_uchar,
+                        csmsave_FPtr_write_ushort func_write_ushort,
+                        csmsave_FPtr_write_ulong func_write_ulong,
+                        csmsave_FPtr_write_double func_write_double,
+                        csmsave_FPtr_write_float func_write_float,
+                        csmsave_FPtr_write_string func_write_string,
+                        csmsave_FPtr_read_bool func_read_bool,
+                        csmsave_FPtr_read_uchar func_read_uchar,
+                        csmsave_FPtr_read_ushort func_read_ushort,
+                        csmsave_FPtr_read_ulong func_read_ulong,
+                        csmsave_FPtr_read_double func_read_double,
+                        csmsave_FPtr_read_float func_read_float,
+                        csmsave_FPtr_read_string func_read_string,
+                        csmsave_FPtr_write_string func_write_st_mark,
+                        csmsave_FPtr_read_string func_read_st_mark)
 {
     struct csmsave_t *csmsave;
     
     csmsave = MALLOC(struct csmsave_t);
     
-    csmsave->file_descriptor = ASSIGN_POINTER_PP_NOT_NULL(file_descriptor, FILE);
-    csmsave->mode = mode;
+    csmsave->csmsave_item = ASSIGN_POINTER_PP_NOT_NULL(csmsave_item, struct csmsave_item_t);
+    csmsave->func_free_item = func_free_item;
+    
+    csmsave->func_write_bool = func_write_bool;
+    csmsave->func_write_uchar = func_write_uchar;
+    csmsave->func_write_ushort = func_write_ushort;
+    csmsave->func_write_ulong = func_write_ulong;
+    csmsave->func_write_double = func_write_double;
+    csmsave->func_write_float = func_write_float;
+    csmsave->func_write_string = func_write_string;
+    
+    csmsave->func_read_bool = func_read_bool;
+    csmsave->func_read_uchar = func_read_uchar;
+    csmsave->func_read_ushort = func_read_ushort;
+    csmsave->func_read_ulong = func_read_ulong;
+    csmsave->func_read_double = func_read_double;
+    csmsave->func_read_float = func_read_float;
+    csmsave->func_read_string = func_read_string;
+    
+    csmsave->func_write_st_mark = func_write_st_mark;
+    csmsave->func_read_st_mark = func_read_st_mark;
     
     return csmsave;
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-struct csmsave_t *csmsave_new_file_writer(const char *file_path)
-{
-    FILE *file_descriptor;
-    enum i_mode_t mode;
-    
-    file_descriptor = fopen(file_path, "wt");
-    mode = i_MODE_WRITE;
-    
-    return i_new(&file_descriptor, mode);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-struct csmsave_t *csmsave_new_file_reader(const char *file_path)
-{
-    FILE *file_descriptor;
-    enum i_mode_t mode;
-    
-    file_descriptor = fopen(file_path, "rt");
-    mode = i_MODE_READ;
-    
-    return i_new(&file_descriptor, mode);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -80,11 +103,9 @@ void csmsave_free(struct csmsave_t **csmsave)
 {
     assert_no_null(csmsave);
     assert_no_null(*csmsave);
-    assert_no_null((*csmsave)->file_descriptor);
+    assert_no_null((*csmsave)->func_free_item);
     
-    fflush((*csmsave)->file_descriptor);
-    fclose((*csmsave)->file_descriptor);
-    (*csmsave)->file_descriptor = NULL;
+    (*csmsave)->func_free_item(&(*csmsave)->csmsave_item);
     
     FREE_PP(csmsave, struct csmsave_t);
 }
@@ -94,9 +115,9 @@ void csmsave_free(struct csmsave_t **csmsave)
 void csmsave_write_bool(struct csmsave_t *csmsave, CSMBOOL value)
 {
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
+    assert(csmsave->func_write_bool);
     
-    fprintf(csmsave->file_descriptor, "%hu\n", value);
+    csmsave->func_write_bool(csmsave->csmsave_item, value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -104,9 +125,9 @@ void csmsave_write_bool(struct csmsave_t *csmsave, CSMBOOL value)
 void csmsave_write_ushort(struct csmsave_t *csmsave, unsigned short value)
 {
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
+    assert(csmsave->func_write_ushort);
     
-    fprintf(csmsave->file_descriptor, "%hu\n", value);
+    csmsave->func_write_ushort(csmsave->csmsave_item, value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -114,9 +135,9 @@ void csmsave_write_ushort(struct csmsave_t *csmsave, unsigned short value)
 void csmsave_write_uchar(struct csmsave_t *csmsave, unsigned char value)
 {
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
+    assert(csmsave->func_write_uchar);
     
-    fprintf(csmsave->file_descriptor, "%hhu\n", value);
+    csmsave->func_write_uchar(csmsave->csmsave_item, value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -124,9 +145,9 @@ void csmsave_write_uchar(struct csmsave_t *csmsave, unsigned char value)
 void csmsave_write_ulong(struct csmsave_t *csmsave, unsigned long value)
 {
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
+    assert(csmsave->func_write_ulong);
     
-    fprintf(csmsave->file_descriptor, "%lu\n", value);
+    csmsave->func_write_ulong(csmsave->csmsave_item, value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -134,9 +155,9 @@ void csmsave_write_ulong(struct csmsave_t *csmsave, unsigned long value)
 void csmsave_write_double(struct csmsave_t *csmsave, double value)
 {
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
-
-    fprintf(csmsave->file_descriptor, "%.17lf\n", value);
+    assert(csmsave->func_write_double);
+    
+    csmsave->func_write_double(csmsave->csmsave_item, value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -144,9 +165,9 @@ void csmsave_write_double(struct csmsave_t *csmsave, double value)
 void csmsave_write_float(struct csmsave_t *csmsave, float value)
 {
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
-
-    fprintf(csmsave->file_descriptor, "%.9f\n", value);
+    assert(csmsave->func_write_float);
+    
+    csmsave->func_write_float(csmsave->csmsave_item, value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -154,9 +175,9 @@ void csmsave_write_float(struct csmsave_t *csmsave, float value)
 void csmsave_write_string(struct csmsave_t *csmsave, const char *value)
 {
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
-
-    fprintf(csmsave->file_descriptor, "%s\n", value);
+    assert(csmsave->func_write_string);
+    
+    csmsave->func_write_string(csmsave->csmsave_item, value);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -181,7 +202,6 @@ void csmsave_write_arr_ulong(struct csmsave_t *csmsave, const csmArrULong *array
     unsigned long i, count;
     
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
 
     count = csmArrULong_count(array);
     csmsave_write_ulong(csmsave, count);
@@ -205,7 +225,6 @@ void csmsave_dontuse_write_arr_st(
     unsigned long i, count;
     
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_WRITE);
     assert_no_null(func_write_struct);
     
     count = csmarrayc_count_st(array, csmsave_item_t);
@@ -230,7 +249,9 @@ void csmsave_dontuse_write_st(
     assert_no_null(csmsave);
     assert_no_null(func_write_struct);
     
-    fprintf(csmsave->file_descriptor, "%s\n", type_name);
+    if (csmsave->func_write_st_mark != NULL)
+        csmsave->func_write_st_mark(csmsave->csmsave_item, type_name);
+    
     func_write_struct(item, csmsave);
 }
 
@@ -259,108 +280,70 @@ void csmsave_dontuse_write_optional_st(
 
 CSMBOOL csmsave_read_bool(struct csmsave_t *csmsave)
 {
-    unsigned short value;
-    int readed;
-    
     assert_no_null(csmsave);
+    assert_no_null(csmsave->func_read_bool);
 
-    readed = fscanf(csmsave->file_descriptor, "%hu\n", &value);
-    assert(readed == 1);
-    assert(value == 0 || value == 1);
-    
-    return (CSMBOOL)value;
+    return csmsave->func_read_bool(csmsave->csmsave_item);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 unsigned char csmsave_read_uchar(struct csmsave_t *csmsave)
 {
-    unsigned char value;
-    int readed;
-    
     assert_no_null(csmsave);
+    assert_no_null(csmsave->func_read_uchar);
 
-    readed = fscanf(csmsave->file_descriptor, "%hhu", &value);
-    assert(readed == 1);
-    assert(value < 255);
-    
-    return (unsigned char)value;
+    return csmsave->func_read_uchar(csmsave->csmsave_item);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 unsigned short csmsave_read_ushort(struct csmsave_t *csmsave)
 {
-    unsigned short value;
-    int readed;
-    
     assert_no_null(csmsave);
+    assert_no_null(csmsave->func_read_ushort);
 
-    readed = fscanf(csmsave->file_descriptor, "%hu\n", &value);
-    assert(readed == 1);
-    
-    return (CSMBOOL)value;
+    return csmsave->func_read_ushort(csmsave->csmsave_item);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 unsigned long csmsave_read_ulong(struct csmsave_t *csmsave)
 {
-    unsigned long value;
-    int readed;
-    
     assert_no_null(csmsave);
+    assert_no_null(csmsave->func_read_ulong);
 
-    readed = fscanf(csmsave->file_descriptor, "%lu\n", &value);
-    assert(readed == 1);
-    
-    return value;
+    return csmsave->func_read_ulong(csmsave->csmsave_item);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 double csmsave_read_double(struct csmsave_t *csmsave)
 {
-    double value;
-    int readed;
-    
     assert_no_null(csmsave);
+    assert_no_null(csmsave->func_read_double);
 
-    readed = fscanf(csmsave->file_descriptor, "%lf\n", &value);
-    assert(readed == 1);
-    
-    return value;
+    return csmsave->func_read_double(csmsave->csmsave_item);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 float csmsave_read_float(struct csmsave_t *csmsave)
 {
-    float value;
-    int readed;
-    
     assert_no_null(csmsave);
+    assert_no_null(csmsave->func_read_float);
 
-    readed = fscanf(csmsave->file_descriptor, "%f\n", &value);
-    assert(readed == 1);
-    
-    return value;
+    return csmsave->func_read_float(csmsave->csmsave_item);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
 char *csmsave_read_string(struct csmsave_t *csmsave)
 {
-    int readed;
-    char value[i_STRING_BUFFER_SIZE];
-    
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_READ);
-    
-    readed = fscanf(csmsave->file_descriptor, "%s\n", value);
-    assert(readed == 1);
-    
-    return csmstring_duplicate(value);
+    assert_no_null(csmsave->func_read_string);
+
+    return csmsave->func_read_string(csmsave->csmsave_item);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -381,7 +364,6 @@ csmArrULong *csmsave_read_arr_ulong(struct csmsave_t *csmsave)
     unsigned long i, count;
     
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_READ);
     
     count = csmsave_read_ulong(csmsave);
     array = csmArrULong_new(count);
@@ -408,7 +390,6 @@ csmArrayStruct(csmsave_item_t) *csmsave_dontuse_read_arr_st(
     unsigned long i, count;
     
     assert_no_null(csmsave);
-    assert(csmsave->mode == i_MODE_READ);
     assert_no_null(func_read_struct);
     
     count = csmsave_read_ulong(csmsave);
@@ -432,16 +413,18 @@ struct csmsave_item_t *csmsave_dontuse_read_st(
                         const char *type_name,
                         csmsave_FPtr_read_struct func_read_struct)
 {
-    char value[i_STRING_BUFFER_SIZE];
-    int readed;
-    
     assert_no_null(csmsave);
     assert_no_null(func_read_struct);
-    assert(csmsave->mode == i_MODE_READ);
     
-    readed = fscanf(csmsave->file_descriptor, "%s\n", value);
-    assert(readed == 1);
-    assert(csmstring_equal_strings(value, type_name) == CSMTRUE);
+    if (csmsave->func_read_st_mark != NULL)
+    {
+        char *readed_string;
+        
+        readed_string = csmsave->func_read_st_mark(csmsave->csmsave_item);
+        assert(csmstring_equal_strings(readed_string, type_name) == CSMTRUE);
+        
+        csmstring_free(&readed_string);
+    }
     
     return func_read_struct(csmsave);
 }

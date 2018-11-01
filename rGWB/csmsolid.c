@@ -22,7 +22,7 @@
 #include "csmmaterial.inl"
 #include "csmmath.inl"
 #include "csmnode.inl"
-#include "csmsave.h"
+#include "csmsave.inl"
 #include "csmstring.inl"
 #include "csmsurface.inl"
 #include "csmtolerance.inl"

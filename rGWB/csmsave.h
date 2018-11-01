@@ -1,122 +1,90 @@
 // Write / read to file or other sources...
 
-#include "csmfwddecl.hxx"
+#include "csmsave.hxx"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void (*csmsave_FPtr_write_struct)(const struct csmsave_item_t *item, struct csmsave_t *csmsave);
-#define CSMSAVE_CHECK_FUNC_WRITE_STRUCT(function, type)  ((void (*)(const struct type *, struct csmsave_t *))function == function)
-
-typedef struct csmsave_item_t *(*csmsave_FPtr_read_struct)(struct csmsave_t *csmsave);
-#define CSMSAVE_CHECK_FUNC_READ_STRUCT(function, type)  ((struct type *(*)(struct csmsave_t *))function == function)
-
-
-DLL_RGWB CONSTRUCTOR(struct csmsave_t *, csmsave_new_file_writer, (const char *file_path));
-
-DLL_RGWB CONSTRUCTOR(struct csmsave_t *, csmsave_new_file_reader, (const char *file_path));
+DLL_RGWB CONSTRUCTOR(struct csmsave_t *, csmsave_dontuse_new, (
+                        struct csmsave_item_t **csmsave_item,
+                        csmsave_FPtr_free_item func_free_item,
+                        csmsave_FPtr_write_bool func_write_bool,
+                        csmsave_FPtr_write_uchar func_write_uchar,
+                        csmsave_FPtr_write_ushort func_write_ushort,
+                        csmsave_FPtr_write_ulong func_write_ulong,
+                        csmsave_FPtr_write_double func_write_double,
+                        csmsave_FPtr_write_float func_write_float,
+                        csmsave_FPtr_write_string func_write_string,
+                        csmsave_FPtr_read_bool func_read_bool,
+                        csmsave_FPtr_read_uchar func_read_uchar,
+                        csmsave_FPtr_read_ushort func_read_ushort,
+                        csmsave_FPtr_read_ulong func_read_ulong,
+                        csmsave_FPtr_read_double func_read_double,
+                        csmsave_FPtr_read_float func_read_float,
+                        csmsave_FPtr_read_string func_read_string,
+                        csmsave_FPtr_write_string func_write_st_mark,
+                        csmsave_FPtr_read_string func_read_st_mark));
+#define csmsave_new(\
+                    csmsave_item, item_type,\
+                    func_free_item,\
+                    func_write_bool,\
+                    func_write_uchar,\
+                    func_write_ushort,\
+                    func_write_ulong,\
+                    func_write_double,\
+                    func_write_float,\
+                    func_write_string,\
+                    func_read_bool,\
+                    func_read_uchar,\
+                    func_read_ushort,\
+                    func_read_ulong,\
+                    func_read_double,\
+                    func_read_float,\
+                    func_read_string,\
+                    func_write_st_mark,\
+                    func_read_st_mark)\
+    (\
+        ((struct item_type **)csmsave_item == csmsave_item),\
+        CSMSAVE_CHECK_FUNC_ITEM(func_free_item, item_type),\
+        CSMSAVE_CHECK_FUNC_WRITE_BOOL(func_write_bool, item_type),\
+        CSMSAVE_CHECK_FUNC_WRITE_UCHAR(func_write_uchar, item_type),\
+        CSMSAVE_CHECK_FUNC_WRITE_USHORT(func_write_ushort, item_type),\
+        CSMSAVE_CHECK_FUNC_WRITE_ULONG(func_write_ulong, item_type),\
+        CSMSAVE_CHECK_FUNC_WRITE_DOUBLE(func_write_double, item_type),\
+        CSMSAVE_CHECK_FUNC_WRITE_FLOAT(func_write_float, item_type),\
+        CSMSAVE_CHECK_FUNC_WRITE_STRING(func_write_string, item_type),\
+        CSMSAVE_CHECK_FUNC_READ_BOOL(func_read_bool, item_type),\
+        CSMSAVE_CHECK_FUNC_READ_UCHAR(func_read_uchar, item_type),\
+        CSMSAVE_CHECK_FUNC_READ_USHORT(func_read_ushort, item_type),\
+        CSMSAVE_CHECK_FUNC_READ_ULONG(func_read_ulong, item_type),\
+        CSMSAVE_CHECK_FUNC_READ_DOUBLE(func_read_double, item_type),\
+        CSMSAVE_CHECK_FUNC_READ_FLOAT(func_read_float, item_type),\
+        CSMSAVE_CHECK_FUNC_READ_STRING(func_read_string, item_type),\
+        CSMSAVE_CHECK_FUNC_WRITE_STRING(func_write_st_mark, item_type),\
+        CSMSAVE_CHECK_FUNC_READ_STRING(func_read_st_mark, item_type),\
+        csmsave_dontuse_new(\
+                        (struct csmsave_item_t **)csmsave_item,\
+                        (csmsave_FPtr_free_item)func_free_item,\
+                        (csmsave_FPtr_write_bool)func_write_bool,\
+                        (csmsave_FPtr_write_uchar)func_write_uchar,\
+                        (csmsave_FPtr_write_ushort)func_write_ushort,\
+                        (csmsave_FPtr_write_ulong)func_write_ulong,\
+                        (csmsave_FPtr_write_double)func_write_double,\
+                        (csmsave_FPtr_write_float)func_write_float,\
+                        (csmsave_FPtr_write_string)func_write_string,\
+                        (csmsave_FPtr_read_bool)func_read_bool,\
+                        (csmsave_FPtr_read_uchar)func_read_uchar,\
+                        (csmsave_FPtr_read_ushort)func_read_ushort,\
+                        (csmsave_FPtr_read_ulong)func_read_ulong,\
+                        (csmsave_FPtr_read_double)func_read_double,\
+                        (csmsave_FPtr_read_float)func_read_float,\
+                        (csmsave_FPtr_read_string)func_read_string,\
+                        (csmsave_FPtr_write_string)func_write_st_mark,\
+                        (csmsave_FPtr_read_string)func_read_st_mark)\
+    )
 
 DLL_RGWB void csmsave_free(struct csmsave_t **csmsave);
-
-
-// Write...
-
-DLL_RGWB void csmsave_write_bool(struct csmsave_t *csmsave, CSMBOOL value);
-
-DLL_RGWB void csmsave_write_uchar(struct csmsave_t *csmsave, unsigned char value);
-
-DLL_RGWB void csmsave_write_ushort(struct csmsave_t *csmsave, unsigned short value);
-#define csmsave_write_enum(csmsave, value) csmsave_write_ushort(csmsave, (unsigned short)value)
-
-DLL_RGWB void csmsave_write_ulong(struct csmsave_t *csmsave, unsigned long value);
-
-DLL_RGWB void csmsave_write_double(struct csmsave_t *csmsave, double value);
-
-DLL_RGWB void csmsave_write_float(struct csmsave_t *csmsave, float value);
-
-DLL_RGWB void csmsave_write_string(struct csmsave_t *csmsave, const char *value);
-
-DLL_RGWB void csmsave_write_string_optional(struct csmsave_t *csmsave, const char *value);
-
-DLL_RGWB void csmsave_write_arr_ulong(struct csmsave_t *csmsave, const csmArrULong *array);
-
-DLL_RGWB void csmsave_dontuse_write_arr_st(
-                        struct csmsave_t *csmsave,
-                        const csmArrayStruct(csmsave_item_t) *array, const char *type_name,
-                        csmsave_FPtr_write_struct func_write_struct);
-#define csmsave_write_arr_st(csmsave, array, func_write_struct, type)\
-(/*lint -save -e505*/\
-    ((const csmArrayStruct(type) *)array == array),\
-    CSMSAVE_CHECK_FUNC_WRITE_STRUCT(func_write_struct, type),\
-    csmsave_dontuse_write_arr_st(csmsave, (const csmArrayStruct(csmsave_item_t) *)array, #type, (csmsave_FPtr_write_struct)func_write_struct)\
-)/*lint -restore*/
-
-DLL_RGWB void csmsave_dontuse_write_st(
-                        struct csmsave_t *csmsave,
-                        const struct csmsave_item_t *item, const char *type_name,
-                        csmsave_FPtr_write_struct func_write_struct);
-#define csmsave_write_st(csmsave, item, func_write_struct, type)\
-(/*lint -save -e505*/\
-    ((const struct type *)item == item),\
-    CSMSAVE_CHECK_FUNC_WRITE_STRUCT(func_write_struct, type),\
-    csmsave_dontuse_write_st(csmsave, (const struct csmsave_item_t *)item, #type, (csmsave_FPtr_write_struct)func_write_struct)\
-)/*lint -restore*/
-
-DLL_RGWB void csmsave_dontuse_write_optional_st(
-                        struct csmsave_t *csmsave,
-                        const struct csmsave_item_t *item, const char *type_name,
-                        csmsave_FPtr_write_struct func_write_struct);
-#define csmsave_write_optional_st(csmsave, item, func_write_struct, type)\
-(/*lint -save -e505*/\
-    ((const struct type *)item == item),\
-    CSMSAVE_CHECK_FUNC_WRITE_STRUCT(func_write_struct, type),\
-    csmsave_dontuse_write_optional_st(csmsave, (const struct csmsave_item_t *)item, #type, (csmsave_FPtr_write_struct)func_write_struct)\
-)/*lint -restore*/
-
-
-
-// Read...
-
-DLL_RGWB CSMBOOL csmsave_read_bool(struct csmsave_t *csmsave);
-
-DLL_RGWB unsigned char csmsave_read_uchar(struct csmsave_t *csmsave);
-
-DLL_RGWB unsigned short csmsave_read_ushort(struct csmsave_t *csmsave);
-#define csmsave_read_enum(csmsave, enum_type) (enum enum_type)csmsave_read_ushort(csmsave)
-
-DLL_RGWB unsigned long csmsave_read_ulong(struct csmsave_t *csmsave);
-
-DLL_RGWB double csmsave_read_double(struct csmsave_t *csmsave);
-
-DLL_RGWB float csmsave_read_float(struct csmsave_t *csmsave);
-
-DLL_RGWB CONSTRUCTOR(char *, csmsave_read_string, (struct csmsave_t *csmsave));
-
-DLL_RGWB CONSTRUCTOR(char *, csmsave_read_string_optional, (struct csmsave_t *csmsave));
-
-DLL_RGWB CONSTRUCTOR(csmArrULong *, csmsave_read_arr_ulong, (struct csmsave_t *csmsave));
-
-DLL_RGWB CONSTRUCTOR(csmArrayStruct(csmsave_item_t) *, csmsave_dontuse_read_arr_st, (struct csmsave_t *csmsave, const char *type_name, csmsave_FPtr_read_struct func_read_struct));
-#define csmsave_read_arr_st(csmsave, func_read_struct, type)\
-(/*lint -save -e505*/\
-    CSMSAVE_CHECK_FUNC_READ_STRUCT(func_read_struct, type),\
-    (csmArrayStruct(type) *)csmsave_dontuse_read_arr_st(csmsave, #type, (csmsave_FPtr_read_struct)func_read_struct)\
-)/*lint -restore*/
-
-DLL_RGWB CONSTRUCTOR(struct csmsave_item_t *, csmsave_dontuse_read_st, (struct csmsave_t *csmsave, const char *type_name, csmsave_FPtr_read_struct func_read_struct));
-#define csmsave_read_st(csmsave, func_read_struct, type)\
-(/*lint -save -e505*/\
-    CSMSAVE_CHECK_FUNC_READ_STRUCT(func_read_struct, type),\
-    (struct type *)csmsave_dontuse_read_st(csmsave, #type, (csmsave_FPtr_read_struct)func_read_struct)\
-)/*lint -restore*/
-
-DLL_RGWB CONSTRUCTOR(struct csmsave_item_t *, csmsave_dontuse_read_optional_st, (struct csmsave_t *csmsave, const char *type_name, csmsave_FPtr_read_struct func_read_struct));
-#define csmsave_read_optional_st(csmsave, func_read_struct, type)\
-(/*lint -save -e505*/\
-    CSMSAVE_CHECK_FUNC_READ_STRUCT(func_read_struct, type),\
-    (struct type *)csmsave_dontuse_read_optional_st(csmsave, #type, (csmsave_FPtr_read_struct)func_read_struct)\
-)/*lint -restore*/
 
 #ifdef __cplusplus
 }

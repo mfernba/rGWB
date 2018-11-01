@@ -15,7 +15,7 @@
 #include "csmsolid.h"
 #include "csmsplit.h"
 #include "csmsplit.hxx"
-#include "csmsave.h"
+#include "csmsave.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmmem.inl"
