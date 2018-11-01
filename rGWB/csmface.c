@@ -1255,8 +1255,6 @@ void csmface_face_equation_info(
 void csmface_maximize_bbox(const struct csmface_t *face, struct csmbbox_t *bbox)
 {
     assert_no_null(face);
-    assert(face->generated_face_data_needs_update == CSMFALSE);
-    
     csmbbox_maximize_bbox(bbox, face->bbox);
 }
 
@@ -1267,7 +1265,6 @@ double csmface_loop_area_in_face(const struct csmface_t *face, const struct csml
     double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
     
     assert_no_null(face);
-    assert(face->generated_face_data_needs_update == CSMFALSE);
 
     csmmath_plane_axis_from_implicit_plane_equation(
 						face->A, face->B, face->C, face->D,
