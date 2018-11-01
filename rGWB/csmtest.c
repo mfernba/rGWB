@@ -6314,8 +6314,8 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    //i_test_performance_2(viewer);
-    i_test_performance_1(viewer);
+    i_test_performance_2(viewer);
+    //i_test_performance_1(viewer);
     
     return;
     
