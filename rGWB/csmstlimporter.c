@@ -32,6 +32,7 @@
 #define fread lc_fread
 #define fclose lc_fclose
 #define fprintf ctxt_printf
+#define feof f_lc_feof
 
 #endif
 
@@ -448,7 +449,7 @@ static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csm
         
         csmfacbrep2solid_free(&brep_builder);
         
-    } while (!f_lc_feof(file) && exists_error == CSMFALSE);
+    } while (!feof(file) && exists_error == CSMFALSE);
     
     if (exists_error == CSMTRUE)
         solid_loc = NULL;
