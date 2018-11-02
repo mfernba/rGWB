@@ -23,7 +23,8 @@ enum csmcompare_t
 #ifdef __STANDALONE_DISTRIBUTABLE
 #include "csmapto2d.hxx"
 #include "csmapto3d.hxx"
-#include "csmaulong.hxx"
 #endif
+
+#include "csmaulong.hxx"
 
 #endif /* csmtypes_h */
