@@ -326,8 +326,8 @@
 		553E63E81FF69E0600A15475 /* csmsetop.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmsetop.hxx; sourceTree = "<group>"; };
 		5559D4E2204F3F310058F6F5 /* csmsetop_join.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsetop_join.c; sourceTree = "<group>"; };
 		5559D4E3204F3F310058F6F5 /* csmsetop_join.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsetop_join.inl; sourceTree = "<group>"; };
-		555B4A0B2187AF6A0051F657 /* csmstlimporter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmstlimporter.c; sourceTree = "<group>"; };
-		555B4A0C2187AF6A0051F657 /* csmstlimporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmstlimporter.h; sourceTree = "<group>"; };
+		555B4A0B2187AF6A0051F657 /* csmstlimporter.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmstlimporter.c; sourceTree = "<group>"; };
+		555B4A0C2187AF6A0051F657 /* csmstlimporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmstlimporter.h; sourceTree = "<group>"; };
 		555B4A0F2187B07A0051F657 /* csmstlimporter.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = csmstlimporter.hxx; sourceTree = "<group>"; };
 		5570129E1E8328E400DFC490 /* csmsweep.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; lineEnding = 2; path = csmsweep.c; sourceTree = "<group>"; };
 		5570129F1E8328E400DFC490 /* csmsweep.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmsweep.h; sourceTree = "<group>"; };
@@ -369,7 +369,7 @@
 		5583DE2F218AD33C0002AABB /* csmsave.hxx */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; lineEnding = 2; path = csmsave.hxx; sourceTree = "<group>"; };
 		5583DE34218AD56E0002AABB /* csmsave.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsave.inl; sourceTree = "<group>"; };
 		5583DE37218AD5D30002AABB /* csmsavetxt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmsavetxt.h; sourceTree = "<group>"; };
-		5583DE38218AD5D30002AABB /* csmsavetxt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmsavetxt.c; sourceTree = "<group>"; };
+		5583DE38218AD5D30002AABB /* csmsavetxt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsavetxt.c; sourceTree = "<group>"; };
 		5585C6B51FCB3DFA0045898B /* csmsubdvfaces.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmsubdvfaces.c; sourceTree = "<group>"; };
 		5585C6B61FCB3DFA0045898B /* csmsubdvfaces.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmsubdvfaces.inl; sourceTree = "<group>"; };
 		5589F1EA2083EBE200526923 /* csmoptree.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmoptree.c; sourceTree = "<group>"; };

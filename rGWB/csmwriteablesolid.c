@@ -232,7 +232,7 @@ CONSTRUCTOR(static struct csmwriteablesolid_face_t *, i_new_face, (
     face->floops = ASSIGN_POINTER_PP_NOT_NULL(floops, csmArrayStruct(csmwriteablesolid_loop_t));
     
     face->surface_eq = ASSIGN_POINTER_PP_NOT_NULL(surface_eq, struct csmsurface_t);
-    face->visz_material_opt = ASSIGN_POINTER_PP_NOT_NULL(visz_material_opt, struct csmmaterial_t);
+    face->visz_material_opt = ASSIGN_POINTER_PP(visz_material_opt, struct csmmaterial_t);
     
     return face;
 }

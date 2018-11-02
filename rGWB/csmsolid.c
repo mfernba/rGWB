@@ -1499,7 +1499,7 @@ void csmsolid_get_bbox_extension(
                         double *x_max, double *y_max, double *z_max)
 {
     assert_no_null(solid);
-    csmbbox_get_extension_ext(solid->bbox, x_min, y_min, z_min, x_max, y_max, z_max);
+    csmbbox_get_extension_real(solid->bbox, x_min, y_min, z_min, x_max, y_max, z_max);
 }
 
 // ----------------------------------------------------------------------------------------------------

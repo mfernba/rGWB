@@ -8,18 +8,27 @@
 
 #include "csmsavetxt.h"
 
-#include "csmarrayc.h"
-#include "csmaulong.h"
-#include "csmsave.inl"
 #include "csmsave.h"
 #include "csmstring.inl"
 
 #ifdef __STANDALONE_DISTRIBUTABLE
+
 #include "csmassert.inl"
 #include "csmmem.inl"
+
 #else
+
 #include "cyassert.h"
 #include "cypespy.h"
+#include "cypeio.h"
+#include "cypetxt.h"
+#include "standarc.h"
+
+#define fflush f_lc_fflush
+#define fopen lc_fopen
+#define fclose lc_fclose
+#define fprintf ctxt_printf
+
 #endif
 
 enum i_mode_t
@@ -34,7 +43,7 @@ struct csmsavetxt_t
     enum i_mode_t mode;
 };
 
-#define i_STRING_BUFFER_SIZE 1024 * 1024
+#define i_STRING_BUFFER_SIZE (1024 * 1024)
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -58,7 +67,7 @@ static void i_free(struct csmsavetxt_t **csmsave)
     assert_no_null(*csmsave);
     assert_no_null((*csmsave)->file_descriptor);
     
-    fflush((*csmsave)->file_descriptor);
+    (void)fflush((*csmsave)->file_descriptor);
     fclose((*csmsave)->file_descriptor);
     (*csmsave)->file_descriptor = NULL;
     

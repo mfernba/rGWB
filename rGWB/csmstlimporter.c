@@ -23,6 +23,15 @@
 
 #include "cyassert.h"
 #include "cypespy.h"
+#include "cypeio.h"
+#include "cypetxt.h"
+#include "standarc.h"
+
+#define fopen lc_fopen
+#define fopen_u lc_fopen_u
+#define fread lc_fread
+#define fclose lc_fclose
+#define fprintf ctxt_printf
 
 #endif
 
@@ -47,7 +56,7 @@ struct i_stl_solid_t
     struct csmfacbrep2solid_t *brep_builder;
 };
 
-csmArrayStruct(i_stl_solid_t) *stl_solids;
+csmArrayStruct(i_stl_solid_t);
 
 // --------------------------------------------------------------------------------
 
@@ -97,9 +106,9 @@ static void i_append_facet_to_brep_builder(const struct i_stl_facet_t *facet, st
     assert_no_null(facet);
 
     outer_loop = csmfacbrep2solid_new_loop();
-    csmfacbrep2solid_append_point_to_loop(outer_loop, facet->v1x, facet->v1y, facet->v1z);
-    csmfacbrep2solid_append_point_to_loop(outer_loop, facet->v2x, facet->v2y, facet->v2z);
-    csmfacbrep2solid_append_point_to_loop(outer_loop, facet->v3x, facet->v3y, facet->v3z);
+    csmfacbrep2solid_append_point_to_loop(outer_loop, (double)facet->v1x, (double)facet->v1y, (double)facet->v1z);
+    csmfacbrep2solid_append_point_to_loop(outer_loop, (double)facet->v2x, (double)facet->v2y, (double)facet->v2z);
+    csmfacbrep2solid_append_point_to_loop(outer_loop, (double)facet->v3x, (double)facet->v3y, (double)facet->v3z);
     
     face = csmfacbrep2solid_new_face();
     csmfacbrep2solid_append_outer_loop_to_face(face, &outer_loop);
@@ -327,6 +336,8 @@ static enum csmstlimporter_result_t i_did_read_binary_file(FILE *file, struct cs
     return result;
 }
 
+#ifdef __STANDALONE_DISTRIBUTABLE
+
 // --------------------------------------------------------------------------------
 
 enum csmstlimporter_result_t csmstlimporter_did_read_binary_stl(const char *file_path, struct csmsolid_t **solid)
@@ -437,7 +448,7 @@ static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csm
         
         csmfacbrep2solid_free(&brep_builder);
         
-    } while (!feof(file) && exists_error == CSMFALSE);
+    } while (!f_lc_feof(file) && exists_error == CSMFALSE);
     
     if (exists_error == CSMTRUE)
         solid_loc = NULL;
@@ -479,3 +490,80 @@ enum csmstlimporter_result_t csmstlimporter_did_read_ascii_stl(const char *file_
     
     return result;
 }
+
+#else
+
+// --------------------------------------------------------------------------------
+
+enum csmstlimporter_result_t csmstlimporter_did_read_binary_stl_u(const wchar_t *file_path, struct csmsolid_t **solid)
+{
+    enum csmstlimporter_result_t result;
+    struct csmsolid_t *solid_loc;
+    FILE *file;
+    
+    assert_no_null(solid);
+    
+    file = fopen_u(file_path, L"rb");
+    
+    if (file == NULL)
+    {
+        result = CSMSTLIMPORTER_RESULT_FILE_NOT_FOUND;
+        solid_loc = NULL;
+    }
+    else
+    {
+        result = i_did_read_binary_file(file, &solid_loc);
+        fclose(file);
+    }
+    
+    *solid = solid_loc;
+    
+    return result;
+}
+
+// --------------------------------------------------------------------------------
+
+void csmstlimporter_convert_binary_stl_to_text_u(const wchar_t *file_path_in, const wchar_t *file_path_out)
+{
+    FILE *file_in, *file_out;
+    size_t stl_facet_size;
+    struct i_stl_header_t header;
+    unsigned long i;
+
+    assert(sizeof(unsigned int) == 4);
+    assert(sizeof(float) == 4);
+    assert(sizeof(unsigned short) == 2);
+    stl_facet_size = sizeof(struct i_stl_facet_t);
+    assert(stl_facet_size == 48);
+
+    file_in = fopen_u(file_path_in, L"rb");
+    file_out = fopen_u(file_path_out, L"wt");
+    
+    fread(&header, sizeof(struct i_stl_header_t), 1, file_in);
+    assert(header.no_facets > 0);
+
+    fprintf(file_out, "%s\n", header.header);
+    fprintf(file_out, "%lu\n", header.no_facets);
+    fprintf(file_out, "\n");
+    
+    for (i = 0; i < header.no_facets; i++)
+    {
+        struct i_stl_facet_t facet;
+        unsigned short attrib;
+            
+        fread(&facet, sizeof(struct i_stl_facet_t), 1, file_in);
+        fread(&attrib, sizeof(unsigned short), 1, file_in);
+
+        fprintf(file_out, "Face idx: %lu\n", i);
+        fprintf(file_out, "Normal %f %f %f\n", facet.nx, facet.ny, facet.nz);
+        fprintf(file_out, "Vertex %f %f %f\n", facet.v1x, facet.v1y, facet.v1z);
+        fprintf(file_out, "Vertex %f %f %f\n", facet.v2x, facet.v2y, facet.v2z);
+        fprintf(file_out, "Vertex %f %f %f\n", facet.v3x, facet.v3y, facet.v3z);
+        fprintf(file_out, "\n");
+    }
+
+    fclose(file_in);
+    fclose(file_out);
+}
+
+#endif

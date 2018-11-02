@@ -44,7 +44,7 @@ DLL_RGWB CONSTRUCTOR(struct csmsave_t *, csmsave_dontuse_new, (
                     func_read_string,\
                     func_write_st_mark,\
                     func_read_st_mark)\
-    (\
+    (/*lint -save -e505*/\
         ((struct item_type **)csmsave_item == csmsave_item),\
         CSMSAVE_CHECK_FUNC_ITEM(func_free_item, item_type),\
         CSMSAVE_CHECK_FUNC_WRITE_BOOL(func_write_bool, item_type),\
@@ -82,7 +82,7 @@ DLL_RGWB CONSTRUCTOR(struct csmsave_t *, csmsave_dontuse_new, (
                         (csmsave_FPtr_read_string)func_read_string,\
                         (csmsave_FPtr_write_string)func_write_st_mark,\
                         (csmsave_FPtr_read_string)func_read_st_mark)\
-    )
+    )/*lint -restore*/
 
 DLL_RGWB void csmsave_free(struct csmsave_t **csmsave);
 
