@@ -204,6 +204,6 @@ void csmface_append_datos_mesh(
 void csmface_append_cara_solido(
                     struct csmface_t *face,
                     CSMBOOL only_faces_towards_direction, double Wx, double Wy, double Wz, double tolerance_rad, 
-                    ArrArrPuntero(ArrPunto3D) *caras_solido);
+                    ArrArrPuntero(ArrPunto3D) *caras_solido, ArrEstructura(ejes2d_t) *ejes_caras_solido);
 
 #endif

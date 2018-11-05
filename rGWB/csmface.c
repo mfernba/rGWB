@@ -44,6 +44,7 @@
 #include "cypespy.h"
 #include "cypemesh.h"
 #include "ebageom.h"
+#include "ejes2d.h"
 #endif
 
 struct csmface_t
@@ -330,7 +331,6 @@ struct csmface_t *csmface_new_from_writeable_face(
 {
     struct csmface_t *face;
     unsigned long i, no_loops;
-    struct csmloop_t *prev_loop;
     
     assert_no_null(w_face);
     
@@ -345,7 +345,6 @@ struct csmface_t *csmface_new_from_writeable_face(
         face->visz_material_opt = csmmaterial_copy(w_face->visz_material_opt);
     
     no_loops = csmarrayc_count_st(w_face->floops, csmwriteablesolid_loop_t);
-    prev_loop = NULL;
     
     for (i = 0; i < no_loops; i++)
     {
@@ -1975,6 +1974,7 @@ static void i_cyvis_append_loop_to_shape(
                         struct csmloop_t *loop,
                         double Xo, double Yo, double Zo,
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz,
+                        CSMBOOL is_outer_loop,
                         ArrPuntero(ArrPunto3D) *poligonos_3d_cara)
 {
     struct csmhedge_t *ledge, *iterator;
@@ -2017,10 +2017,26 @@ static void i_cyvis_append_loop_to_shape(
         
     } while (iterator != ledge);
     
-    if (arr_NumElemsPunto3D(points) >= 3 && csmmath_fabs(arr_CalcularAreaPunto2D(points_2d)) > 0.)
+    if (arr_NumElemsPunto3D(points) >= 3)
     {
-        ebageom_invierte_puntos3D(points);
-        arr_AppendPunteroTD(poligonos_3d_cara, points, ArrPunto3D);
+        double area;
+
+        area = arr_CalcularAreaPunto2D(points_2d);
+
+        if (csmmath_fabs(area) > 0.)
+        {
+            if (is_outer_loop == CSMTRUE)
+                assert(area > 0.);
+            else
+                assert(area < 0.);
+
+            ebageom_invierte_puntos3D(points);
+            arr_AppendPunteroTD(poligonos_3d_cara, points, ArrPunto3D);
+        }
+        else
+        {
+            arr_DestruyePunto3D(&points);
+        }
     }
     else
     {
@@ -2085,14 +2101,14 @@ void csmface_append_datos_mesh(
     poligonos_3d_cara = arr_CreaPunteroTD(0, ArrPunto3D);
 
     flout = csmface_flout(face);
-    i_cyvis_append_loop_to_shape(flout, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+    i_cyvis_append_loop_to_shape(flout, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMTRUE, poligonos_3d_cara);
 
     loop_iterator = csmface_floops(face);
     
     while (loop_iterator != NULL)
     {
         if (loop_iterator != flout)
-            i_cyvis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+            i_cyvis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMFALSE, poligonos_3d_cara);
 
         loop_iterator = csmloop_next(loop_iterator);
     }
@@ -2138,12 +2154,13 @@ void csmface_append_datos_mesh(
 void csmface_append_cara_solido(
                     struct csmface_t *face,
                     CSMBOOL only_faces_towards_direction, double Wx, double Wy, double Wz, double tolerance_rad, 
-                    ArrArrPuntero(ArrPunto3D) *caras_solido)
+                    ArrArrPuntero(ArrPunto3D) *caras_solido, ArrEstructura(ejes2d_t) *ejes_caras_solido)
 {
     double Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz;
     CSMBOOL add_face;
     
     assert_no_null(face);
+    assert(arr_NumElemsPunteroArrayTD(caras_solido, ArrPunto3D) == arr_NumElemsPunteroST(ejes_caras_solido, ejes2d_t));
 
     csmmath_plane_axis_from_implicit_plane_equation(
                         face->A, face->B, face->C, face->D,
@@ -2187,22 +2204,31 @@ void csmface_append_cara_solido(
         poligonos_3d_cara = arr_CreaPunteroTD(0, ArrPunto3D);
 
         flout = csmface_flout(face);
-        i_cyvis_append_loop_to_shape(flout, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+        i_cyvis_append_loop_to_shape(flout, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMTRUE, poligonos_3d_cara);
 
         loop_iterator = csmface_floops(face);
         
         while (loop_iterator != NULL)
         {
             if (loop_iterator != flout)
-                i_cyvis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, poligonos_3d_cara);
+                i_cyvis_append_loop_to_shape(loop_iterator, Xo, Yo, Zo, Ux, Uy, Uz, Vx, Vy, Vz, CSMFALSE, poligonos_3d_cara);
 
             loop_iterator = csmloop_next(loop_iterator);
         }
         
         if (arr_NumElemsPunteroTD(poligonos_3d_cara, ArrPunto3D) > 0)
+        {
+            struct ejes2d_t *ejes_cara;
+
             arr_AppendPunteroArrayTD(caras_solido, poligonos_3d_cara, ArrPunto3D);
+
+            ejes_cara = ejes2d_crea(Xo, Yo, Zo, Ux, Uy, Uz, -Vx, -Vy, -Vz);
+            arr_AppendPunteroST(ejes_caras_solido, ejes_cara, ejes2d_t);
+        }
         else
+        {
             arr_DestruyeEstructurasTD(&poligonos_3d_cara, ArrPunto3D, arr_DestruyePunto3D);
+        }
     }
 }
 

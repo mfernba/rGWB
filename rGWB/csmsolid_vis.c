@@ -33,6 +33,7 @@
 #include "a_punter.h"
 #include "a_ulong.h"
 #include "cyassert.h"
+#include "ejes2d.h"
 
 #endif
 
@@ -592,9 +593,11 @@ ArrPuntero(ArrPunto3D) *csmsolid_vis_datos_lineas(struct csmsolid_t *solid)
 
 ArrArrPuntero(ArrPunto3D) *csmsolid_vis_caras_solido(
                         struct csmsolid_t *solid,
-                        CSMBOOL only_faces_towards_direction, double Wx, double Wy, double Wz, double tolerance_rad)
+                        CSMBOOL only_faces_towards_direction, double Wx, double Wy, double Wz, double tolerance_rad,
+                        ArrEstructura(ejes2d_t) **ejes_caras_solido_opc)
 {
     ArrArrPuntero(ArrPunto3D) *caras_solido;
+    ArrEstructura(ejes2d_t) *ejes_caras_solido_loc;
     struct csmhashtb_iterator(csmface_t) *face_iterator;
 
     csmsolid_redo_geometric_generated_data(solid);
@@ -602,18 +605,25 @@ ArrArrPuntero(ArrPunto3D) *csmsolid_vis_caras_solido(
     face_iterator = csmsolid_face_iterator(solid);
 
     caras_solido = arr_CreaPunteroArrayTD(0, ArrPunto3D);
+    ejes_caras_solido_loc = arr_CreaPunteroST(0, ejes2d_t);
 
     while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
     {
         struct csmface_t *face;
         
         csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);
-        csmface_append_cara_solido(face, only_faces_towards_direction, Wx, Wy, Wz, tolerance_rad, caras_solido);
+        csmface_append_cara_solido(face, only_faces_towards_direction, Wx, Wy, Wz, tolerance_rad, caras_solido, ejes_caras_solido_loc);
     }
 
     csmhashtb_free_iterator(&face_iterator, csmface_t);
 
+    if (ejes_caras_solido_opc != NULL)
+        *ejes_caras_solido_opc = ejes_caras_solido_loc;
+    else
+        arr_DestruyeEstructurasST(&ejes_caras_solido_loc, ejes2d_t, ejes2d_destruye);
+
     return caras_solido;
 }
+
 
 #endif
