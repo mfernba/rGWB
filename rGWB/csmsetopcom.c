@@ -1476,58 +1476,82 @@ void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid
 void csmsetopcom_move_face_to_solid(
                         unsigned long recursion_level,
                         struct csmface_t *face, struct csmsolid_t *face_solid,
-                        struct csmsolid_t *destination_solid)
+                        struct csmsolid_t *destination_solid,
+                        CSMBOOL *improper_face_move_detected)
 {
+    CSMBOOL improper_face_move_detected_loc;
+    
     assert(recursion_level < 1000000);
+    assert_no_null(improper_face_move_detected);
     
-    if (csmface_fsolid(face) != destination_solid)
+    if (csmface_fsolid(face) == destination_solid)
     {
-        register struct csmloop_t *loop_iterator;
-    
-        assert(csmface_fsolid(face) == face_solid);
-        
-        if (csmdebug_debug_enabled() == CSMTRUE)
+        improper_face_move_detected_loc = CSMFALSE;
+    }
+    else
+    {
+        if (csmface_fsolid(face) != face_solid)
         {
-            csmdebug_print_debug_info("Moving face %lu (solid %p) to solid %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
-            assert(csmface_fsolid(face) == face_solid);
+            improper_face_move_detected_loc = CSMTRUE;
         }
-        
-        csmsolid_move_face_to_solid(face_solid, face, destination_solid);
-        
-        loop_iterator = csmface_floops(face);
-        
-        while (loop_iterator != NULL)
+        else
         {
-            register struct csmhedge_t *loop_ledge, *he_iterator;
-            unsigned long no_iters;
+            struct csmloop_t *loop_iterator;
             
-            loop_ledge = csmloop_ledge(loop_iterator);
-            he_iterator = loop_ledge;
-            no_iters = 0;
-            
-            do
+            if (csmdebug_debug_enabled() == CSMTRUE)
             {
-                struct csmhedge_t *he_mate_iterator;
-                struct csmface_t *he_mate_iterator_face;
-                struct csmsolid_t *he_mate_iterator_face_solid;
-                
-                assert(no_iters < 10000);
-                no_iters++;
-                
-                he_mate_iterator = csmopbas_mate(he_iterator);
-                he_mate_iterator_face = csmopbas_face_from_hedge(he_mate_iterator);
-                he_mate_iterator_face_solid = csmface_fsolid(he_mate_iterator_face);
-                
-                if (he_mate_iterator_face_solid != destination_solid)
-                    csmsetopcom_move_face_to_solid(recursion_level + 1, he_mate_iterator_face, he_mate_iterator_face_solid, destination_solid);
-                
-                he_iterator = csmhedge_next(he_iterator);
+                csmdebug_print_debug_info("Moving face %lu (solid %p) to solid %p\n", csmface_id(face), csmface_fsolid(face), destination_solid);
+                assert(csmface_fsolid(face) == face_solid);
             }
-            while (he_iterator != loop_ledge);
             
-            loop_iterator = csmloop_next(loop_iterator);
+            csmsolid_move_face_to_solid(face_solid, face, destination_solid);
+            
+            loop_iterator = csmface_floops(face);
+            improper_face_move_detected_loc = CSMFALSE;
+            
+            while (loop_iterator != NULL)
+            {
+                register struct csmhedge_t *loop_ledge, *he_iterator;
+                unsigned long no_iters;
+                
+                loop_ledge = csmloop_ledge(loop_iterator);
+                he_iterator = loop_ledge;
+                no_iters = 0;
+                
+                do
+                {
+                    struct csmhedge_t *he_mate_iterator;
+                    struct csmface_t *he_mate_iterator_face;
+                    struct csmsolid_t *he_mate_iterator_face_solid;
+                    
+                    assert(no_iters < 10000);
+                    no_iters++;
+                    
+                    he_mate_iterator = csmopbas_mate(he_iterator);
+                    he_mate_iterator_face = csmopbas_face_from_hedge(he_mate_iterator);
+                    he_mate_iterator_face_solid = csmface_fsolid(he_mate_iterator_face);
+                    
+                    if (he_mate_iterator_face_solid != destination_solid)
+                    {
+                        csmsetopcom_move_face_to_solid(recursion_level + 1, he_mate_iterator_face, he_mate_iterator_face_solid, destination_solid, &improper_face_move_detected_loc);
+                        
+                        if (improper_face_move_detected_loc == CSMTRUE)
+                            break;
+                    }
+                    
+                    he_iterator = csmhedge_next(he_iterator);
+                }
+                while (he_iterator != loop_ledge);
+                
+                loop_iterator = csmloop_next(loop_iterator);
+                
+                if (improper_face_move_detected_loc == CSMTRUE)
+                    break;
+            }
         }
     }
+    
+    *improper_face_move_detected = improper_face_move_detected_loc;
 }
 
 // ----------------------------------------------------------------------------------------------------

@@ -951,34 +951,27 @@ static CSMBOOL i_did_finish_split(
     if (csmdebug_debug_enabled() == CSMTRUE)
         csmsolid_print_debug(work_solid, CSMTRUE);
 
-    there_is_improper_intersection_error = CSMFALSE;
-    
     solid_above_loc = csmsolid_new_empty_solid(0);
     i_assign_result_material(work_solid, solid_above_loc);
     
     solid_below_loc = csmsolid_new_empty_solid(0);
     i_assign_result_material(work_solid, solid_below_loc);
     
+    there_is_improper_intersection_error = CSMFALSE;
+    
     for (i = 0; i < no_null_faces; i++)
     {
         struct csmface_t *face_to_solid_above;
-        struct csmface_t *face_to_solid_below;
         
         face_to_solid_above = csmarrayc_get_st(set_of_null_faces_above, i, csmface_t);
+        csmsetopcom_move_face_to_solid(0, face_to_solid_above, work_solid, solid_above_loc, &there_is_improper_intersection_error);
 
-        if (csmface_fsolid(face_to_solid_above) == work_solid)
-            csmsetopcom_move_face_to_solid(0, face_to_solid_above, work_solid, solid_above_loc);
-        else if (csmface_fsolid(face_to_solid_above) != solid_above_loc)
-            there_is_improper_intersection_error = CSMTRUE;
-        
         if (there_is_improper_intersection_error == CSMFALSE)
         {
+            struct csmface_t *face_to_solid_below;
+            
             face_to_solid_below = csmarrayc_get_st(set_of_null_faces_below, i, csmface_t);
-
-            if (csmface_fsolid(face_to_solid_below) == work_solid)
-                csmsetopcom_move_face_to_solid(0, face_to_solid_below, work_solid, solid_below_loc);
-            else if (csmface_fsolid(face_to_solid_below) != solid_below_loc)
-                there_is_improper_intersection_error = CSMTRUE;
+            csmsetopcom_move_face_to_solid(0, face_to_solid_below, work_solid, solid_below_loc, &there_is_improper_intersection_error);
         }
 
         if (there_is_improper_intersection_error == CSMTRUE)

@@ -63,7 +63,8 @@ void csmsetopcom_correct_faces_after_joining_null_edges(struct csmsolid_t *solid
 void csmsetopcom_move_face_to_solid(
                         unsigned long recursion_level,
                         struct csmface_t *face, struct csmsolid_t *face_solid,
-                        struct csmsolid_t *destination_solid);
+                        struct csmsolid_t *destination_solid,
+                        CSMBOOL *improper_face_move_detected);
 
 enum csmsetop_classify_resp_solid_t csmsetopcom_classify_value_respect_to_plane(double value, double tolerance);
 

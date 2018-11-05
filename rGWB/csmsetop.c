@@ -449,9 +449,12 @@ static void i_move_independent_shells_from_parameter_solid_to_result(
     for (i = 0; i < no_faces; i++)
     {
         struct csmface_t *face_from_solid_parameter;
+        CSMBOOL improper_face_move_detected;
     
         face_from_solid_parameter = csmarrayc_get_st(faces_to_move, i, csmface_t);
-        csmsetopcom_move_face_to_solid(0, face_from_solid_parameter, solid_parameter, solid_result);
+        
+        csmsetopcom_move_face_to_solid(0, face_from_solid_parameter, solid_parameter, solid_result, &improper_face_move_detected);
+        assert(improper_face_move_detected == CSMFALSE);
     }
     
     csmarrayc_free_st(&faces_to_move, csmface_t, NULL);
@@ -585,12 +588,15 @@ CONSTRUCTOR(static struct csmsolid_t *, i_finish_set_operation, (
         for (i = 0; i < half_no_null_faces; i++)
         {
             struct csmface_t *face_from_solid_A, *face_from_solid_B;
+            CSMBOOL improper_face_move_detected;
         
             face_from_solid_A = csmarrayc_get_st(set_of_null_faces_A, i + face_desp_a, csmface_t);
-            csmsetopcom_move_face_to_solid(0, face_from_solid_A, solid_A, result);
+            csmsetopcom_move_face_to_solid(0, face_from_solid_A, solid_A, result, &improper_face_move_detected);
+            assert(improper_face_move_detected == CSMFALSE);
         
             face_from_solid_B = csmarrayc_get_st(set_of_null_faces_B, i + face_desp_b, csmface_t);
-            csmsetopcom_move_face_to_solid(0, face_from_solid_B, solid_B, result);
+            csmsetopcom_move_face_to_solid(0, face_from_solid_B, solid_B, result, &improper_face_move_detected);
+            assert(improper_face_move_detected == CSMFALSE);
         }
         
         if (i_should_move_independent_shells_to_solid_result(set_operation, setop_operator_union_joins_independent_shells) == CSMTRUE)
