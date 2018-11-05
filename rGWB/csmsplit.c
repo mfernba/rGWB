@@ -19,6 +19,7 @@
 #include "csmsimplifysolid.inl"
 #include "csmsolid.h"
 #include "csmsolid.inl"
+#include "csmstring.inl"
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 #include "csmvertex.tli"
@@ -29,6 +30,7 @@
 #else
 #include "cyassert.h"
 #include "cypespy.h"
+#include "copiafor.h"
 #endif
 
 enum i_position_t
@@ -45,6 +47,8 @@ struct i_neighborhood_t
     enum i_position_t prev_position;
     enum i_position_t recl_position;
 };
+
+static const unsigned long i_NUM_MAX_PERTURBATIONS = 10;
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -912,16 +916,18 @@ static void i_assign_result_material(const struct csmsolid_t *solid, struct csms
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_finish_split(
+static CSMBOOL i_did_finish_split(
                         csmArrayStruct(csmface_t) *set_of_null_faces,
                         struct csmsolid_t *work_solid,
                         const struct csmtolerance_t *tolerances,
                         struct csmsolid_t **solid_above, struct csmsolid_t **solid_below)
 {
+    CSMBOOL did_finish;
     unsigned long i, no_null_faces;
     struct csmsolid_t *solid_above_loc, *solid_below_loc;
     csmArrayStruct(csmface_t) *set_of_null_faces_above;
     csmArrayStruct(csmface_t) *set_of_null_faces_below;
+    CSMBOOL there_is_improper_intersection_error;
 
     assert_no_null(solid_above);
     assert_no_null(solid_below);
@@ -944,6 +950,8 @@ static void i_finish_split(
     
     if (csmdebug_debug_enabled() == CSMTRUE)
         csmsolid_print_debug(work_solid, CSMTRUE);
+
+    there_is_improper_intersection_error = CSMFALSE;
     
     solid_above_loc = csmsolid_new_empty_solid(0);
     i_assign_result_material(work_solid, solid_above_loc);
@@ -957,26 +965,52 @@ static void i_finish_split(
         struct csmface_t *face_to_solid_below;
         
         face_to_solid_above = csmarrayc_get_st(set_of_null_faces_above, i, csmface_t);
-        csmsetopcom_move_face_to_solid(0, face_to_solid_above, work_solid, solid_above_loc);
+
+        if (csmface_fsolid(face_to_solid_above) == work_solid)
+            csmsetopcom_move_face_to_solid(0, face_to_solid_above, work_solid, solid_above_loc);
+        else if (csmface_fsolid(face_to_solid_above) != solid_above_loc)
+            there_is_improper_intersection_error = CSMTRUE;
         
-        face_to_solid_below = csmarrayc_get_st(set_of_null_faces_below, i, csmface_t);
-        csmsetopcom_move_face_to_solid(0, face_to_solid_below, work_solid, solid_below_loc);
+        if (there_is_improper_intersection_error == CSMFALSE)
+        {
+            face_to_solid_below = csmarrayc_get_st(set_of_null_faces_below, i, csmface_t);
+
+            if (csmface_fsolid(face_to_solid_below) == work_solid)
+                csmsetopcom_move_face_to_solid(0, face_to_solid_below, work_solid, solid_below_loc);
+            else if (csmface_fsolid(face_to_solid_below) != solid_below_loc)
+                there_is_improper_intersection_error = CSMTRUE;
+        }
+
+        if (there_is_improper_intersection_error == CSMTRUE)
+            break;
     }
-    
+
     csmsetopcom_cleanup_solid(work_solid, solid_above_loc);
     csmsetopcom_cleanup_solid(work_solid, solid_below_loc);
-    
-    csmsolid_redo_geometric_face_data(solid_above_loc);
-    csmsetopcom_correct_faces_after_joining_null_edges(solid_above_loc, tolerances);
-    
-    csmsolid_redo_geometric_face_data(solid_below_loc);
-    csmsetopcom_correct_faces_after_joining_null_edges(solid_below_loc, tolerances);
 
-    if (csmdebug_debug_enabled() == CSMTRUE)
+    if (there_is_improper_intersection_error == CSMTRUE)
     {
-        csmsolid_print_debug(work_solid, CSMTRUE);
-        csmsolid_print_debug(solid_above_loc, CSMTRUE);
-        csmsolid_print_debug(solid_below_loc, CSMTRUE);
+        did_finish = CSMFALSE;
+
+        csmsolid_free(&solid_above_loc);
+        csmsolid_free(&solid_below_loc);
+    }
+    else
+    {   
+        did_finish = CSMTRUE;
+    
+        csmsolid_redo_geometric_face_data(solid_above_loc);
+        csmsetopcom_correct_faces_after_joining_null_edges(solid_above_loc, tolerances);
+    
+        csmsolid_redo_geometric_face_data(solid_below_loc);
+        csmsetopcom_correct_faces_after_joining_null_edges(solid_below_loc, tolerances);
+
+        if (csmdebug_debug_enabled() == CSMTRUE)
+        {
+            csmsolid_print_debug(work_solid, CSMTRUE);
+            csmsolid_print_debug(solid_above_loc, CSMTRUE);
+            csmsolid_print_debug(solid_below_loc, CSMTRUE);
+        }
     }
  
     csmdebug_end_context();
@@ -985,6 +1019,8 @@ static void i_finish_split(
     *solid_below = solid_below_loc;
     
     csmarrayc_free_st(&set_of_null_faces_above, csmface_t, NULL);
+
+    return did_finish;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -997,102 +1033,146 @@ enum csmsplit_opresult_t csmsplit_split_solid(
     enum csmsplit_opresult_t operation_result;
     struct csmsolid_t *solid_above_loc, *solid_below_loc;
     struct csmtolerance_t *tolerances;
-    struct csmsolid_t *work_solid;
-    csmArrayStruct(csmvertex_t) *set_of_on_vertices;
-    csmArrayStruct(csmedge_t) *set_of_null_edges;
+    CSMBOOL apply_perturbation;
+    double D_work;
+    unsigned long no_perturbations;
 
     csmdebug_begin_context("Split");
     
     tolerances = csmtolerance_new();
-    
-    work_solid = csmsolid_duplicate(solid);
-    csmsolid_redo_geometric_face_data(work_solid);
-    csmsolid_clear_algorithm_data(work_solid);
-    
-    csmdebug_set_viewer_results(NULL, NULL);
-    csmdebug_set_viewer_parameters(work_solid, NULL);
-    csmdebug_set_plane(A, B, C, D);
-    //csmdebug_show_viewer();    
-    
-    set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D, tolerances);
-    
-    if (csmdebug_debug_enabled() == CSMTRUE)
-    {
-        csmdebug_print_debug_info("---->WORK SOLID BEFORE INSERTING NULL EDGES\n");
-        csmsolid_print_debug(work_solid, CSMTRUE);
-        csmdebug_print_debug_info("<----WORK SOLID BEFORE INSERTING NULL EDGES\n");
-    }
 
-    set_of_null_edges = i_insert_nulledges_to_split_solid(A, B, C, D, tolerances, set_of_on_vertices);
+    apply_perturbation = CSMFALSE;
+    D_work = D;
+    no_perturbations = 0;
 
-    if (csmdebug_debug_enabled() == CSMTRUE)
+    do
     {
-        csmdebug_print_debug_info("---->WORK SOLID AFTER INSERTING NULL EDGES\n");
-        csmsolid_print_debug(work_solid, CSMTRUE);
-        csmdebug_print_debug_info("<----WORK SOLID AFTER INSERTING NULL EDGES\n");
-    }
+        struct csmsolid_t *work_solid;
+        csmArrayStruct(csmvertex_t) *set_of_on_vertices;
+        csmArrayStruct(csmedge_t) *set_of_null_edges;
 
-    //csmdebug_show_viewer();
+        apply_perturbation = CSMFALSE;
+
+        work_solid = csmsolid_duplicate(solid);
+        csmsolid_redo_geometric_face_data(work_solid);
+        csmsolid_clear_algorithm_data(work_solid);
+
+        csmdebug_set_viewer_results(NULL, NULL);
+        csmdebug_set_viewer_parameters(work_solid, NULL);
+        csmdebug_set_plane(A, B, C, D);
+        //csmdebug_show_viewer();
+
+        set_of_on_vertices = i_split_edges_by_plane(work_solid, A, B, C, D_work, tolerances);
     
-    if (csmarrayc_count_st(set_of_null_edges, csmedge_t) == 0)
-    {
-        operation_result = CSMSPLIT_OPRESULT_NO;
-        
-        solid_above_loc = NULL;
-        solid_below_loc = NULL;
-    }
-    else
-    {
-        csmArrayStruct(csmface_t) *set_of_null_faces;
-        CSMBOOL did_join_all_null_edges;
-        
-        i_join_null_edges(set_of_null_edges, tolerances, &set_of_null_faces, &did_join_all_null_edges);
-        
-        if (did_join_all_null_edges == CSMFALSE || csmarrayc_count_st(set_of_null_faces, csmface_t) == 0)
+        if (csmdebug_debug_enabled() == CSMTRUE)
         {
-            operation_result = CSMSPLIT_OPRESULT_IMPROPER_CUT;
-            
+            csmdebug_print_debug_info("---->WORK SOLID BEFORE INSERTING NULL EDGES\n");
+            csmsolid_print_debug(work_solid, CSMTRUE);
+            csmdebug_print_debug_info("<----WORK SOLID BEFORE INSERTING NULL EDGES\n");
+        }
+
+        set_of_null_edges = i_insert_nulledges_to_split_solid(A, B, C, D_work, tolerances, set_of_on_vertices);
+
+        if (csmdebug_debug_enabled() == CSMTRUE)
+        {
+            csmdebug_print_debug_info("---->WORK SOLID AFTER INSERTING NULL EDGES\n");
+            csmsolid_print_debug(work_solid, CSMTRUE);
+            csmdebug_print_debug_info("<----WORK SOLID AFTER INSERTING NULL EDGES\n");
+        }
+
+        //csmdebug_show_viewer();
+    
+        if (csmarrayc_count_st(set_of_null_edges, csmedge_t) == 0)
+        {
+            operation_result = CSMSPLIT_OPRESULT_NO;
+        
             solid_above_loc = NULL;
             solid_below_loc = NULL;
         }
         else
         {
-            double volume_above, volume_below;
-            
-            i_finish_split(set_of_null_faces, work_solid, tolerances, &solid_above_loc, &solid_below_loc);
-
-            csmsolid_clear_algorithm_data(solid_above_loc);
-            csmsolid_clear_algorithm_data(solid_below_loc);
-            
-            assert(csmsolid_is_empty(work_solid) == CSMTRUE);
-            
-            csmsolid_redo_geometric_face_data(solid_above_loc);
-            volume_above = csmsolid_volume(solid_above_loc);
-            
-            csmsolid_redo_geometric_face_data(solid_below_loc);
-            volume_below = csmsolid_volume(solid_below_loc);
-            
-            if (volume_above > 1.e-6 || volume_below > 1.e-6)
+            csmArrayStruct(csmface_t) *set_of_null_faces;
+            CSMBOOL did_join_all_null_edges;
+        
+            i_join_null_edges(set_of_null_edges, tolerances, &set_of_null_faces, &did_join_all_null_edges);
+        
+            if (did_join_all_null_edges == CSMFALSE || csmarrayc_count_st(set_of_null_faces, csmface_t) == 0)
             {
-                operation_result = CSMSPLIT_OPRESULT_OK;
+                operation_result = CSMSPLIT_OPRESULT_IMPROPER_CUT;
             
-                if (volume_above > 1.e-6)
-                    csmsimplifysolid_simplify(solid_above_loc, tolerances);
-                
-                if (volume_below > 1.e-6)
-                    csmsimplifysolid_simplify(solid_below_loc, tolerances);
+                solid_above_loc = NULL;
+                solid_below_loc = NULL;
             }
             else
-            {
-                operation_result = CSMSPLIT_OPRESULT_NO;
+            {   
+                if (i_did_finish_split(set_of_null_faces, work_solid, tolerances, &solid_above_loc, &solid_below_loc) == CSMFALSE)
+                {
+                    operation_result = CSMSPLIT_OPRESULT_IMPROPER_CUT;
+
+                    if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
+                        apply_perturbation = CSMFALSE;
+                    else
+                        apply_perturbation = CSMTRUE;
+                }
+                else
+                {
+                    double volume_above, volume_below;
+
+                    csmsolid_clear_algorithm_data(solid_above_loc);
+                    csmsolid_clear_algorithm_data(solid_below_loc);
+            
+                    assert(csmsolid_is_empty(work_solid) == CSMTRUE);
+            
+                    csmsolid_redo_geometric_face_data(solid_above_loc);
+                    volume_above = csmsolid_volume(solid_above_loc);
+            
+                    csmsolid_redo_geometric_face_data(solid_below_loc);
+                    volume_below = csmsolid_volume(solid_below_loc);
+            
+                    if (volume_above > 1.e-6 || volume_below > 1.e-6)
+                    {
+                        operation_result = CSMSPLIT_OPRESULT_OK;
+            
+                        if (volume_above > 1.e-6)
+                            csmsimplifysolid_simplify(solid_above_loc, tolerances);
                 
-                csmsolid_free(&solid_above_loc);
-                csmsolid_free(&solid_below_loc);
+                        if (volume_below > 1.e-6)
+                            csmsimplifysolid_simplify(solid_below_loc, tolerances);
+                    }
+                    else
+                    {
+                        operation_result = CSMSPLIT_OPRESULT_NO;
+                
+                        csmsolid_free(&solid_above_loc);
+                        csmsolid_free(&solid_below_loc);
+                    }
+                }
             }
+
+            if (apply_perturbation == CSMTRUE)
+            {
+                D_work += csmtolerance_perturbation_increment(tolerances);
+                no_perturbations++;
+            
+                if (csmdebug_debug_enabled() == CSMTRUE)
+                {
+                    char *text;
+                
+                    text = copiafor_codigo2("Perturbation %lu, D: %lf\n", no_perturbations, D_work);
+                    csmdebug_print_debug_info(text);
+                
+                    csmstring_free(&text);
+                }
+            }
+
+            csmarrayc_free_st(&set_of_null_faces, csmface_t, NULL);
         }
 
-        csmarrayc_free_st(&set_of_null_faces, csmface_t, NULL);
-    }
+        csmsolid_free(&work_solid);
+        csmarrayc_free_st(&set_of_on_vertices, csmvertex_t, NULL);
+        csmarrayc_free_st(&set_of_null_edges, csmedge_t, NULL);
+
+    } while (operation_result != CSMSPLIT_OPRESULT_OK && apply_perturbation == CSMTRUE && no_perturbations < i_NUM_MAX_PERTURBATIONS);
 
     if (solid_above != NULL)
         *solid_above = solid_above_loc;
@@ -1105,9 +1185,6 @@ enum csmsplit_opresult_t csmsplit_split_solid(
         csmsolid_free(&solid_below_loc);
     
     csmtolerance_free(&tolerances);
-    csmsolid_free(&work_solid);
-    csmarrayc_free_st(&set_of_on_vertices, csmvertex_t, NULL);
-    csmarrayc_free_st(&set_of_null_edges, csmedge_t, NULL);
     
     csmdebug_end_context();
     
