@@ -350,6 +350,7 @@ void csmloop_face_equation(
     register struct csmhedge_t *iterator;
     unsigned long no_iterations;
     unsigned long num_vertexs;
+    double length;
     
     assert_no_null(loop);
     assert_no_null(A);
@@ -405,14 +406,18 @@ void csmloop_face_equation(
         
     } while (iterator != loop->ledge);
     
-    //assert(num_vertexs >= 3);
-    
-    if (csmmath_is_null_vector(A_loc, B_loc, C_loc, csmtolerance_default_null_vector()) == CSMTRUE)
+    length = csmmath_length_vector3D(A_loc, B_loc, C_loc);
+
+    if (num_vertexs < 3 || csmmath_fabs(length) < 1.e-30)
     {
         A_loc = 0.;
         B_loc = 0.;
         C_loc = 1.;
-        D_loc = 0.;
+
+        if (num_vertexs < 3)
+            D_loc = 0.;
+        else
+            D_loc = -csmmath_dot_product3D(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs;
     }
     else
     {
