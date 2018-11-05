@@ -12,7 +12,7 @@
 extern "C" {
 #endif
     
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 DLL_RGWB enum csmstlimporter_result_t csmstlimporter_did_read_binary_stl(const char *file_path, struct csmsolid_t **solid);
 

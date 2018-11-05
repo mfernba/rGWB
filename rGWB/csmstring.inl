@@ -19,7 +19,7 @@ char *csmstring_duplicate(const char *cadena);
 void csmstring_free(char **cadena);
     
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
     
 char *copiafor_nousar(const char *formato, ...);
 #define copiafor_codigo0(formato) copiafor_nousar(formato)

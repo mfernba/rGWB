@@ -29,7 +29,7 @@
 #include "csmvertex.inl"
 #include "csmvertex.tli"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
 #include "csmstring.inl"

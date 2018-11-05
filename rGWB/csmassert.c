@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 manueru. All rights reserved.
 //
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #include "csmassert.inl"
 

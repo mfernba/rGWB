@@ -5,7 +5,7 @@
 #include "csmface.inl"
 #include "csmloop.inl"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #else
 #include "cyassert.h"

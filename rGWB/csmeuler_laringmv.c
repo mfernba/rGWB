@@ -8,13 +8,14 @@
 
 #include "csmeuler_laringmv.inl"
 
+#include "csmarrayc.h"
 #include "csmdebug.inl"
 #include "csmface.inl"
 #include "csmhedge.inl"
 #include "csmloop.inl"
 #include "csmvertex.inl"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #else
 #include "cyassert.h"
@@ -29,6 +30,7 @@ void csmeuler_laringmv(
     register struct csmloop_t *iterator_face1;
     unsigned long no_iterations;
     struct csmloop_t *flout_face1;
+    const csmArrayStruct(csmloop_t) *face1_inner_loops_with_area;
     
     csmface_redo_geometric_generated_data(face1);
     
@@ -36,6 +38,7 @@ void csmeuler_laringmv(
     no_iterations = 0;
     
     flout_face1 = csmface_flout(face1);
+    face1_inner_loops_with_area = csmface_get_inner_loops_with_area(face1);
     
     do
     {
@@ -56,7 +59,7 @@ void csmeuler_laringmv(
             vtx = csmhedge_vertex(ledge);
             csmvertex_get_coords(vtx, &x, &y, &z);
             
-            if (csmface_is_point_interior_to_face(face1, x, y, z, tolerances) == CSMFALSE)
+            if (csmface_is_point_interior_to_face_optimized_laringmv(face1, face1_inner_loops_with_area, x, y, z, tolerances) == CSMFALSE)
             {
                 csmloop_set_setop_loop_was_a_hole(iterator_face1, CSMTRUE);
                 
@@ -68,6 +71,8 @@ void csmeuler_laringmv(
         iterator_face1 = next_loop;
         
     } while (iterator_face1 != NULL);
+    
+    csmarrayc_free_const_st(&face1_inner_loops_with_area, csmloop_t);
 }
 
 // ------------------------------------------------------------------------------------------

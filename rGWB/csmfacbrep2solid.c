@@ -23,7 +23,7 @@
 #include "csmtolerance.inl"
 #include "csmvertex.inl"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #include "csmapto3d.h"
 #include "csmassert.inl"

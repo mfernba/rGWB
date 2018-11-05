@@ -6153,7 +6153,7 @@ static void i_test_performance_1(struct csmviewer_t *viewer)
         
         no_columns = 2;
         dist_between_columns = (l1 - 4. * hole_diameter) / (no_columns - 1);
-        
+
         for (unsigned long i = 0; i < no_rows; i++)
         {
             double row_coord;
@@ -6198,11 +6198,12 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
 {
     struct csmshape2d_t *shape2d;
     struct csmsolid_t *solid1;
-    double l1, e1, l2, h1;
+    double l1, e1, e2, l2, h1;
     double length;
 
     l1 = 0.1;
     e1 = 0.01;
+    e2 = 0.005;
     l2 = 0.02;
     h1 = 0.04;
     
@@ -6212,27 +6213,27 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
         points = csmArrPoint2D_new(0);
         
         csmArrPoint2D_append(points, -0.5 * l1, 0.);
-        csmArrPoint2D_append(points, -0.5 * l1, e1);
-        csmArrPoint2D_append(points, -0.5 * l1, e1 + e1);
+        csmArrPoint2D_append(points, -0.5 * l1, e2);
+        csmArrPoint2D_append(points, -0.5 * l1, e2 + e1);
         csmArrPoint2D_append(points, -0.5 * l1 + l2, h1);
         csmArrPoint2D_append(points, -0.5 * l1, h1);
         csmArrPoint2D_append(points, -0.5 * l1, h1 + e1);
         csmArrPoint2D_append(points, -0.5 * l1 + 2. * l2, h1 + e1);
         csmArrPoint2D_append(points, -0.5 * l1 + 2. * l2, h1);
         csmArrPoint2D_append(points, -0.5 * l1 + l2 + e1, h1);
-        csmArrPoint2D_append(points, -0.5 * l1 + e1, e1 + e1);
-        csmArrPoint2D_append(points, -0.5 * l1 + e1, e1);
+        csmArrPoint2D_append(points, -0.5 * l1 + e2, e2 + e1);
+        csmArrPoint2D_append(points, -0.5 * l1 + e2, e2);
 
-        csmArrPoint2D_append(points, 0.5 * l1 - e1, e1);
-        csmArrPoint2D_append(points, 0.5 * l1 - e1, e1 + e1);
+        csmArrPoint2D_append(points, 0.5 * l1 - e2, e2);
+        csmArrPoint2D_append(points, 0.5 * l1 - e2, e2 + e1);
         csmArrPoint2D_append(points, 0.5 * l1 - l2 - e1, h1);
         csmArrPoint2D_append(points, 0.5 * l1 - 2. * l2, h1);
         csmArrPoint2D_append(points, 0.5 * l1 - 2. * l2, h1 + e1);
         csmArrPoint2D_append(points, 0.5 * l1, h1 + e1);
         csmArrPoint2D_append(points, 0.5 * l1, h1);
         csmArrPoint2D_append(points, 0.5 * l1 - l2, h1);
-        csmArrPoint2D_append(points, 0.5 * l1, e1 + e1);
-        csmArrPoint2D_append(points, 0.5 * l1, e1);
+        csmArrPoint2D_append(points, 0.5 * l1, e2 + e1);
+        csmArrPoint2D_append(points, 0.5 * l1, e2);
         csmArrPoint2D_append(points, 0.5 * l1, 0.);
         
         csmArrPoint2D_invert(points);
@@ -6313,6 +6314,10 @@ void csmtest_test(void)
 
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
+    
+    //csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    //i_test_mechanical_part1_redux();
+    //return;
     
     i_test_performance_2(viewer);
     //i_test_performance_1(viewer);
@@ -6501,16 +6506,3 @@ void csmtest_test(void)
     
     csmviewer_free(&viewer);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -64,6 +64,13 @@ CSMBOOL csmface_contains_point(
                         struct csmvertex_t **hit_vertex_opc,
                         struct csmhedge_t **hit_hedge_opc, double *t_relative_to_hit_hedge_opc);
 
+CONSTRUCTOR(const csmArrayStruct(csmloop_t) *, csmface_get_inner_loops_with_area, (const struct csmface_t *face));
+
+CSMBOOL csmface_is_point_interior_to_face_optimized_laringmv(
+                        const struct csmface_t *face, const csmArrayStruct(csmloop_t) *face_inner_loops_with_area,
+                        double x, double y, double z,
+                        const struct csmtolerance_t *tolerances);
+
 CSMBOOL csmface_is_point_interior_to_face(
                         const struct csmface_t *face,
                         double x, double y, double z,
@@ -174,7 +181,7 @@ void csmface_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no_es_in
 
 // Visualization...
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 void csmface_draw_solid(
                     struct csmface_t *face,

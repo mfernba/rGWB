@@ -10,7 +10,7 @@
 //  Basic memory management module.
 //
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #include <stddef.h>
 

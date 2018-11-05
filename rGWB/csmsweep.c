@@ -37,7 +37,7 @@
 #include "csmsubdvfaces.inl"
 
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #include "csmapto2d.h"
 #include "csmapto3d.h"
@@ -840,7 +840,7 @@ struct csmsweep_path_t *csmsweep_new_elliptical_plane_path(
     
     points = csmArrPoint2D_new(0);
     
-    #ifdef __STANDALONE_DISTRIBUTABLE
+    #ifdef RGWB_STANDALONE_DISTRIBUTABLE
         csmArrPoint2D_append_elipse_points(points, x, y, radius_x, radius_y, no_points_circle, CSMFALSE);
     #else
         arr_AnyadirArcoElipsePunto2D(points, x, y, radius_x, radius_y, 0., 2. * PI, 0., FALSO, no_points_circle);

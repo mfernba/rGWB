@@ -25,6 +25,10 @@ extern "C"
 #include <basicGraphics/bsgraphics2.h>
 #include <basicGraphics/bsgraphics2.tlh>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define i_MAX_NUM_CONTEXTS 100
 #define i_MAX_LENGTH_CONTEXT_NAME 256
 
@@ -814,3 +818,6 @@ void csmdebug_draw_debug_info(struct bsgraphics2_t *graphics)
 
 
 
+#ifdef __cplusplus
+}
+#endif

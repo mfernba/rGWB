@@ -20,7 +20,7 @@ enum csmcompare_t
     CSMCOMPARE_FIRST_GREATER = 1
 };
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmapto2d.hxx"
 #include "csmapto3d.hxx"
 #endif

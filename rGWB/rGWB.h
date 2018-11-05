@@ -49,4 +49,6 @@ FOUNDATION_EXPORT const unsigned char rGWBVersionString[];
 #import <rGWB/csmsave.hxx>
 #import <rGWB/csmsavetxt.h>
 #import <rGWB/csmtest.h>
+#import <rGWB/csmtest2.h>
+#import <rGWB/csmviewer.inl>
 

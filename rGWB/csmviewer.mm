@@ -32,6 +32,10 @@ extern "C" {
 #include <WinFrames3/wf3Visor.h>
 #include <WinFrames3/wf3Vista.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct csmviewer_t
 {
     struct csmface_t *face1, *face2;
@@ -282,3 +286,7 @@ void csmviewer_show_face(struct csmviewer_t *viewer, struct csmface_t *face1, st
     viewer->face1 = NULL;
     viewer->face2 = NULL;
 }
+
+#ifdef __cplusplus
+}
+#endif

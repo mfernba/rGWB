@@ -14,7 +14,7 @@
 #include "csmoptree.h"
 #include "csmoptree.hxx"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #include "csmassert.inl"
 #include "csmmem.inl"
@@ -337,7 +337,7 @@ static enum csmstlimporter_result_t i_did_read_binary_file(FILE *file, struct cs
     return result;
 }
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 // --------------------------------------------------------------------------------
 

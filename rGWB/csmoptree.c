@@ -17,7 +17,7 @@
 #include "csmsplit.hxx"
 #include "csmsave.inl"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmmem.inl"
 #include "csmassert.inl"
 #else

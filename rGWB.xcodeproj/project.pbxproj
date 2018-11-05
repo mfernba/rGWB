@@ -140,7 +140,6 @@
 		559452861F79A0E5002AF198 /* csmquadrics.c in Sources */ = {isa = PBXBuildFile; fileRef = 559452841F79A0E5002AF198 /* csmquadrics.c */; };
 		559452871F79A0E5002AF198 /* csmquadrics.h in Headers */ = {isa = PBXBuildFile; fileRef = 559452851F79A0E5002AF198 /* csmquadrics.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5598D6131F24E7F600EA1876 /* csmviewer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5598D6111F24E7F600EA1876 /* csmviewer.mm */; };
-		5598D6141F24E7F600EA1876 /* csmviewer.inl in Resources */ = {isa = PBXBuildFile; fileRef = 5598D6121F24E7F600EA1876 /* csmviewer.inl */; };
 		5598D65C1F24EE4000EA1876 /* basicGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6341F24E8AF00EA1876 /* basicGraphics.framework */; };
 		5598D6661F24EE4000EA1876 /* basicMenu.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6611F24EE4000EA1876 /* basicMenu.framework */; };
 		5598D6671F24EE4000EA1876 /* basicReceptor.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5598D6621F24EE4000EA1876 /* basicReceptor.framework */; };
@@ -175,6 +174,10 @@
 		55FAB61C20D83CA6008E1DFF /* csmsave.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB61A20D83CA6008E1DFF /* csmsave.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		55FAB62220D8566F008E1DFF /* csmwriteablesolid.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */; };
 		55FAB62320D8566F008E1DFF /* csmwriteablesolid.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */; };
+		55FEB004218FA47100C114A6 /* csmtest2.h in Headers */ = {isa = PBXBuildFile; fileRef = 55FEB002218FA47100C114A6 /* csmtest2.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		55FEB005218FA47100C114A6 /* csmtest2.c in Sources */ = {isa = PBXBuildFile; fileRef = 55FEB003218FA47100C114A6 /* csmtest2.c */; };
+		55FEB009218FA99C00C114A6 /* csmviewer.inl in Resources */ = {isa = PBXBuildFile; fileRef = 5598D6121F24E7F600EA1876 /* csmviewer.inl */; };
+		55FEB00A218FA9B700C114A6 /* csmviewer.inl in Headers */ = {isa = PBXBuildFile; fileRef = 5598D6121F24E7F600EA1876 /* csmviewer.inl */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -417,6 +420,8 @@
 		55FAB61A20D83CA6008E1DFF /* csmsave.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmsave.h; sourceTree = "<group>"; };
 		55FAB62020D8566F008E1DFF /* csmwriteablesolid.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmwriteablesolid.c; sourceTree = "<group>"; };
 		55FAB62120D8566F008E1DFF /* csmwriteablesolid.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmwriteablesolid.inl; sourceTree = "<group>"; };
+		55FEB002218FA47100C114A6 /* csmtest2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csmtest2.h; sourceTree = "<group>"; };
+		55FEB003218FA47100C114A6 /* csmtest2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmtest2.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -498,6 +503,8 @@
 				5507A6221E6B8714008B9F73 /* csmtest.c */,
 				55308C351F921A5600353A68 /* csmtest_array.c */,
 				55308C361F921A5600353A68 /* csmtest_array.inl */,
+				55FEB002218FA47100C114A6 /* csmtest2.h */,
+				55FEB003218FA47100C114A6 /* csmtest2.c */,
 				557954591E5DB074000FC91E /* Products */,
 			);
 			name = Test;
@@ -893,10 +900,12 @@
 				5589F1ED2083EBE200526923 /* csmoptree.h in Headers */,
 				5513277D1ECBA0CC00F2B04D /* csmsetop.h in Headers */,
 				5517CD9420BC82FE00DA6690 /* csmaulong.h in Headers */,
+				55FEB004218FA47100C114A6 /* csmtest2.h in Headers */,
 				551D47601FC1E012004F3B43 /* csmbasicshape2d.h in Headers */,
 				559452871F79A0E5002AF198 /* csmquadrics.h in Headers */,
 				5512FD1520B4857D00809018 /* csmeuler_mvfb.inl in Headers */,
 				5507A62A1E700F7C008B9F73 /* csmeuler_lmef.inl in Headers */,
+				55FEB00A218FA9B700C114A6 /* csmviewer.inl in Headers */,
 				5507A6251E6B8714008B9F73 /* csmtest.h in Headers */,
 				5579548D1E5E41C1000FC91E /* csmedge.inl in Headers */,
 				557012C11E832F9600DFC490 /* csmmath.inl in Headers */,
@@ -1071,11 +1080,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				5507A6741E706175008B9F73 /* csmtest.h in Resources */,
+				55FEB009218FA99C00C114A6 /* csmviewer.inl in Resources */,
 				55308C3E1F9222B500353A68 /* csmmaterial.inl in Resources */,
 				551D475C1FC1CED3004F3B43 /* csmshape2d.inl in Resources */,
 				55A9842C1FBCC9DC009F7516 /* License.txt in Resources */,
 				5507A6731E70610D008B9F73 /* rGWB.h in Resources */,
-				5598D6141F24E7F600EA1876 /* csmviewer.inl in Resources */,
 				557954691E5DB0A8000FC91E /* csmmem.inl in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1109,6 +1118,7 @@
 				5507A5C61E6624E7008B9F73 /* csmopbas.c in Sources */,
 				5507A6781E7341CD008B9F73 /* csmeuler_lkemr.c in Sources */,
 				55EA99231ED38FCD006C063C /* csmsetop_procedges.c in Sources */,
+				55FEB005218FA47100C114A6 /* csmtest2.c in Sources */,
 				557012A01E8328E400DFC490 /* csmsweep.c in Sources */,
 				5579546A1E5DB0A8000FC91E /* csmmem.c in Sources */,
 				5532DDB81E8FFE810047B9DF /* csmloopglue.c in Sources */,
@@ -1299,7 +1309,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "__STANDALONE_DISTRIBUTABLE=1";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "RGWB_STANDALONE_DISTRIBUTABLE=1";
 				INFOPLIST_FILE = rGWB/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
@@ -1320,7 +1330,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "__STANDALONE_DISTRIBUTABLE=1";
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = "RGWB_STANDALONE_DISTRIBUTABLE=1";
 				INFOPLIST_FILE = rGWB/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";

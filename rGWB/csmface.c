@@ -18,7 +18,7 @@
 #include "csmsurface.inl"
 #include "csmwriteablesolid.tli"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #include "csmassert.inl"
 #include "csmmem.inl"
@@ -773,6 +773,104 @@ CSMBOOL csmface_contains_point(
     ASSIGN_OPTIONAL_VALUE(t_relative_to_hit_hedge_opc, t_relative_to_hit_hedge_loc);
     
     return containts_point;
+}
+
+// ------------------------------------------------------------------------------------------
+
+const csmArrayStruct(csmloop_t) *csmface_get_inner_loops_with_area(const struct csmface_t *face)
+{
+    const csmArrayStruct(csmloop_t) *inner_loops;
+    struct csmloop_t *loop_iterator;
+    unsigned long no_iters;
+    
+    assert_no_null(face);
+    
+    inner_loops = csmarrayc_new_const_st_array(0, csmloop_t);
+    
+    loop_iterator = face->floops;
+    no_iters = 0;
+
+    while (loop_iterator != NULL)
+    {
+        assert(no_iters < 100000);
+        no_iters++;
+        
+        if (loop_iterator != face->flout && csmloop_has_only_a_null_edge(loop_iterator) == CSMFALSE)
+            csmarrayc_append_element_const_st(inner_loops, loop_iterator, csmloop_t);
+        
+        loop_iterator = csmloop_next(loop_iterator);
+    }
+    
+    return inner_loops;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CSMBOOL csmface_is_point_interior_to_face_optimized_laringmv(
+                        const struct csmface_t *face, const csmArrayStruct(csmloop_t) *face_inner_loops_with_area,
+                        double x, double y, double z,
+                        const struct csmtolerance_t *tolerances)
+{
+    CSMBOOL is_interior_to_face;
+    
+    assert_no_null(face);
+    assert_no_null(face->flout);
+    
+    if (i_is_point_on_face_plane(
+                        x, y, z,
+                        face->A, face->B, face->C, face->D,
+                        face->fuzzy_epsilon,
+                        face->bbox) == CSMFALSE)
+    {
+        is_interior_to_face = CSMFALSE;
+    }
+    else
+    {
+        enum csmmath_containment_point_loop_t type_of_containment;
+    
+        if (csmloop_is_point_inside_loop(
+                        face->flout,
+                        x, y, z, face->dropped_coord,
+                        tolerances,
+                        &type_of_containment, NULL, NULL, NULL) == CSMFALSE)
+        {
+            is_interior_to_face = CSMFALSE;
+        }
+        else if (type_of_containment != CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR)
+        {
+            is_interior_to_face = CSMTRUE;
+        }
+        else
+        {
+            unsigned long i, no_inner_loops_with_area;
+            
+            no_inner_loops_with_area = csmarrayc_count_st(face_inner_loops_with_area, csmloop_t);
+            is_interior_to_face = CSMTRUE;
+            
+            for (i = 0; i < no_inner_loops_with_area; i++)
+            {
+                const struct csmloop_t *loop_iterator;
+                
+                loop_iterator = csmarrayc_get_const_st(face_inner_loops_with_area, i, csmloop_t);
+
+                if (csmloop_is_point_inside_loop(
+                            loop_iterator,
+                            x, y, z, face->dropped_coord,
+                            tolerances,
+                            &type_of_containment, NULL, NULL, NULL) == CSMTRUE)
+                {
+                    if (type_of_containment == CSMMATH_CONTAINMENT_POINT_LOOP_INTERIOR)
+                        is_interior_to_face = CSMFALSE;
+                    else
+                        is_interior_to_face = CSMTRUE;
+                    
+                    break;
+                }
+            }
+        }
+    }
+    
+    return is_interior_to_face;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1666,7 +1764,7 @@ void csmface_print_info_debug(struct csmface_t *face, CSMBOOL assert_si_no_es_in
     ASSIGN_OPTIONAL_VALUE(num_holes_opc, num_holes_loc);
 }
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 // ------------------------------------------------------------------------------------------
 

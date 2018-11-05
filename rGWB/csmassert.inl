@@ -10,7 +10,7 @@
 //  Assertion management module.
 //
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #undef assert
 #include "csmfwddecl.hxx"

@@ -17,7 +17,7 @@
 #include "csmloop.inl"
 #include "csmmath.inl"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #include "csmassert.inl"
 #include "csmdebug.inl"
@@ -47,7 +47,7 @@ static struct csmface_t *i_face_from_hedge(struct csmhedge_t *hedge)
     return csmloop_lface(loop);
 }
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 // ----------------------------------------------------------------------------------------------------
 

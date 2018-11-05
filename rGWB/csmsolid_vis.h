@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 DLL_RGWB void csmsolid_vis_draw_debug_info(struct csmsolid_t *solid, CSMBOOL draw_edge_info, struct bsgraphics2_t *graphics);
 

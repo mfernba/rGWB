@@ -44,7 +44,7 @@ double csmloop_compute_area(
                         double Ux, double Uy, double Uz, double Vx, double Vy, double Vz);
 
 CSMBOOL csmloop_is_point_inside_loop(
-                        struct csmloop_t *loop,
+                        const struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         const struct csmtolerance_t *tolerances,
                         enum csmmath_containment_point_loop_t *type_of_containment_opc,

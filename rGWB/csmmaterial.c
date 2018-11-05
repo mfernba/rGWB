@@ -10,7 +10,7 @@
 #include "csmmaterial.tli"
 #include "csmsave.inl"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
 #else

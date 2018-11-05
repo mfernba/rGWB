@@ -43,7 +43,7 @@ DLL_RGWB void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
 // Array of pointers to structs...
 
 #define csmarrayc_new_st_array(capacidad_inicial, type) (csmArrayStruct(type) *)csmarrayc_dontuse_new_ptr_array(capacidad_inicial, sizeof(struct type *))
-#define csmarrayc_new_const_st_array(capacidad_inicial, type) (const csmArrayStruct(type) *)csmarrayc_dontuse_copy_ptr_array(capacidad_inicial, sizeof(struct type *))
+#define csmarrayc_new_const_st_array(capacidad_inicial, type) (const csmArrayStruct(type) *)csmarrayc_dontuse_new_ptr_array(capacidad_inicial, sizeof(struct type *))
 
 #define csmarrayc_copy_st_array(array, type, func_copy_element)\
 (/*lint -save -e505*/\

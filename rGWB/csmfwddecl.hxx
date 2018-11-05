@@ -22,7 +22,7 @@ extern "C" {
 #include "csmhashtb.hxx"
 #include "csmarrayc.hxx"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 #include <stdlib.h>
 #include <stdio.h>

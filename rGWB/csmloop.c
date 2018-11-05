@@ -19,7 +19,7 @@
 #include "csmvertex.inl"
 #include "csmwriteablesolid.tli"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
 #else
@@ -816,7 +816,7 @@ static CSMBOOL i_is_point_in_loop_bbox(
 // --------------------------------------------------------------------------------------------------------------
 
 CSMBOOL csmloop_is_point_inside_loop(
-                        struct csmloop_t *loop,
+                        const struct csmloop_t *loop,
                         double x, double y, double z, enum csmmath_dropped_coord_t dropped_coord,
                         const struct csmtolerance_t *tolerances,
                         enum csmmath_containment_point_loop_t *type_of_containment_opc,
@@ -1047,13 +1047,14 @@ CSMBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *lo
 
 CSMBOOL csmloop_has_only_a_null_edge(const struct csmloop_t *loop)
 {
-    struct csmhedge_t *hedge_next;
+    struct csmhedge_t *hedge_next_next, *hedge_prev_prev;
     
     assert_no_null(loop);
     
-    hedge_next = csmhedge_next(loop->ledge);
+    hedge_next_next = csmhedge_next(csmhedge_next(loop->ledge));
+    hedge_prev_prev = csmhedge_prev(csmhedge_prev(loop->ledge));
     
-    if (hedge_next == loop->ledge)
+    if (hedge_next_next == loop->ledge && hedge_prev_prev == loop->ledge)
         return CSMTRUE;
     else
         return CSMFALSE;

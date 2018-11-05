@@ -8,7 +8,7 @@
 
 #include "csmstring.inl"
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
 #include <string.h>
@@ -23,7 +23,7 @@
 
 CSMBOOL csmstring_equal_strings(const char *cadena1, const char *cadena2)
 {
-    #ifdef __STANDALONE_DISTRIBUTABLE
+    #ifdef RGWB_STANDALONE_DISTRIBUTABLE
     if (strcmp(cadena1, cadena2) == 0)
     #else
     if (cad_cadenas_iguales(cadena1, cadena2) == CIERTO)
@@ -37,7 +37,7 @@ CSMBOOL csmstring_equal_strings(const char *cadena1, const char *cadena2)
 
 char *csmstring_duplicate(const char *cadena)
 {
-    #ifdef __STANDALONE_DISTRIBUTABLE
+    #ifdef RGWB_STANDALONE_DISTRIBUTABLE
         return strdup(cadena);
     #else
         return cad_copia_cadena(cadena);
@@ -53,7 +53,7 @@ void csmstring_free(char **cadena)
 
 // ------------------------------------------------------------------------------------------
 
-#ifdef __STANDALONE_DISTRIBUTABLE
+#ifdef RGWB_STANDALONE_DISTRIBUTABLE
 
 char *copiafor_nousar(const char *formato, ...)
 {
