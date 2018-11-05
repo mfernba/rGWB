@@ -29,7 +29,13 @@ extern "C" {
 #include <limits.h>
 
 #define CONSTRUCTOR(type, name, params) type name params
-#define UNREFERENCED(x) (void)(x)
+
+#ifndef UNREFERENCED
+    
+    #define UNREFERENCED(x) (void)(x)
+    
+#endif
+    
 #define ASSIGN_OPTIONAL_VALUE(a, b) if ((a) != NULL) *(a) = (b)
     
 #define DLL_RGWB
