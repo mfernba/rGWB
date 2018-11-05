@@ -10,7 +10,6 @@
 #include "csmsolid.inl"
 
 #include "csmarrayc.h"
-#include "csmaulong.h"
 #include "csmbbox.inl"
 #include "csmdebug.inl"
 #include "csmedge.inl"
@@ -467,6 +466,31 @@ CONSTRUCTOR(static struct csmsolid_t *, i_new_empty_solid_for_reading, (
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *solid_bbox)
+{
+    struct csmhashtb_iterator(csmface_t) *iterator;
+    
+    csmbbox_reset(solid_bbox);
+    
+    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
+    
+    while (csmhashtb_has_next(iterator, csmface_t) == CSMTRUE)
+    {
+        struct csmface_t *face;
+        
+        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
+        
+        csmface_redo_geometric_generated_data(face);
+        csmface_maximize_bbox(face, solid_bbox);
+    }
+    
+    csmbbox_compute_bsphere_and_margins(solid_bbox);
+    
+    csmhashtb_free_iterator(&iterator, csmface_t);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 struct csmsolid_t *csmsolid_read(struct csmsave_t *csmsave)
 {
     struct csmsolid_t *solid;
@@ -487,6 +511,8 @@ struct csmsolid_t *csmsolid_read(struct csmsave_t *csmsave)
     i_fill_sfaces_from_writeable_solid(writeable_solid->faces, solid, solid->sfaces, solid->svertexs, &created_shedges);
     i_fill_sedges_from_writeable_solid(writeable_solid->edges, created_shedges, solid->sedges);
     
+    i_redo_faces_geometric_generated_data(solid->sfaces, solid->bbox);
+
     csmwriteablesolid_free(&writeable_solid);
     csmhashtb_free(&created_shedges, csmhedge_t, NULL);
     
@@ -817,31 +843,6 @@ void csmsolid_clear_algorithm_edge_data(struct csmsolid_t *solid)
 {
     assert_no_null(solid);
     i_clear_algorithm_edge_mask(solid->sedges);
-}
-
-// ----------------------------------------------------------------------------------------------------
-
-static void i_redo_faces_geometric_generated_data(struct csmhashtb(csmface_t) *sfaces, struct csmbbox_t *solid_bbox)
-{
-    struct csmhashtb_iterator(csmface_t) *iterator;
-    
-    csmbbox_reset(solid_bbox);
-    
-    iterator = csmhashtb_create_iterator(sfaces, csmface_t);
-    
-    while (csmhashtb_has_next(iterator, csmface_t) == CSMTRUE)
-    {
-        struct csmface_t *face;
-        
-        csmhashtb_next_pair(iterator, NULL, &face, csmface_t);
-        
-        csmface_redo_geometric_generated_data(face);
-        csmface_maximize_bbox(face, solid_bbox);
-    }
-    
-    csmbbox_compute_bsphere_and_margins(solid_bbox);
-    
-    csmhashtb_free_iterator(&iterator, csmface_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
