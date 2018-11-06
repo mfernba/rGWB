@@ -28,7 +28,7 @@
 static void i_move_all_loops_from_he2_face1_to_he1_face(struct csmhedge_t *he1, struct csmhedge_t *he2)
 {
     struct csmface_t *face_he1, *face_he2;
-    register struct csmloop_t *loop_iterator_face2;
+    struct csmloop_t *loop_iterator_face2;
     register unsigned long no_iterations;
 
     assert(he1 != he2);
@@ -65,7 +65,7 @@ static void i_merge_halfegdes_loops_isolating_edge(struct csmhedge_t **he1, stru
     struct csmloop_t *he1_loop, *he2_loop;
     struct csmhedge_t *prev_he1, *next_he1;
     struct csmhedge_t *prev_he2, *next_he2;
-    register struct csmhedge_t *he_iterator;
+    struct csmhedge_t *he_iterator;
     register unsigned long no_iterations;
     struct csmface_t *he2_loop_face;
     

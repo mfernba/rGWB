@@ -30,7 +30,7 @@ void csmeuler_lmekr(
     struct csmface_t *he1_and_he2_face;
     struct csmsolid_t *he1_and_he2_solid;
     unsigned long *id_new_element;
-    register struct csmhedge_t *he_iterator;
+    struct csmhedge_t *he_iterator;
     register unsigned long no_iterations;
     struct csmedge_t *new_edge;
     struct csmhedge_t *nhe1, *nhe2;

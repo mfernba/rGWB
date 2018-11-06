@@ -39,7 +39,7 @@ void csmeuler_lmef(
     struct csmface_t *new_face;
     struct csmedge_t *new_edge;
     struct csmloop_t *new_loop;
-    register struct csmhedge_t *he_iterator;
+    struct csmhedge_t *he_iterator;
     register unsigned long no_iterations;
     unsigned long *id_new_element;
     struct csmhedge_t *new_he1, *new_he2;

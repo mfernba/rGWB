@@ -31,7 +31,7 @@ void csmeuler_lkev(
     struct csmhedge_t *he_vertex_to_retain;
     struct csmsolid_t *hes_solid;
     struct csmvertex_t *vertex_to_retain, *vertex_to_delete;
-    register struct csmhedge_t *he_iterator;
+    struct csmhedge_t *he_iterator;
     register unsigned long no_iterations;
     struct csmedge_t *edge;    
     CSMBOOL delete_vertex;

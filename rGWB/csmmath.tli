@@ -30,6 +30,6 @@ enum csmmath_dropped_coord_t
 
 #define CSMMATH_PI 3.14159265359
 
-#define CSMMATH_ABS(x) (((x) > 0.) ? (x) : -(x))
+#define CSMMATH_ABS(x) (((x) >= 0.) ? (x) : -(x))
 
 #endif

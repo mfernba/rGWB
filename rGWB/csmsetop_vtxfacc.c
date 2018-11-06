@@ -170,7 +170,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_initial_vertex_neighbor
 {
     csmArrayStruct(i_neighborhood_t) *vertex_neighborhood;
     double x_vertex, y_vertex, z_vertex;
-    register struct csmhedge_t *hedge_iterator, *vertex_hedge;
+    struct csmhedge_t *hedge_iterator, *vertex_hedge;
     unsigned long num_iters;
     
     vertex_neighborhood = csmarrayc_new_st_array(0, i_neighborhood_t);

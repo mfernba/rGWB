@@ -223,11 +223,7 @@ void csmhashtb_nousar_free_iterator(struct csmhashtb_iterator_t **iterator)
 CSMBOOL csmhashtb_nousar_has_next(const struct csmhashtb_iterator_t *iterator)
 {
     assert_no_null(iterator);
-    
-    if (iterator->next_item != NULL)
-        return IS_TRUE(iterator->next_item != NULL);
-    else
-        return CSMFALSE;
+    return IS_TRUE(iterator->next_item != NULL);
 }
 
 // ------------------------------------------------------------------------------------------

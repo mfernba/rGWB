@@ -129,7 +129,7 @@ static CSMBOOL i_is_hedge_on_inner_loop(struct csmhedge_t *hedge)
 
 static CSMBOOL i_is_hedge_on_hedge_cycle_with_a_side_on_a_hole(struct csmhedge_t *hedge)
 {
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iters;
     
     iterator = hedge;
@@ -1511,7 +1511,7 @@ void csmsetopcom_move_face_to_solid(
             
             while (loop_iterator != NULL)
             {
-                register struct csmhedge_t *loop_ledge, *he_iterator;
+                struct csmhedge_t *loop_ledge, *he_iterator;
                 unsigned long no_iters;
                 
                 loop_ledge = csmloop_ledge(loop_iterator);
@@ -1714,7 +1714,7 @@ void csmsetopcom_cleanup_solid(struct csmsolid_t *origin_solid, struct csmsolid_
         
         while (loop_iterator != NULL)
         {
-            register struct csmhedge_t *loop_ledge, *he_iterator;
+            struct csmhedge_t *loop_ledge, *he_iterator;
             unsigned long no_iters;
         
             loop_ledge = csmloop_ledge(loop_iterator);
@@ -1779,7 +1779,7 @@ void csmsetopcom_cleanup_solid_setop(
         
         while (loop_iterator != NULL)
         {
-            register struct csmhedge_t *loop_ledge, *he_iterator;
+            struct csmhedge_t *loop_ledge, *he_iterator;
             unsigned long no_iters;
         
             loop_ledge = csmloop_ledge(loop_iterator);

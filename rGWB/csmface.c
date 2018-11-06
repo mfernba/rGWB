@@ -404,7 +404,7 @@ unsigned long csmface_id(const struct csmface_t *face)
 
 void csmface_reassign_id(struct csmface_t *face, unsigned long *id_new_element, unsigned long *new_id_opc)
 {
-    register struct csmloop_t *iterator;
+    struct csmloop_t *iterator;
     unsigned long num_iters;
     
     assert_no_null(face);
@@ -495,7 +495,7 @@ void csmface_copy_attributes_from_face1(const struct csmface_t *face1, struct cs
 
 static void i_compute_bounding_box(struct csmloop_t *floops, struct csmbbox_t *bbox)
 {
-    register struct csmloop_t *iterator;
+    struct csmloop_t *iterator;
     unsigned long num_iters;
     
     csmbbox_reset(bbox);
@@ -520,7 +520,7 @@ static void i_compute_bounding_box(struct csmloop_t *floops, struct csmbbox_t *b
 
 static double i_compute_fuzzy_epsilon_for_containing_test(double A, double B, double C, double D, double max_tolerable_distance, struct csmloop_t *floops)
 {
-    register struct csmloop_t *iterator;
+    struct csmloop_t *iterator;
     unsigned long num_iters;
     double max_distance_to_plane;
     double tolerance_point_on_plane;
@@ -1055,7 +1055,7 @@ CSMBOOL csmface_is_loop_contained_in_face(
                         struct csmloop_t *loop,
                         const struct csmtolerance_t *tolerances)
 {
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iterations;
     
     assert_no_null(face);
@@ -1132,7 +1132,7 @@ CSMBOOL csmface_is_loop_contained_in_face_outer_loop(
                         struct csmloop_t *loop,
                         const struct csmtolerance_t *tolerances)
 {
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iterations;
     
     assert_no_null(face);

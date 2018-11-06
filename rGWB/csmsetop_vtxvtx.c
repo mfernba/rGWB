@@ -252,7 +252,7 @@ CONSTRUCTOR(static csmArrayStruct(i_neighborhood_t) *, i_preprocess_neighborhood
                         const struct csmtolerance_t *tolerances))
 {
     csmArrayStruct(i_neighborhood_t) *neighborhoods;
-    register struct csmhedge_t *vhedge, *he_iterator;
+    struct csmhedge_t *vhedge, *he_iterator;
     unsigned long num_iters;
     
     neighborhoods = csmarrayc_new_st_array(0, i_neighborhood_t);

@@ -233,7 +233,7 @@ struct csmloop_t *csmloop_duplicate(
                         struct csmhashtb(csmhedge_t) *relation_shedges_old_to_new)
 {
     struct csmloop_t *new_loop;
-    register struct csmhedge_t *iterator, *last_hedge;
+    struct csmhedge_t *iterator, *last_hedge;
     unsigned long no_iterations;
     
     assert_no_null(loop);
@@ -347,7 +347,7 @@ void csmloop_face_equation(
 {
     double A_loc, B_loc, C_loc, D_loc;
     double xc, yc, zc;
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iterations;
     unsigned long num_vertexs;
     double length;
@@ -439,7 +439,7 @@ void csmloop_face_equation(
 
 void csmloop_update_bounding_box(const struct csmloop_t *loop, struct csmbbox_t *bbox)
 {
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iterations;
     
     assert_no_null(loop);
@@ -493,7 +493,7 @@ double csmloop_max_distance_to_plane(
                         double A, double B, double C, double D)
 {
     double max_distance_to_plane;
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iterations;
     double tolerance_point_on_plane;
     
@@ -612,7 +612,7 @@ static CSMBOOL i_is_point_on_loop_boundary(
     struct csmvertex_t *hit_vertex_loc;
     struct csmhedge_t *hit_hedge_loc;
     double t_relative_to_hit_hedge_loc;
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iterations;
     
     iterator = ledge;
@@ -736,7 +736,7 @@ static void i_compute_loop_bbox(struct i_generated_bbox_data_t *generated_projec
     
     if (generated_projected_bbox_data->bbox_needs_update == CSMTRUE || generated_projected_bbox_data->dropped_coord_bbox != dropped_coord)
     {
-        register struct csmhedge_t *iterator;
+        struct csmhedge_t *iterator;
         unsigned long no_iterations;
         CSMBOOL initialized;
         double x_not_dropped, y_not_dropped;
@@ -867,7 +867,7 @@ CSMBOOL csmloop_is_point_inside_loop(
         }
         else
         {
-            register struct csmhedge_t *ray_hedge;
+            struct csmhedge_t *ray_hedge;
             struct csmhedge_t *start_hedge;
             unsigned long no_iterations;
             
@@ -985,7 +985,7 @@ CSMBOOL csmloop_is_point_inside_loop(
 
 CSMBOOL csmloop_is_vertex_used_by_hedge_on_loop(const struct csmloop_t *loop, const struct csmvertex_t *vertex)
 {
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iterations;
     
     assert_no_null(loop);
@@ -1016,7 +1016,7 @@ CSMBOOL csmloop_is_vertex_used_by_hedge_on_loop(const struct csmloop_t *loop, co
 
 CSMBOOL csmloop_is_bounded_by_vertex_with_mask_attrib(const struct csmloop_t *loop, csmvertex_mask_t mask_attrib)
 {
-    register struct csmhedge_t *iterator;
+    struct csmhedge_t *iterator;
     unsigned long no_iterations;
     
     assert_no_null(loop);
@@ -1167,7 +1167,7 @@ struct csmloop_t *csmloop_prev(struct csmloop_t *loop)
 
 void csmloop_revert_loop_orientation(struct csmloop_t *loop)
 {
-    register struct csmhedge_t *he_iterator;
+    struct csmhedge_t *he_iterator;
     struct csmvertex_t *prev_vertex;
     unsigned long no_iters;
     

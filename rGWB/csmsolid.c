@@ -1439,7 +1439,7 @@ double csmsolid_volume(const struct csmsolid_t *solid)
     while (csmhashtb_has_next(face_iterator, csmface_t) == CSMTRUE)
     {
         struct csmface_t *face;
-        register struct csmloop_t *loop_iterator;
+        struct csmloop_t *loop_iterator;
         unsigned long num_loop_iterations;
         
         csmhashtb_next_pair(face_iterator, NULL, &face, csmface_t);

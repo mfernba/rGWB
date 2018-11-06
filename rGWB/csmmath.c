@@ -30,7 +30,7 @@ enum csmcompare_t csmmath_compare_doubles(double value1, double value2, double e
 {
     double diff;
     
-    diff = fabs(value1 - value2);
+    diff = CSMMATH_ABS(value1 - value2);
     
     if (diff < epsilon)
         return CSMCOMPARE_EQUAL;
@@ -46,9 +46,9 @@ enum csmmath_dropped_coord_t csmmath_dropped_coord(double x, double y, double z)
 {
     double x_abs, y_abs, z_abs;
     
-    x_abs = fabs(x);
-    y_abs = fabs(y);
-    z_abs = fabs(z);
+    x_abs = CSMMATH_ABS(x);
+    y_abs = CSMMATH_ABS(y);
+    z_abs = CSMMATH_ABS(z);
     
     if (x_abs >= y_abs && x_abs >= z_abs)
         return CSMMATH_DROPPED_COORD_X;
@@ -101,9 +101,9 @@ CSMBOOL csmmath_equal_coords(
 {
     double diff_x, diff_y, diff_z;
     
-    diff_x = csmmath_fabs(x1 - x2);
-    diff_y = csmmath_fabs(y1 - y2);
-    diff_z = csmmath_fabs(z1 - z2);
+    diff_x = CSMMATH_ABS(x1 - x2);
+    diff_y = CSMMATH_ABS(y1 - y2);
+    diff_z = CSMMATH_ABS(z1 - z2);
     
     if (diff_x < epsilon && diff_y < epsilon && diff_z < epsilon)
         return CSMTRUE;

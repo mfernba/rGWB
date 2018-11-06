@@ -32,7 +32,7 @@ void csmeuler_lmev(
     struct csmsolid_t *solido_he1;
     struct csmedge_t *new_edge;
     struct csmvertex_t *new_vertex;
-    register struct csmhedge_t *he_iterator;
+    struct csmhedge_t *he_iterator;
     register unsigned long no_iterations;
     struct csmvertex_t *old_vertex;
     unsigned long *id_new_element;

@@ -27,7 +27,7 @@ void csmeuler_laringmv(
                     struct csmface_t *face1, struct csmface_t *face2,
                     const struct csmtolerance_t *tolerances)
 {
-    register struct csmloop_t *iterator_face1;
+    struct csmloop_t *iterator_face1;
     unsigned long no_iterations;
     struct csmloop_t *flout_face1;
     const csmArrayStruct(csmloop_t) *face1_inner_loops_with_area;
@@ -83,7 +83,7 @@ void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(
                     CSMBOOL *did_move_some_loop_opt)
 {
     CSMBOOL did_move_some_loop_loc;
-    register struct csmloop_t *iterator_face1;
+    struct csmloop_t *iterator_face1;
     unsigned long no_iterations;
     
     csmface_redo_geometric_generated_data(face1);
