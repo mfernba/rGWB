@@ -122,7 +122,3 @@ double csmmath_atan2(double y, double x);
 double csmmath_cos(double angle);
 
 double csmmath_sin(double angle);
-
-double csmmath_cosh(double angle);
-
-double csmmath_sinh(double angle);
