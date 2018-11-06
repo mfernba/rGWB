@@ -6201,7 +6201,7 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
     double l1, e1, e2, l2, h1;
     double length;
 
-    l1 = 0.1;
+    l1 = 0.6;
     e1 = 0.01;
     e2 = 0.005;
     l2 = 0.02;
@@ -6261,7 +6261,7 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
         dist_between_rows = hole_diameter + 0.01;
         no_rows = (unsigned long)floor((length - 2. * hole_diameter) / dist_between_rows);
         
-        no_columns = 2;
+        no_columns = 10;
         dist_between_columns = (l1 - 4. * hole_diameter) / (no_columns - 1);
         
         for (unsigned long i = 0; i < no_rows; i++)

@@ -44,7 +44,7 @@ void csmeuler_laringmv(
     {
         struct csmloop_t *next_loop;
         
-        assert(no_iterations < 10000);
+        assert(no_iterations < 100000);
         no_iterations++;
         
         next_loop = csmloop_next(iterator_face1);
@@ -96,7 +96,7 @@ void csmeuler_laringmv_from_face1_to_2_if_fits_in_face(
     {
         struct csmloop_t *next_loop;
         
-        assert(no_iterations < 10000);
+        assert(no_iterations < 100000);
         no_iterations++;
         
         next_loop = csmloop_next(iterator_face1);
