@@ -34,3 +34,4 @@ CSMBOOL csmbbox_intersects_with_other_bbox(const struct csmbbox_t *bbox1, const 
 CSMBOOL csmbbox_intersects_with_segment(
                         const struct csmbbox_t *bbox,
                         double x1, double y1, double z1, double x2, double y2, double z2);
+
