@@ -81,7 +81,7 @@ struct csmoptree_t
 
 static const unsigned char i_FILE_VERSION = 0;
 
-static const enum csmoptree_result_t i_UNEVALUATED_RESULT = (enum csmoptree_result_t)9999;
+static const enum csmoptree_result_t i_UNEVALUATED_RESULT = (enum csmoptree_result_t)USHRT_MAX;
 
 // ------------------------------------------------------------------------------------------
 

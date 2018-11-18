@@ -6031,6 +6031,41 @@ static void i_test_save2(struct csmviewer_t *viewer)
 
 // ------------------------------------------------------------------------------------------
 
+#include "csmsimplifysolid.inl"
+
+static void i_test_save3(struct csmviewer_t *viewer)
+{
+    struct csmoptree_t *optree;
+    struct csmsave_t *csmsave;
+    struct csmsolid_t *solid_res;
+    
+    csmsave = csmsavetxt_new_file_reader("opbool/optree_solido_0.optree");
+    optree = csmoptree_read(csmsave);
+    csmsave_free(&csmsave);
+    
+    csmoptree_clean_results(optree);
+    assert(csmoptree_evaluate(optree, &solid_res) == CSMOPTREE_RESULT_OK);
+    
+    //struct csmtolerance_t *tolerances = csmtolerance_new();
+    //csmsimplifysolid_simplify(solid_res, tolerances);
+    
+    i_set_output_debug_file("opbool_solido_0_optree");
+    csmsolid_print_debug(solid_res, CSMTRUE);
+
+    //csmdebug_set_enable_face_edge_filter(CSMTRUE);
+    //csmdebug_add_face_to_filter(150178);
+    csmdebug_add_face_to_filter(152494);
+    csmdebug_add_face_to_filter(152548);
+
+    csmdebug_set_viewer_results(solid_res, NULL);
+    csmdebug_show_viewer();
+    csmdebug_set_viewer_results(NULL, NULL);
+    csmsolid_free(&solid_res);
+    csmoptree_free(&optree);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static void i_test_importacion_stl1(void)
 {
     enum csmstlimporter_result_t res;
@@ -6261,7 +6296,7 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
         dist_between_rows = hole_diameter + 0.01;
         no_rows = (unsigned long)floor((length - 2. * hole_diameter) / dist_between_rows);
         
-        no_columns = 10;
+        no_columns = 2;
         dist_between_columns = (l1 - 4. * hole_diameter) / (no_columns - 1);
         
         for (unsigned long i = 0; i < no_rows; i++)
@@ -6315,13 +6350,14 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
-    //csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
     //i_test_mechanical_part1_redux();
     //return;
     
-    i_test_performance_2(viewer);
-    //i_test_performance_1(viewer);
-    
+    //i_test_performance_2(viewer);
+    i_test_performance_1(viewer);
+    //i_test_save3(viewer);
+
     return;
     
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
@@ -6366,7 +6402,8 @@ void csmtest_test(void)
     i_test_save0();
     i_test_save1(viewer);
     i_test_save2(viewer);
-    
+    i_test_save3(viewer);
+
     if (process_all_test == CSMFALSE)
     {
         csmdebug_enable_visual_debug();
