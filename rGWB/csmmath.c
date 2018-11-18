@@ -13,11 +13,19 @@
 #include "csmtolerance.inl"
 
 #ifdef RGWB_STANDALONE_DISTRIBUTABLE
+
 #include "csmassert.inl"
 #include <math.h>
+#include <immintrin.h>
+
+#define CSMMATH_MAKE_M256D(m256d, a, b, c, d) (m256d[0] = (a), m256d[1] = (b), m256d[2] = (c), m256d[3] = (d))
+#define CSMMATH_SUM_M256D(m256d) (m256d[0] + m256d[1] + m256d[2] + m256d[3])
+
 #else
+
 #include "cyassert.h"
 #include "standarc.h"
+
 #endif
 
 double __cdecl sqrt(double);
@@ -201,7 +209,21 @@ void csmmath_unit_vector_between_two_3D_points(double x1, double y1, double z1, 
 
 double csmmath_dot_product3D(double Ux, double Uy, double Uz, double Vx, double Vy, double Vz)
 {
-    return Ux * Vx + Uy * Vy + Uz * Vz;
+    #ifdef RGWB_STANDALONE_DISTRIBUTABLE
+    {
+        __m256d U, V, UxV;
+        
+        CSMMATH_MAKE_M256D(U, Ux, Uy, Uz, 0.);
+        CSMMATH_MAKE_M256D(V, Vx, Vy, Vz, 0.);
+
+        UxV = _mm256_mul_pd(U, V);
+        return UxV[0] + UxV[1] + UxV[2];
+    }
+    #else
+    {
+        return Ux * Vx + Uy * Vy + Uz * Vz;
+    }
+    #endif
 }
 
 //-------------------------------------------------------------------------------------------
@@ -677,9 +699,23 @@ CSMBOOL csmmath_exists_intersection_between_two_segments3D(
 double csmmath_signed_distance_point_to_plane(double x, double y, double z, double A, double B, double C, double D)
 {
     assert(fabs(A) > 0. || fabs(B) > 0. || fabs(C) > 0.);
-	return A * x + B * y + C * z + D;
-}
+    
+    #ifdef RGWB_STANDALONE_DISTRIBUTABLE
+    {
+        __m256d plane, point, mulwise;
+        
+        CSMMATH_MAKE_M256D(plane, A, B, C, D);
+        CSMMATH_MAKE_M256D(point, x, y, z, 1.);
 
+        mulwise = _mm256_mul_pd(plane, point);
+        return CSMMATH_SUM_M256D(mulwise);
+    }
+    #else
+    {
+        return A * x + B * y + C * z + D;
+    }
+    #endif
+}
 
 //-------------------------------------------------------------------------------------------
 
