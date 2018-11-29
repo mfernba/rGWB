@@ -206,16 +206,19 @@ static void i_append_element_to_cell(
                     }
                     
                     assert(added_i == CSMTRUE);
-                    csmarrayc_free_const_st(&cell->elements, csmoctree_item_t);
                 }
+                
+                csmarrayc_free_const_st(&cell->elements, csmoctree_item_t);
             }
         }
         else
         {
             unsigned long i, no_cells;
             
-            assert(csmarrayc_count_st(cell->elements, csmoctree_item_t) == 0);
+            assert(cell->elements == NULL);
+            
             no_cells = csmarrayc_count_st(cell->cells, i_cell_t);
+            assert(no_cells == 8);
             
             added_loc = CSMFALSE;
             
