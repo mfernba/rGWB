@@ -6357,17 +6357,28 @@ void csmtest_test(void)
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
     csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    
+    csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
+    
+    i_test_importacion_stl1();
+    i_test_facetedbrep1(viewer);
+    i_test_facetedbrep2(viewer, CSMTRUE);
+    
+    csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
+    i_test_facetedbrep2(viewer, CSMFALSE);    
+    
+    //csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
     //i_test_mechanical_part1_redux();
     //return;
     
     //i_test_performance_2(viewer);
-    i_test_performance_1(viewer);
+    //i_test_performance_1(viewer);
     //i_test_save3(viewer);
 
-    return;
+    //return;
     
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
-    csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
+    //csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
     //i_test_union_solidos8(viewer);
     //i_test_interseccion_solidos7(viewer);
 
@@ -6405,7 +6416,7 @@ void csmtest_test(void)
     i_test_save0();
     i_test_save1(viewer);
     i_test_save2(viewer);
-    i_test_save3(viewer);
+    //i_test_save3(viewer);
 
     if (process_all_test == CSMFALSE)
     {

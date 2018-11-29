@@ -1100,7 +1100,7 @@ CONSTRUCTOR(static struct csmoctree(i_vertex_t) *, i_initialize_vertex_octree, (
     tolerance_margin = 10. * equal_points_tolerance;
     octree_bbox = i_compute_octree_bbox(faces);
     
-    vertex_octree = csmoctree_new(10, tolerance_margin, &octree_bbox, i_is_vertex_contained_in_bbox, i_vertex_t);
+    vertex_octree = csmoctree_new(5, tolerance_margin, &octree_bbox, i_is_vertex_contained_in_bbox, i_vertex_t);
     
     no_vertexs = csmarrayc_count_st(vertexs, i_vertex_t);
     
@@ -1124,9 +1124,10 @@ static unsigned long i_get_vertex_idx_for_point(
                         struct csmoctree(i_vertex_t) *vertex_octree,
                         csmArrayStruct(i_vertex_t) *vertexs)
 {
-    unsigned long vertex_idx;
     const csmArrayStruct(i_vertex_t) *neighborhood;
     unsigned long no_vertexs_neighborhood;
+    CSMBOOL create_new_vertex;
+    struct i_vertex_t *vertex;
     
     csmbbox_reset(loop_point_bbox_opt);
     csmbbox_maximize_coord(loop_point_bbox_opt, x - tolerance, y - tolerance, z - tolerance);
@@ -1138,7 +1139,67 @@ static unsigned long i_get_vertex_idx_for_point(
     
     if (no_vertexs_neighborhood == 0)
     {
-        struct i_vertex_t *vertex;
+        create_new_vertex = CSMTRUE;
+        vertex = NULL;
+    }
+    else
+    {
+        const struct i_vertex_t *nearest_vertex;
+        double dist_to_nearest_vertex;
+        
+        if (no_vertexs_neighborhood == 1)
+        {
+            nearest_vertex = csmarrayc_get_const_st(neighborhood, 0, i_vertex_t);
+            assert_no_null(nearest_vertex);
+            
+            dist_to_nearest_vertex = csmmath_squared_distance_3D(nearest_vertex->x, nearest_vertex->y, nearest_vertex->z, x, y, z);
+        }
+        else
+        {
+            unsigned long i;
+            
+            nearest_vertex = NULL;
+            dist_to_nearest_vertex = 0.;
+        
+            for (i = 0; i < no_vertexs_neighborhood; i++)
+            {
+                const struct i_vertex_t *vertex;
+                double distance;
+                
+                vertex = csmarrayc_get_const_st(neighborhood, i, i_vertex_t);
+                assert_no_null(vertex);
+                
+                distance = csmmath_squared_distance_3D(vertex->x, vertex->y, vertex->z, x, y, z);
+                
+                if (nearest_vertex == NULL || distance < dist_to_nearest_vertex)
+                {
+                    nearest_vertex = vertex;
+                    dist_to_nearest_vertex = distance;
+                }
+            }
+        }
+        
+        assert_no_null(nearest_vertex);
+        
+        if (dist_to_nearest_vertex > tolerance)
+        {
+            create_new_vertex = CSMTRUE;
+            vertex = NULL;
+        }
+        else
+        {
+            create_new_vertex = CSMFALSE;
+            
+            vertex = csmarrayc_get_st(vertexs, nearest_vertex->vertex_idx, i_vertex_t);
+            assert(vertex == nearest_vertex);
+        
+            vertex->no_uses++;
+        }
+    }
+
+    if (create_new_vertex == CSMTRUE)
+    {
+        unsigned long vertex_idx;
         unsigned long no_uses;
         struct csmvertex_t *svertex;
         
@@ -1149,48 +1210,13 @@ static unsigned long i_get_vertex_idx_for_point(
         vertex = i_new_vertex(vertex_idx, x, y, z, no_uses, svertex);
         
         csmoctree_append_item(vertex_octree, i_vertex_t, vertex);
-        
         csmarrayc_append_element_st(vertexs, vertex, i_vertex_t);
     }
-    else
-    {
-        const struct i_vertex_t *nearest_vertex;
-        double dist_to_nearest_vertex;
-        unsigned long i;
-        struct i_vertex_t *vertex;
-
-        nearest_vertex = NULL;
-        dist_to_nearest_vertex = 0.;
-        
-        for (i = 0; i < no_vertexs_neighborhood; i++)
-        {
-            const struct i_vertex_t *vertex;
-            double distance;
-            
-            vertex = csmarrayc_get_const_st(neighborhood, i, i_vertex_t);
-            assert_no_null(vertex);
-            
-            distance = csmmath_squared_distance_3D(vertex->x, vertex->y, vertex->z, x, y, z);
-            
-            if (nearest_vertex == NULL || distance < dist_to_nearest_vertex)
-            {
-                nearest_vertex = vertex;
-                dist_to_nearest_vertex = distance;
-            }
-        }
-        
-        assert_no_null(nearest_vertex);
-        
-        vertex = csmarrayc_get_st(vertexs, nearest_vertex->vertex_idx, i_vertex_t);
-        assert(vertex == nearest_vertex);
-        
-        vertex_idx = nearest_vertex->vertex_idx;
-        vertex->no_uses++;
-    }
-    
+   
     csmarrayc_free_const_st(&neighborhood, i_vertex_t);
     
-    return vertex_idx;
+    assert_no_null(vertex);
+    return vertex->vertex_idx;
 }
 
 // ------------------------------------------------------------------------------------------

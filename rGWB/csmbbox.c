@@ -261,8 +261,6 @@ static void i_increase_coordinates(double *min, double *max)
 
 void csmbbox_compute_bsphere_and_margins(struct csmbbox_t *bbox)
 {
-    double radius;
-    
     assert_no_null(bbox);
     
     i_increase_coordinates(&bbox->x_min_ext, &bbox->x_max_ext);
@@ -273,8 +271,7 @@ void csmbbox_compute_bsphere_and_margins(struct csmbbox_t *bbox)
     bbox->y_center = 0.5 * (bbox->y_min_ext + bbox->y_max_ext);
     bbox->z_center = 0.5 * (bbox->z_min_ext + bbox->z_max_ext);
     
-    radius = 0.5 * CSMMATH_MAX(CSMMATH_MAX(bbox->x_max_ext - bbox->x_min_ext, bbox->y_max_ext - bbox->y_min_ext), bbox->z_max_ext - bbox->z_min_ext);
-    bbox->radius_sq = CSMMATH_CUAD(radius);
+    bbox->radius_sq = csmmath_squared_distance_3D(bbox->x_center, bbox->y_center, bbox->z_center, bbox->x_max_ext, bbox->y_max_ext, bbox->z_max_ext);
 }
 
 // ------------------------------------------------------------------------------------------

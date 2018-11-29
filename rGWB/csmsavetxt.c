@@ -286,6 +286,8 @@ struct csmsave_t *csmsavetxt_new_file_writer(const char *file_path)
     struct csmsavetxt_t *csmsavetxt;
     
     file_descriptor = fopen(file_path, "wt");
+    assert_no_null(file_descriptor);
+    
     mode = i_MODE_WRITE;
     
     csmsavetxt = i_new(&file_descriptor, mode);
@@ -301,6 +303,8 @@ struct csmsave_t *csmsavetxt_new_file_reader(const char *file_path)
     struct csmsavetxt_t *csmsavetxt;
     
     file_descriptor = fopen(file_path, "rt");
+    assert_no_null(file_descriptor);
+    
     mode = i_MODE_READ;
     
     csmsavetxt = i_new(&file_descriptor, mode);

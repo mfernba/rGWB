@@ -160,7 +160,7 @@ static void i_test2(void)
     i_test_number_of_elements_in_bbox(0.5, 0.5, 0.5, 1., 1., 1., points_octree, 2);
     i_test_number_of_elements_in_bbox(0.5, 0.5, 0.0, 1., 1., 0.5, points_octree, 0);
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 0.5, points_octree, 3);
-    i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 1.0, points_octree, 0);
+    i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 1.0, points_octree, 3);
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.1, 0.1, 0.1, points_octree, 0);
     i_test_number_of_elements_in_bbox(0.24, 0.24, 0.24, 0.26, 0.26, 0.26, points_octree, 3);
     
