@@ -361,6 +361,24 @@ CSMBOOL csmbbox_contains_point(const struct csmbbox_t *bbox, double x, double y,
 
 // ------------------------------------------------------------------------------------------
 
+CSMBOOL csmbbox_contains_point_in_real_dimensions(const struct csmbbox_t *bbox, double x, double y, double z)
+{
+    assert_no_null(bbox);
+    
+    if (x < bbox->x_min || x > bbox->x_max)
+        return CSMFALSE;
+    
+    if (y < bbox->y_min || y > bbox->y_max)
+        return CSMFALSE;
+    
+    if (z < bbox->z_min || z > bbox->z_max)
+        return CSMFALSE;
+    
+    return CSMTRUE;
+}
+
+// ------------------------------------------------------------------------------------------
+
 static CSMBOOL i_exists_intersection_between_bbboxes(
                         double x_min1, double y_min1, double z_min1, double x_max1, double y_max1, double z_max1,
                         double x_min2, double y_min2, double z_min2, double x_max2, double y_max2, double z_max2)

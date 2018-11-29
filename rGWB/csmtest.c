@@ -6360,9 +6360,11 @@ void csmtest_test(void)
     
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);
     
-    i_test_importacion_stl1();
-    i_test_facetedbrep1(viewer);
-    i_test_facetedbrep2(viewer, CSMTRUE);
+    //i_test_importacion_stl1();
+    //i_test_importacion_stl2();
+    i_test_importacion_stl3();
+    //i_test_facetedbrep1(viewer);
+    //i_test_facetedbrep2(viewer, CSMTRUE);
     
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
     i_test_facetedbrep2(viewer, CSMFALSE);    

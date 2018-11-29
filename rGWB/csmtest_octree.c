@@ -50,7 +50,7 @@ static void i_free_point(struct i_point_t **point)
 static CSMBOOL i_is_point_in_bbox(const struct i_point_t *point, const struct csmbbox_t *bbox)
 {
     assert_no_null(point);
-    return csmbbox_contains_point(bbox, point->x, point->y, point->z);
+    return csmbbox_contains_point_in_real_dimensions(bbox, point->x, point->y, point->z);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -172,6 +172,6 @@ static void i_test2(void)
 
 void csmtest_octree_test(void)
 {
-    //i_test1();
+    i_test1();
     i_test2();
 }

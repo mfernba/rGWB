@@ -31,6 +31,8 @@ void csmbbox_get_extension_ext(
 
 CSMBOOL csmbbox_contains_point(const struct csmbbox_t *bbox, double x, double y, double z);
 
+CSMBOOL csmbbox_contains_point_in_real_dimensions(const struct csmbbox_t *bbox, double x, double y, double z);
+
 CSMBOOL csmbbox_intersects_with_other_bbox(const struct csmbbox_t *bbox1, const struct csmbbox_t *bbox2);
 
 CSMBOOL csmbbox_intersects_with_segment(

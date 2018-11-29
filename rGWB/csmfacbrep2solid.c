@@ -1057,7 +1057,7 @@ static void i_append_face_loop_points_to_octree_bbox(const struct csmfacbrep2sol
 static CSMBOOL i_is_vertex_contained_in_bbox(const struct i_vertex_t *vertex, const struct csmbbox_t *bbox)
 {
     assert_no_null(vertex);
-    return csmbbox_contains_point(bbox, vertex->x, vertex->y, vertex->z);
+    return csmbbox_contains_point_in_real_dimensions(bbox, vertex->x, vertex->y, vertex->z);
 }
 
 // ------------------------------------------------------------------------------------------
