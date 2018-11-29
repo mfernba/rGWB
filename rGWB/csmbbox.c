@@ -234,9 +234,9 @@ void csmbbox_increase_by_absolute_margin(struct csmbbox_t *bbox, double margin)
 {
     assert_no_null(bbox);
     
-    i_increase_coordinates_by_margin(margin, &bbox->x_min_ext, &bbox->x_max_ext);
-    i_increase_coordinates_by_margin(margin, &bbox->y_min_ext, &bbox->y_max_ext);
-    i_increase_coordinates_by_margin(margin, &bbox->z_min_ext, &bbox->z_max_ext);
+    i_increase_coordinates_by_margin(margin, &bbox->x_min, &bbox->x_max);
+    i_increase_coordinates_by_margin(margin, &bbox->y_min, &bbox->y_max);
+    i_increase_coordinates_by_margin(margin, &bbox->z_min, &bbox->z_max);
 }
 
 // ------------------------------------------------------------------------------------------

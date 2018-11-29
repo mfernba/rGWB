@@ -11,6 +11,7 @@
 #include "csmarrayc.h"
 #include "csmassert.inl"
 #include "csmbbox.inl"
+#include "csmmath.tli"
 #include "csmmem.inl"
 #include "csmstring.inl"
 
@@ -32,6 +33,7 @@ struct csmoctree_t
     double tolerance_margin;
     
     struct csmbbox_t *octree_bbox;
+    double minimun_cell_size;
 
     csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox;
     
@@ -260,7 +262,7 @@ static void i_append_element_to_cell(
 CONSTRUCTOR(static struct csmoctree_t *, i_new, (
                         unsigned long max_occupancy,
                         double tolerance_margin,
-                        struct csmbbox_t **octree_bbox,
+                        struct csmbbox_t **octree_bbox, double minimun_cell_size,
                         csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox,
                         const csmArrayStruct(csmoctree_item_t) **elements,
                         struct i_cell_t **root))
@@ -273,6 +275,7 @@ CONSTRUCTOR(static struct csmoctree_t *, i_new, (
     octree->tolerance_margin = tolerance_margin;
     
     octree->octree_bbox = ASSIGN_POINTER_PP_NOT_NULL(octree_bbox, struct csmbbox_t);
+    octree->minimun_cell_size = minimun_cell_size;
     
     octree->func_intersects_with_bbox = func_intersects_with_bbox;
     
@@ -282,7 +285,27 @@ CONSTRUCTOR(static struct csmoctree_t *, i_new, (
     
     return octree;
 }
-            
+
+// ----------------------------------------------------------------------------------------------------
+
+static double i_compute_minimun_cell_size(const struct csmbbox_t *octree_bbox, double tolerance_margin)
+{
+    double x_min, y_min, z_min, x_max, y_max, z_max;
+    double x_extension, y_extension, z_extension;
+    double min_extension;
+    
+    assert(tolerance_margin > 0.);
+    
+    csmbbox_get_extension_real(octree_bbox, &x_min, &y_min, &z_min, &x_max, &y_max, &z_max);
+    
+    x_extension = x_max - x_min;
+    y_extension = y_max - y_min;
+    z_extension = z_max - z_min;
+    
+    min_extension = CSMMATH_MIN(x_extension, CSMMATH_MIN(y_extension, z_extension));
+    return CSMMATH_MAX(min_extension / 100., 3. * tolerance_margin);
+}
+
 // ----------------------------------------------------------------------------------------------------
 
 struct csmoctree_t *csmoctree_dontuse_new(
@@ -291,13 +314,17 @@ struct csmoctree_t *csmoctree_dontuse_new(
                         struct csmbbox_t **octree_bbox,
                         csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox)
 {
+    double minimun_cell_size;
     const csmArrayStruct(csmoctree_item_t) *pendant_elements;
     struct i_cell_t *root;
     
+    assert_no_null(octree_bbox);
+    
+    minimun_cell_size = i_compute_minimun_cell_size(*octree_bbox, tolerance_margin);
     pendant_elements = csmarrayc_new_const_st_array(0, csmoctree_item_t);
     root = NULL;
 
-    return i_new(max_occupancy, tolerance_margin, octree_bbox, func_intersects_with_bbox, &pendant_elements, &root);
+    return i_new(max_occupancy, tolerance_margin, octree_bbox, minimun_cell_size, func_intersects_with_bbox, &pendant_elements, &root);
 }
 
 // ----------------------------------------------------------------------------------------------------

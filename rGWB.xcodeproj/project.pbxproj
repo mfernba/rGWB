@@ -458,6 +458,7 @@
 			isa = PBXGroup;
 			children = (
 				557954981E5E4811000FC91E /* csmbbox.inl */,
+				558F40A321B0529D007583B0 /* New Group */,
 				557954971E5E4811000FC91E /* csmbbox.c */,
 				557012BF1E832F9600DFC490 /* csmmath.inl */,
 				557012BE1E832F9600DFC490 /* csmmath.c */,
@@ -807,6 +808,13 @@
 				558DE347208B2ADD00AC42F4 /* csmfacbrep2solid.c */,
 			);
 			name = "Solid building utilities";
+			sourceTree = "<group>";
+		};
+		558F40A321B0529D007583B0 /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "New Group";
 			sourceTree = "<group>";
 		};
 		5598D6181F24E81100EA1876 /* Viewer */ = {
