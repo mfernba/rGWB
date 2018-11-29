@@ -65,7 +65,9 @@ struct csmwriteablesolid_hedge_t;
 struct csmwriteablesolid_loop_t;
 struct csmwriteablesolid_face_t;
 struct csmwriteablesolid_edge_t;
-    
+struct csmoctree_t;
+struct csmoctree_element_t;
+
 #ifdef __cplusplus
 enum csmedge_hedge_side_t: int;
 enum csmsetop_operation_t: int;

@@ -21,6 +21,10 @@ DLL_RGWB void csmarrayc_dontuse_append_element(struct csmarrayc_t *array, void *
 
 DLL_RGWB void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx, void *element);
 
+DLL_RGWB void csmarrayc_dontuse_concat(
+                       struct csmarrayc_t *array, const struct csmarrayc_t *array_origin,
+                       csmarrayc_FPtr_copy_struct func_copy_element);
+
 DLL_RGWB CSMBOOL csmarrayc_dontuse_contains_element(
                         const struct csmarrayc_t *array,
                         const csmarrayc_byte *search_data,
@@ -91,6 +95,21 @@ DLL_RGWB void csmarrayc_dontuse_invert(struct csmarrayc_t *array);
     (void)((const struct type *)element == element),\
     csmarrayc_dontuse_append_element((struct csmarrayc_t *)array, (void *)(&(element)))\
 )/*lint -restore*/
+
+#define csmarrayc_concat_st(array, array_origin, func_copy_element, type)\
+    (/*lint -save -e505*/\
+     (void)((csmArrayStruct(type) *)array == array),\
+     (void)((const csmArrayStruct(type) *)array_origin == array_origin),\
+     CSMARRAYC_CHECK_FUNC_COPY_STRUCT(func_copy_element, type),\
+     csmarrayc_dontuse_concat((struct csmarrayc_t *)array, (const struct csmarrayc_t *)array_origin, (csmarrayc_FPtr_copy_struct)func_copy_element)\
+     )/*lint -restore*/
+
+#define csmarrayc_concat_const_st(array, array_origin, type)\
+    (/*lint -save -e505*/\
+     (void)((const csmArrayStruct(type) *)array == array),\
+     (void)((const csmArrayStruct(type) *)array_origin == array_origin),\
+     csmarrayc_dontuse_concat((struct csmarrayc_t *)array, (const struct csmarrayc_t *)array_origin, NULL)\
+     )/*lint -restore*/
 
 #define csmarrayc_contains_element_st(array, array_type, search_data, search_data_type, func_match_condition, idx_opt)\
 (/*lint -save -e505*/\

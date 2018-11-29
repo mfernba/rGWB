@@ -253,6 +253,63 @@ void csmarrayc_dontuse_set_element(struct csmarrayc_t *array, unsigned long idx,
 
 // ---------------------------------------------------------------------------------
 
+void csmarrayc_dontuse_concat(
+						struct csmarrayc_t *array, const struct csmarrayc_t *array_origin,
+                        csmarrayc_FPtr_copy_struct func_copy_element)
+{
+    i_integrity(array);
+    i_integrity(array_origin);
+    assert(array->element_data_size == array_origin->element_data_size);
+    
+    if (array->capacity < array->no_elems + array_origin->no_elems)
+    {
+        size_t new_capacity;
+        char *ptr_data_extended;
+        
+        new_capacity = array->no_elems + array_origin->no_elems;
+        ptr_data_extended = (char *)malloc(new_capacity * array->element_data_size);
+        assert_no_null(ptr_data_extended);
+        
+        memcpy(ptr_data_extended, array->ptr_data, array->no_elems * array->element_data_size);
+        
+        FREE_PP(&array->ptr_data, char);
+        
+        array->ptr_data = ASSIGN_POINTER_PP_NOT_NULL(&ptr_data_extended, char);
+        array->capacity = new_capacity;
+    }
+    
+    if (func_copy_element == NULL)
+    {
+        memcpy(array->ptr_data + array->no_elems * array->element_data_size, array_origin->ptr_data, array_origin->element_data_size * array_origin->no_elems);
+    }
+    else
+    {
+        unsigned long i;
+        size_t offset_origin, offset_destination;
+        
+        offset_origin = 0;
+        offset_destination = array->no_elems * array->element_data_size;
+
+        for (i = 0; i < array_origin->no_elems; i++)
+        {
+            const char *element;
+            char *element_copy;
+            
+            element = *(char **)(array_origin->ptr_data + offset_origin);
+            element_copy = func_copy_element(element);
+            
+            memcpy(array->ptr_data + offset_destination, &element_copy, array->element_data_size);
+            
+            offset_origin += array_origin->element_data_size;
+            offset_destination += array->element_data_size;
+        }
+    }
+    
+    array->no_elems += array_origin->no_elems;
+}
+
+// ---------------------------------------------------------------------------------
+
 CSMBOOL csmarrayc_dontuse_contains_element(
                         const struct csmarrayc_t *array,
                         const csmarrayc_byte *search_data,
