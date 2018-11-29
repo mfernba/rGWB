@@ -33,6 +33,7 @@
 
 struct i_null_value_t;
 csmArrayStruct(i_edge_t);
+struct csmoctree(i_vertex_t);
 
 #else
 
@@ -67,6 +68,7 @@ struct csmfacbrep2solid_face_t
 
 struct i_vertex_t
 {
+    unsigned long vertex_idx;
     double x, y, z;
     
     unsigned long no_uses;
@@ -199,6 +201,7 @@ static void i_free_face(struct csmfacbrep2solid_face_t **face)
 // ------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct i_vertex_t *, i_new_vertex, (
+                        unsigned long vertex_idx,
                         double x, double y, double z,
                         unsigned long no_uses,
                         struct csmvertex_t *svertex))
@@ -206,6 +209,8 @@ CONSTRUCTOR(static struct i_vertex_t *, i_new_vertex, (
     struct i_vertex_t *vertex;
     
     vertex = MALLOC(struct i_vertex_t);
+    
+    vertex->vertex_idx = vertex_idx;
     
     vertex->x = x;
     vertex->y = y;
@@ -372,127 +377,24 @@ void csmfacbrep2solid_reverse(struct csmfacbrep2solid_loop_t *loop)
 
 // ------------------------------------------------------------------------------------------
 
-static unsigned long i_get_vertex_idx_for_point(
-                        double x, double y, double z,
-                        double tolerance,
-                        csmArrayStruct(i_vertex_t) *vertexs)
-{
-    unsigned long vertex_idx;
-    unsigned long i, no_points;
-    
-    no_points = csmarrayc_count_st(vertexs, i_vertex_t);
-    vertex_idx = ULONG_MAX;
-    
-    for (i = 0; i < no_points; i++)
-    {
-        struct i_vertex_t *vertex;
-        
-        vertex = csmarrayc_get_st(vertexs, i, i_vertex_t);
-        assert_no_null(vertex);
-        
-        if (csmmath_equal_coords(x, y, z, vertex->x, vertex->y, vertex->z, tolerance) == CSMTRUE)
-        {
-            vertex_idx = i;
-            vertex->no_uses++;
-            break;
-        }
-    }
-    
-    if (vertex_idx == ULONG_MAX)
-    {
-        struct i_vertex_t *vertex;
-        unsigned long no_uses;
-        struct csmvertex_t *svertex;
-        
-        no_uses = 1;
-        svertex = NULL;
-        
-        vertex = i_new_vertex(x, y, z, no_uses, svertex);
-        csmarrayc_append_element_st(vertexs, vertex, i_vertex_t);
-        
-        vertex_idx = csmarrayc_count_st(vertexs, i_vertex_t) - 1;
-    }
-    
-    return vertex_idx;
-}
-
-// ------------------------------------------------------------------------------------------
-
-static void i_register_loop_vertexs(
-                        struct csmfacbrep2solid_loop_t *loop,
-                        double tolerance,
-                        csmArrayStruct(i_vertex_t) *vertexs)
-{
-    unsigned long i, no_points;
-    
-    assert_no_null(loop);
-    no_points = csmarrayc_count_st(loop->points, i_loop_point_t);
-    assert(no_points >= 3);
-    
-    for (i = 0; i < no_points; i++)
-    {
-        struct i_loop_point_t *loop_point;
-        
-        loop_point = csmarrayc_get_st(loop->points, i, i_loop_point_t);
-        assert_no_null(loop_point);
-        
-        if (loop_point->vertex_idx == ULONG_MAX)
-        {
-            loop_point->vertex_idx = i_get_vertex_idx_for_point(loop_point->x, loop_point->y, loop_point->z, tolerance, vertexs);
-        }
-        else
-        {
-            struct i_vertex_t *vertex;
-            
-            vertex = csmarrayc_get_st(vertexs, loop_point->vertex_idx, i_vertex_t);
-            assert_no_null(vertex);
-            
-            loop_point->x = vertex->x;
-            loop_point->y = vertex->y;
-            loop_point->z = vertex->z;
-            
-            vertex->no_uses++;
-        }
-    }
-}
-
-// ------------------------------------------------------------------------------------------
-
-static void i_register_inner_loops_vertexs(
-                        csmArrayStruct(csmfacbrep2solid_loop_t) *inner_loops,
-                        double tolerance,
-                        csmArrayStruct(i_vertex_t) *vertexs)
-{
-    unsigned long i, no_inner_loops;
-    
-    no_inner_loops = csmarrayc_count_st(inner_loops, csmfacbrep2solid_loop_t);
-    
-    for (i = 0; i < no_inner_loops; i++)
-    {
-        struct csmfacbrep2solid_loop_t *inner_loop;
-        
-        inner_loop = csmarrayc_get_st(inner_loops, i, csmfacbrep2solid_loop_t);
-        i_register_loop_vertexs(inner_loop, tolerance, vertexs);
-    }
-}
-
-// ------------------------------------------------------------------------------------------
-
 unsigned long csmfacbrep2solid_append_point(struct csmfacbrep2solid_t *builder, double x, double y, double z)
 {
+    unsigned long vertex_idx;
     struct i_vertex_t *vertex;
     unsigned long no_uses;
     struct csmvertex_t *svertex;
     
     assert_no_null(builder);
+    
+    vertex_idx = csmarrayc_count_st(builder->vertexs, i_vertex_t);
 
     no_uses = 0;
     svertex = NULL;
 
-    vertex = i_new_vertex(x, y, z, no_uses, svertex);
+    vertex = i_new_vertex(vertex_idx, x, y, z, no_uses, svertex);
     csmarrayc_append_element_st(builder->vertexs, vertex, i_vertex_t);
 
-    return csmarrayc_count_st(builder->vertexs, i_vertex_t) - 1;
+    return vertex_idx;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1103,23 +1005,7 @@ static CSMBOOL i_check_inner_loop_orientation(struct csmsolid_t *solid)
 
 // ------------------------------------------------------------------------------------------
 
-static CSMBOOL i_loop_point_intersects_with_bbox(
-                        const struct i_loop_point_t *loop_point,
-                        const struct csmbbox_t *bbox,
-                        const struct i_octree_common_data_t *octree_common_data)
-{
-    assert_no_null(loop_point);
-    assert_no_null(octree_common_data);
-    
-    return csmbbox_contains_point(bbox, loop_point->x, loop_point->y, loop_point->z);
-}
-
-// ------------------------------------------------------------------------------------------
-
-static void i_loop_point_maximize_bbox(
-                        const struct i_loop_point_t *loop_point,
-                        struct csmbbox_t *bbox,
-                        const struct i_octree_common_data_t *octree_common_data)
+static void i_loop_point_maximize_bbox(const struct i_loop_point_t *loop_point, struct csmbbox_t *bbox)
 {
     assert_no_null(loop_point);
     csmbbox_maximize_coord(bbox, loop_point->x, loop_point->y, loop_point->z);
@@ -1127,7 +1013,187 @@ static void i_loop_point_maximize_bbox(
 
 // ------------------------------------------------------------------------------------------
 
-static void i_append_loop_point_to_octree(struct csmfacbrep2solid_loop_t *loop, struct csmoctree_t *octree)
+static void i_append_loop_points_to_octree_bbox(struct csmfacbrep2solid_loop_t *loop, struct csmbbox_t *octree_bbox)
+{
+    unsigned long i, no_points;
+    
+    assert_no_null(loop);
+    no_points = csmarrayc_count_st(loop->points, i_loop_point_t);
+    
+    for (i = 0; i < no_points; i++)
+    {
+        struct i_loop_point_t *loop_point;
+        
+        loop_point = csmarrayc_get_st(loop->points, i, i_loop_point_t);
+        i_loop_point_maximize_bbox(loop_point, octree_bbox);
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_append_face_loop_points_to_octree_bbox(const struct csmfacbrep2solid_face_t *face, struct csmbbox_t *octree_bbox)
+{
+    unsigned long i, no_inner_loops;
+    
+    assert_no_null(face);
+    assert(face->sface == NULL);
+    assert(face->outer_loop != NULL);
+    
+    i_append_loop_points_to_octree_bbox(face->outer_loop, octree_bbox);
+    
+    no_inner_loops = csmarrayc_count_st(face->inner_loops, csmfacbrep2solid_loop_t);
+    
+    for (i = 0; i < no_inner_loops; i++)
+    {
+        struct csmfacbrep2solid_loop_t *inner_loop;
+        
+        inner_loop = csmarrayc_get_st(face->inner_loops, i, csmfacbrep2solid_loop_t);
+        i_append_loop_points_to_octree_bbox(inner_loop, octree_bbox);
+    }
+}
+
+// ------------------------------------------------------------------------------------------
+
+static CSMBOOL i_is_vertex_contained_in_bbox(const struct i_vertex_t *vertex, const struct csmbbox_t *bbox)
+{
+    assert_no_null(vertex);
+    return csmbbox_contains_point(bbox, vertex->x, vertex->y, vertex->z);
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmbbox_t *, i_compute_octree_bbox, (const csmArrayStruct(csmfacbrep2solid_face_t) *faces))
+{
+    struct csmbbox_t *octree_bbox;
+    unsigned long i, no_faces;
+    
+    no_faces = csmarrayc_count_st(faces, csmfacbrep2solid_face_t);
+    assert(no_faces > 0);
+
+    octree_bbox = csmbbox_create_empty_box();
+
+    for (i = 0; i < no_faces; i++)
+    {
+        const struct csmfacbrep2solid_face_t *face;
+        
+        face = csmarrayc_get_const_st(faces, i, csmfacbrep2solid_face_t);
+        i_append_face_loop_points_to_octree_bbox(face, octree_bbox);
+    }
+    
+    return octree_bbox;
+}
+
+// ------------------------------------------------------------------------------------------
+
+CONSTRUCTOR(static struct csmoctree(i_vertex_t) *, i_initialize_vertex_octree, (
+                        csmArrayStruct(csmfacbrep2solid_face_t) *faces,
+                        csmArrayStruct(i_vertex_t) *vertexs))
+{
+    struct csmoctree(i_vertex_t) *vertex_octree;
+    struct csmbbox_t *octree_bbox;
+    unsigned long i, no_vertexs;
+
+    octree_bbox = i_compute_octree_bbox(faces);
+    vertex_octree = csmoctree_new(3, &octree_bbox, i_is_vertex_contained_in_bbox, i_vertex_t);
+    
+    no_vertexs = csmarrayc_count_st(vertexs, i_vertex_t);
+    
+    for (i = 0; i < no_vertexs; i++)
+    {
+        struct i_vertex_t *vertex;
+        
+        vertex = csmarrayc_get_st(vertexs, i, i_vertex_t);
+        csmoctree_append_item(vertex_octree, i_vertex_t, vertex);
+    }
+    
+    return vertex_octree;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static unsigned long i_get_vertex_idx_for_point(
+                        double x, double y, double z,
+                        double tolerance,
+                        struct csmbbox_t *loop_point_bbox_opt,
+                        struct csmoctree(i_vertex_t) *vertex_octree,
+                        csmArrayStruct(i_vertex_t) *vertexs)
+{
+    unsigned long vertex_idx;
+    const csmArrayStruct(i_vertex_t) *neighborhood;
+    unsigned long no_vertexs_neighborhood;
+    
+    csmbbox_reset(loop_point_bbox_opt);
+    csmbbox_maximize_coord(loop_point_bbox_opt, x - tolerance, y - tolerance, z - tolerance);
+    csmbbox_maximize_coord(loop_point_bbox_opt, x + tolerance, y + tolerance, z + tolerance);
+    
+    neighborhood = csmoctree_get_bbox_neighbors(vertex_octree, i_vertex_t, loop_point_bbox_opt);
+    no_vertexs_neighborhood = csmarrayc_count_st(neighborhood, i_vertex_t);
+    
+    if (no_vertexs_neighborhood == 0)
+    {
+        struct i_vertex_t *vertex;
+        unsigned long no_uses;
+        struct csmvertex_t *svertex;
+        
+        no_uses = 1;
+        svertex = NULL;
+        
+        vertex_idx = csmarrayc_count_st(vertexs, i_vertex_t);
+        vertex = i_new_vertex(vertex_idx, x, y, z, no_uses, svertex);
+        
+        csmoctree_append_item(vertex_octree, i_vertex_t, vertex);
+        
+        csmarrayc_append_element_st(vertexs, vertex, i_vertex_t);
+    }
+    else
+    {
+        const struct i_vertex_t *nearest_vertex;
+        double dist_to_nearest_vertex;
+        unsigned long i;
+        struct i_vertex_t *vertex;
+
+        nearest_vertex = NULL;
+        dist_to_nearest_vertex = 0.;
+        
+        for (i = 0; i < no_vertexs_neighborhood; i++)
+        {
+            const struct i_vertex_t *vertex;
+            double distance;
+            
+            vertex = csmarrayc_get_const_st(neighborhood, i, i_vertex_t);
+            assert_no_null(vertex);
+            
+            distance = csmmath_squared_distance_3D(vertex->x, vertex->y, vertex->z, x, y, z);
+            
+            if (nearest_vertex == NULL || distance < dist_to_nearest_vertex)
+            {
+                nearest_vertex = vertex;
+                dist_to_nearest_vertex = distance;
+            }
+        }
+        
+        assert_no_null(nearest_vertex);
+        
+        vertex = csmarrayc_get_st(vertexs, nearest_vertex->vertex_idx, i_vertex_t);
+        assert(vertex == nearest_vertex);
+        
+        vertex_idx = nearest_vertex->vertex_idx;
+        vertex->no_uses++;
+    }
+    
+    csmarrayc_free_const_st(&neighborhood, i_vertex_t);
+    
+    return vertex_idx;
+}
+
+// ------------------------------------------------------------------------------------------
+
+static void i_register_loop_vertexs(
+                        struct csmfacbrep2solid_loop_t *loop,
+                        double tolerance,
+                        struct csmbbox_t *loop_point_bbox_opt,
+                        struct csmoctree(i_vertex_t) *vertex_octree,
+                        csmArrayStruct(i_vertex_t) *vertexs)
 {
     unsigned long i, no_points;
     
@@ -1140,80 +1206,96 @@ static void i_append_loop_point_to_octree(struct csmfacbrep2solid_loop_t *loop, 
         struct i_loop_point_t *loop_point;
         
         loop_point = csmarrayc_get_st(loop->points, i, i_loop_point_t);
-        csmoctree_append_item(octree, loop_point, i_loop_point_t, i_octree_common_data_t, i_loop_point_intersects_with_bbox, i_loop_point_maximize_bbox);
+        assert_no_null(loop_point);
+        
+        if (loop_point->vertex_idx == ULONG_MAX)
+        {
+            loop_point->vertex_idx = i_get_vertex_idx_for_point(
+                        loop_point->x, loop_point->y, loop_point->z,
+                        tolerance,
+                        loop_point_bbox_opt,
+                        vertex_octree,
+                        vertexs);
+        }
+        else
+        {
+            struct i_vertex_t *vertex;
+            
+            vertex = csmarrayc_get_st(vertexs, loop_point->vertex_idx, i_vertex_t);
+            assert_no_null(vertex);
+            
+            loop_point->x = vertex->x;
+            loop_point->y = vertex->y;
+            loop_point->z = vertex->z;
+            
+            vertex->no_uses++;
+        }
     }
 }
 
 // ------------------------------------------------------------------------------------------
 
-static void i_append_face_loop_points_to_octree(const struct csmfacbrep2solid_face_t *face, struct csmoctree_t *octree)
+static void i_register_inner_loops_vertexs(
+                        csmArrayStruct(csmfacbrep2solid_loop_t) *inner_loops,
+                        double tolerance,
+                        struct csmbbox_t *loop_point_bbox_opt,
+                        struct csmoctree(i_vertex_t) *vertex_octree,
+                        csmArrayStruct(i_vertex_t) *vertexs)
 {
     unsigned long i, no_inner_loops;
     
-    assert_no_null(face);
-    assert(face->sface == NULL);
-    assert(face->outer_loop != NULL);
-    
-    i_append_loop_point_to_octree(face->outer_loop, octree);
-    
-    no_inner_loops = csmarrayc_count_st(face->inner_loops, csmfacbrep2solid_loop_t);
+    no_inner_loops = csmarrayc_count_st(inner_loops, csmfacbrep2solid_loop_t);
     
     for (i = 0; i < no_inner_loops; i++)
     {
         struct csmfacbrep2solid_loop_t *inner_loop;
         
-        inner_loop = csmarrayc_get_st(face->inner_loops, i, csmfacbrep2solid_loop_t);
-        i_append_loop_point_to_octree(inner_loop, octree);
+        inner_loop = csmarrayc_get_st(inner_loops, i, csmfacbrep2solid_loop_t);
+        i_register_loop_vertexs(inner_loop, tolerance, loop_point_bbox_opt, vertex_octree, vertexs);
     }
-}
-
-
-// ------------------------------------------------------------------------------------------
-
-CONSTRUCTOR(static struct csmoctree_t *, i_build_octree, (csmArrayStruct(csmfacbrep2solid_face_t) *faces))
-{
-    struct csmoctree_t *octree;
-    unsigned long i, no_faces;
-    
-    no_faces = csmarrayc_count_st(faces, csmfacbrep2solid_face_t);
-    assert(no_faces > 0);
-
-    octree = csmoctree_new(10);
-
-    for (i = 0; i < no_faces; i++)
-    {
-        const struct csmfacbrep2solid_face_t *face;
-        
-        face = csmarrayc_get_const_st(faces, i, csmfacbrep2solid_face_t);
-        i_append_face_loop_points_to_octree(face, octree);
-    }
-
-    csmoctree_build(octree);
-    
-    return octree;
 }
 
 // ------------------------------------------------------------------------------------------
 
-static void i_generate_face_vertexs(csmArrayStruct(csmfacbrep2solid_face_t) *faces, csmArrayStruct(i_vertex_t) *vertexs)
+static void i_register_face_vertexs(
+                        struct csmfacbrep2solid_face_t *face,
+                        double tolerance,
+                        struct csmbbox_t *loop_point_bbox_opt,
+                        struct csmoctree(i_vertex_t) *vertex_octree,
+                        csmArrayStruct(i_vertex_t) *vertexs)
 {
-    struct csmoctree_t *octree;
-    unsigned long i, no_faces;
+    assert_no_null(face);
+    
+    i_register_loop_vertexs(face->outer_loop, tolerance, loop_point_bbox_opt, vertex_octree, vertexs);
+    i_register_inner_loops_vertexs(face->inner_loops, tolerance, loop_point_bbox_opt, vertex_octree, vertexs);
+}
 
+// ------------------------------------------------------------------------------------------
+
+static void i_generate_face_vertexs(
+                        double tolerance,
+                        csmArrayStruct(csmfacbrep2solid_face_t) *faces,
+                        csmArrayStruct(i_vertex_t) *vertexs)
+{
+    struct csmoctree(i_vertex_t) *vertex_octree;
+    unsigned long i, no_faces;
+    struct csmbbox_t *loop_point_bbox;
+    
     no_faces = csmarrayc_count_st(faces, csmfacbrep2solid_face_t);
     assert(no_faces > 0);
 
-    octree = i_build_octree(faces);
+    vertex_octree = i_initialize_vertex_octree(faces, vertexs);
+    loop_point_bbox = csmbbox_create_empty_box();
     
     for (i = 0; i < no_faces; i++)
     {
         struct csmfacbrep2solid_face_t *face;
         
         face = csmarrayc_get_st(faces, i, csmfacbrep2solid_face_t);
-        -->
+        i_register_face_vertexs(face, tolerance, loop_point_bbox, vertex_octree, vertexs);
     }
     
-    csmoctree_free(&octree);
+    csmoctree_free(&vertex_octree, i_vertex_t);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -1241,7 +1323,7 @@ enum csmfacbrep2solid_result_t csmfacbrep2solid_build(struct csmfacbrep2solid_t 
         if (builder->face_normal_point_out_of_solid == CSMTRUE)
             i_reverse_faces_loops_because_csm_outer_loop_points_to_interior(builder->faces);
         
-        i_generate_face_vertexs(builder->faces, builder->vertexs);
+        i_generate_face_vertexs(builder->equal_points_tolerance, builder->faces, builder->vertexs);
         
         if (i_did_generate_edge_list(builder->faces, &edges) == CSMFALSE)
         {
