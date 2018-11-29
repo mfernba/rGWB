@@ -15,6 +15,8 @@ void csmbbox_maximize_coord(struct csmbbox_t *bbox, double x, double y, double z
 
 void csmbbox_maximize_bbox(struct csmbbox_t *bbox_maximizar, const struct csmbbox_t *bbox);
 
+void csmbbox_increase_by_absolute_margin(struct csmbbox_t *bbox, double margin);
+
 void csmbbox_compute_bsphere_and_margins(struct csmbbox_t *bbox);
 
 void csmbbox_get_extension_real(

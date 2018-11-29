@@ -219,6 +219,28 @@ void csmbbox_maximize_bbox(struct csmbbox_t *bbox_maximizar, const struct csmbbo
 
 // ------------------------------------------------------------------------------------------
 
+static void i_increase_coordinates_by_margin(double margin, double *min, double *max)
+{
+    assert_no_null(min);
+    assert_no_null(max);
+    
+    *min -= margin;
+    *max += margin;
+}
+
+// ------------------------------------------------------------------------------------------
+
+void csmbbox_increase_by_absolute_margin(struct csmbbox_t *bbox, double margin)
+{
+    assert_no_null(bbox);
+    
+    i_increase_coordinates_by_margin(margin, &bbox->x_min_ext, &bbox->x_max_ext);
+    i_increase_coordinates_by_margin(margin, &bbox->y_min_ext, &bbox->y_max_ext);
+    i_increase_coordinates_by_margin(margin, &bbox->z_min_ext, &bbox->z_max_ext);
+}
+
+// ------------------------------------------------------------------------------------------
+
 static double i_compute_margin(double min, double max)
 {
     assert(min <= max);
@@ -231,13 +253,8 @@ static void i_increase_coordinates(double *min, double *max)
 {
     double margin;
     
-    assert_no_null(min);
-    assert_no_null(max);
-    
     margin = i_compute_margin(*min, *max);
-    
-    *min -= margin;
-    *max += margin;
+    i_increase_coordinates_by_margin(margin, min, max);
 }
 
 // ------------------------------------------------------------------------------------------

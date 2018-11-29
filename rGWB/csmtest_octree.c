@@ -108,7 +108,7 @@ static void i_test1(void)
     csmArrayStruct(i_point_t) *points;
     
     bbox = i_new_bbox_with_dimensions(0., 0., 0., 1., 1., 1.);
-    points_octree = csmoctree_new(1, &bbox, i_is_point_in_bbox, i_point_t);
+    points_octree = csmoctree_new(1, 0.005, &bbox, i_is_point_in_bbox, i_point_t);
     points = csmarrayc_new_st_array(0, i_point_t);
     
     i_append_point(0.25, 0.25, 0.25, points_octree, points);
@@ -126,6 +126,8 @@ static void i_test1(void)
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 1.0, points_octree, 2);
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.1, 0.1, 0.1, points_octree, 0);
     i_test_number_of_elements_in_bbox(0.24, 0.24, 0.24, 0.26, 0.26, 0.26, points_octree, 1);
+    i_test_number_of_elements_in_bbox(0.25, 0.25, 0.25, 0.26, 0.26, 0.26, points_octree, 1);
+    i_test_number_of_elements_in_bbox(0.26, 0.26, 0.26, 0.27, 0.27, 0.27, points_octree, 0);
     
     csmoctree_free(&points_octree, i_point_t);
     csmarrayc_free_st(&points, i_point_t, i_free_point);

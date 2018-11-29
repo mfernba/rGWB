@@ -5,12 +5,13 @@
 
 DLL_RGWB CONSTRUCTOR(struct csmoctree_t *, csmoctree_dontuse_new, (
                         unsigned long max_occupancy,
+                        double tolerance_margin,
                         struct csmbbox_t **octree_bbox,
                         csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox));
-#define csmoctree_new(max_occupancy, octree_bbox, func_intersects_with_bbox, type)\
+#define csmoctree_new(max_occupancy, tolerance_margin, octree_bbox, func_intersects_with_bbox, type)\
     (/*lint -save -e505*/\
         CSMOCTREE_CHECK_FUNC_INTERSECTS_WITH_BBOX(func_intersects_with_bbox, type),\
-        (struct csmoctree(type) *)csmoctree_dontuse_new(max_occupancy, octree_bbox, (csmoctree_FPtr_intersects_with_bbox)func_intersects_with_bbox)\
+        (struct csmoctree(type) *)csmoctree_dontuse_new(max_occupancy, tolerance_margin, octree_bbox, (csmoctree_FPtr_intersects_with_bbox)func_intersects_with_bbox)\
     )/*lint -restore*/
 
 DLL_RGWB void csmoctree_dontuse_free(struct csmoctree_t **octree);

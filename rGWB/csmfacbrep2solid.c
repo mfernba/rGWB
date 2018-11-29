@@ -1088,15 +1088,19 @@ CONSTRUCTOR(static struct csmbbox_t *, i_compute_octree_bbox, (const csmArrayStr
 // ------------------------------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmoctree(i_vertex_t) *, i_initialize_vertex_octree, (
+                        double equal_points_tolerance,
                         csmArrayStruct(csmfacbrep2solid_face_t) *faces,
                         csmArrayStruct(i_vertex_t) *vertexs))
 {
     struct csmoctree(i_vertex_t) *vertex_octree;
+    double tolerance_margin;
     struct csmbbox_t *octree_bbox;
     unsigned long i, no_vertexs;
 
+    tolerance_margin = 10. * equal_points_tolerance;
     octree_bbox = i_compute_octree_bbox(faces);
-    vertex_octree = csmoctree_new(3, &octree_bbox, i_is_vertex_contained_in_bbox, i_vertex_t);
+    
+    vertex_octree = csmoctree_new(10, tolerance_margin, &octree_bbox, i_is_vertex_contained_in_bbox, i_vertex_t);
     
     no_vertexs = csmarrayc_count_st(vertexs, i_vertex_t);
     
@@ -1276,7 +1280,7 @@ static void i_register_face_vertexs(
 // ------------------------------------------------------------------------------------------
 
 static void i_generate_face_vertexs(
-                        double tolerance,
+                        double equal_points_tolerance,
                         csmArrayStruct(csmfacbrep2solid_face_t) *faces,
                         csmArrayStruct(i_vertex_t) *vertexs)
 {
@@ -1287,7 +1291,7 @@ static void i_generate_face_vertexs(
     no_faces = csmarrayc_count_st(faces, csmfacbrep2solid_face_t);
     assert(no_faces > 0);
 
-    vertex_octree = i_initialize_vertex_octree(faces, vertexs);
+    vertex_octree = i_initialize_vertex_octree(equal_points_tolerance, faces, vertexs);
     loop_point_bbox = csmbbox_create_empty_box();
     
     for (i = 0; i < no_faces; i++)
@@ -1295,7 +1299,7 @@ static void i_generate_face_vertexs(
         struct csmfacbrep2solid_face_t *face;
         
         face = csmarrayc_get_st(faces, i, csmfacbrep2solid_face_t);
-        i_register_face_vertexs(face, tolerance, loop_point_bbox, vertex_octree, vertexs);
+        i_register_face_vertexs(face, equal_points_tolerance, loop_point_bbox, vertex_octree, vertexs);
     }
     
     csmoctree_free(&vertex_octree, i_vertex_t);

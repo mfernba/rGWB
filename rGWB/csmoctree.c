@@ -20,6 +20,7 @@ csmArrayStruct(i_cell_t);
 struct i_cell_t
 {
     struct csmbbox_t *bbox;
+    struct csmbbox_t *extended_bbox;
     
     const csmArrayStruct(csmoctree_item_t) *elements;
     csmArrayStruct(i_cell_t) *cells;
@@ -28,6 +29,8 @@ struct i_cell_t
 struct csmoctree_t
 {
     unsigned long max_occupancy;
+    double tolerance_margin;
+    
     struct csmbbox_t *octree_bbox;
 
     csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox;
@@ -41,6 +44,7 @@ struct csmoctree_t
 
 CONSTRUCTOR(static struct i_cell_t *, i_new_cell, (
                         struct csmbbox_t **bbox,
+                        struct csmbbox_t **extended_bbox,
                         const csmArrayStruct(csmoctree_item_t) **elements,
                         csmArrayStruct(i_cell_t) **cells))
 {
@@ -49,6 +53,7 @@ CONSTRUCTOR(static struct i_cell_t *, i_new_cell, (
     cell = MALLOC(struct i_cell_t);
     
     cell->bbox = ASSIGN_POINTER_PP_NOT_NULL(bbox, struct csmbbox_t);
+    cell->extended_bbox = ASSIGN_POINTER_PP_NOT_NULL(extended_bbox, struct csmbbox_t);
     
     cell->elements = ASSIGN_POINTER_PP_NOT_NULL(elements, const csmArrayStruct(csmoctree_item_t));
     cell->cells = ASSIGN_POINTER_PP(cells, csmArrayStruct(i_cell_t));
@@ -64,6 +69,7 @@ static void i_free_cell(struct i_cell_t **cell)
     assert_no_null(*cell);
     
     csmbbox_free(&(*cell)->bbox);
+    csmbbox_free(&(*cell)->extended_bbox);
     
     if ((*cell)->elements != NULL)
         csmarrayc_free_const_st(&(*cell)->elements, csmoctree_item_t);
@@ -76,15 +82,22 @@ static void i_free_cell(struct i_cell_t **cell)
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static struct i_cell_t *, i_new_root_cell, (struct csmbbox_t **bbox))
+CONSTRUCTOR(static struct i_cell_t *, i_new_root_cell, (struct csmbbox_t **bbox, double tolerance_margin))
 {
+    struct csmbbox_t *extended_bbox;
     const csmArrayStruct(csmoctree_item_t) *elements;
     csmArrayStruct(i_cell_t) *cells;
+    
+    assert_no_null(bbox);
+    
+    extended_bbox = csmbbox_copy(*bbox);
+    csmbbox_increase_by_absolute_margin(extended_bbox, tolerance_margin);
+    csmbbox_compute_bsphere_and_margins(extended_bbox);
     
     elements = csmarrayc_new_const_st_array(0, csmoctree_item_t);
     cells = NULL;
     
-    return i_new_cell(bbox, &elements, &cells);
+    return i_new_cell(bbox, &extended_bbox, &elements, &cells);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -92,6 +105,7 @@ CONSTRUCTOR(static struct i_cell_t *, i_new_root_cell, (struct csmbbox_t **bbox)
 static void i_set_cell(
                         unsigned long cell_idx,
                         double x_min, double y_min, double z_min, double x_max, double y_max, double z_max,
+                        double tolerance_margin,
                         csmArrayStruct(i_cell_t) *cells)
 {
     struct csmbbox_t *cell_bbox;
@@ -106,13 +120,13 @@ static void i_set_cell(
     csmbbox_maximize_coord(cell_bbox, x_max, y_max, z_max);
     csmbbox_compute_bsphere_and_margins(cell_bbox);
     
-    cell = i_new_root_cell(&cell_bbox);
+    cell = i_new_root_cell(&cell_bbox, tolerance_margin);
     csmarrayc_set_st(cells, cell_idx, cell, i_cell_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
 
-CONSTRUCTOR(static csmArrayStruct(i_cell_t) *, i_explode_cell_bbox, (const struct csmbbox_t *bbox))
+CONSTRUCTOR(static csmArrayStruct(i_cell_t) *, i_explode_cell_bbox, (const struct csmbbox_t *bbox, double tolerance_margin))
 {
     csmArrayStruct(i_cell_t) *cells;
     double x_min, y_min, z_min, x_max, y_max, z_max;
@@ -128,15 +142,15 @@ CONSTRUCTOR(static csmArrayStruct(i_cell_t) *, i_explode_cell_bbox, (const struc
     cells = csmarrayc_new_st_array(8, i_cell_t);
     cell_idx = 0;
     
-    i_set_cell(cell_idx++, x_min, y_min, z_min, x_middle, y_middle, z_middle, cells);
-    i_set_cell(cell_idx++, x_middle, y_min, z_min, x_max, y_middle, z_middle, cells);
-    i_set_cell(cell_idx++, x_min, y_middle, z_min, x_middle, y_max, z_middle, cells);
-    i_set_cell(cell_idx++, x_middle, y_middle, z_min, x_max, y_max, z_middle, cells);
+    i_set_cell(cell_idx++, x_min, y_min, z_min, x_middle, y_middle, z_middle, tolerance_margin, cells);
+    i_set_cell(cell_idx++, x_middle, y_min, z_min, x_max, y_middle, z_middle, tolerance_margin, cells);
+    i_set_cell(cell_idx++, x_min, y_middle, z_min, x_middle, y_max, z_middle, tolerance_margin, cells);
+    i_set_cell(cell_idx++, x_middle, y_middle, z_min, x_max, y_max, z_middle, tolerance_margin, cells);
     
-    i_set_cell(cell_idx++, x_min, y_min, z_middle, x_middle, y_middle, z_max, cells);
-    i_set_cell(cell_idx++, x_middle, y_min, z_middle, x_max, y_middle, z_max, cells);
-    i_set_cell(cell_idx++, x_min, y_middle, z_middle, x_middle, y_max, z_max, cells);
-    i_set_cell(cell_idx++, x_middle, y_middle, z_middle, x_max, y_max, z_max, cells);
+    i_set_cell(cell_idx++, x_min, y_min, z_middle, x_middle, y_middle, z_max, tolerance_margin, cells);
+    i_set_cell(cell_idx++, x_middle, y_min, z_middle, x_max, y_middle, z_max, tolerance_margin, cells);
+    i_set_cell(cell_idx++, x_min, y_middle, z_middle, x_middle, y_max, z_max, tolerance_margin, cells);
+    i_set_cell(cell_idx++, x_middle, y_middle, z_middle, x_max, y_max, z_max, tolerance_margin, cells);
     
     return cells;
 }
@@ -147,6 +161,7 @@ static void i_append_element_to_cell(
                         unsigned long recursion_level,
                         struct i_cell_t *cell,
                         unsigned long max_occupancy,
+                        double tolerance_margin,
                         const struct csmoctree_item_t *element,
                         csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox,
                         CSMBOOL *added)
@@ -159,7 +174,7 @@ static void i_append_element_to_cell(
     assert_no_null(func_intersects_with_bbox);
     assert_no_null(added);
     
-    if (func_intersects_with_bbox(element, cell->bbox) == CSMFALSE)
+    if (func_intersects_with_bbox(element, cell->extended_bbox) == CSMFALSE)
     {
         added_loc = CSMFALSE;
     }
@@ -180,7 +195,7 @@ static void i_append_element_to_cell(
                 unsigned long i;
                 unsigned long no_cells;
                 
-                cell->cells = i_explode_cell_bbox(cell->bbox);
+                cell->cells = i_explode_cell_bbox(cell->bbox, tolerance_margin);
                 
                 no_cells = csmarrayc_count_st(cell->cells, i_cell_t);
                 assert(no_cells == 8);
@@ -200,7 +215,7 @@ static void i_append_element_to_cell(
                         CSMBOOL added_in_inner_cell;
                         
                         inner_cell = csmarrayc_get_st(cell->cells, j, i_cell_t);
-                        i_append_element_to_cell(recursion_level + 1, inner_cell, max_occupancy, element, func_intersects_with_bbox, &added_in_inner_cell);
+                        i_append_element_to_cell(recursion_level + 1, inner_cell, max_occupancy, tolerance_margin, element, func_intersects_with_bbox, &added_in_inner_cell);
                         
                         if (added_in_inner_cell == CSMTRUE)
                             added_i = CSMTRUE;
@@ -229,7 +244,7 @@ static void i_append_element_to_cell(
                 CSMBOOL added_in_inner_cell;
                 
                 inner_cell = csmarrayc_get_st(cell->cells, i, i_cell_t);
-                i_append_element_to_cell(recursion_level + 1, inner_cell, max_occupancy, element, func_intersects_with_bbox, &added_in_inner_cell);
+                i_append_element_to_cell(recursion_level + 1, inner_cell, max_occupancy, tolerance_margin, element, func_intersects_with_bbox, &added_in_inner_cell);
                 
                 if (added_in_inner_cell == CSMTRUE)
                     added_loc = CSMTRUE;
@@ -244,6 +259,7 @@ static void i_append_element_to_cell(
 
 CONSTRUCTOR(static struct csmoctree_t *, i_new, (
                         unsigned long max_occupancy,
+                        double tolerance_margin,
                         struct csmbbox_t **octree_bbox,
                         csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox,
                         const csmArrayStruct(csmoctree_item_t) **elements,
@@ -254,6 +270,8 @@ CONSTRUCTOR(static struct csmoctree_t *, i_new, (
     octree = MALLOC(struct csmoctree_t);
     
     octree->max_occupancy = max_occupancy;
+    octree->tolerance_margin = tolerance_margin;
+    
     octree->octree_bbox = ASSIGN_POINTER_PP_NOT_NULL(octree_bbox, struct csmbbox_t);
     
     octree->func_intersects_with_bbox = func_intersects_with_bbox;
@@ -269,6 +287,7 @@ CONSTRUCTOR(static struct csmoctree_t *, i_new, (
 
 struct csmoctree_t *csmoctree_dontuse_new(
                         unsigned long max_occupancy,
+                        double tolerance_margin,
                         struct csmbbox_t **octree_bbox,
                         csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox)
 {
@@ -278,7 +297,7 @@ struct csmoctree_t *csmoctree_dontuse_new(
     pendant_elements = csmarrayc_new_const_st_array(0, csmoctree_item_t);
     root = NULL;
 
-    return i_new(max_occupancy, octree_bbox, func_intersects_with_bbox, &pendant_elements, &root);
+    return i_new(max_occupancy, tolerance_margin, octree_bbox, func_intersects_with_bbox, &pendant_elements, &root);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -319,7 +338,7 @@ static void i_update_octree(struct csmoctree_t *octree)
         struct csmbbox_t *root_bbox;
         
         root_bbox = csmbbox_copy(octree->octree_bbox);
-        octree->root = i_new_root_cell(&root_bbox);
+        octree->root = i_new_root_cell(&root_bbox, octree->tolerance_margin);
     }
     
     no_pendant_elements = csmarrayc_count_st(octree->pendant_elements, csmoctree_item_t);
@@ -335,7 +354,7 @@ static void i_update_octree(struct csmoctree_t *octree)
             
             element = csmarrayc_get_const_st(octree->pendant_elements, i, csmoctree_item_t);
             
-            i_append_element_to_cell(0, octree->root, octree->max_occupancy, element, octree->func_intersects_with_bbox, &added);
+            i_append_element_to_cell(0, octree->root, octree->max_occupancy, octree->tolerance_margin, element, octree->func_intersects_with_bbox, &added);
             assert(added == CSMTRUE);
         };
         
@@ -357,7 +376,7 @@ static void i_append_bbox_neighbors(
     assert(recursion_level < 10000);
     assert_no_null(func_intersects_with_bbox);
     
-    if (csmbbox_intersects_with_other_bbox(cell->bbox, bbox) == CSMTRUE)
+    if (csmbbox_intersects_with_other_bbox(cell->extended_bbox, bbox) == CSMTRUE)
     {
         if (cell->cells == NULL)
         {
