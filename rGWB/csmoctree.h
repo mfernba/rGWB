@@ -3,6 +3,10 @@
 #include "csmfwddecl.hxx"
 #include "csmoctree.hxx"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 DLL_RGWB CONSTRUCTOR(struct csmoctree_t *, csmoctree_dontuse_new, (
                         unsigned long max_occupancy,
                         double tolerance_margin,
@@ -36,3 +40,15 @@ DLL_RGWB CONSTRUCTOR(const csmArrayStruct(csmoctree_item_t) *, csmoctree_dontuse
         ((struct csmoctree(type) *)octree == octree),\
         (const csmArrayStruct(type) *)csmoctree_dontuse_get_bbox_neighbors((struct csmoctree_t *)octree, bbox)\
     )/*lint -restore*/
+
+
+DLL_RGWB void csmoctree_dontuse_print(struct csmoctree_t *octree);
+#define csmoctree_print(octree, type)\
+    (/*lint -save -e505*/\
+        ((struct csmoctree(type) *)octree == octree),\
+        csmoctree_dontuse_print((struct csmoctree_t *)octree)\
+    )/*lint -restore*/
+    
+#ifdef __cplusplus
+}
+#endif

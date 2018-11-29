@@ -121,6 +121,8 @@ static void i_test1(void)
     i_append_point(0.25, 0.75, 0.75, points_octree, points);
     i_append_point(0.75, 0.75, 0.75, points_octree, points);
     
+    csmoctree_print(points_octree, i_point_t);
+    
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 1., 1., 1., points_octree, 8);
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 0.5, points_octree, 1);
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 1.0, points_octree, 2);
@@ -151,6 +153,8 @@ static void i_test2(void)
     
     i_append_point(0.75, 0.75, 0.75, points_octree, points);
     i_append_point(0.76, 0.75003, 0.75, points_octree, points);
+    
+    csmoctree_print(points_octree, i_point_t);
     
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 1., 1., 1., points_octree, 5);
     i_test_number_of_elements_in_bbox(0.5, 0.5, 0.5, 1., 1., 1., points_octree, 2);
