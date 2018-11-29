@@ -75,6 +75,8 @@ CONSTRUCTOR(static struct csmbbox_t *, i_new_bbox_with_dimensions, (double x_min
     csmbbox_maximize_coord(bbox, x_min, y_min, z_min);
     csmbbox_maximize_coord(bbox, x_max, y_max, z_max);
     
+    csmbbox_compute_bsphere_and_margins(bbox);
+    
     return bbox;
 }
 

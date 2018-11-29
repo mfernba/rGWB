@@ -1080,6 +1080,8 @@ CONSTRUCTOR(static struct csmbbox_t *, i_compute_octree_bbox, (const csmArrayStr
         i_append_face_loop_points_to_octree_bbox(face, octree_bbox);
     }
     
+    csmbbox_compute_bsphere_and_margins(octree_bbox);
+
     return octree_bbox;
 }
 
@@ -1125,6 +1127,7 @@ static unsigned long i_get_vertex_idx_for_point(
     csmbbox_reset(loop_point_bbox_opt);
     csmbbox_maximize_coord(loop_point_bbox_opt, x - tolerance, y - tolerance, z - tolerance);
     csmbbox_maximize_coord(loop_point_bbox_opt, x + tolerance, y + tolerance, z + tolerance);
+    csmbbox_compute_bsphere_and_margins(loop_point_bbox_opt);
     
     neighborhood = csmoctree_get_bbox_neighbors(vertex_octree, i_vertex_t, loop_point_bbox_opt);
     no_vertexs_neighborhood = csmarrayc_count_st(neighborhood, i_vertex_t);

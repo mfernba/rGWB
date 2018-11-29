@@ -104,7 +104,8 @@ static void i_set_cell(
     cell_bbox = csmbbox_create_empty_box();
     csmbbox_maximize_coord(cell_bbox, x_min, y_min, z_min);
     csmbbox_maximize_coord(cell_bbox, x_max, y_max, z_max);
-
+    csmbbox_compute_bsphere_and_margins(cell_bbox);
+    
     cell = i_new_root_cell(&cell_bbox);
     csmarrayc_set_st(cells, cell_idx, cell, i_cell_t);
 }
@@ -376,7 +377,7 @@ static void i_append_bbox_neighbors(
         {
             unsigned long i, no_cells;
             
-            assert(csmarrayc_count_st(cell->elements, csmoctree_item_t) == 0);
+            assert(cell->elements == NULL);
             no_cells = csmarrayc_count_st(cell->cells, i_cell_t);
             
             for (i = 0; i < no_cells; i++)
