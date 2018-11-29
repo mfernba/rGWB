@@ -2,6 +2,9 @@
 
 #include "csmtest.h"
 
+#include "csmtest_array.inl"
+#include "csmtest_octree.inl"
+
 #include "csmapto2d.h"
 #include "csmarrayc.h"
 #include "csmassert.inl"
@@ -36,7 +39,6 @@
 #include "csmsplit.h"
 #include "csmstring.inl"
 #include "csmsweep.h"
-#include "csmtest_array.inl"
 #include "csmtolerance.inl"
 #include "csmviewer.inl"
 #include "csmfacbrep2solid.h"
@@ -6347,6 +6349,10 @@ void csmtest_test(void)
     struct csmviewer_t *viewer;
     CSMBOOL process_all_test = CSMFALSE;
 
+    csmtest_array_test1();
+    csmtest_array_test2();
+    csmtest_octree_test();
+    
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
@@ -6385,9 +6391,6 @@ void csmtest_test(void)
     process_all_test = CSMTRUE;
     csmdebug_configure_for_fast_testing();
     //csmdebug_configure(CSMFALSE, CSMTRUE, CSMFALSE);
-    
-    //csmtest_array_test1();
-    //csmtest_array_test2();
     
     i_test_crea_destruye_solido_vacio();
     i_test_basico_solido_una_arista();

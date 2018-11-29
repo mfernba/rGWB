@@ -89,22 +89,24 @@ CONSTRUCTOR(static struct i_cell_t *, i_new_root_cell, (struct csmbbox_t **bbox)
 
 // ----------------------------------------------------------------------------------------------------
 
-static void i_subdivision_limits(
-                        double bbox_start, double bbox_end,
-                        unsigned long i, unsigned long no_subdivisions,
-                        double *start, double *end)
+static void i_set_cell(
+                        unsigned long cell_idx,
+                        double x_min, double y_min, double z_min, double x_max, double y_max, double z_max,
+                        csmArrayStruct(i_cell_t) *cells)
 {
-    double size;
+    struct csmbbox_t *cell_bbox;
+    struct i_cell_t *cell;
     
-    assert(bbox_start < bbox_end);
-    assert(no_subdivisions > 0);
-    assert_no_null(start);
-    assert_no_null(end);
-    
-    size = (bbox_end - bbox_start) / no_subdivisions;
-    
-    *start = (i == 0) ? bbox_start : bbox_start + i * size;
-    *end = (i == no_subdivisions - 1) ? bbox_end : bbox_start + (i + 1) * size;
+    assert(x_min < x_max);
+    assert(y_min < y_max);
+    assert(z_min < z_max);
+
+    cell_bbox = csmbbox_create_empty_box();
+    csmbbox_maximize_coord(cell_bbox, x_min, y_min, z_min);
+    csmbbox_maximize_coord(cell_bbox, x_max, y_max, z_max);
+
+    cell = i_new_root_cell(&cell_bbox);
+    csmarrayc_set_st(cells, cell_idx, cell, i_cell_t);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -112,49 +114,28 @@ static void i_subdivision_limits(
 CONSTRUCTOR(static csmArrayStruct(i_cell_t) *, i_explode_cell_bbox, (const struct csmbbox_t *bbox))
 {
     csmArrayStruct(i_cell_t) *cells;
-    unsigned long i, no_subdivisions;
     double x_min, y_min, z_min, x_max, y_max, z_max;
-    unsigned long current_cell_idx;
-    
-    no_subdivisions = 2;
-    cells = csmarrayc_new_st_array(no_subdivisions * no_subdivisions * no_subdivisions, i_cell_t);
-    
+    double x_middle, y_middle, z_middle;
+    unsigned long cell_idx;
+
     csmbbox_get_extension_real(bbox, &x_min, &y_min, &z_min, &x_max, &y_max, &z_max);
-    current_cell_idx = 0;
     
-    for (i = 0; i < no_subdivisions; i++)
-    {
-        double x_start, x_end;
-        unsigned long j;
-        
-        i_subdivision_limits(x_min, x_max, i, no_subdivisions, &x_start, &x_end);
-        
-        for (j = 0; j < no_subdivisions; j++)
-        {
-            double y_start, y_end;
-            unsigned long k;
-
-            i_subdivision_limits(y_min, y_max, j, no_subdivisions, &y_start, &y_end);
-            
-            for (k = 0; k < no_subdivisions; k++)
-            {
-                double z_start, z_end;
-                struct csmbbox_t *cell_bbox;
-                struct i_cell_t *cell;
-
-                i_subdivision_limits(z_min, z_max, j, no_subdivisions, &z_start, &z_end);
-                
-                cell_bbox = csmbbox_create_empty_box();
-                csmbbox_maximize_coord(cell_bbox, x_start, y_start, z_start);
-                csmbbox_maximize_coord(cell_bbox, x_end, y_end, z_end);
-                
-                cell = i_new_root_cell(&cell_bbox);
-                csmarrayc_insert_element_st(cells, current_cell_idx, cell, i_cell_t);
-                
-                current_cell_idx++;
-            }
-        }
-    }
+    x_middle = 0.5 * (x_min + x_max);
+    y_middle = 0.5 * (y_min + y_max);
+    z_middle = 0.5 * (z_min + z_max);
+    
+    cells = csmarrayc_new_st_array(8, i_cell_t);
+    cell_idx = 0;
+    
+    i_set_cell(cell_idx++, x_min, y_min, z_min, x_middle, y_middle, z_middle, cells);
+    i_set_cell(cell_idx++, x_middle, y_min, z_min, x_max, y_middle, z_middle, cells);
+    i_set_cell(cell_idx++, x_min, y_middle, z_min, x_middle, y_max, z_middle, cells);
+    i_set_cell(cell_idx++, x_middle, y_middle, z_min, x_max, y_max, z_middle, cells);
+    
+    i_set_cell(cell_idx++, x_min, y_min, z_middle, x_middle, y_middle, z_max, cells);
+    i_set_cell(cell_idx++, x_middle, y_min, z_middle, x_max, y_middle, z_max, cells);
+    i_set_cell(cell_idx++, x_min, y_middle, z_middle, x_middle, y_max, z_max, cells);
+    i_set_cell(cell_idx++, x_middle, y_middle, z_middle, x_max, y_max, z_max, cells);
     
     return cells;
 }
@@ -201,7 +182,7 @@ static void i_append_element_to_cell(
                 cell->cells = i_explode_cell_bbox(cell->bbox);
                 
                 no_cells = csmarrayc_count_st(cell->cells, i_cell_t);
-                assert(no_cells > 0);
+                assert(no_cells == 8);
                 
                 for (i = 0; i < current_occupancy; i++)
                 {

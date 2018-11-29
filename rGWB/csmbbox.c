@@ -136,6 +136,21 @@ void csmbbox_reset(struct csmbbox_t *bbox)
 
 // ------------------------------------------------------------------------------------------
 
+static void i_update_extended_box_range(struct csmbbox_t *bbox)
+{
+    assert_no_null(bbox);
+    
+    bbox->x_min_ext = bbox->x_min;
+    bbox->y_min_ext = bbox->y_min;
+    bbox->z_min_ext = bbox->z_min;
+
+    bbox->x_max_ext = bbox->x_max;
+    bbox->y_max_ext = bbox->y_max;
+    bbox->z_max_ext = bbox->z_max;
+}
+
+// ------------------------------------------------------------------------------------------
+
 void csmbbox_maximize_coord(struct csmbbox_t *bbox, double x, double y, double z)
 {
     assert_no_null(bbox);
@@ -162,6 +177,8 @@ void csmbbox_maximize_coord(struct csmbbox_t *bbox, double x, double y, double z
         bbox->y_max = CSMMATH_MAX(bbox->y_max, y);
         bbox->z_max = CSMMATH_MAX(bbox->z_max, z);
     }
+    
+    i_update_extended_box_range(bbox);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -196,6 +213,8 @@ void csmbbox_maximize_bbox(struct csmbbox_t *bbox_maximizar, const struct csmbbo
             bbox_maximizar->z_max = CSMMATH_MAX(bbox_maximizar->z_max, bbox->z_max);
         }
     }
+    
+    i_update_extended_box_range(bbox_maximizar);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -228,14 +247,6 @@ void csmbbox_compute_bsphere_and_margins(struct csmbbox_t *bbox)
     double radius;
     
     assert_no_null(bbox);
-    
-    bbox->x_min_ext = bbox->x_min;
-    bbox->y_min_ext = bbox->y_min;
-    bbox->z_min_ext = bbox->z_min;
-
-    bbox->x_max_ext = bbox->x_max;
-    bbox->y_max_ext = bbox->y_max;
-    bbox->z_max_ext = bbox->z_max;
     
     i_increase_coordinates(&bbox->x_min_ext, &bbox->x_max_ext);
     i_increase_coordinates(&bbox->y_min_ext, &bbox->y_max_ext);
