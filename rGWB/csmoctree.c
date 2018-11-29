@@ -350,10 +350,12 @@ static void i_append_bbox_neighbors(
                         unsigned long recursion_level,
                         const struct i_cell_t *cell,
                         const struct csmbbox_t *bbox,
+                        csmoctree_FPtr_intersects_with_bbox func_intersects_with_bbox,
                         const csmArrayStruct(csmoctree_item_t) *bbox_neighbors)
 {
     assert_no_null(cell);
     assert(recursion_level < 10000);
+    assert_no_null(func_intersects_with_bbox);
     
     if (csmbbox_intersects_with_other_bbox(cell->bbox, bbox) == CSMTRUE)
     {
@@ -368,9 +370,9 @@ static void i_append_bbox_neighbors(
                 const struct csmoctree_item_t *element;
                 
                 element = csmarrayc_get_const_st(cell->elements, i, csmoctree_item_t);
-                assert_no_null(element);
                 
-                csmarrayc_append_element_const_st(bbox_neighbors, element, csmoctree_item_t);
+                if (func_intersects_with_bbox(element, bbox) == CSMTRUE)
+                    csmarrayc_append_element_const_st(bbox_neighbors, element, csmoctree_item_t);
             }
         }
         else
@@ -378,14 +380,16 @@ static void i_append_bbox_neighbors(
             unsigned long i, no_cells;
             
             assert(cell->elements == NULL);
+            
             no_cells = csmarrayc_count_st(cell->cells, i_cell_t);
+            assert(no_cells == 8);
             
             for (i = 0; i < no_cells; i++)
             {
                 struct i_cell_t *inner_cell;
                 
                 inner_cell = csmarrayc_get_st(cell->cells, i, i_cell_t);
-                i_append_bbox_neighbors(recursion_level + 1, inner_cell, bbox, bbox_neighbors);
+                i_append_bbox_neighbors(recursion_level + 1, inner_cell, bbox, func_intersects_with_bbox, bbox_neighbors);
             }
         }
     }
@@ -402,7 +406,7 @@ const csmArrayStruct(csmoctree_item_t) *csmoctree_dontuse_get_bbox_neighbors(str
     i_update_octree(octree);
     
     bbox_neighbors = csmarrayc_new_const_st_array(0, csmoctree_item_t);
-    i_append_bbox_neighbors(0, octree->root, bbox, bbox_neighbors);
+    i_append_bbox_neighbors(0, octree->root, bbox, octree->func_intersects_with_bbox, bbox_neighbors);
 
     return bbox_neighbors;
 }

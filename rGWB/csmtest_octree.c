@@ -121,10 +121,11 @@ static void i_test1(void)
     i_append_point(0.25, 0.75, 0.75, points_octree, points);
     i_append_point(0.75, 0.75, 0.75, points_octree, points);
     
+    i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 1., 1., 1., points_octree, 8);
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 0.5, points_octree, 1);
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 1.0, points_octree, 2);
-
-    i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 1., 1., 1., points_octree, 8);
+    i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.1, 0.1, 0.1, points_octree, 0);
+    i_test_number_of_elements_in_bbox(0.24, 0.24, 0.24, 0.26, 0.26, 0.26, points_octree, 1);
     
     csmoctree_free(&points_octree, i_point_t);
     csmarrayc_free_st(&points, i_point_t, i_free_point);
