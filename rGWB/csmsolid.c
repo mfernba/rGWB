@@ -1452,7 +1452,7 @@ double csmsolid_volume(const struct csmsolid_t *solid)
             double x1, y1, z1;
             unsigned long num_he_iterations;
             
-            assert(num_loop_iterations < 1000);
+            assert(num_loop_iterations < 100000);
             num_loop_iterations++;
             
             he1 = csmloop_ledge(loop_iterator);
