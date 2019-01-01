@@ -122,7 +122,7 @@ static void i_test1(void)
     csmArrayStruct(i_point_t) *points;
     
     bbox = i_new_bbox_with_dimensions(0., 0., 0., 1., 1., 1.);
-    points_octree = csmoctree_new(1, 0.005, &bbox, i_is_point_in_bbox, i_point_t);
+    points_octree = csmoctree_new(1, 1.e-6, &bbox, i_is_point_in_bbox, i_point_t);
     points = csmarrayc_new_st_array(0, i_point_t);
     
     i_append_point(0.25, 0.25, 0.25, points_octree, points);
@@ -158,7 +158,7 @@ static void i_test2(void)
     csmArrayStruct(i_point_t) *points;
     
     bbox = i_new_bbox_with_dimensions(0., 0., 0., 1., 1., 1.);
-    points_octree = csmoctree_new(1, 0.005, &bbox, i_is_point_in_bbox, i_point_t);
+    points_octree = csmoctree_new(1, 1.e-6, &bbox, i_is_point_in_bbox, i_point_t);
     points = csmarrayc_new_st_array(0, i_point_t);
     
     i_append_point(0.25, 0.25, 0.25, points_octree, points);

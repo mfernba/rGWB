@@ -1093,14 +1093,11 @@ CONSTRUCTOR(static struct csmoctree(i_vertex_t) *, i_initialize_vertex_octree, (
                         csmArrayStruct(i_vertex_t) *vertexs))
 {
     struct csmoctree(i_vertex_t) *vertex_octree;
-    double tolerance_margin;
     struct csmbbox_t *octree_bbox;
     unsigned long i, no_vertexs;
 
-    tolerance_margin = 10. * equal_points_tolerance;
     octree_bbox = i_compute_octree_bbox(faces);
-    
-    vertex_octree = csmoctree_new(5, tolerance_margin, &octree_bbox, i_is_vertex_contained_in_bbox, i_vertex_t);
+    vertex_octree = csmoctree_new(5, equal_points_tolerance, &octree_bbox, i_is_vertex_contained_in_bbox, i_vertex_t);
     
     no_vertexs = csmarrayc_count_st(vertexs, i_vertex_t);
     
