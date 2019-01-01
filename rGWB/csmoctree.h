@@ -42,11 +42,12 @@ DLL_RGWB CONSTRUCTOR(const csmArrayStruct(csmoctree_item_t) *, csmoctree_dontuse
     )/*lint -restore*/
 
 
-DLL_RGWB void csmoctree_dontuse_print(struct csmoctree_t *octree);
-#define csmoctree_print(octree, type)\
+DLL_RGWB void csmoctree_dontuse_print(struct csmoctree_t *octree, csmoctree_FPtr_print_debug_info func_print_debug_info);
+#define csmoctree_print(octree, func_print_debug_info, type)\
     (/*lint -save -e505*/\
         ((struct csmoctree(type) *)octree == octree),\
-        csmoctree_dontuse_print((struct csmoctree_t *)octree)\
+        CSMOCTREE_CHECK_FUNC_PRINT_DEBUG_INFO(func_print_debug_info, type),\
+        csmoctree_dontuse_print((struct csmoctree_t *)octree, (csmoctree_FPtr_print_debug_info)func_print_debug_info)\
     )/*lint -restore*/
     
 #ifdef __cplusplus

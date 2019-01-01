@@ -39,3 +39,4 @@ CSMBOOL csmbbox_intersects_with_segment(
                         const struct csmbbox_t *bbox,
                         double x1, double y1, double z1, double x2, double y2, double z2);
 
+enum csmoctree_bbox_inters_t csmbbox_classify_point_respect_to_bbox(const struct csmbbox_t *bbox, double x, double y, double z, double tolerance);

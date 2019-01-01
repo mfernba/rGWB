@@ -10,6 +10,7 @@
 
 #include "csmmath.inl"
 #include "csmmath.tli"
+#include "csmoctree.hxx"
 
 #ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
@@ -271,7 +272,7 @@ void csmbbox_compute_bsphere_and_margins(struct csmbbox_t *bbox)
     bbox->y_center = 0.5 * (bbox->y_min_ext + bbox->y_max_ext);
     bbox->z_center = 0.5 * (bbox->z_min_ext + bbox->z_max_ext);
     
-    bbox->radius_sq = csmmath_squared_distance_3D(bbox->x_center, bbox->y_center, bbox->z_center, bbox->x_max_ext, bbox->y_max_ext, bbox->z_max_ext);
+    bbox->radius_sq = .5 * csmmath_squared_distance_3D(bbox->x_min_ext, bbox->y_min_ext, bbox->z_min_ext, bbox->x_max_ext, bbox->y_max_ext, bbox->z_max_ext);
 }
 
 // ------------------------------------------------------------------------------------------
@@ -486,11 +487,38 @@ CSMBOOL csmbbox_intersects_with_segment(
     }
 }
 
+// ------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
+enum csmoctree_bbox_inters_t csmbbox_classify_point_respect_to_bbox(const struct csmbbox_t *bbox, double x, double y, double z, double tolerance)
+{
+    assert_no_null(bbox);
+    
+    if (x < bbox->x_min || x > bbox->x_max)
+    {
+        return CSMOCTREE_BBOX_INTERS_NO;
+    }
+    else if (y < bbox->y_min || y > bbox->y_max)
+    {
+        return CSMOCTREE_BBOX_INTERS_NO;
+    }
+    else if (z < bbox->z_min || z > bbox->z_max)
+    {
+        return CSMOCTREE_BBOX_INTERS_NO;
+    }
+    else
+    {
+        if (CSMMATH_ABS(x - bbox->x_min) < tolerance
+                || CSMMATH_ABS(x - bbox->x_max) < tolerance
+                || CSMMATH_ABS(y - bbox->y_min) < tolerance
+                || CSMMATH_ABS(y - bbox->y_max) < tolerance
+                || CSMMATH_ABS(z - bbox->z_min) < tolerance
+                || CSMMATH_ABS(z - bbox->z_max) < tolerance)
+        {
+            return CSMOCTREE_BBOX_INTERS_IN_BBOX_FACE;
+        }
+        else
+        {
+            return CSMOCTREE_BBOX_INTERS_INTERIOR;
+        }
+    }
+}

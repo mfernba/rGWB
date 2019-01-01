@@ -76,6 +76,7 @@ enum csmsetop_a_vs_b_t: int;
 enum csmoptree_result_t: int;
 enum csmnode_object_t: int;
 enum csmstlimporter_result_t: int;
+enum csmoctree_bbox_inters_t: int;
 #else
 enum csmedge_hedge_side_t;
 enum csmsetop_operation_t;
@@ -84,6 +85,7 @@ enum csmsetop_a_vs_b_t;
 enum csmoptree_result_t;
 enum csmnode_object_t;
 enum csmstlimporter_result_t;
+enum csmoctree_bbox_inters_t;
 #endif
 
 struct csmbbox_t;

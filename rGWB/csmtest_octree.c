@@ -12,6 +12,7 @@
 #include "csmbbox.inl"
 #include "csmarrayc.h"
 #include "csmassert.inl"
+#include "csmdebug.inl"
 #include "csmmem.inl"
 #include "csmmath.inl"
 
@@ -47,10 +48,10 @@ static void i_free_point(struct i_point_t **point)
 
 // ----------------------------------------------------------------------------------------------------
 
-static CSMBOOL i_is_point_in_bbox(const struct i_point_t *point, const struct csmbbox_t *bbox)
+static enum csmoctree_bbox_inters_t i_is_point_in_bbox(const struct i_point_t *point, const struct csmbbox_t *bbox, double tolerance)
 {
     assert_no_null(point);
-    return csmbbox_contains_point_in_real_dimensions(bbox, point->x, point->y, point->z);
+    return csmbbox_classify_point_respect_to_bbox(bbox, point->x, point->y, point->z, tolerance);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -89,14 +90,27 @@ static void i_test_number_of_elements_in_bbox(
 {
     struct csmbbox_t *bbox;
     const csmArrayStruct(i_point_t) *points_in_bbox;
+    unsigned long points_in_bbox_count;
     
     bbox = i_new_bbox_with_dimensions(x_min, y_min, z_min, x_max, y_max, z_max);
     
     points_in_bbox = csmoctree_get_bbox_neighbors(points_octree, i_point_t, bbox);
-    assert(csmarrayc_count_st(points_in_bbox, i_point_t) == expected_number_of_elements);
+    
+    points_in_bbox_count = csmarrayc_count_st(points_in_bbox, i_point_t);
+    csmdebug_print_debug_info("Point in bbox count: %lu\n", points_in_bbox_count);
+    
+    assert(points_in_bbox_count == expected_number_of_elements);
     
     csmarrayc_free_const_st(&points_in_bbox, i_point_t);
     csmbbox_free(&bbox);
+}
+
+// ----------------------------------------------------------------------------------------------------
+
+static void i_print_point_debug_info(const struct i_point_t *point)
+{
+    assert_no_null(point);
+    csmdebug_print_debug_info("(%lf, %lf, %lf)\n", point->x, point->y, point->z);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -121,7 +135,7 @@ static void i_test1(void)
     i_append_point(0.25, 0.75, 0.75, points_octree, points);
     i_append_point(0.75, 0.75, 0.75, points_octree, points);
     
-    csmoctree_print(points_octree, i_point_t);
+    csmoctree_print(points_octree, i_print_point_debug_info, i_point_t);
     
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 1., 1., 1., points_octree, 8);
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 0.5, 0.5, 0.5, points_octree, 1);
@@ -154,7 +168,7 @@ static void i_test2(void)
     i_append_point(0.75, 0.75, 0.75, points_octree, points);
     i_append_point(0.76, 0.75003, 0.75, points_octree, points);
     
-    csmoctree_print(points_octree, i_point_t);
+    csmoctree_print(points_octree, i_print_point_debug_info, i_point_t);
     
     i_test_number_of_elements_in_bbox(0.0, 0.0, 0.0, 1., 1., 1., points_octree, 5);
     i_test_number_of_elements_in_bbox(0.5, 0.5, 0.5, 1., 1., 1., points_octree, 2);
