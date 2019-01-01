@@ -6366,8 +6366,8 @@ void csmtest_test(void)
     //i_test_facetedbrep1(viewer);
     //i_test_facetedbrep2(viewer, CSMTRUE);
     
-    csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
-    i_test_facetedbrep2(viewer, CSMFALSE);    
+    //csmdebug_set_treat_improper_solid_operations_as_errors(CSMFALSE);
+    //i_test_facetedbrep2(viewer, CSMFALSE);
     
     //csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
     //i_test_mechanical_part1_redux();
