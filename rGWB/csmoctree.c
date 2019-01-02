@@ -336,9 +336,11 @@ static void i_append_element_to_cell(
             for (i = 0; i < current_occupancy; i++)
             {
                 const struct i_cell_item_t *interior_element;
+                CSMBOOL added_at_least_in_one_cell;
                 unsigned long j;
                 
                 interior_element = csmarrayc_get_st(cell->interior_elements, i, i_cell_item_t);
+                added_at_least_in_one_cell = CSMFALSE;
 
                 for (j = 0; j < 8; j++)
                 {
@@ -349,8 +351,10 @@ static void i_append_element_to_cell(
                     i_append_element_to_cell(recursion_level + 1, inner_cell, max_occupancy, tolerance_margin, minimun_cell_size, interior_element, func_intersects_with_bbox, id_new_element, &added_i);
                     
                     if (added_i == CSMTRUE)
-                        break;
+                        added_at_least_in_one_cell = CSMTRUE;
                 }
+                
+                assert(added_at_least_in_one_cell == CSMTRUE);
             }
             
             csmarrayc_free_const_st(&cell->interior_elements, i_cell_item_t);
