@@ -6298,7 +6298,7 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
         dist_between_rows = hole_diameter + 0.01;
         no_rows = (unsigned long)floor((length - 2. * hole_diameter) / dist_between_rows);
         
-        no_columns = 60;
+        no_columns = 2;
         dist_between_columns = (l1 - 4. * hole_diameter) / (no_columns - 1);
         
         for (unsigned long i = 0; i < no_rows; i++)
