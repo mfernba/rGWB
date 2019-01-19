@@ -6238,7 +6238,7 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
     double l1, e1, e2, l2, h1;
     double length;
 
-    l1 = 0.6;
+    l1 = 10.;
     e1 = 0.01;
     e2 = 0.005;
     l2 = 0.02;
@@ -6291,14 +6291,14 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
         struct csmsolid_t *hole_solid, *solid_aux;
         enum csmsetop_opresult_t res;
 
-        hole_diameter = 0.01;
+        hole_diameter = 0.05;
         
         hole_shape = csmshape2d_new();
         
         dist_between_rows = hole_diameter + 0.01;
         no_rows = (unsigned long)floor((length - 2. * hole_diameter) / dist_between_rows);
         
-        no_columns = 2;
+        no_columns = 60;
         dist_between_columns = (l1 - 4. * hole_diameter) / (no_columns - 1);
         
         for (unsigned long i = 0; i < no_rows; i++)
@@ -6315,7 +6315,7 @@ static void i_test_performance_2(struct csmviewer_t *viewer)
                 column_coord = -0.5 * l1 + 2. * hole_diameter + j * dist_between_columns;
                 
                 points = csmArrPoint2D_new(0);
-                csmArrPoint2D_append_circle_points(points, column_coord, row_coord, 0.5 * hole_diameter, 16, CSMFALSE);
+                csmArrPoint2D_append_circle_points(points, column_coord, row_coord, 0.5 * hole_diameter, 32, CSMFALSE);
                 
                 csmshape2d_append_new_polygon_with_points(hole_shape, &points);
             }
@@ -6356,6 +6356,8 @@ void csmtest_test(void)
     viewer = csmviewer_new();
     csmdebug_set_viewer(viewer, csmviewer_show, csmviewer_show_face, csmviewer_set_parameters, csmviewer_set_results);
     
+    i_test_performance_2(viewer);
+    //return;
     csmdebug_configure(CSMTRUE, CSMTRUE, CSMTRUE);
     
     csmdebug_set_treat_improper_solid_operations_as_errors(CSMTRUE);

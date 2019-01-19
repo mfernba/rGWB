@@ -10,6 +10,7 @@
 #define csmhashtb_h
 
 #define csmhashtb(tipo) csmhashtb__##tipo
+#define csmhashtb2id(tipo) csmhashtb2id__##tipo
 #define csmhashtb_iterator(tipo) csmhashtb__iterator_##tipo
 
 struct csmhashtb_item_ptr_t;

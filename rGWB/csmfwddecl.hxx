@@ -98,7 +98,8 @@ struct csmhashtb(csmface_t);
 struct csmhashtb(csmedge_t);
 struct csmhashtb(csmvertex_t);
 struct csmhashtb(csmhedge_t);
-
+struct csmhashtb2id(csmsetop_vtxfacc_inters_t);
+    
 csmArrayStruct(csmvertex_t);
 csmArrayStruct(csmedge_t);
 csmArrayStruct(csmface_t);
