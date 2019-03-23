@@ -119,6 +119,8 @@ double csmmath_sqrt(double value);
 
 double csmmath_atan2(double y, double x);
 
+double csmmath_acos(double value);
+
 double csmmath_cos(double angle);
 
 double csmmath_sin(double angle);

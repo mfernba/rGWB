@@ -817,6 +817,13 @@ double csmmath_atan2(double y, double x)
 
 //-------------------------------------------------------------------------------------------
 
+double csmmath_acos(double value)
+{
+    return acos(value);
+}
+
+//-------------------------------------------------------------------------------------------
+
 double csmmath_cos(double angle)
 {
     return cos(angle);
