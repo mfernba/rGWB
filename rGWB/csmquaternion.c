@@ -5,6 +5,7 @@
 //  Created by Manuel Fernández Baños on 23/3/19.
 //  Copyright © 2019 Manuel Fernández. All rights reserved.
 //
+// Based on "Essential mathematics for games and interactive graphics"
 
 #include "csmquaternion.h"
 
@@ -85,6 +86,16 @@ struct csmquaternion_t *csmquaternion_new_from_rotation_axis(double Ux, double U
 
 // ----------------------------------------------------------------------
 
+static CSMBOOL i_is_unit_quaternion(double w, double x, double y, double z)
+{
+    double sq_magnitude;
+    
+    sq_magnitude = CSMMATH_CUAD(w) + CSMMATH_CUAD(x) + CSMMATH_CUAD(y) + CSMMATH_CUAD(z);
+    return IS_TRUE(CSMMATH_ABS(sq_magnitude - 1.) < 1.e-6);
+}
+
+// ----------------------------------------------------------------------
+
 static double i_magnitude(double w, double x, double y, double z)
 {
     return csmmath_sqrt(CSMMATH_CUAD(w) + CSMMATH_CUAD(x) + CSMMATH_CUAD(y) + CSMMATH_CUAD(z));
@@ -142,6 +153,24 @@ void csmquaternion_free(struct csmquaternion_t **q)
     assert_no_null(*q);
     
     FREE_PP(q, struct csmquaternion_t);
+}
+
+// ----------------------------------------------------------------------
+
+void csmquaternion_inverse(struct csmquaternion_t *q)
+{
+    double magnitude, sq_magnitude;
+    
+    assert_no_null(q);
+    
+    magnitude = i_magnitude(q->w, q->x, q->y, q->z);
+    sq_magnitude = CSMMATH_CUAD(magnitude);
+    assert(sq_magnitude > 0.);
+
+    q->w =  q->w / sq_magnitude;
+    q->x = -q->x / sq_magnitude;
+    q->y = -q->y / sq_magnitude;
+    q->z = -q->z / sq_magnitude;
 }
 
 // ----------------------------------------------------------------------
@@ -300,3 +329,21 @@ void csmquaternion_to_rotation_matrix_3x3(
 
 // ----------------------------------------------------------------------
 
+void csmquaternion_apply_rotation_to_vector(const struct csmquaternion_t *q, double *Ux, double *Uy, double *Uz)
+{
+    double vMult, crossMult, pMult;
+    
+    assert_no_null(q);
+    assert(i_is_unit_quaternion(q->w, q->x, q->y, q->z) == CSMTRUE);
+    assert_no_null(Ux);
+    assert_no_null(Uy);
+    assert_no_null(Uz);
+    
+    vMult = 2. * csmmath_dot_product3D(q->x, q->y, q->z, *Ux, *Uy, *Uz);
+    crossMult = 2. * q->w;
+    pMult = crossMult * q->w - 1.;
+    
+    *Ux = pMult * (*Ux) + vMult * q->x + crossMult * (q->y * (*Uz) - q->z * (*Uy));
+    *Uy = pMult * (*Uy) + vMult * q->y + crossMult * (q->z * (*Ux) - q->x * (*Uz));
+    *Uz = pMult * (*Uz) + vMult * q->z + crossMult * (q->x * (*Uy) - q->y * (*Ux));
+}

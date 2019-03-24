@@ -24,7 +24,9 @@ DLL_RGWB CONSTRUCTOR(struct csmquaternion_t *, csmquaternion_from_rotation_matri
 DLL_RGWB void csmquaternion_free(struct csmquaternion_t **q);
 
 
-// Operations...
+// Operations with quaternions...
+
+DLL_RGWB void csmquaternion_inverse(struct csmquaternion_t *q);
 
 DLL_RGWB void csmquaternion_add_q2_to_q1(struct csmquaternion_t *q1, const struct csmquaternion_t *q2);
 
@@ -52,3 +54,7 @@ DLL_RGWB void csmquaternion_to_rotation_matrix_3x3(
                         double *a11, double *a12, double *a13,
                         double *a21, double *a22, double *a23,
                         double *a31, double *a32, double *a33);
+
+// Vector rotation...
+
+DLL_RGWB void csmquaternion_apply_rotation_to_vector(const struct csmquaternion_t *q, double *Ux, double *Uy, double *Uz);
