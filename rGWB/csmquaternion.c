@@ -19,6 +19,8 @@ struct csmquaternion_t
     double x, y, z;
 };
 
+static const double i_COS_TOLERANCE = 1.e-6;
+
 // ----------------------------------------------------------------------
 
 CONSTRUCTOR(static struct csmquaternion_t *, i_new, (double w, double x, double y, double z))
@@ -157,6 +159,18 @@ void csmquaternion_free(struct csmquaternion_t **q)
 
 // ----------------------------------------------------------------------
 
+void csmquaternion_make_zero(struct csmquaternion_t *q)
+{
+    assert_no_null(q);
+    
+    q->w = 0.;
+    q->x = 0.;
+    q->y = 0.;
+    q->z = 0.;
+}
+
+// ----------------------------------------------------------------------
+
 void csmquaternion_inverse(struct csmquaternion_t *q)
 {
     double magnitude, sq_magnitude;
@@ -165,26 +179,28 @@ void csmquaternion_inverse(struct csmquaternion_t *q)
     
     magnitude = i_magnitude(q->w, q->x, q->y, q->z);
     sq_magnitude = CSMMATH_CUAD(magnitude);
-    assert(sq_magnitude > 0.);
-
-    q->w =  q->w / sq_magnitude;
-    q->x = -q->x / sq_magnitude;
-    q->y = -q->y / sq_magnitude;
-    q->z = -q->z / sq_magnitude;
+    
+    if (csmmath_fabs(sq_magnitude) > 1.e-6)
+    {
+        q->w =  q->w / sq_magnitude;
+        q->x = -q->x / sq_magnitude;
+        q->y = -q->y / sq_magnitude;
+        q->z = -q->z / sq_magnitude;
+    }
 }
 
 // ----------------------------------------------------------------------
 
-void csmquaternion_add_q2_to_q1(struct csmquaternion_t *q1, const struct csmquaternion_t *q2)
+void csmquaternion_add_q2_to_q1(struct csmquaternion_t *q1, const struct csmquaternion_t *q2, double q2_factor)
 {
     assert_no_null(q1);
     assert_no_null(q2);
     
-    q1->w += q2->w;
+    q1->w += q2->w * q2_factor;
     
-    q1->x += q2->x;
-    q1->y += q2->y;
-    q1->z += q2->z;
+    q1->x += q2->x * q2_factor;
+    q1->y += q2->y * q2_factor;
+    q1->z += q2->z * q2_factor;
 }
 
 // ----------------------------------------------------------------------
@@ -346,4 +362,96 @@ void csmquaternion_apply_rotation_to_vector(const struct csmquaternion_t *q, dou
     *Ux = pMult * (*Ux) + vMult * q->x + crossMult * (q->y * (*Uz) - q->z * (*Uy));
     *Uy = pMult * (*Uy) + vMult * q->y + crossMult * (q->z * (*Ux) - q->x * (*Uz));
     *Uz = pMult * (*Uz) + vMult * q->z + crossMult * (q->x * (*Uy) - q->y * (*Ux));
+}
+
+//-------------------------------------------------------------------------------
+
+void csmquaternion_lerp(
+                    const struct csmquaternion_t *q_start, const struct csmquaternion_t *q_end,
+                    double t,
+                    struct csmquaternion_t *q_result)
+{
+    double cos_theta;
+    double startInterp;
+
+    assert(t + 1.e-6 > 0. && t - 1.e-6 < 1.);
+    
+    cos_theta = csmquaternion_dot_product(q_start, q_end);
+
+    if (cos_theta + i_COS_TOLERANCE > 0.)
+        startInterp = 1. - t;
+    else
+        startInterp = t - 1.;
+    
+    csmquaternion_make_zero(q_result);
+    csmquaternion_add_q2_to_q1(q_result, q_start, startInterp);
+    csmquaternion_add_q2_to_q1(q_result, q_end, t);
+}
+
+//-------------------------------------------------------------------------------
+
+void csmquaternion_slerp(
+                    const struct csmquaternion_t *q_start, const struct csmquaternion_t *q_end,
+                    double t,
+                    struct csmquaternion_t *q_result)
+{
+    double cos_theta;
+    double startInterp, endInterp;
+
+    assert(t + 1.e-6 > 0. && t - 1.e-6 < 1.);
+
+    cos_theta = csmquaternion_dot_product(q_start, q_end);
+    
+    // if "angle" between quaternions is less than 90 degrees
+    if (cos_theta + i_COS_TOLERANCE > 0.)
+    {
+        // if angle is greater than zero
+        if ((1.0 - cos_theta) > i_COS_TOLERANCE)
+        {
+            // use standard slerp
+            double theta;
+            double reciprocal_sin_theta;
+            
+            theta = csmmath_acos(cos_theta);
+            reciprocal_sin_theta = 1. / csmmath_sin(theta);
+            
+            startInterp = csmmath_sin((1.0 - t) * theta) * reciprocal_sin_theta;
+            endInterp = csmmath_sin(t * theta) * reciprocal_sin_theta;
+        }
+        // angle is close to zero
+        else
+        {
+            // use linear interpolation
+            startInterp = 1.0 - t;
+            endInterp = t;
+        }
+    }
+    // otherwise, take the shorter route
+    else
+    {
+        // if angle is less than 180 degrees
+        if ((1.0 + cos_theta) > i_COS_TOLERANCE)
+        {
+            // use slerp w/negation of start quaternion
+            double theta;
+            double reciprocal_sin_theta;
+
+            theta = csmmath_acos(-cos_theta);
+            reciprocal_sin_theta = 1. / csmmath_sin(theta);
+            
+            startInterp = csmmath_sin((t - 1.) * theta) * reciprocal_sin_theta;
+            endInterp = csmmath_sin(t * theta) * reciprocal_sin_theta;
+        }
+        // angle is close to 180 degrees
+        else
+        {
+            // use lerp w/negation of start quaternion
+            startInterp = t - 1.0;
+            endInterp = t;
+        }
+    }
+
+    csmquaternion_make_zero(q_result);
+    csmquaternion_add_q2_to_q1(q_result, q_start, startInterp);
+    csmquaternion_add_q2_to_q1(q_result, q_end, endInterp);
 }

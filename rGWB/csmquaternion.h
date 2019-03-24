@@ -26,9 +26,11 @@ DLL_RGWB void csmquaternion_free(struct csmquaternion_t **q);
 
 // Operations with quaternions...
 
+DLL_RGWB void csmquaternion_make_zero(struct csmquaternion_t *q);
+
 DLL_RGWB void csmquaternion_inverse(struct csmquaternion_t *q);
 
-DLL_RGWB void csmquaternion_add_q2_to_q1(struct csmquaternion_t *q1, const struct csmquaternion_t *q2);
+DLL_RGWB void csmquaternion_add_q2_to_q1(struct csmquaternion_t *q1, const struct csmquaternion_t *q2, double q2_factor);
 
 DLL_RGWB void csmquaternion_multiply_by_scalar(struct csmquaternion_t *q, double scalar);
 
@@ -58,3 +60,17 @@ DLL_RGWB void csmquaternion_to_rotation_matrix_3x3(
 // Vector rotation...
 
 DLL_RGWB void csmquaternion_apply_rotation_to_vector(const struct csmquaternion_t *q, double *Ux, double *Uy, double *Uz);
+
+
+// Interpolation...
+
+DLL_RGWB void csmquaternion_lerp(
+                        const struct csmquaternion_t *q_start, const struct csmquaternion_t *q_end,
+                        double t,
+                        struct csmquaternion_t *q_result);
+
+DLL_RGWB void csmquaternion_slerp(
+                        const struct csmquaternion_t *q_start, const struct csmquaternion_t *q_end,
+                        double t,
+                        struct csmquaternion_t *q_result);
+
