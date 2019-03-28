@@ -134,13 +134,66 @@ struct csmquaternion_t *csmquaternion_from_rotation_matrix(
 {
     double matrix_trace;
     double w, x, y, z;
+    double rotation[3][3];
+    
+    rotation[0][0] = a00;
+    rotation[0][1] = a01;
+    rotation[0][2] = a02;
+
+    rotation[1][0] = a10;
+    rotation[1][1] = a11;
+    rotation[1][2] = a12;
+
+    rotation[2][0] = a20;
+    rotation[2][1] = a21;
+    rotation[2][2] = a22;
+    
+    #define rotation(x, y) rotation[x][y]
     
     matrix_trace = a00 + a11 + a22;
-    w = matrix_trace + 1.;
-    
-    x = a21 - a12;
-    y = a02 - a20;
-    z = a10 - a01;
+
+    if (matrix_trace > 0.)
+    {
+        double s, recips;
+        
+        s = csmmath_sqrt(matrix_trace + 1.);
+        assert(s > 0.);
+        
+        recips = 0.5 / s;
+        
+        w = s * 0.5f;
+        x = (rotation[2][1] - rotation[1][2]) * recips;
+        y = (rotation[0][2] - rotation[2][0]) * recips;
+        z = (rotation[1][0] - rotation[0][1]) * recips;
+    }
+    else
+    {
+        unsigned int i = 0;
+        double components[3];
+        
+        if ( rotation(1,1) > rotation(0,0) )
+            i = 1;
+        
+        if ( rotation(2,2) > rotation(i,i) )
+            i = 2;
+        
+        unsigned int j = (i+1)%3;
+        unsigned int k = (j+1)%3;
+        
+        double s, recips;
+        
+        s = csmmath_sqrt(rotation(i,i) - rotation(j,j) - rotation(k,k) + 1.0);
+        recips = 0.5 / s;
+
+        components[i] = 0.5f*s;
+        components[j] = (rotation(j,i) + rotation(i,j)) * recips;
+        components[k] = (rotation(k,i) + rotation(i,k)) * recips;
+                         
+        w = (rotation(k,j) - rotation(j,k)) * recips;
+        x = components[0];
+        y = components[1];
+        z = components[2];
+    }
 
     i_normalize(&w, &x, &y, &z);
     
@@ -330,6 +383,7 @@ void csmquaternion_to_rotation_matrix_3x3(
     z = q->z;
     i_normalize(&w, &x, &y, &z);
 
+    /*
     *a11 = 1. - 2. * (y * y + z * z);
     *a12 = 2. * (x * y - w * z);
     *a13 = 2. * (x * z + w * y);
@@ -341,6 +395,26 @@ void csmquaternion_to_rotation_matrix_3x3(
     *a31 = 2. * (x * z - w * y);
     *a32 = 2. * (y * z + w * x);
     *a33 = 1. - 2. * (x * x - y * y);
+     */
+    
+    double Nq = CSMMATH_CUAD(w) + CSMMATH_CUAD(x) + CSMMATH_CUAD(y) + CSMMATH_CUAD(z);
+    double s = (Nq > 0.0) ? (2.0 / Nq) : 0.0;
+    double xs = x * s, ys = y * s, zs = z * s;
+    double wx = w * xs, wy = w * ys, wz = w * zs;
+    double xx = x * xs, xy = x * ys, xz = x * zs;
+    double yy = y * ys, yz = y * zs, zz = z * zs;
+    
+    *a11 = 1.0 - (yy + zz);
+    *a21 = xy + wz;
+    *a31 = xz - wy;
+    
+    *a12 = xy - wz;
+    *a22 = 1.0 - (xx + zz);
+    *a32 = yz + wx;
+    
+    *a13 = xz + wy;
+    *a23 = yz - wx;
+    *a33 = 1.0 - (xx + yy);
 }
 
 // ----------------------------------------------------------------------

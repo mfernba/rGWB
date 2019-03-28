@@ -62,6 +62,8 @@
 		551D475C1FC1CED3004F3B43 /* csmshape2d.inl in Resources */ = {isa = PBXBuildFile; fileRef = 551D475B1FC1CED3004F3B43 /* csmshape2d.inl */; };
 		551D475F1FC1E012004F3B43 /* csmbasicshape2d.c in Sources */ = {isa = PBXBuildFile; fileRef = 551D475D1FC1E012004F3B43 /* csmbasicshape2d.c */; };
 		551D47601FC1E012004F3B43 /* csmbasicshape2d.h in Headers */ = {isa = PBXBuildFile; fileRef = 551D475E1FC1E012004F3B43 /* csmbasicshape2d.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		551DF9FC224ACC7700840152 /* csmtest_quaternion.inl in Headers */ = {isa = PBXBuildFile; fileRef = 551DF9FA224ACC7700840152 /* csmtest_quaternion.inl */; };
+		551DF9FD224ACC7700840152 /* csmtest_quaternion.c in Sources */ = {isa = PBXBuildFile; fileRef = 551DF9FB224ACC7700840152 /* csmtest_quaternion.c */; };
 		552053E4211DF02E00D7BBA4 /* csmtypes.hxx in Headers */ = {isa = PBXBuildFile; fileRef = 550E55AC1F87811A0033864A /* csmtypes.hxx */; settings = {ATTRIBUTES = (Public, ); }; };
 		55244B1D1E9F9DC0006F546E /* csmeuler_laringmv.c in Sources */ = {isa = PBXBuildFile; fileRef = 55244B1B1E9F9DC0006F546E /* csmeuler_laringmv.c */; };
 		55244B1E1E9F9DC0006F546E /* csmeuler_laringmv.inl in Headers */ = {isa = PBXBuildFile; fileRef = 55244B1C1E9F9DC0006F546E /* csmeuler_laringmv.inl */; };
@@ -311,6 +313,8 @@
 		551D475B1FC1CED3004F3B43 /* csmshape2d.inl */ = {isa = PBXFileReference; lastKnownFileType = text; lineEnding = 2; path = csmshape2d.inl; sourceTree = "<group>"; };
 		551D475D1FC1E012004F3B43 /* csmbasicshape2d.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmbasicshape2d.c; sourceTree = "<group>"; };
 		551D475E1FC1E012004F3B43 /* csmbasicshape2d.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 2; path = csmbasicshape2d.h; sourceTree = "<group>"; };
+		551DF9FA224ACC7700840152 /* csmtest_quaternion.inl */ = {isa = PBXFileReference; lastKnownFileType = text; path = csmtest_quaternion.inl; sourceTree = "<group>"; };
+		551DF9FB224ACC7700840152 /* csmtest_quaternion.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = csmtest_quaternion.c; sourceTree = "<group>"; };
 		55244B1B1E9F9DC0006F546E /* csmeuler_laringmv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmeuler_laringmv.c; sourceTree = "<group>"; };
 		55244B1C1E9F9DC0006F546E /* csmeuler_laringmv.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 2; path = csmeuler_laringmv.inl; sourceTree = "<group>"; };
 		55244B221EA0255A006F546E /* csmtransform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; lineEnding = 2; path = csmtransform.c; sourceTree = "<group>"; };
@@ -527,6 +531,8 @@
 				55308C361F921A5600353A68 /* csmtest_array.inl */,
 				558F409D21B01C64007583B0 /* csmtest_octree.c */,
 				558F409C21B01C64007583B0 /* csmtest_octree.inl */,
+				551DF9FA224ACC7700840152 /* csmtest_quaternion.inl */,
+				551DF9FB224ACC7700840152 /* csmtest_quaternion.c */,
 				55FEB002218FA47100C114A6 /* csmtest2.h */,
 				55FEB003218FA47100C114A6 /* csmtest2.c */,
 				557954591E5DB074000FC91E /* Products */,
@@ -945,6 +951,7 @@
 				557012A11E8328E400DFC490 /* csmsweep.h in Headers */,
 				55F83C6B1FC4A33B009DBBEF /* csmsurface.inl in Headers */,
 				551327701EC3AF1100F2B04D /* csmvertex.tli in Headers */,
+				551DF9FC224ACC7700840152 /* csmtest_quaternion.inl in Headers */,
 				5507A62E1E701441008B9F73 /* csmeuler_lkef.inl in Headers */,
 				5583DE39218AD5D30002AABB /* csmsavetxt.h in Headers */,
 				5507A5CB1E662758008B9F73 /* csmeuler_lmev.inl in Headers */,
@@ -1171,6 +1178,7 @@
 				557954681E5DB0A8000FC91E /* csmassert.c in Sources */,
 				551D47591FC1CD50004F3B43 /* csmshape2d.c in Sources */,
 				557954991E5E4811000FC91E /* csmbbox.c in Sources */,
+				551DF9FD224ACC7700840152 /* csmtest_quaternion.c in Sources */,
 				55244B1D1E9F9DC0006F546E /* csmeuler_laringmv.c in Sources */,
 				5507A6501E705618008B9F73 /* csmeuler_kvfs.c in Sources */,
 				557954871E5E2DCB000FC91E /* csmstring.c in Sources */,

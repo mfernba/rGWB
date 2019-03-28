@@ -7,6 +7,7 @@
 #ifdef RGWB_STANDALONE_DISTRIBUTABLE
 #include "csmassert.inl"
 #include "csmmem.inl"
+#include <string.h>
 #else
 #include "cyassert.h"
 #include "cypespy.h"
@@ -220,4 +221,53 @@ void csmtransform_transform_point(
     ASSIGN_OPTIONAL_VALUE(x_trans_opc, vector_resultado[0] / w);
     ASSIGN_OPTIONAL_VALUE(y_trans_opc, vector_resultado[1] / w);
     ASSIGN_OPTIONAL_VALUE(z_trans_opc, vector_resultado[2] / w);
+}
+
+// -------------------------------------------------
+
+struct csmtransform_t *csmtransform_multiply(const struct csmtransform_t *matrix1, const struct csmtransform_t *matrix2)
+{
+    struct csmtransform_t *transform;
+    unsigned long i;
+
+    assert_no_null(matrix1);
+    assert_no_null(matrix2);
+
+    transform = i_new();
+    assert_no_null(transform);
+
+    for (i = 0; i < 4; i++)
+    {
+        unsigned long j;
+        
+        for (j = 0; j < 4; j++)
+        {
+            unsigned long k;
+            double valor_ij;
+            
+            valor_ij = 0.;
+            
+            for (k = 0; k < 4; k++)
+            {
+                double valor1_ik, valor2_kj;
+                
+                valor1_ik = matrix1->data[i][k];
+                valor2_kj = matrix2->data[k][j];
+                
+                valor_ij += valor1_ik * valor2_kj;
+            }
+            
+            transform->data[i][j] = valor_ij;
+        }
+    }
+    
+    return transform;
+}
+
+// -------------------------------------------------
+
+void csmtransform_get_coefs(const struct csmtransform_t *transform, double coefs[4][4])
+{
+    assert_no_null(transform);
+    memcpy(coefs, transform->data, sizeof(transform->data));
 }

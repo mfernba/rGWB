@@ -4,6 +4,7 @@
 
 #include "csmtest_array.inl"
 #include "csmtest_octree.inl"
+#include "csmtest_quaternion.inl"
 
 #include "csmapto2d.h"
 #include "csmarrayc.h"
@@ -6349,6 +6350,7 @@ void csmtest_test(void)
     struct csmviewer_t *viewer;
     CSMBOOL process_all_test = CSMFALSE;
 
+    csmtest_quaternion_test();
     csmtest_array_test1();
     csmtest_array_test2();
     csmtest_octree_test();

@@ -26,3 +26,7 @@ void csmtransform_transform_point(
                             const struct csmtransform_t *transformacion,
                             double x, double y, double z,
                             double *x_trans_opc, double *y_trans_opc, double *z_trans_opc);
+
+CONSTRUCTOR(struct csmtransform_t *, csmtransform_multiply, (const struct csmtransform_t *matrix1, const struct csmtransform_t *matrix2));
+
+void csmtransform_get_coefs(const struct csmtransform_t *transform, double coefs[4][4]);
