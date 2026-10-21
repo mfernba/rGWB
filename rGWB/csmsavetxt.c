@@ -43,7 +43,7 @@ struct csmsavetxt_t
     enum i_mode_t mode;
 };
 
-#define i_STRING_BUFFER_SIZE (1024 * 1024)
+#define i_STRING_INITIAL_CAPACITY 256
 
 // ----------------------------------------------------------------------------------------------------
 
@@ -238,18 +238,69 @@ static float i_read_float(const struct csmsavetxt_t *csmsave)
 
 // ----------------------------------------------------------------------------------------------------
 
+static void i_grow_string_buffer(char **value, size_t length, size_t *capacity)
+{
+    char *value_extended;
+    size_t i;
+
+    assert_no_null(value);
+    assert_no_null(*value);
+    assert_no_null(capacity);
+    assert(length < *capacity);
+
+    value_extended = CALLOC(2 * (*capacity), char);
+
+    for (i = 0; i < length; i++)
+        value_extended[i] = (*value)[i];
+
+    FREE_PP(value, char);
+
+    *value = value_extended;
+    *capacity *= 2;
+}
+
+// ----------------------------------------------------------------------------------------------------
+
 CONSTRUCTOR(static char *, i_read_string, (const struct csmsavetxt_t *csmsave))
 {
-    int readed;
-    char value[i_STRING_BUFFER_SIZE];
-    
+    char *value, *string;
+    size_t length, capacity;
+    int c;
+
     assert_no_null(csmsave);
     assert(csmsave->mode == i_MODE_READ);
-    
-    readed = fscanf(csmsave->file_descriptor, "%s\n", value);
-    assert(readed == 1);
-    
-    return csmstring_duplicate(value);
+
+    // Skip line breaks left by the previous read...
+    (void)fscanf(csmsave->file_descriptor, " ");
+
+    // String extends until end of line, it may contain spaces...
+    capacity = i_STRING_INITIAL_CAPACITY;
+    value = CALLOC(capacity, char);
+    length = 0;
+
+    c = getc(csmsave->file_descriptor);
+    assert(c != EOF);
+
+    while (c != EOF && c != '\n')
+    {
+        if (length + 1 == capacity)
+            i_grow_string_buffer(&value, length, &capacity);
+
+        value[length] = (char)c;
+        length++;
+
+        c = getc(csmsave->file_descriptor);
+    }
+
+    if (length > 0 && value[length - 1] == '\r')
+        length--;
+
+    value[length] = '\0';
+
+    string = csmstring_duplicate(value);
+    FREE_PP(&value, char);
+
+    return string;
 }
 
 // ----------------------------------------------------------------------------------------------------
