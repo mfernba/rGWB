@@ -340,20 +340,32 @@ void csmquaternion_convert_to_axis_angle(
                         double *Ux, double *Uy, double *Uz, double *rotation_rad)
 {
     double axis_magnitude;
-    
+
     assert_no_null(q);
     assert_no_null(Ux);
     assert_no_null(Uy);
     assert_no_null(Uz);
     assert_no_null(rotation_rad);
-    
-    axis_magnitude = csmmath_sqrt(1. - CSMMATH_CUAD(q->w));
 
-    *Ux = q->x / axis_magnitude;
-    *Uy = q->y / axis_magnitude;
-    *Uz = q->z / axis_magnitude;
+    // Vector part length is sin(angle / 2), more accurate than sqrt(1 - w^2) for small angles...
+    axis_magnitude = csmmath_length_vector3D(q->x, q->y, q->z);
 
-    *rotation_rad = 2. * csmmath_acos(q->w);
+    if (axis_magnitude < 1.e-12)
+    {
+        // Null rotation: any axis is valid...
+        *Ux = 1.;
+        *Uy = 0.;
+        *Uz = 0.;
+    }
+    else
+    {
+        *Ux = q->x / axis_magnitude;
+        *Uy = q->y / axis_magnitude;
+        *Uz = q->z / axis_magnitude;
+    }
+
+    // atan2 keeps precision near 0 and 2 * pi, where acos(w) loses it...
+    *rotation_rad = 2. * csmmath_atan2(axis_magnitude, q->w);
 }
 
 // ----------------------------------------------------------------------
@@ -421,6 +433,7 @@ void csmquaternion_to_rotation_matrix_3x3(
 
 void csmquaternion_apply_rotation_to_vector(const struct csmquaternion_t *q, double *Ux, double *Uy, double *Uz)
 {
+    double Ux_loc, Uy_loc, Uz_loc;
     double vMult, crossMult, pMult;
     
     assert_no_null(q);
@@ -428,14 +441,18 @@ void csmquaternion_apply_rotation_to_vector(const struct csmquaternion_t *q, dou
     assert_no_null(Ux);
     assert_no_null(Uy);
     assert_no_null(Uz);
-    
-    vMult = 2. * csmmath_dot_product3D(q->x, q->y, q->z, *Ux, *Uy, *Uz);
+
+    Ux_loc = *Ux;
+    Uy_loc = *Uy;
+    Uz_loc = *Uz;
+
+    vMult = 2. * csmmath_dot_product3D(q->x, q->y, q->z, Ux_loc, Uy_loc, Uz_loc);
     crossMult = 2. * q->w;
     pMult = crossMult * q->w - 1.;
     
-    *Ux = pMult * (*Ux) + vMult * q->x + crossMult * (q->y * (*Uz) - q->z * (*Uy));
-    *Uy = pMult * (*Uy) + vMult * q->y + crossMult * (q->z * (*Ux) - q->x * (*Uz));
-    *Uz = pMult * (*Uz) + vMult * q->z + crossMult * (q->x * (*Uy) - q->y * (*Ux));
+    *Ux = pMult * Ux_loc + vMult * q->x + crossMult * (q->y * Uz_loc - q->z * Uy_loc);
+    *Uy = pMult * Uy_loc + vMult * q->y + crossMult * (q->z * Ux_loc - q->x * Uz_loc);
+    *Uz = pMult * Uz_loc + vMult * q->z + crossMult * (q->x * Uy_loc - q->y * Ux_loc);
 }
 
 //-------------------------------------------------------------------------------
