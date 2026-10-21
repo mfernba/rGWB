@@ -16,10 +16,6 @@
 
 #include "csmassert.inl"
 #include <math.h>
-#include <immintrin.h>
-
-#define CSMMATH_MAKE_M256D(m256d, a, b, c, d) (m256d[0] = (a), m256d[1] = (b), m256d[2] = (c), m256d[3] = (d))
-#define CSMMATH_SUM_M256D(m256d) (m256d[0] + m256d[1] + m256d[2] + m256d[3])
 
 #else
 
@@ -208,22 +204,8 @@ void csmmath_unit_vector_between_two_3D_points(double x1, double y1, double z1, 
 // ------------------------------------------------------------------------------------------
 
 double csmmath_dot_product3D(double Ux, double Uy, double Uz, double Vx, double Vy, double Vz)
-{
-    #ifdef RGWB_STANDALONE_DISTRIBUTABLE
-    {
-        __m256d U, V, UxV;
-        
-        CSMMATH_MAKE_M256D(U, Ux, Uy, Uz, 0.);
-        CSMMATH_MAKE_M256D(V, Vx, Vy, Vz, 0.);
-
-        UxV = _mm256_mul_pd(U, V);
-        return UxV[0] + UxV[1] + UxV[2];
-    }
-    #else
-    {
-        return Ux * Vx + Uy * Vy + Uz * Vz;
-    }
-    #endif
+{   
+    return Ux * Vx + Uy * Vy + Uz * Vz;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -353,7 +335,7 @@ static void i_valida_es_vector_unitario_3D(double Ux, double Uy, double Uz)
 	double modulo;
 
 	modulo = csmmath_length_vector3D(Ux, Uy, Uz);
-	assert(modulo - 1. < 1.e-6);
+	assert(CSMMATH_ABS(modulo - 1.) < 1.e-6);
 }
 
 //-------------------------------------------------------------------------------------------
@@ -681,7 +663,7 @@ CSMBOOL csmmath_exists_intersection_between_two_segments3D(
 		}
 		else
 		{	
-			hay_interseccion = CSMFALSE;
+			hay_interseccion = CSMTRUE;
 		}
 	}
 	
@@ -698,23 +680,8 @@ CSMBOOL csmmath_exists_intersection_between_two_segments3D(
 
 double csmmath_signed_distance_point_to_plane(double x, double y, double z, double A, double B, double C, double D)
 {
-    assert(fabs(A) > 0. || fabs(B) > 0. || fabs(C) > 0.);
-    
-    #ifdef RGWB_STANDALONE_DISTRIBUTABLE
-    {
-        __m256d plane, point, mulwise;
-        
-        CSMMATH_MAKE_M256D(plane, A, B, C, D);
-        CSMMATH_MAKE_M256D(point, x, y, z, 1.);
-
-        mulwise = _mm256_mul_pd(plane, point);
-        return CSMMATH_SUM_M256D(mulwise);
-    }
-    #else
-    {
-        return A * x + B * y + C * z + D;
-    }
-    #endif
+    assert(fabs(A) > 0. || fabs(B) > 0. || fabs(C) > 0.);    
+    return A * x + B * y + C * z + D;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -804,8 +771,8 @@ double csmmath_fabs(double value)
 
 double csmmath_sqrt(double value)
 {
-    assert(value > 0.);
-    return sqrt(value);
+    assert(value + 1.e-12 > 0.);
+    return sqrt(CSMMATH_MAX(0., value));
 }
 
 //-------------------------------------------------------------------------------------------
