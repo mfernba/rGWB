@@ -115,13 +115,19 @@ struct csmarrayc_t *csmarrayc_dontuse_new_ptr_array(unsigned long capacity_inici
 
 struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *array, csmarrayc_FPtr_copy_struct func_copy_element)
 {
+    size_t capacity;
     size_t i, offset;
     char *ptr_data;
     
     assert_no_null(array);
     assert_no_null(func_copy_element);
     
-    ptr_data = (char *)malloc(array->element_data_size * array->no_elems);
+    if (array->no_elems == 0)
+        capacity = i_INITIAL_CAPACITY;
+    else
+        capacity = array->no_elems;
+
+    ptr_data = (char *)malloc(array->element_data_size * capacity);
     offset = 0;
     
     for (i = 0; i < array->no_elems; i++)
@@ -137,7 +143,7 @@ struct csmarrayc_t *csmarrayc_dontuse_copy_ptr_array(const struct csmarrayc_t *a
         offset += array->element_data_size;
     }
     
-    return i_new(array->is_pointer_array, array->no_elems, array->no_elems, &ptr_data, array->element_data_size);
+    return i_new(array->is_pointer_array, array->no_elems, capacity, &ptr_data, array->element_data_size);
 }
 
 // ---------------------------------------------------------------------------------
