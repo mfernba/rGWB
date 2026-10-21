@@ -972,9 +972,9 @@ static enum csmsetop_opresult_t i_set_operation(
                 break;
                 
             case CSMSETOP_OPRESULT_NON_MANIFOLD_OPERAND:
-                
-                if (csmdebug_get_treat_improper_solid_operations_as_errors() == CSMTRUE)
-                    apply_perturbation = CSMFALSE;
+
+                // A non-manifold operand can't be fixed by perturbation...
+                apply_perturbation = CSMFALSE;
                 break;
                 
             case CSMSETOP_OPRESULT_IMPROPER_INTERSECTIONS:
