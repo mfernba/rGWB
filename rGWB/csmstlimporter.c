@@ -388,20 +388,30 @@ static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csm
     
     do
     {
-        char solid_name[256];
         int readed;
+        int solid_header_length, solid_footer_length;
+        unsigned long no_facets_solid;
         struct i_stl_facet_t facet;
         struct csmfacbrep2solid_t *brep_builder;
         struct csmsolid_t *solid_i;
-        
-        readed = fscanf(file, "solid %s\n", solid_name);
-        assert(readed == 1 || readed == 0);
+
+        // Trailing whitespace after the last solid isn't another solid...
+        fscanf(file, " ");
+
+        if (feof(file))
+            break;
+
+        // Solid name is optional and may contain spaces, skip the whole line...
+        solid_header_length = -1;
+        fscanf(file, " solid%n%*[^\n]", &solid_header_length);
 
         brep_builder = csmfacbrep2solid_new(1.e-9, CSMTRUE);
-        
-        while (fscanf(file, "facet normal %f %f %f\n", &facet.nx, &facet.ny, &facet.nz) == 3)
+        no_facets_solid = 0;
+
+        while (fscanf(file, " facet normal %f %f %f\n", &facet.nx, &facet.ny, &facet.nz) == 3)
         {
             no_facets++;
+            no_facets_solid++;
             
             readed = fscanf(file, "outer loop\n");
             assert(readed == 0);
@@ -425,14 +435,20 @@ static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csm
             i_append_facet_to_brep_builder(&facet, brep_builder);
         }
         
-        readed = fscanf(file, "endsolid %s\n", solid_name);
-        assert(readed == 1 || readed == 0 || readed == -1);
-        
-        if (i_did_evaluate_brep(brep_builder, &solid_i, &result) == CSMFALSE)
+        solid_footer_length = -1;
+        fscanf(file, " endsolid%n%*[^\n]", &solid_footer_length);
+
+        if (solid_header_length == -1 && no_facets_solid == 0 && solid_footer_length == -1)
+        {
+            // Nothing recognized in this pass: the file would never advance...
+            exists_error = CSMTRUE;
+            result = CSMSTLIMPORTER_RESULT_INCORRECT_FORMAT;
+        }
+        else if (i_did_evaluate_brep(brep_builder, &solid_i, &result) == CSMFALSE)
         {
             exists_error = CSMTRUE;
         }
-        else
+        else if (solid_i != NULL)
         {
             if (optree == NULL)
             {
@@ -441,26 +457,35 @@ static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csm
             else
             {
                 struct csmoptree_t *optree_i;
-                
+
                 optree_i = csmoptree_new_node_solid(&solid_i);
                 optree = csmoptree_new_node_boolean_union(&optree, &optree_i);
             }
         }
-        
+
         csmfacbrep2solid_free(&brep_builder);
         
     } while (!feof(file) && exists_error == CSMFALSE);
     
     if (exists_error == CSMTRUE)
+    {
         solid_loc = NULL;
+    }
+    else if (optree == NULL)
+    {
+        result = CSMSTLIMPORTER_RESULT_EMPTY_SOLID;
+        solid_loc = NULL;
+    }
     else
+    {
         result = i_did_evaluate_optree(optree, &solid_loc);
-        
+    }
+
     *solid = solid_loc;
-    
+
     if (optree != NULL)
         csmoptree_free(&optree);
-    
+
     return result;
 }
 
