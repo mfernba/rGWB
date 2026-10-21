@@ -281,10 +281,7 @@ static enum csmstlimporter_result_t i_did_read_binary_file(FILE *file, struct cs
     stl_facet_size = sizeof(struct i_stl_facet_t);
     assert(stl_facet_size == 48);
     
-    fread(&header, sizeof(struct i_stl_header_t), 1, file);
-    assert(header.no_facets > 0);
-    
-    if (header.no_facets == 0)
+    if (fread(&header, sizeof(struct i_stl_header_t), 1, file) != 1 || header.no_facets == 0)
     {
         result = CSMSTLIMPORTER_RESULT_INCORRECT_FORMAT;
         solid_loc = NULL;
@@ -293,19 +290,26 @@ static enum csmstlimporter_result_t i_did_read_binary_file(FILE *file, struct cs
     {
         csmArrayStruct(i_stl_solid_t) *stl_solids;
         struct i_stl_solid_t *current_stl_solid;
+        CSMBOOL is_truncated;
         unsigned long i;
-    
+
         stl_solids = csmarrayc_new_st_array(0, i_stl_solid_t);
         current_stl_solid = NULL;
-        
+        is_truncated = CSMFALSE;
+
         for (i = 0; i < header.no_facets; i++)
         {
             struct i_stl_facet_t facet;
             unsigned short attrib;
-            
-            fread(&facet, sizeof(struct i_stl_facet_t), 1, file);
-            fread(&attrib, sizeof(unsigned short), 1, file);
-            
+
+            // File shorter than the facet count in header...
+            if (fread(&facet, sizeof(struct i_stl_facet_t), 1, file) != 1
+                    || fread(&attrib, sizeof(unsigned short), 1, file) != 1)
+            {
+                is_truncated = CSMTRUE;
+                break;
+            }
+
             if (current_stl_solid == NULL || i_is_stl_solid_with_attrib(current_stl_solid, &attrib) == CSMFALSE)
             {
                 unsigned long pos;
@@ -327,8 +331,17 @@ static enum csmstlimporter_result_t i_did_read_binary_file(FILE *file, struct cs
 
             i_append_face_to_stl_solid(current_stl_solid, &facet);
         }
-        
-        result = i_new_solid_from_stl_solids(stl_solids, &solid_loc);
+
+        if (is_truncated == CSMTRUE)
+        {
+            result = CSMSTLIMPORTER_RESULT_INCORRECT_FORMAT;
+            solid_loc = NULL;
+        }
+        else
+        {
+            result = i_new_solid_from_stl_solids(stl_solids, &solid_loc);
+        }
+
         csmarrayc_free_st(&stl_solids, i_stl_solid_t, i_free_stl_solid);
     }
     
@@ -369,6 +382,45 @@ enum csmstlimporter_result_t csmstlimporter_did_read_binary_stl(const char *file
 
 // --------------------------------------------------------------------------------
 
+static CSMBOOL i_did_read_ascii_facet_loop(FILE *file, struct i_stl_facet_t *facet)
+{
+    int outer_loop_length, endloop_length, endfacet_length;
+
+    assert_no_null(facet);
+
+    // fscanf returns 0 with or without match on literal-only formats, %n tells if it matched...
+    outer_loop_length = -1;
+    fscanf(file, " outer loop%n", &outer_loop_length);
+
+    if (outer_loop_length == -1)
+        return CSMFALSE;
+
+    if (fscanf(file, " vertex %f %f %f", &facet->v1x, &facet->v1y, &facet->v1z) != 3)
+        return CSMFALSE;
+
+    if (fscanf(file, " vertex %f %f %f", &facet->v2x, &facet->v2y, &facet->v2z) != 3)
+        return CSMFALSE;
+
+    if (fscanf(file, " vertex %f %f %f", &facet->v3x, &facet->v3y, &facet->v3z) != 3)
+        return CSMFALSE;
+
+    endloop_length = -1;
+    fscanf(file, " endloop%n", &endloop_length);
+
+    if (endloop_length == -1)
+        return CSMFALSE;
+
+    endfacet_length = -1;
+    fscanf(file, " endfacet%n", &endfacet_length);
+
+    if (endfacet_length == -1)
+        return CSMFALSE;
+
+    return CSMTRUE;
+}
+
+// --------------------------------------------------------------------------------
+
 static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csmsolid_t **solid)
 {
     enum csmstlimporter_result_t result;
@@ -388,9 +440,9 @@ static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csm
     
     do
     {
-        int readed;
         int solid_header_length, solid_footer_length;
         unsigned long no_facets_solid;
+        CSMBOOL facet_format_error;
         struct i_stl_facet_t facet;
         struct csmfacbrep2solid_t *brep_builder;
         struct csmsolid_t *solid_i;
@@ -408,37 +460,33 @@ static enum csmstlimporter_result_t i_did_read_ascii_file(FILE *file, struct csm
         brep_builder = csmfacbrep2solid_new(1.e-9, CSMTRUE);
         no_facets_solid = 0;
 
+        facet_format_error = CSMFALSE;
+
         while (fscanf(file, " facet normal %f %f %f\n", &facet.nx, &facet.ny, &facet.nz) == 3)
         {
             no_facets++;
             no_facets_solid++;
-            
-            readed = fscanf(file, "outer loop\n");
-            assert(readed == 0);
+
+            if (i_did_read_ascii_facet_loop(file, &facet) == CSMFALSE)
             {
-                readed = fscanf(file, "vertex %f %f %f\n", &facet.v1x, &facet.v1y, &facet.v1z);
-                assert(readed == 3);
-                
-                readed = fscanf(file, "vertex %f %f %f\n", &facet.v2x, &facet.v2y, &facet.v2z);
-                assert(readed == 3);
-                
-                readed = fscanf(file, "vertex %f %f %f\n", &facet.v3x, &facet.v3y, &facet.v3z);
-                assert(readed == 3);
-
+                facet_format_error = CSMTRUE;
+                break;
             }
-            readed = fscanf(file, "endloop\n");
-            assert(readed == 0);
 
-            readed = fscanf(file, "endfacet\n");
-            assert(readed == 0);
-            
             i_append_facet_to_brep_builder(&facet, brep_builder);
         }
-        
-        solid_footer_length = -1;
-        fscanf(file, " endsolid%n%*[^\n]", &solid_footer_length);
 
-        if (solid_header_length == -1 && no_facets_solid == 0 && solid_footer_length == -1)
+        solid_footer_length = -1;
+
+        if (facet_format_error == CSMFALSE)
+            fscanf(file, " endsolid%n%*[^\n]", &solid_footer_length);
+
+        if (facet_format_error == CSMTRUE)
+        {
+            exists_error = CSMTRUE;
+            result = CSMSTLIMPORTER_RESULT_INCORRECT_FORMAT;
+        }
+        else if (solid_header_length == -1 && no_facets_solid == 0 && solid_footer_length == -1)
         {
             // Nothing recognized in this pass: the file would never advance...
             exists_error = CSMTRUE;
