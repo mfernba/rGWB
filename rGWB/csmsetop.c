@@ -902,11 +902,19 @@ static enum csmsetop_opresult_t i_set_operation(
     unsigned long no_perturbations;
     double perturbartion_amount;
     CSMBOOL apply_perturbation;
+    double x_min_B, y_min_B, z_min_B, x_max_B, y_max_B, z_max_B;
+    double x_center_B, y_center_B, z_center_B;
 
     tolerances = csmtolerance_new();
     csmsolid_redo_geometric_face_data((struct csmsolid_t *)solid_A);
     csmsolid_redo_geometric_face_data((struct csmsolid_t *)solid_B);
-    
+
+    // Perturbation scales B around its own center, so the displacement depends on B size, not on its distance to origin...
+    csmsolid_get_bbox_extension(solid_B, &x_min_B, &y_min_B, &z_min_B, &x_max_B, &y_max_B, &z_max_B);
+    x_center_B = 0.5 * (x_min_B + x_max_B);
+    y_center_B = 0.5 * (y_min_B + y_max_B);
+    z_center_B = 0.5 * (z_min_B + z_max_B);
+
     no_perturbations = 0;
     
     apply_perturbation = CSMFALSE;
@@ -934,9 +942,9 @@ static enum csmsetop_opresult_t i_set_operation(
         {
             csmsolid_general_transform(
                         solid_B_copy,
-                        perturbartion_amount, 0., 0., 0.,
-                        0., perturbartion_amount, 0., 0.,
-                        0., 0., perturbartion_amount, 0.);
+                        perturbartion_amount, 0., 0., (1. - perturbartion_amount) * x_center_B,
+                        0., perturbartion_amount, 0., (1. - perturbartion_amount) * y_center_B,
+                        0., 0., perturbartion_amount, (1. - perturbartion_amount) * z_center_B);
         }
 
         csmdebug_clear_debug_points();
