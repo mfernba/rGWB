@@ -415,14 +415,27 @@ void csmloop_face_equation(
         C_loc = 1.;
 
         if (num_vertexs < 3)
+        {
             D_loc = 0.;
+        }
         else
-            D_loc = -csmmath_dot_product3D(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs;
+        {
+            D_loc = -csmmath_dot_product3D(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs; 
+            
+            xc /= num_vertexs;
+            yc /= num_vertexs;
+            zc /= num_vertexs;
+        }
     }
     else
     {
         csmmath_make_unit_vector3D(&A_loc, &B_loc, &C_loc);
+
         D_loc = -csmmath_dot_product3D(A_loc, B_loc, C_loc, xc, yc, zc) / num_vertexs;
+
+        xc /= num_vertexs;
+        yc /= num_vertexs;
+        zc /= num_vertexs;
     }
     
     *A = A_loc;

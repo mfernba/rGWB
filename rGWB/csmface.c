@@ -598,8 +598,19 @@ void csmface_redo_geometric_generated_data(struct csmface_t *face)
 
 void csmface_mark_geometric_generated_data_needs_update(struct csmface_t *face)
 {
+    struct csmloop_t *loop_iterator;
+
     assert_no_null(face);
+
     face->generated_face_data_needs_update = CSMTRUE;
+
+    loop_iterator = face->floops;
+    
+    while (loop_iterator != NULL)
+    {
+        csmloop_mark_local_bounding_box_needs_update(loop_iterator);
+        loop_iterator = csmloop_next(loop_iterator);
+    }
 }
 
 // ------------------------------------------------------------------------------------------
